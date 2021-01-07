@@ -18,7 +18,7 @@ class CreateUsersTable extends Migration
             $table->string('first_name')->nullable();
             $table->string('last_name')->nullable();
             $table->string('email')->unique();
-            $table->string('mobile_number')->unique()->nullable();
+            $table->string('mobile_number')->unique();
             $table->string('password');
             $table->string('profile_image')->nullable();
             $table->string('api_token')->nullable();
@@ -26,7 +26,7 @@ class CreateUsersTable extends Migration
             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
 			$table->timestamp('updated_at')->nullable();
             $table->softDeletes();
-            $table->unsignedInteger('created_by');
+            $table->unsignedInteger('created_by')->default(1);
 			$table->unsignedInteger('updated_by')->nullable();
 			$table->unsignedInteger('deleted_by')->nullable();
 
