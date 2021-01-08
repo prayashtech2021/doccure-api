@@ -15,12 +15,12 @@ class CreateStateTable extends Migration
     {
         Schema::create('states', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('statename', 30);
-
+            $table->string('name');
             $table->unsignedInteger('country_id')->index()->default(1);
-            $table->foreign('country_id')->references('id')->on('countries');
-
             $table->integer('status')->default(1);
+
+            $table->foreign('country_id')->references('id')->on('countries')->onDelete('cascade')->onUpdate('cascade');
+
             $table->timestamps();
             $table->datetime('deleted_at')->nullable();
         });
@@ -33,6 +33,6 @@ class CreateStateTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('state');
+        Schema::dropIfExists('states');
     }
 }
