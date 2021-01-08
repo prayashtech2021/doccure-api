@@ -4,6 +4,7 @@ use App\User;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 use App\ActivityLog;
+use Illuminate\Support\Carbon;
 
 function getUserProfileImage($user_id)
 {
@@ -39,4 +40,22 @@ function getDriverLicenseImage($user_id)
 function removeMetaColumn($model)
 {
     $model->makeHidden(['created_by', 'updated_by', 'updated_at', 'deleted_by']);
+}
+
+/**
+ * time conversion
+ */
+
+function convertToUTC(Carbon $date, $timezone = null, $format = null)
+{
+    if (!$timezone) $timezone = config('app.timezone');
+    $datetime = Carbon::parse($date, $timezone)->timezone(new DateTimeZone('UTC'));
+    return $format ? $datetime->format($format) : $datetime;
+}
+
+function convertToLocal(Carbon $date, $timezone = null, $format = null)
+{
+    if (!$timezone) $timezone = config('app.timezone');
+    $datetime = Carbon::parse($date, new DateTimeZone('UTC'))->timezone($timezone);
+    return $format ? $datetime->format($format) : $datetime;
 }
