@@ -17,13 +17,17 @@ class CreateSpecialitiesTable extends Migration
             $table->increments('id');
             $table->string('name')->unique();
             $table->string('image')->nullable();
-            $table->integer('status')->default(1);
 
-            $table->integer('created_by')->default(1);
-            $table->integer('updated_by')->nullable();
-            $table->integer('deleted_by')->nullable();
-            $table->timestamps();
-            $table->datetime('deleted_at')->nullable();
+            $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
+			$table->timestamp('updated_at')->nullable();
+            $table->softDeletes();
+            $table->unsignedInteger('created_by');
+			$table->unsignedInteger('updated_by')->nullable();
+			$table->unsignedInteger('deleted_by')->nullable();
+
+            $table->foreign('created_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
+			$table->foreign('updated_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
+			$table->foreign('deleted_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
         });
     }
 
