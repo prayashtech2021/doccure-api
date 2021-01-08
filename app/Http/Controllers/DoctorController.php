@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Validator;
-use App\ { User, Patient, Doctor };
+use App\ { User };
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use DB;
@@ -16,12 +16,13 @@ class DoctorController extends Controller
      * @return \Illuminate\Http\Response
      */
    
-    public function dashboard() {
+    public function dashboard(Request $request) {
         try {
-            $user_id = auth()->user()->id;
-            $doctor = Doctor::where('user_id', '=', $user_id)->first();
+            
+            $user_id = auth()->user()->id;//$request->user()->id;
+            $doctor = User::whereHasRole('doctor')->where('user_id', '=', $user_id)->first();
             if($doctor){
-                $patient = Patient::get()->count();
+                $patient = User::whereHasRole('patient')->get()->count();
                 return response()->json(['success' => true, 'code' => 200, 'total_patient'=>$patient]);
             }else{
                 return response()->json(['status' => false, 'message' => 'Something went wrong. Please try again later.']);
@@ -30,6 +31,10 @@ class DoctorController extends Controller
             DB::rollback();
             return response()->json(['status' => false, 'message' => 'Something went wrong. Please try again later.', 'error' => $exception->getMessage()]);
         }
+    }
+
+    public function doctorProfile(){
+       
     }
 
     

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Validator;
-use App\ { User, Patient };
+use App\ { User };
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use DB;
@@ -19,42 +19,25 @@ class HomeController extends Controller
     public function register(Request $request){
         try {
             $validator = Validator::make($request->all(),[
-                'name'  => 'required|string|max:191',
+                'first_name'  => 'required|string|max:191',
+                'last_name'  => 'required|string|max:191',
                 'email' => 'required|email|unique:users',
                 'mobile_number' => 'required|min:10|max:10|unique:users',
                 'password' => 'required|confirmed|min:6|string',
+                'type' => 'required|integer',
             ]);
             if ($validator->fails()) {
                 return response()->json(['success' => false, 'code' => 401, 'error' => 'Validation Error', 'error_details' => $validator->errors()]);
             }
             DB::beginTransaction();
             $array=$request->toArray();
-            $array['first_name'] = $request->name; //test
-            $array['email'] = $request->email;
             $array['password'] = Hash::make($request->password);
             $array['created_by'] = 1; //test
             
             $user = User::create($array);
 
             if($user){
-                if($request->type==1){  //patient
-                    $role = 'patient';
-                    Patient::create([
-                        'user_id' => $user->id,
-                        'first_name' => $request->name,
-                        'created_by' => 1, //test
-                    ]);
-                   
-                }else{  //Doctor
-                    $role = 'doctor';
-                    Doctor::create([
-                        'user_id' => $user->id,
-                        'first_name' => $request->name,
-                        'created_by' => 1, //test
-                    ]);
-                }
-                $user->assignRole($role);
-
+                $user->assignRole($request->type);
                 DB::commit();
                 return response()->json(['success' => true, 'code' => 200, 'message'=>'Registered Successfully']);
             }else{
@@ -67,14 +50,12 @@ class HomeController extends Controller
 		}
     }
 
-    public function getList(Request $request)
+    public function getList($case)
     {
-    	$case = $request->case;
-
     	if ($case) {
     		switch ($case) {
                 case 'get_country' : 
-                    $response = Country::get()->toArray();
+                    $response = Country::pluck('id','name')->toArray();
                     break;
                 case 'get_states' : 
                     $response = State::get()->toArray(); 
@@ -91,10 +72,6 @@ class HomeController extends Controller
         }
 
         return response()->json($response, 200);
-    }
-
-    public function get_country(){
-
     }
 
 }
