@@ -14,7 +14,7 @@ class CreateUsersTable extends Migration
     public function up()
     {
         Schema::create('users', function (Blueprint $table) {
-            $table->increments('id');
+            $table->id();
             $table->string('name')->nullable();
             $table->string('first_name');
             $table->string('last_name')->nullable();
@@ -28,7 +28,7 @@ class CreateUsersTable extends Migration
             $table->string('profile_image')->nullable();
             $table->string('api_token')->nullable();
             $table->rememberToken()->nullable();
-            
+
             $table->unsignedTinyInteger('price_type')->comment('1=>Free,2=>Custom Price');
             $table->decimal('amount',12,2);
             $table->char('currency_code',4)->nullable();
@@ -36,9 +36,9 @@ class CreateUsersTable extends Migration
             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
 			$table->timestamp('updated_at')->nullable();
             $table->softDeletes();
-            $table->unsignedInteger('created_by')->default(1);
-			$table->unsignedInteger('updated_by')->nullable();
-			$table->unsignedInteger('deleted_by')->nullable();
+            $table->unsignedBigInteger('created_by')->default(1);
+			$table->unsignedBigInteger('updated_by')->nullable();
+			$table->unsignedBigInteger('deleted_by')->nullable();
 
             $table->foreign('created_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
 			$table->foreign('updated_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');

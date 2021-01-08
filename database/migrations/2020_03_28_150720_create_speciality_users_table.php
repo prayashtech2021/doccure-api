@@ -14,9 +14,9 @@ class CreateSpecialityUsersTable extends Migration
     public function up()
     {
         Schema::create('user_speciality', function (Blueprint $table) {
-            $table->unsignedInteger('user_id');
-            $table->unsignedInteger('speciality_id');
-            
+            $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('speciality_id');
+
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
             $table->foreign('speciality_id')->references('id')->on('specialities')->onDelete('cascade')->onUpdate('cascade');
 

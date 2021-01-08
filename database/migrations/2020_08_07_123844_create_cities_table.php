@@ -14,10 +14,10 @@ class CreateCitiesTable extends Migration
     public function up()
     {
         Schema::create('cities', function (Blueprint $table) {
-            $table->increments('id');
-            $table->unsignedInteger('country_id');
+            $table->id();
+            $table->unsignedBigInteger('country_id');
             $table->char('country_code',3);
-            $table->unsignedInteger('state_id');
+            $table->unsignedBigInteger('state_id');
             $table->char('state_code',3);
             $table->string('name');
             $table->decimal('latitude',10,8);
@@ -26,9 +26,9 @@ class CreateCitiesTable extends Migration
             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
             $table->timestamp('updated_at')->nullable();
             $table->softDeletes()->default(DB::raw('CURRENT_TIMESTAMP'));
-            $table->unsignedInteger('created_by')->default(1);
-            $table->unsignedInteger('updated_by')->nullable();
-            $table->unsignedInteger('deleted_by')->nullable();
+            $table->unsignedBigInteger('created_by')->default(1);
+            $table->unsignedBigInteger('updated_by')->nullable();
+            $table->unsignedBigInteger('deleted_by')->nullable();
 
             $table->foreign('country_id')->references('id')->on('countries')->onDelete('cascade')->onUpdate('cascade');
             $table->foreign('state_id')->references('id')->on('states')->onDelete('cascade')->onUpdate('cascade');
