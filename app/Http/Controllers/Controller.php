@@ -6,13 +6,53 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Routing\Controller as BaseController;
+use Validator;
+use Illuminate\Http\Request;
 
 class Controller extends BaseController {
 	use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
 
 	public function __construct() {
-
+		
 	}
+
+	public static function customValidation($rules) {
+		$validator = Validator::make($request->all(), $rules);
+		if ($validator->fails()) {
+			return response()->json(['success' => false, 'code' => 401, 'error' => $validator->errors()->first(), 'error_details' => $validator->errors()]);
+		}
+	}
+
+	public static function customDelete($model, $id)
+    {
+        try {
+			$use = "\Api\/".$model;
+            $data = $use::withTrashed()->find($id);
+            if ($data && $id) {
+                if ($data->trashed()) {
+                    $data->restore();
+                    $data->deleted_by = null;
+					$data->save();  
+					$msg='Record Activated successfully!';     
+                    session()->flash('success', 'Record Activated successfully!');             
+                } else {
+                    $data->delete();
+                    $data->deleted_by =auth()->user()->id;
+					$data->save();
+					$msg='Record Deleted successfully!';
+                    session()->flash('success', 'Record Deleted successfully!');
+                }
+                
+                return response()->json(['success' => true, 'code' => 200, 'message' => $msg]);
+            } else {
+                session()->flash('error', 'Sorry try again!');
+                return response()->json(['success' => false, 'code' => 401, 'error' => 'Something went wrong, try again!']);
+            }
+        } catch (\Exception | \Throwable $e) {
+            return response()->json(['success' => false, 'code' => 500, 'error' => $e->getMessage()]);
+        }
+    }
+
 	/*
 		             * =================================================================================================================================================
 		             *
