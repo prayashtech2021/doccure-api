@@ -15,7 +15,7 @@ class PatientController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-   
+
     public function list(){
         try {
             $list = Patient::select('id','first_name','last_name','address_line1','address_line2')
@@ -52,11 +52,11 @@ class PatientController extends Controller
             DB::beginTransaction();
 
             $patient  = Patient::findOrFail($request->patient_id);
-           
+
             $patient->fill($request->all());
-           
+
             $patient->dob = date('Y-m-d',strtotime(str_replace('/', '-', $request->dob)));
-            
+
             $patient->save();
 
             DB::commit();
@@ -120,5 +120,5 @@ class PatientController extends Controller
         }
     }
 
-    
+
 }

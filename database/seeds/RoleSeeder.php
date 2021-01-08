@@ -58,7 +58,7 @@ class RoleSeeder extends Seeder
             $row->save();
             $row->permissions()->sync($permissions);
         }
-        
+
         User::whereEmail('superadmin@gmail.com')->first()->assignRole('super_admin');
         User::whereEmail('admin@gmail.com')->first()->assignRole('company_admin');
         User::whereEmail('doctor@gmail.com')->first()->assignRole('doctor');

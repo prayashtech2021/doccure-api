@@ -20,11 +20,11 @@ class CreateAppointmentsTable extends Migration
             $table->time('end_time');
             $table->tinyInteger('payment_type');
             $table->unsignedBigInteger('payment_id')->nullable();
-            $table->text('tokbox_session_id');
-            $table->text('tokbox_token');
-            $table->boolean('payment_status');
+            $table->text('tokbox_session_id')->nullable();
+            $table->text('tokbox_token')->nullable();
+            $table->boolean('payment_status')->default(true);
             $table->boolean('approved_status')->default(true);
-            $table->string('time_zone');
+            $table->string('time_zone')->default(true);
             $table->boolean('appointment_status')->default(false);
             $table->boolean('call_status')->default(false);
             $table->boolean('review_status')->default(false);

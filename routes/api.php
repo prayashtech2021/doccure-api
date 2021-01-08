@@ -24,14 +24,19 @@ Route::middleware(['secureApi','responseHeader'])->group(function () {
 
 
 });
- 
+
 Route::middleware(['auth:api','secureApi','responseHeader'])->group(function () {
-    Route::post('changepassword', 'Api\UserController@changePassword');
+    Route::post('change-password', 'Api\UserController@changePassword');
     Route::post('reset-password', 'Api\UserController@resetPassword');
 
     Route::get('patient/list','PatientController@list');
     Route::post('patient/profile_update','PatientController@profile_update');
     Route::get('patient/profile/{id}','PatientController@profile_details');
+
+    //appointments
+    Route::get('appointments/list','AppointmentController@list');
+    Route::get('appointments/create','AppointmentController@create');
+
 
     Route::get('getList','HomeController@getList');
     Route::get('logout', 'PassportController@logout');
@@ -39,7 +44,7 @@ Route::middleware(['auth:api','secureApi','responseHeader'])->group(function () 
     //Route::middleware('role:doctor')->group(function () {
        Route::get('doctor/dashboard','DoctorController@dashboard')->name('Doctor.Dashboard');
     //});
-}); 
+});
 
 Route::any('{path}', function() {
     return response()->json([
