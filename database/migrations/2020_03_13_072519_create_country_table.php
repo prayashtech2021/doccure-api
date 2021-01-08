@@ -16,10 +16,9 @@ class CreateCountryTable extends Migration
         Schema::create('countries', function (Blueprint $table) {
             $table->increments('id');
             $table->string('sortname', 3);
-            $table->string('name');
+            $table->string('country', 150);
             $table->string('tcode', 5);
             $table->integer('status')->default(1);
-            
             $table->timestamps();
             $table->datetime('deleted_at')->nullable();
         });
@@ -32,6 +31,6 @@ class CreateCountryTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('countries');
+        Schema::dropIfExists('country');
     }
 }
