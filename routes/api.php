@@ -35,6 +35,10 @@ Route::middleware(['auth:api','secureApi','responseHeader'])->group(function () 
 
     Route::get('getList','HomeController@getList');
     Route::get('logout', 'PassportController@logout');
+
+    //Route::middleware('role:doctor')->group(function () {
+       Route::get('doctor/dashboard','DoctorController@dashboard')->name('Doctor.Dashboard');
+    //});
 }); 
 
 Route::any('{path}', function() {

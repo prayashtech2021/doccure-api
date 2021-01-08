@@ -19,9 +19,10 @@ class DoctorController extends Controller
     public function dashboard() {
         try {
             $user_id = auth()->user()->id;
-            $user = Doctor::where('user_id', '=', $user_id)->first();
-            if($user){
-                return response()->json(['success' => true, 'code' => 200, 'message'=>'Registered Successfully']);
+            $doctor = Doctor::where('user_id', '=', $user_id)->first();
+            if($doctor){
+                $patient = Patient::get()->count();
+                return response()->json(['success' => true, 'code' => 200, 'total_patient'=>$patient]);
             }else{
                 return response()->json(['status' => false, 'message' => 'Something went wrong. Please try again later.']);
             }

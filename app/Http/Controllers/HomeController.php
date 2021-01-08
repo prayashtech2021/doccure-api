@@ -22,7 +22,7 @@ class HomeController extends Controller
                 'name'  => 'required|string|max:191',
                 'email' => 'required|email|unique:users',
                 'mobile_number' => 'required|min:10|max:10|unique:users',
-                'password' => 'required|min:6|string',
+                'password' => 'required|confirmed|min:6|string',
             ]);
             if ($validator->fails()) {
                 return response()->json(['success' => false, 'code' => 401, 'error' => 'Validation Error', 'error_details' => $validator->errors()]);
@@ -30,6 +30,7 @@ class HomeController extends Controller
             DB::beginTransaction();
             $array=$request->toArray();
             $array['first_name'] = $request->name; //test
+            $array['email'] = $request->email;
             $array['password'] = Hash::make($request->password);
             $array['created_by'] = 1; //test
             
@@ -46,11 +47,11 @@ class HomeController extends Controller
                    
                 }else{  //Doctor
                     $role = 'doctor';
-                    /*Doctor::create([
+                    Doctor::create([
                         'user_id' => $user->id,
                         'first_name' => $request->name,
                         'created_by' => 1, //test
-                    ]);*/
+                    ]);
                 }
                 $user->assignRole($role);
 
