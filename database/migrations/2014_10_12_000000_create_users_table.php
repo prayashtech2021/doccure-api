@@ -21,7 +21,7 @@ class CreateUsersTable extends Migration
             $table->string('email')->unique();
             $table->string('mobile_number')->unique()->nullable();
             $table->string('password');
-            $table->unsignedTinyInteger('gender',1)->comment('1=>Male,2=>Female');
+            $table->unsignedTinyInteger('gender')->default(1)->comment('1=>Male,2=>Female');
             $table->date('dob')->nullable();
             $table->char('blood_group',3)->nullable();
             $table->text('biography')->nullable();
@@ -29,7 +29,7 @@ class CreateUsersTable extends Migration
             $table->string('api_token')->nullable();
             $table->rememberToken()->nullable();
             
-            $table->unsignedTinyInteger('price_type')->comment('1=>Free,2=>Custome Price');
+            $table->unsignedTinyInteger('price_type')->comment('1=>Free,2=>Custom Price');
             $table->decimal('amount',12,2);
             $table->char('currency_code',4)->nullable();
 
