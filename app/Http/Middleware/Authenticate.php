@@ -17,14 +17,6 @@ class Authenticate extends Middleware
      * @return string|null
      */
 
-    public function handle($request, Closure $next)
-    { 
-        if($request->bearerToken()){
-            return $next($request);
-        } else {
-            return response()->json(['status' => false, 'code'=>503, 'error' => "Auth token not available"], 503);
-        }
-    }
     protected function redirectTo($request)
     {
         if (! $request->expectsJson()) {
