@@ -35,7 +35,7 @@ Route::middleware(['auth:api','secureApi','responseHeader'])->group(function () 
 
     //appointments
     Route::get('appointments/list','AppointmentController@list');
-    Route::get('appointments/create','AppointmentController@create');
+    Route::post('appointments/create','AppointmentController@create');
 
 
     Route::get('getList','HomeController@getList');

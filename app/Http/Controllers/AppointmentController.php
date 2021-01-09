@@ -4,10 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Appointment;
 use App\TimeZone;
+use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Validator;
 use \Exception;
-use Illuminate\Support\Facades\Cookie;
 use \Throwable;
 use Closure;
 
@@ -38,18 +39,20 @@ class AppointmentController extends Controller
     public function list(Request $request)
     {
         try {
-            $user = $request->user();
-            $list = new Appointment();
-            $appointment_date = $request->appointment_date ? Carbon::createFromFormat($request->appointment_date, 'd-m-Y') : null;
+//            $user = $request->user();
+            $user = User::find($request->user_id);
 
-            $list->when($appointment_date, function ($qry) use ($appointment_date) {
-                $qry->whereDate('appointment_date', convertToUTC($appointment_date));
+            $list = Appointment::whereAppointmentStatus(0);
+
+            $appointment_date = $request->appointment_date ? Carbon::createFromFormat('d/m/Y', $request->appointment_date) : null;
+            $list->when($appointment_date, function ($qry, $appointment_date) {
+                return $qry->whereDate('appointment_date', convertToUTC($appointment_date));
             });
 
             if ($user->hasRole('patient')) {
                 $list = $list->whereUserId($user->id)->get();
             } elseif ($user->hasRole('doctor')) {
-                $list = $list->whereUserId($user->id)->get();
+                $list = $list->whereDoctorId($user->id)->get();
             } elseif ($user->hasRole('doctor')) {
                 $list = $list->get();
             }
@@ -61,14 +64,27 @@ class AppointmentController extends Controller
 
     public function create(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'doctor_id' => 'required',
+            'appointment_type' => 'required',
+            'appointment_date' => 'required',
+            'start_time' => 'required',
+            'end_time' => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            return self::send_bad_request_response($validator->errors()->first());
+        }
+
         try {
             $appointment = new Appointment();
-            $last_id = $appointment->lastest()->first() ? $appointment->lastest()->first()->id : 0;
+            $last_id = $appointment->latest()->first() ? $appointment->latest()->first()->id : 0;
             $appointment->appointment_reference = 'APT' . str_pad($last_id + 1, 12, "0", STR_PAD_LEFT);
-            $appointment->user_id = $request->user_id;
+            $appointment->user_id = 4;
             $appointment->doctor_id = $request->doctor_id;
             $appointment->appointment_type = $request->appointment_type;
-            $appointment->start_time = convertToUTC($request->start_time);
+            $appointment->appointment_date = convertToUTC(Carbon::createFromFormat('d/m/Y', $request->appointment_date));
+            $appointment->start_time = $request->start_time;
             $appointment->end_time = $request->end_time;
             $appointment->payment_type = 1;
             $appointment->save();
