@@ -46,6 +46,25 @@ class Kernel extends HttpKernel
         ],
     ];
 
+    protected $middlewarePriority = [
+        \App\Http\Middleware\CheckAuthHeader::class,
+        \App\Http\Middleware\ApiSecurity::class,
+        
+        \App\Http\Middleware\CheckAuthHeader::class, 
+        \App\Http\Middleware\Authenticate::class,
+        \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
+        \Illuminate\Routing\Middleware\SubstituteBindings::class,
+        \Illuminate\Http\Middleware\SetCacheHeaders::class,
+        \Illuminate\Auth\Middleware\Authorize::class,
+        \App\Http\Middleware\RedirectIfAuthenticated::class,
+        \Illuminate\Auth\Middleware\RequirePassword::class,
+        \Illuminate\Routing\Middleware\ValidateSignature::class,
+        \Illuminate\Routing\Middleware\ThrottleRequests::class,
+        \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
+
+        \App\Http\Middleware\ResponseHeader::class,
+    ];
+    
     /**
      * The application's route middleware.
      *
@@ -69,5 +88,6 @@ class Kernel extends HttpKernel
 
         'secureApi' => \App\Http\Middleware\ApiSecurity::class,
         'responseHeader' => \App\Http\Middleware\ResponseHeader::class,
+        'CheckAuthHeader' => \App\Http\Middleware\CheckAuthHeader::class,
     ];
 }

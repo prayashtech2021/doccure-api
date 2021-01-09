@@ -25,7 +25,7 @@ Route::middleware(['secureApi','responseHeader'])->group(function () {
 
 });
 
-Route::middleware(['auth:api','secureApi','responseHeader'])->group(function () {
+Route::middleware(['CheckAuthHeader','auth:api','secureApi','responseHeader'])->group(function () {
     Route::post('change-password', 'Api\UserController@changePassword');
     Route::post('reset-password', 'Api\UserController@resetPassword');
 
