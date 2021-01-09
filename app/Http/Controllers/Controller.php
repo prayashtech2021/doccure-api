@@ -26,7 +26,7 @@ class Controller extends BaseController {
 	public static function customDelete($model, $id)
     {
         try {
-			$use = "\Api\/".$model;
+			$use = "\App\/".$model;
             $data = $use::withTrashed()->find($id);
             if ($data && $id) {
                 if ($data->trashed()) {
