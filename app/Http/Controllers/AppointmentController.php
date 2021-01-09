@@ -39,24 +39,44 @@ class AppointmentController extends Controller
     public function list(Request $request)
     {
         try {
-//            $user = $request->user();
-            $user = User::find($request->user_id);
+            $user = $request->user();
+            $paginate = $request->count_per_page?$request->count_per_page:10;
 
-            $list = Appointment::whereAppointmentStatus(0);
+            $order_by = $request->order_by?$request->order_by:'desc';
+            $list = Appointment::orderBy('created_at', $order_by);
+
+            $status = $request->appointment_status;
+            if($status){
+                switch ($status){
+                    case 1:
+                        $list = $list->where('appointment_status', false)->whereDate('appointment_date','>=', convertToUTC(now()));
+                        break;
+                    case 2:
+                        $list = $list->where('appointment_status', true)->whereDate('appointment_date','<=', convertToUTC(now()));
+                        break;
+                    case 3:
+                        $list = $list->where('appointment_status', false)->whereDate('appointment_date','<', convertToUTC(now()));
+                        break;
+                }
+            }
 
             $appointment_date = $request->appointment_date ? Carbon::createFromFormat('d/m/Y', $request->appointment_date) : null;
-            $list->when($appointment_date, function ($qry, $appointment_date) {
+            $list = $list->when($appointment_date, function ($qry) use ($appointment_date) {
                 return $qry->whereDate('appointment_date', convertToUTC($appointment_date));
             });
 
             if ($user->hasRole('patient')) {
-                $list = $list->whereUserId($user->id)->get();
+                $list = $list->whereUserId($user->id);
             } elseif ($user->hasRole('doctor')) {
-                $list = $list->whereDoctorId($user->id)->get();
-            } elseif ($user->hasRole('doctor')) {
-                $list = $list->get();
+                $list = $list->whereDoctorId($user->id);
             }
-            return self::send_success_response($list);
+
+            $data = collect();
+            $list->paginate($paginate)->getCollection()->each(function ($appointment) use (&$data){
+                $data->push($appointment->getData());
+            });
+
+            return self::send_success_response($data);
         } catch (Exception | Throwable $exception) {
             return self::send_exception_response($exception->getMessage());
         }
@@ -89,7 +109,7 @@ class AppointmentController extends Controller
             $appointment->payment_type = 1;
             $appointment->save();
 
-            return self::send_success_response($appointment->toArray());
+            return self::send_success_response($appointment->getData());
 
         } catch (Exception | Throwable $exception) {
             return self::send_exception_response($exception->getMessage());

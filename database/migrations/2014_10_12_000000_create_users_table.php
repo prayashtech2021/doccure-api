@@ -32,6 +32,7 @@ class CreateUsersTable extends Migration
             $table->unsignedTinyInteger('price_type')->comment('1=>Free,2=>Custom Price');
             $table->decimal('amount',12,2);
             $table->char('currency_code',4)->nullable();
+            $table->unsignedInteger('time_zone_id')->nullable();
 
             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
 			$table->timestamp('updated_at')->nullable();
@@ -43,6 +44,7 @@ class CreateUsersTable extends Migration
             $table->foreign('created_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
 			$table->foreign('updated_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
 			$table->foreign('deleted_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
+			$table->foreign('time_zone_id')->references('id')->on('time_zones')->onDelete('cascade')->onUpdate('cascade');
         });
     }
 
