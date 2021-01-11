@@ -14,10 +14,11 @@ class CreateEducationDetailsTable extends Migration
     public function up()
     {
         Schema::create('education_details', function (Blueprint $table) {
+            $table->id();
             $table->unsignedBigInteger('user_id');
             $table->string('degeree');
             $table->string('institute');
-            $table->int('year_of_completion');
+            $table->string('year_of_completion');
 
             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
             $table->timestamp('updated_at')->nullable();

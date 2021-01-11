@@ -40,6 +40,14 @@ class User extends Authenticatable
     {
         return $this->hasMany('App\OauthAccessToken');
     }
+    
+    public function specialities() { 
+        return $this->belongsToMany('App\Speciality', 'speciality_users'); 
+    }
+
+    public function doctorEducation() { 
+        return $this->hasMany('App\EducationDetail'); 
+    }
 
 
 }

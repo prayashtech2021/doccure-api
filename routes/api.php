@@ -43,6 +43,8 @@ Route::middleware(['auth:api','secureApi','responseHeader'])->group(function () 
 
     //Route::middleware('role:doctor')->group(function () {
        Route::get('doctor/dashboard','DoctorController@dashboard')->name('Doctor.Dashboard');
+       Route::get('doctor/Profile','DoctorController@doctorProfile')->name('Doctor.Profile');
+       Route::post('doctor/saveProfile','DoctorController@saveProfile')->name('Doctor.saveProfile');
     //});
 });
 
