@@ -16,29 +16,31 @@ function getUserProfileImage($user_id)
         return URL::asset('img/profile_image.jpg');
     }
 }
-function getDriverBadgeImage($user_id)
-{
-    $user = User::find($user_id);
-    if ($user && !empty($user->driver->tfl_badge_image) && Storage::exists('badge-images/' . $user->driver->tfl_badge_image)) {
-        return (config('filesystems.default') == 's3') ? Storage::temporaryUrl('badge-images/' . $user->driver->tfl_badge_image, now()->addMinutes(5)) : Storage::url('badge-images/' . $user->driver->tfl_badge_image);
 
-    } else {
-        return URL::asset('img/badge.jpg');
-    }
+function getList($case){
+    	if ($case) {
+    		switch ($case) {
+                case 'get_country' : 
+                    $response = Country::select('id','name','phone_code','currency','emoji','emojiU')->toArray();
+                    break;
+                case 'get_states' : 
+                    $response = State::pluck('id','name')->toArray(); 
+                    break;
+                case 'get_cities' : 
+                    $response = City::pluck('id','name')->toArray(); 
+                    break;
+                default : 
+                    $response = ['case' => $case, 'status' => 'Action not found']; 
+                    break;
+	    	}
+	    } else {
+            $response = ['status' => 'invalid request'];
+        }
+
+        return response()->json($response, 200);
 }
-function getDriverLicenseImage($user_id)
-{
-    $user = User::find($user_id);
-    if ($user && !empty($user->driver->license_image) && Storage::exists('license-images/' . $user->driver->license_image)) {
-        return (config('filesystems.default') == 's3') ? Storage::temporaryUrl('license-images/' . $user->driver->license_image, now()->addMinutes(5)) : Storage::url('license-images/' . $user->driver->license_image);
 
-    } else {
-        return URL::asset('img/license.jpg');
-    }
-}
-
-function removeMetaColumn($model)
-{
+function removeMetaColumn($model){
     $model->makeHidden(['created_by', 'updated_by', 'updated_at', 'deleted_by']);
 }
 

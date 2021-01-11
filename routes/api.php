@@ -22,12 +22,14 @@ Route::middleware(['secureApi','responseHeader'])->group(function () {
     Route::post('register', 'Api\HomeController@register');
     Route::post('login', 'PassportController@login');
 
-
+    Route::post('password/email', 'PassportController@forgot');
+    Route::post('password/reset', 'PassportController@resetPassword');
 });
 
 Route::middleware(['CheckAuthHeader','auth:api','secureApi','responseHeader'])->group(function () {
-    Route::post('change-password', 'Api\UserController@changePassword');
-    Route::post('reset-password', 'Api\UserController@resetPassword');
+
+    Route::post('changepassword', 'Api\HomeController@changePassword');
+    Route::post('reset-password', 'Api\HomeController@resetPassword');
 
     Route::get('patient/list','Api\PatientController@list');
     Route::post('patient/profile_update','Api\PatientController@profile_update');
@@ -38,12 +40,16 @@ Route::middleware(['CheckAuthHeader','auth:api','secureApi','responseHeader'])->
     Route::post('appointments/create','Api\AppointmentController@create');
 
 
-    Route::get('getList','Api\HomeController@getList');
-    Route::get('logout', 'PassportController@logout');
-
     //Route::middleware('role:doctor')->group(function () {
        Route::get('doctor/dashboard','Api\DoctorController@dashboard')->name('Doctor.Dashboard');
+       Route::get('doctor/dashboard','Api\DoctorController@dashboard')->name('Doctor.Dashboard');
+       Route::get('doctor/Profile','Api\DoctorController@doctorProfile')->name('Doctor.Profile');
+       Route::post('doctor/saveProfile','Api\DoctorController@saveProfile')->name('Doctor.saveProfile');
     //});
+
+    
+    Route::get('getList/{id}','Api\HomeController@getList')->name('getList');
+    Route::get('logout', 'PassportController@logout');
 });
 
 Route::any('{path}', function() {

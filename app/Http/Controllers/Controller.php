@@ -16,7 +16,7 @@ class Controller extends BaseController {
 
 	}
 
-	public static function customValidation($rules) {
+	public static function customValidation($request,$rules) {
 		$validator = Validator::make($request->all(), $rules);
 		if ($validator->fails()) {
 			return response()->json(['success' => false, 'code' => 401, 'error' => $validator->errors()->first(), 'error_details' => $validator->errors()]);

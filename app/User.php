@@ -24,7 +24,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-         'first_name', 'last_name', 'email', 'password', 'mobile_number', 'profile_image','created_by',
+         'first_name', 'last_name', 'email', 'password', 'mobile_number', 'profile_image','country_id','currency_code','created_by',
     ];
 
     /**
@@ -39,6 +39,14 @@ class User extends Authenticatable
    public function accessToken()
     {
         return $this->hasMany('App\OauthAccessToken');
+    }
+    
+    public function specialities() { 
+        return $this->belongsToMany('App\Speciality', 'speciality_users'); 
+    }
+
+    public function doctorEducation() { 
+        return $this->hasMany('App\EducationDetail'); 
     }
 
 
