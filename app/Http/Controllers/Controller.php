@@ -13,7 +13,7 @@ class Controller extends BaseController {
 	use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
 
 	public function __construct() {
-		
+
 	}
 
 	public static function customValidation($request,$rules) {
@@ -26,15 +26,15 @@ class Controller extends BaseController {
 	public static function customDelete($model, $id)
     {
         try {
-			$use = "\Api\/".$model;
+			$use = "\App\/".$model;
             $data = $use::withTrashed()->find($id);
             if ($data && $id) {
                 if ($data->trashed()) {
                     $data->restore();
                     $data->deleted_by = null;
-					$data->save();  
-					$msg='Record Activated successfully!';     
-                    session()->flash('success', 'Record Activated successfully!');             
+					$data->save();
+					$msg='Record Activated successfully!';
+                    session()->flash('success', 'Record Activated successfully!');
                 } else {
                     $data->delete();
                     $data->deleted_by =auth()->user()->id;
@@ -42,7 +42,7 @@ class Controller extends BaseController {
 					$msg='Record Deleted successfully!';
                     session()->flash('success', 'Record Deleted successfully!');
                 }
-                
+
                 return response()->json(['success' => true, 'code' => 200, 'message' => $msg]);
             } else {
                 session()->flash('error', 'Sorry try again!');

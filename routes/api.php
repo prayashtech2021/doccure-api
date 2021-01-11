@@ -25,7 +25,7 @@ Route::middleware(['secureApi','responseHeader'])->group(function () {
 
 });
 
-Route::middleware(['auth:api','secureApi','responseHeader'])->group(function () {
+Route::middleware(['CheckAuthHeader','auth:api','secureApi','responseHeader'])->group(function () {
     Route::post('change-password', 'Api\UserController@changePassword');
     Route::post('reset-password', 'Api\UserController@resetPassword');
 
@@ -35,7 +35,7 @@ Route::middleware(['auth:api','secureApi','responseHeader'])->group(function () 
 
     //appointments
     Route::get('appointments/list','AppointmentController@list');
-    Route::get('appointments/create','AppointmentController@create');
+    Route::post('appointments/create','AppointmentController@create');
 
 
     Route::get('getList','HomeController@getList');
