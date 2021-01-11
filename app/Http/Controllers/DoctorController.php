@@ -20,7 +20,8 @@ class DoctorController extends Controller
         try {
             $user_id = $request->user()->id;
             if($user_id){
-                $patient = User::whereHasRole('patient')->get()->count();
+                $patient = User::get()->count();
+                //$patient = User::whereHasRole('patient')->get()->count();
                 return response()->json(['success' => true, 'code' => 200, 'total_patient'=>$patient]);
             }else{
                 return response()->json(['status' => false, 'message' => 'Something went wrong. Please try again later.']);
@@ -32,20 +33,19 @@ class DoctorController extends Controller
     }
 
     public function doctorProfile(Request $request){
-        $user_id = 5; //$request->user()->id;
+        $user_id = $request->user()->id;
         
         $doctor['profile'] = User::find($user_id)->first();
-        //$doctor['speciality'] = user()->specialities->first();
-        $doctor['specialization'] = Speciality::all();
-        
+        $doctor['speciality'] = user()->specialities->first();
+        $doctor['specialization'] = Speciality::all();        
         $doctor['education'] = EducationDetail::where('user_id', '=', $user_id)->get();
         //$doctor['clinic'] = ClinicDetail::orderBy('id', 'DESC')->where('user_id', '=', $user_id)->get();
 
-        $country = Country::pluck('name', 'id');
+        $country = getList('get_country');
 
-        $states = State::pluck('name', 'id');
+        $states =  getList('get_states');
 
-        $cities = City::pluck('name', 'id');
+        $cities =  getList('get_cities');
 
         return response()->json(['success' => true, 'code' => 200, 'doctor'=>$doctor,'country'=>$country, 'states' => $states, 'cities'=>$cities]);
 

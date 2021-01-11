@@ -19,7 +19,7 @@ class PassportController extends Controller {
 			'password' => 'required',
 		]);
 		if ($validator->fails()) {
-			return response()->json(['success' => false, 'code' => 401, 'error' => 'Validation Error', 'error_details' => $validator->errors()]);
+            return self::send_bad_request_response($validator->errors()->first());
 		}
 		$credentials = [
 			'email' => $request->email,
@@ -47,18 +47,24 @@ class PassportController extends Controller {
 			$user->roles = $arr;
 			$user->profile_image = getUserProfileImage($user->id);
 			removeMetaColumn($user);
-			// dd($arr);
-			return response()->json([
-				'success' => true, 'code' => 200,
-				'token' => $token,
-				'user' => $user,
-			]);
+			
+			$response_array = [
+				"code" => "200",
+				"message" => "Logged Successfully",
+				"data" => $user,
+				"token" => $token,
+			];
+	
+			return response()->json(self::convertNullsAsEmpty($response_array), 200);
+			
 		} else {
 			$user = User::withTrashed()->where('email', $request->email)->first();
 			if ($user && $user->trashed()) {
-				return response()->json(['success' => false, 'code' => 401, "error" => 'Your account is not activated.']);
+				$message = "Your account is not activated.";
+                return self::send_bad_request_response($message);
 			}
-			return response()->json(['success' => false, 'code' => 401, 'error' => 'UnAuthorised']);
+			$message = "Your account is not activated.";
+            return self::send_unauthorised_request_response($message);
 		}
 	}
 
@@ -66,7 +72,13 @@ class PassportController extends Controller {
 		if (auth()->check()) {
 			auth()->user()->token()->revoke();
 		}
-		return response()->json(['success' => true, 'code' => 200, 'message' => 'Logged out Successfully']);
+
+		$response_array = [
+			"code" => "200",
+			"message" => "Logged out Successfully",
+			
+		];
+		return response()->json(self::convertNullsAsEmpty($response_array), 200);
 	}
 
 	public function forgot(Request $request) {
@@ -75,37 +87,54 @@ class PassportController extends Controller {
 			'email' => 'required|email|exists:users,email',
 		]);
 		if ($validator->fails()) {
-			return response()->json(['success' => false, 'code' => 401, 'error' => 'Validation Error', 'error_details' => $validator->errors()]);
+            return self::send_bad_request_response($validator->errors()->first());
 		}
 		$user = User::withTrashed()->where('email', $request->email)->first();
 		if ($user->trashed()) {
-			return response()->json(['success' => false, 'code' => 401, "error" => 'Your account is not activated.']);
+			$message = "Your account is not activated.";
+            return self::send_bad_request_response($message);
 		}
-		$url = "https://taxidemo.dreamguystech.com/reset/password/" . $user->id;
+		$url = "https://doccure-reactdemo.dreamguystech.com/reset/password/" . $user->id;
+		
 		Mail::to($user->email)->send(new PasswordReset(['url' => $url]));
-
-		return response()->json(['success' => true, 'code' => 200, "message" => 'Reset password link sent on your email id.']);
+		$response_array = [
+			"code" => "200",
+			"message" => "Reset password link sent on your email id.",
+			
+		];
+		return response()->json(self::convertNullsAsEmpty($response_array), 200);
 	}
 
-	public function resetPassword(Request $request) {
-		$input = $request->all();
-
-		$rules = array(
-			'user_id' => 'required|exists:users,id',
-			'new_password' => 'required|min:6',
-			'confirm_password' => 'required|same:new_password',
-		);
-		$validator = Validator::make($input, $rules);
-		if ($validator->fails()) {
-			return response()->json(['success' => false, 'code' => 401, 'error' => 'Validation Error', 'error_details' => $validator->errors()]);
-		} else {
-			try {
-				User::where('id', $input['user_id'])->update(['password' => Hash::make($input['new_password'])]);
-				return response()->json(['success' => true, 'code' => 200, "message" => "Password reset successfully."]);
-			} catch (\Exception | \Throwable $exception) {
-				return response()->json(['success' => false, 'code' => 500, 'error' => $exception->getMessage()]);
-			}
-		}
-	}
+	public function resetPassword(Request $request)
+    {
+        $input = $request->all();
+        
+        $rules = array(
+	    	'user_id' => 'required|integer',
+            'new_password' => 'required|min:6',
+            'confirm_password' => 'required|same:new_password',
+        );
+        $validator = Validator::make($input, $rules);
+        if ($validator->fails()) {
+            return self::send_bad_request_response($validator->errors()->first());
+        } else {
+            try {
+				$userid = $request->user_id;
+				if (User::where('id', $userid)->exists()) {
+						User::where('id', $userid)->update(['password' => Hash::make($input['new_password'])]);
+						$response_array = [
+							"code" => "200",
+							"message" => "Password reset successfully.",
+						];
+						return response()->json(self::convertNullsAsEmpty($response_array), 200);
+				} else {
+					$message = "User not found";
+					return self::send_bad_request_response($message);
+		    	}
+            } catch (\Exception | \Throwable $exception) {
+                return self::send_exception_response($exception->getMessage());
+            }
+        }
+    }
 
 }

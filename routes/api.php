@@ -19,15 +19,17 @@ Route::middleware(['secureApi','responseHeader'])->group(function () {
     Route::get('/',function(){
         return response()->json(['message' => 'Page Not Found'], 404);
     });
-    Route::post('register', 'HomeController@register');
+    Route::post('register', 'HomeController@register')->name('register');
     Route::post('login', 'PassportController@login');
 
-
+    Route::post('password/email', 'PassportController@forgot');
+    Route::post('password/reset', 'PassportController@resetPassword');
 });
 
 Route::middleware(['CheckAuthHeader','auth:api','secureApi','responseHeader'])->group(function () {
-    Route::post('change-password', 'Api\UserController@changePassword');
-    Route::post('reset-password', 'Api\UserController@resetPassword');
+
+    Route::post('changepassword', 'Api\HomeController@changePassword');
+    Route::post('reset-password', 'Api\HomeController@resetPassword');
 
     Route::get('patient/list','PatientController@list');
     Route::post('patient/profile_update','PatientController@profile_update');
@@ -38,14 +40,16 @@ Route::middleware(['CheckAuthHeader','auth:api','secureApi','responseHeader'])->
     Route::post('appointments/create','AppointmentController@create');
 
 
-    Route::get('getList','HomeController@getList');
-    Route::get('logout', 'PassportController@logout');
-
     //Route::middleware('role:doctor')->group(function () {
        Route::get('doctor/dashboard','DoctorController@dashboard')->name('Doctor.Dashboard');
        Route::get('doctor/Profile','DoctorController@doctorProfile')->name('Doctor.Profile');
        Route::post('doctor/saveProfile','DoctorController@saveProfile')->name('Doctor.saveProfile');
     //});
+
+    //Route::get('');
+    
+    Route::get('getList/{id}','HomeController@getList')->name('getList');
+    Route::get('logout', 'PassportController@logout');
 });
 
 Route::any('{path}', function() {
