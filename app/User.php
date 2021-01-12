@@ -8,8 +8,11 @@ use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Laravel\Passport\HasApiTokens;
 use Laravel\Cashier\Billable;
+use Bavix\Wallet\Interfaces\Wallet;
+use Bavix\Wallet\Traits\HasWalletFloat;
+use Bavix\Wallet\Interfaces\WalletFloat;
 
-class User extends Authenticatable
+class User extends Authenticatable implements Wallet, WalletFloat
 {
     use SoftDeletes;
     use Notifiable;
@@ -17,6 +20,7 @@ class User extends Authenticatable
     use HasApiTokens;
     use Billable;
 
+    use HasWalletFloat;
 
     /**
      * The attributes that are mass assignable.
