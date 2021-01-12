@@ -40,12 +40,21 @@ class HomeController extends Controller
             if($get_currency_code){
                 $array['currency_code'] = $get_currency_code[0];
             }
+            $verification_code = mt_rand(100000,999999);
+            $array['verification_code'] = $verification_code;
+            $pool = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+            $token = substr(str_shuffle(str_repeat($pool, 5)), 0, 20);
+            $array['remember_token'] = $token;
             $user = User::create($array);
             $user->assignRole($request->type);
             DB::commit();
+            
+            $url = "http://localhost/reactdoccure/public/api/verification/".$user->id.'/'.$token;
+
             $mail = [
-                'shop_name' => $request->name,
-                'email' => $request->email,
+                'url' => $url,
+                'verification_code' => $verification_code,
             ];
             Mail::to($request->email)->send(new SendInvitation($mail));
 
@@ -57,8 +66,81 @@ class HomeController extends Controller
             return response()->json(self::convertNullsAsEmpty($response_array), 200);
 
         } catch (Exception | Throwable $exception) {
+            DB::rollback();
             return self::send_exception_response($exception->getMessage());
         }
+    }
+
+    public function resendVerificationLink(Request $request){
+        $rules = array(
+            'email' => 'required|email',
+        );
+        $validator = Validator::make($request->all(), $rules);
+        if ($validator->fails()) {
+            return self::send_bad_request_response($validator->errors()->first());
+        } else {
+            try {
+                DB::beginTransaction();
+                $user = User::where('email',$request->email)->first();
+                if($user && ($user->is_verified == 0)){
+
+                    $verification_code = mt_rand(100000,999999);
+                    $pool = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        
+                    $token = substr(str_shuffle(str_repeat($pool, 5)), 0, 20);
+                    $user->remember_token = $token;
+                    $user->verification_code = $verification_code;
+                    $user->save();
+
+                    $url = env('APP_URL')."/public/api/verification/".$user->id.'/'.$token;
+
+                    $mail = [
+                        'url' => $url,
+                        'verification_code' => $verification_code,
+                    ];
+                    Mail::to($request->email)->send(new SendInvitation($mail));
+
+                    DB::commit();
+                    
+                    return self::send_success_response([],'Resent Verification Mail Sucessfully');
+                }elseif($user && ($user->is_verified == 1)){
+                    return self::send_bad_request_response('User Email id Already Verified');
+                }else{
+                    return self::send_bad_request_response('User not found');
+                }
+            } catch (Exception | Throwable $exception) {
+                DB::rollback();
+                return self::send_exception_response($exception->getMessage());
+            }
+        }
+    }
+
+    public function verification(Request $request){
+        $rules = array(
+            'id' => 'required',
+            'code' => 'required',
+        );
+        $validator = Validator::make($request->all(), $rules);
+        if ($validator->fails()) {
+            return self::send_bad_request_response($validator->errors()->first());
+        } else {
+            try {
+                DB::beginTransaction();
+                $user = User::whereId($request->id)->where('verification_code',$request->code)->first();
+                if($user){
+                    $user->is_verified = 1;
+                    $user->save();
+                    DB::commit();
+                    return self::send_success_response($user,'User Email Verified Sucessfully');
+                }else{
+                    return self::send_bad_request_response('Invalid id or verification code provided');
+                }
+            } catch (Exception | Throwable $exception) {
+                DB::rollback();
+                return self::send_exception_response($exception->getMessage());
+            }
+        }
+
     }
 
     public function changePassword(Request $request)
@@ -99,30 +181,51 @@ class HomeController extends Controller
     
     public function getList($case){
         try {
-    	if ($case) {
-    		switch ($case) {
-                case '1' : 
-                    $response = Country::select('id','name','phone_code','currency','emoji','emojiU')->get();
-                    break;
-                case '2' : 
-                    $response = State::pluck('id','name')->get(); 
-                    break;
-                case '3' : 
-                    $response = City::pluck('id','name')->get(); 
-                    break;
-                default : 
-                    $response = ['case' => $case, 'status' => 'Action not found']; 
-                    break;
-	    	}
-	    } else {
-            $response = ['status' => 'invalid request'];
-        }
-   
-        return self::send_success_response($response);
+            if ($case) {
+                switch ($case) {
+                    case '1' : 
+                        $response = Country::select('id','name','phone_code','currency','emoji','emojiU')->get();
+                        break;
+                    case '2' : 
+                        $response = State::pluck('id','name')->get(); 
+                        break;
+                    case '3' : 
+                        $response = City::pluck('id','name')->get(); 
+                        break;
+                    default : 
+                        $response = ['case' => $case, 'status' => 'Action not found']; 
+                        break;
+                }
+            } else {
+                $response = ['status' => 'invalid request'];
+            }
+    
+            return self::send_success_response($response);
         } catch (Exception | Throwable $exception) {
             return self::send_exception_response($exception->getMessage());
         }
 
+    }
+
+    public function checkEmail(Request $request){
+        $rules = array(
+            'email' => 'required|email',
+        );
+        $validator = Validator::make($input, $rules);
+        if ($validator->fails()) {
+            return self::send_bad_request_response($validator->errors()->first());
+        } else {
+            try{
+                $check_user = User::where('email',$request->email)->first();
+                if($check_user){
+                    return self::send_success_response($check_user,'Email-Id Exists');
+                }else{
+                    return self::send_unauthorised_request_response('Email-Id Not Exists');
+                }
+            } catch (Exception | Throwable $exception) {
+                return self::send_exception_response($exception->getMessage());
+            }
+        }
     }
     
 

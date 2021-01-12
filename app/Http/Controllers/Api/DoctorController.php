@@ -164,5 +164,46 @@ class DoctorController extends Controller
             }
         }
     }
+
+    public function doctorList(Request $request){
+        try{
+            $doctors = User::role('doctor')->with('specialities');
+            if($request->gender){
+                $doctors = $doctors->where('gender',$request->gender);
+            }
+            if($request->speciality){
+                $sp = $request->speciality;
+                $doctors = $doctors->whereHas('userSpeciality', function ($category) use ($sp) {
+                    $category->whereIn('user_speciality.speciality_id',$sp)->where('user_speciality.deleted_at', null);
+                });
+            }
+            if($request->country_id){
+                $country_id = $request->country_id;
+                $doctors = $doctors->whereHas('addresses', function ($category) use ($country_id) {
+                    $category->where('addresses.country_id',$country_id)->where('addresses.deleted_at', null);
+                });
+            }
+            if($request->state_id){
+                $state_id = $request->state_id;
+                $doctors = $doctors->whereHas('addresses', function ($category) use ($state_id) {
+                    $category->where('addresses.state_id',$state_id)->where('addresses.deleted_at', null);
+                });
+            }
+            if($request->city_id){
+                $city_id = $request->city_id;
+                $doctors = $doctors->whereHas('addresses', function ($category) use ($city_id) {
+                    $category->where('addresses.city_id',$city_id)->where('addresses.deleted_at', null);
+                });
+            }
+            $doctors->get();
+            if($doctors){
+                return self::send_success_response($doctors,'No Data Found with these request');
+            }else{
+                return self::send_success_response($doctors,'Doctors data fetched successfully');
+            }
+        } catch (\Exception | \Throwable $exception) {
+            return self::send_exception_response($exception->getMessage());
+        }
+    }
     
 }
