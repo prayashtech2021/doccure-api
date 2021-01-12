@@ -21,6 +21,8 @@ Route::middleware(['secureApi','responseHeader'])->group(function () {
     });
     Route::post('register', 'Api\HomeController@register');
     Route::post('login', 'PassportController@login');
+    
+    Route::get('getList/{id}','Api\HomeController@getList')->name('getList');
 
     Route::post('password/email', 'PassportController@forgot');
     Route::post('password/reset', 'PassportController@resetPassword');
@@ -48,7 +50,6 @@ Route::middleware(['CheckAuthHeader','auth:api','secureApi','responseHeader'])->
     //});
 
     
-    Route::get('getList/{id}','Api\HomeController@getList')->name('getList');
     Route::get('logout', 'PassportController@logout');
 });
 
