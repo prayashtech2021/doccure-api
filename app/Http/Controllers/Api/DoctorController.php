@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
 use Validator;
 use App\ { User, Speciality, EducationDetail, Country, State, City };
@@ -21,7 +21,6 @@ class DoctorController extends Controller
             $user_id = $request->user()->id;
             if($user_id){
                 $patient = User::get()->count();
-                //$patient = User::whereHasRole('patient')->get()->count();
                 return response()->json(['success' => true, 'code' => 200, 'total_patient'=>$patient]);
             }else{
                 return response()->json(['status' => false, 'message' => 'Something went wrong. Please try again later.']);
@@ -52,7 +51,7 @@ class DoctorController extends Controller
     }
 
     public function saveProfile(Request $request){
-        $user_id = 5; //$request->user()->id;
+        $user_id = $request->user()->id;
         $rules = [
             'user_id' => 'required|integer',
             'first_name'  => 'required|string|max:191',
@@ -62,7 +61,6 @@ class DoctorController extends Controller
             'gender'  => 'required|integer|max:10',
             'dob'  => 'date',
         ];
-        // return $this->customValidation($request,$rules);
         $validator = Validator::make($request->all(), $rules);
         if ($validator->fails()) {
             return response()->json(['success' => false, 'code' => 401, 'error' => $validator->errors()->first(), 'error_details' => $validator->errors()]);
