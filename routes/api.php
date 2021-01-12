@@ -44,7 +44,6 @@ Route::middleware(['CheckAuthHeader','auth:api','secureApi','responseHeader'])->
 
     //Route::middleware('role:doctor')->group(function () {
        Route::get('doctor/dashboard','Api\DoctorController@dashboard')->name('Doctor.Dashboard');
-       Route::get('doctor/dashboard','Api\DoctorController@dashboard')->name('Doctor.Dashboard');
        Route::get('doctor/Profile','Api\DoctorController@doctorProfile')->name('Doctor.Profile');
        Route::post('doctor/saveProfile','Api\DoctorController@saveProfile')->name('Doctor.saveProfile');
     //});

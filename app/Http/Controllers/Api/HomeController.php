@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Api;
 
 use Validator;
 use App\ { User,Country };
+use App\Mail\SendInvitation;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Mail;
 use DB;
 use Hash;
 
@@ -41,11 +43,15 @@ class HomeController extends Controller
             $user = User::create($array);
             $user->assignRole($request->type);
             DB::commit();
+            $mail = [
+                'shop_name' => $request->name,
+                'email' => $request->email,
+            ];
+            Mail::to($request->email)->send(new SendInvitation($mail));
 
             $response_array = [
                 "code" => "200",
                 "message" => "Registered Successfully",
-                //"data" => $data,
             ];
     
             return response()->json(self::convertNullsAsEmpty($response_array), 200);
@@ -61,7 +67,7 @@ class HomeController extends Controller
         $userid = auth()->user()->id;
         $rules = array(
             'old_password' => 'required',
-            'new_password' => 'required|min:6',
+            'new_password' => 'required|min:6|string',
             'confirm_password' => 'required|same:new_password',
         );
         $validator = Validator::make($input, $rules);

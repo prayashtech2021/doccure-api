@@ -21,33 +21,38 @@ class DoctorController extends Controller
             $user_id = $request->user()->id;
             if($user_id){
                 $patient = User::get()->count();
-                return response()->json(['success' => true, 'code' => 200, 'total_patient'=>$patient]);
+                $data = [ 'total_patient' => $patient ];
+                return self::send_success_response($data);
             }else{
-                return response()->json(['status' => false, 'message' => 'Something went wrong. Please try again later.']);
+                $message = "Your account is not activated.";
+                return self::send_unauthorised_request_response($message);
             }
         } catch (\Exception | \Throwable $exception) {
-            DB::rollback();
-            return response()->json(['status' => false, 'message' => 'Something went wrong. Please try again later.', 'error' => $exception->getMessage()]);
+           return self::send_exception_response($exception->getMessage());
         }
     }
 
     public function doctorProfile(Request $request){
-        $user_id = $request->user()->id;
-        
-        $doctor['profile'] = User::find($user_id)->first();
-        $doctor['speciality'] = user()->specialities->first();
-        $doctor['specialization'] = Speciality::all();        
-        $doctor['education'] = EducationDetail::where('user_id', '=', $user_id)->get();
-        //$doctor['clinic'] = ClinicDetail::orderBy('id', 'DESC')->where('user_id', '=', $user_id)->get();
+        try {
+            $user_id = $request->user()->id;
+            
+            $doctor['profile'] = User::find($user_id)->first();
+            $doctor['speciality'] = user()->specialities->first();
+            $doctor['specialization'] = Speciality::all();        
+            $doctor['education'] = EducationDetail::where('user_id', '=', $user_id)->get();
+            //$doctor['clinic'] = ClinicDetail::orderBy('id', 'DESC')->where('user_id', '=', $user_id)->get();
 
-        $country = getList('get_country');
+            $country = getList('get_country');
 
-        $states =  getList('get_states');
+            $states =  getList('get_states');
 
-        $cities =  getList('get_cities');
+            $cities =  getList('get_cities');
 
-        return response()->json(['success' => true, 'code' => 200, 'doctor'=>$doctor,'country'=>$country, 'states' => $states, 'cities'=>$cities]);
-
+            $data = [ 'doctor' => $doctor, 'country' => $country, 'states' => $states, 'cities' => $cities ];
+            return self::send_success_response($data);
+        } catch (\Exception | \Throwable $exception) {
+            return self::send_exception_response($exception->getMessage());
+        }
     }
 
     public function saveProfile(Request $request){
