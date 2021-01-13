@@ -15,7 +15,7 @@ class CreatePaymentRequestsTable extends Migration
     {
         Schema::create('payment_requests', function (Blueprint $table) {
             $table->increments('id');
-            $table->unsignedInteger('user_id');
+            $table->unsignedBitInteger('user_id');
             $table->string('code');
             $table->text('description');
             $table->char('currency_code',5);
@@ -27,9 +27,9 @@ class CreatePaymentRequestsTable extends Migration
             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
 			$table->timestamp('updated_at')->nullable();
             $table->softDeletes();
-            $table->unsignedInteger('created_by');
-			$table->unsignedInteger('updated_by')->nullable();
-			$table->unsignedInteger('deleted_by')->nullable();
+            $table->unsignedBitInteger('created_by');
+			$table->unsignedBitInteger('updated_by')->nullable();
+			$table->unsignedBitInteger('deleted_by')->nullable();
 
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
             $table->foreign('created_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
