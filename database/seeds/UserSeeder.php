@@ -36,6 +36,9 @@ class UserSeeder extends Seeder
                 'email' => 'doctor@gmail.com',
                 'password' => Hash::make('Test@123'),
 				'mobile_number' => '8978675655',
+                'currency_code' => 'usd',
+                'price_type' => 2,
+                'amount' => 4.50,
                 'created_by' => 1,
             ],
             4 => [
