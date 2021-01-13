@@ -15,7 +15,7 @@ class CreatePaymentRequestsTable extends Migration
     {
         Schema::create('payment_requests', function (Blueprint $table) {
             $table->increments('id');
-            $table->unsignedBitInteger('user_id');
+            $table->unsignedBigInteger('user_id');
             $table->string('code');
             $table->text('description');
             $table->char('currency_code',5);
