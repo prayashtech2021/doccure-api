@@ -31,7 +31,7 @@ class CreateUsersTable extends Migration
 
             $table->unsignedTinyInteger('price_type')->comment('1=>Free,2=>Custom Price');
             $table->decimal('amount',12,2);
-            $table->unsignedInteger('country_id')->nullable();
+            $table->unsignedBigInteger('country_id')->nullable();
             $table->char('currency_code',4)->nullable();
             $table->unsignedInteger('time_zone_id')->nullable();
 
