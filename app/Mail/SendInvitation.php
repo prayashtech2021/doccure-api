@@ -11,15 +11,17 @@ class SendInvitation extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
-
+    public $data;
     /**
      * Create a new message instance.
      *
      * @return void
      */
-    public function __construct()
+    public function __construct($data)
     {
+        $this->data = $data;
     }
+
 
     /**
      * Build the message.
@@ -28,7 +30,8 @@ class SendInvitation extends Mailable implements ShouldQueue
      */
     public function build()
     {
-        return $this->subject(config('app.name') . ' Driver Invitation')
-            ->markdown('emails.send_user_invitation');
+        return $this->subject(config('app.name') . ' Verification Mail')
+            ->markdown('emails.user_verification')
+            ->with('data', $this->data);
     }
 }

@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
+
 use Validator;
 use App\ { User, Speciality, EducationDetail, Country, State, City };
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 use DB;
 
 class DoctorController extends Controller
@@ -21,33 +22,38 @@ class DoctorController extends Controller
             $user_id = $request->user()->id;
             if($user_id){
                 $patient = User::get()->count();
-                return response()->json(['success' => true, 'code' => 200, 'total_patient'=>$patient]);
+                $data = [ 'total_patient' => $patient ];
+                return self::send_success_response($data);
             }else{
-                return response()->json(['status' => false, 'message' => 'Something went wrong. Please try again later.']);
+                $message = "Your account is not activated.";
+                return self::send_unauthorised_request_response($message);
             }
         } catch (\Exception | \Throwable $exception) {
-            DB::rollback();
-            return response()->json(['status' => false, 'message' => 'Something went wrong. Please try again later.', 'error' => $exception->getMessage()]);
+           return self::send_exception_response($exception->getMessage());
         }
     }
 
     public function doctorProfile(Request $request){
-        $user_id = $request->user()->id;
-        
-        $doctor['profile'] = User::find($user_id)->first();
-        $doctor['speciality'] = user()->specialities->first();
-        $doctor['specialization'] = Speciality::all();        
-        $doctor['education'] = EducationDetail::where('user_id', '=', $user_id)->get();
-        //$doctor['clinic'] = ClinicDetail::orderBy('id', 'DESC')->where('user_id', '=', $user_id)->get();
+        try {
+            $user_id = $request->user()->id;
+            
+            $doctor['profile'] = User::find($user_id)->first();
+            $doctor['speciality'] = user()->specialities->first();
+            $doctor['specialization'] = Speciality::all();        
+            $doctor['education'] = EducationDetail::where('user_id', '=', $user_id)->get();
+            //$doctor['clinic'] = ClinicDetail::orderBy('id', 'DESC')->where('user_id', '=', $user_id)->get();
 
-        $country = getList('get_country');
+            $country = getList('get_country');
 
-        $states =  getList('get_states');
+            $states =  getList('get_states');
 
-        $cities =  getList('get_cities');
+            $cities =  getList('get_cities');
 
-        return response()->json(['success' => true, 'code' => 200, 'doctor'=>$doctor,'country'=>$country, 'states' => $states, 'cities'=>$cities]);
-
+            $data = [ 'doctor' => $doctor, 'country' => $country, 'states' => $states, 'cities' => $cities ];
+            return self::send_success_response($data);
+        } catch (\Exception | \Throwable $exception) {
+            return self::send_exception_response($exception->getMessage());
+        }
     }
 
     public function saveProfile(Request $request){
@@ -157,6 +163,47 @@ class DoctorController extends Controller
             foreach($services as $val){
                 user()->services()->create(['service'=> $val]);
             }
+        }
+    }
+
+    public function doctorList(Request $request){
+        try{
+            $doctors = User::role('doctor')->with('specialities');
+            if($request->gender){
+                $doctors = $doctors->where('gender',$request->gender);
+            }
+            if($request->speciality){
+                $sp = $request->speciality;
+                $doctors = $doctors->whereHas('userSpeciality', function ($category) use ($sp) {
+                    $category->whereIn('user_speciality.speciality_id',$sp)->where('user_speciality.deleted_at', null);
+                });
+            }
+            if($request->country_id){
+                $country_id = $request->country_id;
+                $doctors = $doctors->whereHas('addresses', function ($category) use ($country_id) {
+                    $category->where('addresses.country_id',$country_id)->where('addresses.deleted_at', null);
+                });
+            }
+            if($request->state_id){
+                $state_id = $request->state_id;
+                $doctors = $doctors->whereHas('addresses', function ($category) use ($state_id) {
+                    $category->where('addresses.state_id',$state_id)->where('addresses.deleted_at', null);
+                });
+            }
+            if($request->city_id){
+                $city_id = $request->city_id;
+                $doctors = $doctors->whereHas('addresses', function ($category) use ($city_id) {
+                    $category->where('addresses.city_id',$city_id)->where('addresses.deleted_at', null);
+                });
+            }
+            $doctors->get();
+            if($doctors){
+                return self::send_success_response($doctors,'No Data Found with these request');
+            }else{
+                return self::send_success_response($doctors,'Doctors data fetched successfully');
+            }
+        } catch (\Exception | \Throwable $exception) {
+            return self::send_exception_response($exception->getMessage());
         }
     }
     

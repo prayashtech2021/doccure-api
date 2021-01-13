@@ -19,7 +19,9 @@ class UserSeeder extends Seeder
 				'last_name' => 'Admin',
                 'email' => 'superadmin@gmail.com',
                 'password' => Hash::make('Test@123'),
-				'mobile_number' => '8978675651',
+                'mobile_number' => '8978675651',
+                'is_verified' => 1,
+                'country_id' => 1,
                 'created_by' => 1,
             ],
             2 => [
@@ -27,7 +29,9 @@ class UserSeeder extends Seeder
 				'last_name' => '',
                 'email' => 'admin@gmail.com',
                 'password' => Hash::make('Test@123'),
-				'mobile_number' => '8978675654',
+                'mobile_number' => '8978675654',
+                'is_verified' => 1,
+                'country_id' => 1,
                 'created_by' => 1,
             ],
             3 => [
@@ -36,6 +40,8 @@ class UserSeeder extends Seeder
                 'email' => 'doctor@gmail.com',
                 'password' => Hash::make('Test@123'),
 				'mobile_number' => '8978675655',
+                'is_verified' => 1,
+                'country_id' => 1,
                 'created_by' => 1,
             ],
             4 => [
@@ -43,7 +49,9 @@ class UserSeeder extends Seeder
 				'last_name' => '',
                 'email' => 'patient@gmail.com',
                 'password' => Hash::make('Test@123'),
-				'mobile_number' => '8978675656',
+                'mobile_number' => '8978675656',
+                'is_verified' => 1,
+                'country_id' => 1,
                 'created_by' => 1,
             ],
 		];

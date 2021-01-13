@@ -24,8 +24,9 @@ class PassportController extends Controller {
 		$credentials = [
 			'email' => $request->email,
 			'password' => $request->password,
+			'is_verified' => 1,
 		];
-
+		
 		if (auth()->attempt($credentials)) {
 
 			$user = auth()->user();
@@ -64,6 +65,8 @@ class PassportController extends Controller {
 			if ($user && $user->trashed()) {
 				$message = "Your account is not activated.";
                 return self::send_bad_request_response($message);
+			}elseif($user && ($user->is_verified ==0)){
+                return self::send_bad_request_response('User email-id is not verified');
 			}
 			$message = "Your account is not activated.";
             return self::send_unauthorised_request_response($message);

@@ -28,7 +28,8 @@ class User extends Authenticatable implements Wallet, WalletFloat
      * @var array
      */
     protected $fillable = [
-         'first_name', 'last_name', 'email', 'password', 'mobile_number', 'profile_image','country_id','currency_code','created_by',
+         'first_name', 'last_name', 'email', 'password', 'mobile_number', 'profile_image','country_id','currency_code',
+         'verification_code','is_verified','created_by',
     ];
 
     /**
@@ -46,7 +47,7 @@ class User extends Authenticatable implements Wallet, WalletFloat
     }
     
     public function specialities() { 
-        return $this->belongsToMany('App\Speciality', 'speciality_users'); 
+        return $this->belongsToMany('App\Speciality', 'user_speciality'); 
     }
 
     public function doctorEducation() { 
