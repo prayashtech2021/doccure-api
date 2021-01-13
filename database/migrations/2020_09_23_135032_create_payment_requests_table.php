@@ -27,9 +27,9 @@ class CreatePaymentRequestsTable extends Migration
             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
 			$table->timestamp('updated_at')->nullable();
             $table->softDeletes();
-            $table->unsignedBitInteger('created_by');
-			$table->unsignedBitInteger('updated_by')->nullable();
-			$table->unsignedBitInteger('deleted_by')->nullable();
+            $table->unsignedBigInteger('created_by');
+			$table->unsignedBigInteger('updated_by')->nullable();
+			$table->unsignedBigInteger('deleted_by')->nullable();
 
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
             $table->foreign('created_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
