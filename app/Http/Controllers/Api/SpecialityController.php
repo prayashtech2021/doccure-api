@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use DB;
 
-class SpeacilityController extends Controller
+class SpecialityController extends Controller
 {
 	/**
      * Display a listing of the resource.
@@ -16,10 +16,18 @@ class SpeacilityController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function save(Request $request) {
-        $rules = array(
-            'name' => 'required',
-            'image' => 'nullable|string',
-        );
+        if ($request->speciality_id) { //edit
+            $rules = array(
+                'speciality_id' => 'integer',
+                'name' => 'required|unique:specialities,id,'.$request->speciality_id,
+                'image' => 'nullable|string',
+            );
+        }else{
+            $rules = array(
+                'name' => 'required|unique:specialities',
+                'image' => 'nullable|string',
+            );
+        }
         $validator = Validator::make($request->all(), $rules);
         if ($validator->fails()) {
             return self::send_bad_request_response($validator->errors()->first());
@@ -27,8 +35,11 @@ class SpeacilityController extends Controller
 
         try {
             DB::beginTransaction();
-            if ($request->id) {
-                $speciality = Speciality::find($request->id);
+            if ($request->speciality_id) {
+                $speciality = Speciality::find($request->speciality_id);
+                if(!$speciality){
+                    return self::send_bad_request_response('Incorrect speciality id. Please check and try again!');
+                }
                 $speciality->updated_by = auth()->user()->id;
             } else {
                 $speciality = new Speciality();
@@ -36,6 +47,7 @@ class SpeacilityController extends Controller
             }
 
             $speciality->name = $request->name;
+            $speciality->save();
 
             if (!empty($request->image)) {
                 if (preg_match('/data:image\/(.+);base64,(.*)/', $request->image, $matchings)) {
@@ -51,9 +63,10 @@ class SpeacilityController extends Controller
                         }
                     }
                     $speciality->image = $file_name;
+                    $speciality->save();
                 }
             }
-            $speciality->save();
+            
             DB::commit();
             return self::send_success_response([],'Speciality Stored Sucessfully');
 

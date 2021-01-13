@@ -117,8 +117,8 @@ class HomeController extends Controller
 
     public function verification(Request $request){
         $rules = array(
-            'id' => 'required',
-            'code' => 'required',
+            'user_id' => 'required',
+            'verification_code' => 'required',
         );
         $validator = Validator::make($request->all(), $rules);
         if ($validator->fails()) {
@@ -126,14 +126,14 @@ class HomeController extends Controller
         } else {
             try {
                 DB::beginTransaction();
-                $user = User::whereId($request->id)->where('verification_code',$request->code)->first();
+                $user = User::whereId($request->user_id)->where('verification_code',$request->verification_code)->first();
                 if($user){
                     $user->is_verified = 1;
                     $user->save();
                     DB::commit();
                     return self::send_success_response($user,'User Email Verified Sucessfully');
                 }else{
-                    return self::send_bad_request_response('Invalid id or verification code provided');
+                    return self::send_bad_request_response('Invalid User id or verification code provided');
                 }
             } catch (Exception | Throwable $exception) {
                 DB::rollback();
