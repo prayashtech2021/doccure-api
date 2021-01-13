@@ -47,7 +47,9 @@ class PassportController extends Controller {
 			$user->roles = $arr;
 			$user->profile_image = getUserProfileImage($user->id);
 			removeMetaColumn($user);
-			
+			dd($user->hasRole('doctor'));
+			$menuList = $this->getMenu();
+			dd($menuList);
 			$response_array = [
 				"code" => "200",
 				"message" => "Logged Successfully",
@@ -137,4 +139,18 @@ class PassportController extends Controller {
         }
     }
 
+	public function getMenu() {
+		if (auth()->check()) {
+			if(auth()->user()->hasRole(['company_admin'])){
+				dd(2);
+			}
+		}
+
+		$response_array = [
+			"code" => "200",
+			"message" => "Logged out Successfully",
+			
+		];
+		return response()->json(self::convertNullsAsEmpty($response_array), 200);
+	}
 }
