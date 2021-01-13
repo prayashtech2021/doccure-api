@@ -46,7 +46,7 @@ class CreateUsersTable extends Migration
 			$table->foreign('updated_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
 			$table->foreign('deleted_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
             $table->foreign('time_zone_id')->references('id')->on('time_zones')->onDelete('cascade')->onUpdate('cascade');
-            $table->foreign('country_id')->references('id')->on('countries')->onDelete('cascade')->onUpdate('cascade');
+            
 
         });
     }

@@ -16,8 +16,8 @@ class AlterUsersTable extends Migration
         //
         Schema::table('users', function (Blueprint $table) {
             $table->string('verification_code')->after('profile_image')->nullable(); 
-            $table->unsignedTinyInteger('is_verified')->after('verification_code')->default(0); 
-
+            $table->unsignedTinyInteger('is_verified')->after('verification_code')->default(0);
+            $table->foreign('country_id')->references('id')->on('countries')->onDelete('cascade')->onUpdate('cascade'); 
         });
     }
 
