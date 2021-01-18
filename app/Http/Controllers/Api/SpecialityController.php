@@ -86,5 +86,34 @@ class SpecialityController extends Controller
             return self::send_exception_response($exception->getMessage());
         }
     }
+
+    public function destroy(Request $request)
+    {
+        try {
+           
+            $data = Speciality::withTrashed()->find($request->id);
+            if ($data && $request->id) {
+                DB::beginTransaction();
+                if ($data->trashed()) {
+                    $data->restore();
+                    $data->deleted_by = null;
+                    $data->save();                 
+                    $message = 'Record Activated successfully!';   
+                } else {
+                    $data->delete();
+                    $data->deleted_by =auth()->user()->id;
+                    $data->save();
+                    $message = 'Record Deleted successfully!';
+                }
+                DB::commit();
+                return self::send_success_response([],$message);
+            } else {
+                return self::send_bad_request_response('Something went wrong! Please try again later.');
+            }
+        } catch (Exception | Throwable $e) {
+            DB::rollback();
+            return self::send_exception_response($e->getMessage());
+        }
+    }
 }
 ?>

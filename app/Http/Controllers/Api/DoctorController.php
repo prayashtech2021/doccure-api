@@ -167,11 +167,11 @@ class DoctorController extends Controller
 
     public function doctorList(Request $request){
         try{
-            $doctors = User::role('doctor')->with('specialities');
+            $doctors = User::get();//with('specialities');
             if($request->gender){
-                $doctors = $doctors->where('gender',$request->gender);
+                $doctors->where('gender',$request->gender);
             }
-            if($request->speciality){
+           /* if($request->speciality){
                 $sp = $request->speciality;
                 $doctors = $doctors->whereHas('userSpeciality', function ($category) use ($sp) {
                     $category->whereIn('user_speciality.speciality_id',$sp)->where('user_speciality.deleted_at', null);
@@ -194,10 +194,10 @@ class DoctorController extends Controller
                 $doctors = $doctors->whereHas('addresses', function ($category) use ($city_id) {
                     $category->where('addresses.city_id',$city_id)->where('addresses.deleted_at', null);
                 });
-            }
-            $doctors->get();
+            }*/
+           // $doctors->get();
             if($doctors){
-                return self::send_success_response($doctors,'No Data Found with these request');
+                return self::send_success_response($doctors,'');
             }else{
                 return self::send_success_response($doctors,'Doctors data fetched successfully');
             }

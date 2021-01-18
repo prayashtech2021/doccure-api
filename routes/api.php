@@ -49,11 +49,12 @@ Route::middleware(['CheckAuthHeader','auth:api','secureApi','responseHeader'])->
        Route::get('doctor/Profile','Api\DoctorController@doctorProfile')->name('Doctor.Profile');
        Route::post('doctor/saveProfile','Api\DoctorController@saveProfile')->name('Doctor.saveProfile');
 
-       Route::post('doctor/search','Api\DoctorController@doctorList')->name('Doctor.List');
+       Route::post('doctors-search','Api\DoctorController@doctorList')->name('Doctor.List');
     
     /* Speciality */
         Route::post('speacility/save','Api\SpecialityController@save')->name('Speciality.save');
         Route::get('speacility/list','Api\SpecialityController@getList')->name('Speciality.getList');
+        Route::get('speacility/delete/{id}','Api\SpecialityController@destroy')->name('Speciality.delete');
         
     Route::get('logout', 'PassportController@logout');
 });
