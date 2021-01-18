@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
+
 use Validator;
 use App\ { User, Speciality, EducationDetail, Country, State, City };
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 use DB;
 
 class DoctorController extends Controller
