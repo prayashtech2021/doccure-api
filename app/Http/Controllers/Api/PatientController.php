@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
 use Validator;
-use App\ { User, Patient };
+use App\ { User };
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use DB;
@@ -18,7 +18,7 @@ class PatientController extends Controller
 
     public function list(){
         try {
-            $list = Patient::select('id','first_name','last_name','address_line1','address_line2')
+            $list = User::select('id','first_name','last_name','address_line1','address_line2')
             ->with(['user' => function ($q) {
                 $q->select('users.profile_image');
             }])->get();
@@ -31,7 +31,7 @@ class PatientController extends Controller
     }
 
     public function profile_details($id){
-        $patient = Patient::with('user')->find($id);
+        $patient = User::find($id);
         return response()->json(['success' => true, 'code' => 200, "data" => $patient]);
     }
 

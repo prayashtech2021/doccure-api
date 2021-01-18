@@ -19,31 +19,43 @@ Route::middleware(['secureApi','responseHeader'])->group(function () {
     Route::get('/',function(){
         return response()->json(['message' => 'Page Not Found'], 404);
     });
-    Route::post('register', 'HomeController@register');
+    Route::post('register', 'Api\HomeController@register');
     Route::post('login', 'PassportController@login');
-
-
+    
+    Route::get('getList/{id}','Api\HomeController@getList')->name('getList');
+    Route::post('resend-verification-link','Api\HomeController@resendVerificationLink');
+    Route::post('verification','Api\HomeController@verification');
+    Route::post('password/email', 'PassportController@forgot');
+    Route::post('password/reset', 'PassportController@resetPassword');
 });
 
 Route::middleware(['CheckAuthHeader','auth:api','secureApi','responseHeader'])->group(function () {
-    Route::post('change-password', 'Api\UserController@changePassword');
-    Route::post('reset-password', 'Api\UserController@resetPassword');
-
-    Route::get('patient/list','PatientController@list');
-    Route::post('patient/profile_update','PatientController@profile_update');
-    Route::get('patient/profile/{id}','PatientController@profile_details');
+    /* common */
+    Route::post('check-email','Api\HomeController@checkEmail')->name('checkEmail');
+    Route::post('changepassword', 'Api\HomeController@changePassword');
+    Route::post('reset-password', 'Api\HomeController@resetPassword');
+    
+    /* Patient Module */
+    Route::get('patient/list','Api\PatientController@list');
+    Route::post('patient/profile_update','Api\PatientController@profile_update');
+    Route::get('patient/profile/{id}','Api\PatientController@profile_details');
 
     //appointments
-    Route::get('appointments/list','AppointmentController@list');
-    Route::post('appointments/create','AppointmentController@create');
+    Route::get('appointments/list','Api\AppointmentController@list');
+    Route::post('appointments/create','Api\AppointmentController@create');
 
+    /* Doctor Module */
+       Route::get('doctor/dashboard','Api\DoctorController@dashboard')->name('Doctor.Dashboard');
+       Route::get('doctor/Profile','Api\DoctorController@doctorProfile')->name('Doctor.Profile');
+       Route::post('doctor/saveProfile','Api\DoctorController@saveProfile')->name('Doctor.saveProfile');
 
-    Route::get('getList','HomeController@getList');
+       Route::post('doctor/search','Api\DoctorController@doctorList')->name('Doctor.List');
+    
+    /* Speciality */
+        Route::post('speacility/save','Api\SpecialityController@save')->name('Speciality.save');
+        Route::get('speacility/list','Api\SpecialityController@getList')->name('Speciality.getList');
+        
     Route::get('logout', 'PassportController@logout');
-
-    //Route::middleware('role:doctor')->group(function () {
-       Route::get('doctor/dashboard','DoctorController@dashboard')->name('Doctor.Dashboard');
-    //});
 });
 
 Route::any('{path}', function() {

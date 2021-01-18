@@ -9,8 +9,11 @@ use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Laravel\Passport\HasApiTokens;
 use Laravel\Cashier\Billable;
+use Bavix\Wallet\Interfaces\Wallet;
+use Bavix\Wallet\Traits\HasWalletFloat;
+use Bavix\Wallet\Interfaces\WalletFloat;
 
-class User extends Authenticatable
+class User extends Authenticatable implements Wallet, WalletFloat
 {
     use SoftDeletes;
     use Notifiable;
@@ -18,6 +21,7 @@ class User extends Authenticatable
     use HasApiTokens;
     use Billable;
 
+    use HasWalletFloat;
 
     /**
      * The attributes that are mass assignable.
@@ -25,7 +29,8 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-         'first_name', 'last_name', 'email', 'password', 'mobile_number', 'profile_image','created_by',
+         'first_name', 'last_name', 'email', 'password', 'mobile_number', 'profile_image','country_id','currency_code',
+         'verification_code','is_verified','created_by',
     ];
 
     /**
@@ -40,6 +45,14 @@ class User extends Authenticatable
    public function accessToken()
     {
         return $this->hasMany('App\OauthAccessToken');
+    }
+    
+    public function specialities() { 
+        return $this->belongsToMany('App\Speciality', 'user_speciality'); 
+    }
+
+    public function doctorEducation() { 
+        return $this->hasMany('App\EducationDetail'); 
     }
 
     public function basicProfile(){
