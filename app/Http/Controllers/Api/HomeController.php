@@ -92,7 +92,7 @@ class HomeController extends Controller
                     $user->verification_code = $verification_code;
                     $user->save();
 
-                    $url = env('APP_URL')."/public/api/verification/".$user->id.'/'.$token;
+                    $url =  "https://doccure-frontend.dreamguystech.com/verifymail/".$user->id.'/'.$token;
 
                     $mail = [
                         'url' => $url,
@@ -117,8 +117,8 @@ class HomeController extends Controller
 
     public function verification(Request $request){
         $rules = array(
-            'id' => 'required',
-            'code' => 'required',
+            'user_id' => 'required',
+            'verification_code' => 'required',
         );
         $validator = Validator::make($request->all(), $rules);
         if ($validator->fails()) {
@@ -126,14 +126,14 @@ class HomeController extends Controller
         } else {
             try {
                 DB::beginTransaction();
-                $user = User::whereId($request->id)->where('verification_code',$request->code)->first();
+                $user = User::whereId($request->user_id)->where('verification_code',$request->verification_code)->first();
                 if($user){
                     $user->is_verified = 1;
                     $user->save();
                     DB::commit();
                     return self::send_success_response($user,'User Email Verified Sucessfully');
                 }else{
-                    return self::send_bad_request_response('Invalid id or verification code provided');
+                    return self::send_bad_request_response('Invalid User id or verification code provided');
                 }
             } catch (Exception | Throwable $exception) {
                 DB::rollback();
@@ -211,14 +211,14 @@ class HomeController extends Controller
         $rules = array(
             'email' => 'required|email',
         );
-        $validator = Validator::make($input, $rules);
+        $validator = Validator::make($request->all(), $rules);
         if ($validator->fails()) {
             return self::send_bad_request_response($validator->errors()->first());
         } else {
             try{
                 $check_user = User::where('email',$request->email)->first();
                 if($check_user){
-                    return self::send_success_response($check_user,'Email-Id Exists');
+                    return self::send_success_response([],'Email-Id Exists');
                 }else{
                     return self::send_unauthorised_request_response('Email-Id Not Exists');
                 }

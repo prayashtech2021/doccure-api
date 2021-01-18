@@ -53,8 +53,8 @@ Route::middleware(['CheckAuthHeader','auth:api','secureApi','responseHeader'])->
        Route::post('doctor/search','Api\DoctorController@doctorList')->name('Doctor.List');
     
     /* Speciality */
-        Route::post('speacility/save','Api\SpeacilityController@save')->name('Speacility.save');
-        Route::get('speacility/list','Api\SpeacilityController@getList')->name('Speacility.getList');
+        Route::post('speacility/save','Api\SpecialityController@save')->name('Speciality.save');
+        Route::get('speacility/list','Api\SpecialityController@getList')->name('Speciality.getList');
         
     Route::get('logout', 'PassportController@logout');
     

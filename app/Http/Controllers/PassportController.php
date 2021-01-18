@@ -69,8 +69,12 @@ class PassportController extends Controller {
 				$message = "Your account is not activated.";
                 return self::send_bad_request_response($message);
 			}elseif($user && ($user->is_verified ==0)){
-                return self::send_bad_request_response('User email-id is not verified');
-			}
+				$response_array = [
+					"code" => "201",
+					"message" => "User email-id is not verified",
+				];
+				return response()->json(self::convertNullsAsEmpty($response_array), 200);
+            }
 			$message = "Your account is not activated.";
             return self::send_unauthorised_request_response($message);
 		}
@@ -102,13 +106,12 @@ class PassportController extends Controller {
 			$message = "Your account is not activated.";
             return self::send_bad_request_response($message);
 		}
-		$url = "https://doccure-reactdemo.dreamguystech.com/reset/password/" . $user->id;
+		$url = "https://doccure-frontend.dreamguystech.com/resetpassword/".$user->id;
 		
 		Mail::to($user->email)->send(new PasswordReset(['url' => $url]));
 		$response_array = [
 			"code" => "200",
 			"message" => "Reset password link sent on your email id.",
-			
 		];
 		return response()->json(self::convertNullsAsEmpty($response_array), 200);
 	}

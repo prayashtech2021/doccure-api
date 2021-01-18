@@ -18,8 +18,8 @@ class CreateAppointmentsTable extends Migration
             $table->date('appointment_date');
             $table->time('start_time');
             $table->time('end_time');
+            $table->date('next_visit')->nullable();
             $table->tinyInteger('payment_type');
-            $table->unsignedBigInteger('payment_id')->nullable();
             $table->text('tokbox_session_id')->nullable();
             $table->text('tokbox_token')->nullable();
             $table->boolean('payment_status')->default(true);

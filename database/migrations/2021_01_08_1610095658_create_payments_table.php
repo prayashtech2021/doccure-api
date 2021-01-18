@@ -11,22 +11,19 @@ class CreatePaymentsTable extends Migration
         Schema::create('payments', function (Blueprint $table) {
 
             $table->id();
-            $table->unsignedBigInteger('user_id');
-            $table->unsignedBigInteger('doctor_id');
+            $table->unsignedBigInteger('appointment_id');
+            $table->tinyInteger('payment_type'); // stripe or cash
             $table->string('invoice_no');
-            $table->decimal('per_hour_charge', 12, 2);
             $table->decimal('total_amount', 12, 2);
             $table->string('currency_code');
-            $table->tinyInteger('payment_type'); // stripe
-            $table->string('txn_id');
+            $table->string('txn_id')->nullable();
             $table->decimal('tax', 12, 2);
             $table->decimal('tax_amount', 12, 2);
-            $table->string('transaction_charge');
+            $table->string('transaction_charge')->nullable();
             $table->text('transaction_miscellaneous');
             $table->timestamps();
 
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
-            $table->foreign('doctor_id')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
+            $table->foreign('appointment_id')->references('id')->on('appointments')->onDelete('cascade')->onUpdate('cascade');
 
         });
     }
