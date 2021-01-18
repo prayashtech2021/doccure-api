@@ -29,9 +29,9 @@ class User extends Authenticatable implements Wallet, WalletFloat
      * @var array
      */
     protected $fillable = [
-         'first_name', 'last_name', 'email', 'password', 'mobile_number', 'profile_image','country_id','currency_code',
-         'verification_code','is_verified','created_by',
-    ];
+        'first_name', 'last_name', 'email', 'password', 'mobile_number', 'profile_image','country_id','currency_code',
+        'verification_code','is_verified','created_by',
+   ];
 
     /**
      * The attributes that should be hidden for arrays.

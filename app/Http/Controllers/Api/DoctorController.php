@@ -57,16 +57,18 @@ class DoctorController extends Controller
     }
 
     public function saveProfile(Request $request){
-        $user_id = $request->user()->id;
+        $user_id = $request->user_id;
         $rules = [
             'user_id' => 'required|integer',
             'first_name'  => 'required|string|max:191',
             'last_name'  => 'string|max:191',
-            'email' => 'required|email|unique:users',
-            'mobile_number' => 'required|min:10|max:10|unique:users',
-            'gender'  => 'required|integer|max:10',
+            'email' => 'required|email|unique:users,email,'.$request->user_id,
+            'country_code_id' => 'required|integer',
+            'mobile_number' => 'required|min:10|max:10|unique:users,mobile_number,'.$request->user_id,
+            'gender'  => 'required|integer|between:1,2',
             'dob'  => 'date',
         ];
+
         $validator = Validator::make($request->all(), $rules);
         if ($validator->fails()) {
             return response()->json(['success' => false, 'code' => 401, 'error' => $validator->errors()->first(), 'error_details' => $validator->errors()]);
@@ -75,10 +77,12 @@ class DoctorController extends Controller
         //Save doctor profile
         $doctor = User::find($user_id);
         $doctor->fill($request->all());
+        $doctor->currency_code = Country::getCurrentCode($request->country_code_id);
         $doctor->dob = date('Y-m-d',strtotime(str_replace('/', '-', $request->dob)));
         $doctor->save();
-//        $doctor->specialities()->detach();
-  //      $doctor->specialities()->attach($request->specialist);
+        
+        $doctor->specialities()->detach();
+        $doctor->specialities()->attach($request->specialist);
 
         // save doctor Education details
         $doctor->doctorEducation()->delete();
@@ -168,11 +172,11 @@ class DoctorController extends Controller
 
     public function doctorList(Request $request){
         try{
-            $doctors = User::role('doctor')->with('specialities');
+            $doctors = User::get();//with('specialities');
             if($request->gender){
-                $doctors = $doctors->where('gender',$request->gender);
+                $doctors->where('gender',$request->gender);
             }
-            if($request->speciality){
+           /* if($request->speciality){
                 $sp = $request->speciality;
                 $doctors = $doctors->whereHas('userSpeciality', function ($category) use ($sp) {
                     $category->whereIn('user_speciality.speciality_id',$sp)->where('user_speciality.deleted_at', null);
@@ -195,10 +199,10 @@ class DoctorController extends Controller
                 $doctors = $doctors->whereHas('addresses', function ($category) use ($city_id) {
                     $category->where('addresses.city_id',$city_id)->where('addresses.deleted_at', null);
                 });
-            }
-            $doctors->get();
+            }*/
+           // $doctors->get();
             if($doctors){
-                return self::send_success_response($doctors,'No Data Found with these request');
+                return self::send_success_response($doctors,'');
             }else{
                 return self::send_success_response($doctors,'Doctors data fetched successfully');
             }

@@ -7,6 +7,8 @@ use App\Appointment;
 use App\Payment;
 use App\TimeZone;
 use App\User;
+use App\Prescription;
+use App\PrescriptionDetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -185,6 +187,60 @@ class AppointmentController extends Controller
             return self::send_success_response($appointment->getData());
 
         } catch (Exception | Throwable $exception) {
+            return self::send_exception_response($exception->getMessage());
+        }
+    }
+
+    Public function savePrescription(Request $request){
+        $validator = Validator::make($request->all(), [
+            'appointment_id' => 'required',
+           /* 'drug_name' => 'required',
+            'quantity' => 'required|integer',
+            'type' => 'required|string',
+            'days' => 'required|integer',
+            'time' => 'required'*/
+        ]);
+
+        if ($validator->fails()) {
+            return self::send_bad_request_response($validator->errors()->first());
+        }
+        DB::beginTransaction();
+
+        try {
+            $prescription = new Prescription();
+            $prescription->appointment_id = $request->appointment_id;
+            if($request->signature_id){
+                $prescription->signature_id = $request->signature_id;
+            }
+            $prescription->save();
+
+           /* $prescription_details = new PrescriptionDetail();
+            $prescription_details->prescription_id = $prescription->id;
+            $prescription_details->drug_name = $request->drug_name;
+            $prescription_details->quantity = $request->quantity;
+            $prescription_details->type = $request->type;
+            $prescription_details->days = $request->days;
+            $prescription_details->time = $request->time;
+            $prescription_details->save();
+            DB::commit();
+*/
+            return self::send_success_response([],'Prescription Added Successfully');
+
+        } catch (Exception | Throwable $exception) {
+            DB::rollBack();
+            return self::send_exception_response($exception->getMessage());
+        }
+    }
+
+    public function prescriptionList(){
+    
+        try {
+            $list = Prescription::with('prescriptionDetails')->get();
+
+            return self::send_success_response($list,'Prescription Added Successfully');
+
+        } catch (Exception | Throwable $exception) {
+            DB::rollBack();
             return self::send_exception_response($exception->getMessage());
         }
     }

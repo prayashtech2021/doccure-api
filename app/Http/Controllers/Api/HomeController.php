@@ -36,10 +36,8 @@ class HomeController extends Controller
             $array=$request->toArray();
             $array['password'] = Hash::make($request->password);
             $array['created_by'] = 1; //test
-            $get_currency_code = Country::whereId($request->country_id)->get()->pluck('currency');
-            if($get_currency_code){
-                $array['currency_code'] = $get_currency_code[0];
-            }
+            $array['currency_code'] = Country::getCurrentCode($request->country_id);
+
             $verification_code = mt_rand(100000,999999);
             $array['verification_code'] = $verification_code;
             $pool = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -50,7 +48,7 @@ class HomeController extends Controller
             $user->assignRole($request->type);
             DB::commit();
             
-            $url = "http://localhost/reactdoccure/public/api/verification/".$user->id.'/'.$token;
+            $url = "https://doccure-frontend.dreamguystech.com/verifymail/".$user->id.'/'.$token;
 
             $mail = [
                 'url' => $url,

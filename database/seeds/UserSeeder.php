@@ -22,7 +22,7 @@ class UserSeeder extends Seeder
                 'mobile_number' => '8978675651',
                 'is_verified' => 1,
                 'language_id' => 1,
-                'country_id' => 1,
+                //'country_id' => 1,
                 'created_by' => 1,
             ],
             2 => [
@@ -33,7 +33,7 @@ class UserSeeder extends Seeder
                 'mobile_number' => '8978675654',
                 'is_verified' => 1,
                 'language_id' => 1,
-                'country_id' => 1,
+               // 'country_id' => 1,
                 'created_by' => 1,
             ],
             3 => [
@@ -46,7 +46,7 @@ class UserSeeder extends Seeder
                 'price_type' => 2,
                 'is_verified' => 1,
                 'language_id' => 1,
-                'country_id' => 1,
+                //'country_id' => 1,
                 'amount' => 4.50,
                 'created_by' => 1,
             ],
@@ -58,7 +58,7 @@ class UserSeeder extends Seeder
                 'mobile_number' => '8978675656',
                 'is_verified' => 1,
                 'language_id' => 1,
-                'country_id' => 1,
+                //'country_id' => 1,
                 'created_by' => 1,
             ],
 		];
