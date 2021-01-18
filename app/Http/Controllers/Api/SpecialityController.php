@@ -78,7 +78,7 @@ class SpecialityController extends Controller
 
     public function getList(){
         try {
-            $list = Speciality::select('id','name')->orderBy('name', 'ASC')->get();
+            $list = Speciality::select('id','name','image')->orderBy('name', 'ASC')->get();
             
             return self::send_success_response($list,'Speciality content fetched successfully');
         } catch (Exception | Throwable $e) {
