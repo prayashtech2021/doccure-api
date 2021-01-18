@@ -15,11 +15,11 @@ use Illuminate\Support\Facades\Route;
 */
 
 
-Route::post('login', 'PassportController@login');
-Route::middleware([])->group(function () {
+Route::middleware(['secureApi','responseHeader'])->group(function () {
     Route::get('/',function(){
         return response()->json(['message' => 'Page Not Found'], 404);
     });
+    Route::post('login', 'PassportController@login');
     Route::post('register', 'Api\HomeController@register');
     
     Route::get('getList/{id}','Api\HomeController@getList')->name('getList');
