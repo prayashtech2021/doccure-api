@@ -17,6 +17,7 @@ function getUserProfileImage($user_id)
     }
 }
 
+
 function getList($case){
     	if ($case) {
     		switch ($case) {
@@ -33,6 +34,7 @@ function getList($case){
                     $response = ['case' => $case, 'status' => 'Action not found']; 
                     break;
 	    	}
+
 	    } else {
             $response = ['status' => 'invalid request'];
         }
@@ -60,4 +62,15 @@ function convertToLocal(Carbon $date, $timezone = null, $format = null)
     if (!$timezone) $timezone = config('app.timezone');
     $datetime = Carbon::parse($date, new DateTimeZone('UTC'))->timezone($timezone);
     return $format ? $datetime->format($format) : $datetime;
+}
+
+function generateReference($user_id, $last_id, $prefix = '#', $length = 8)
+{
+    $next = $last_id + 1;
+    $ref_length = $length - strlen($prefix . $user_id . '0' . $next);
+    if ($ref_length <= 0) {
+        return generateReference($prefix, $user_id, $last_id, $length + 4);
+    }
+    $pad_length = $length - strlen($prefix);
+    return $prefix . str_pad($user_id . '0' . $next, $pad_length, "0", STR_PAD_LEFT);
 }

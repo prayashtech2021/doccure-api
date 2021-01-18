@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 
 use App\Appointment;
+use App\Payment;
 use App\TimeZone;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use \Exception;
 use \Throwable;
@@ -41,22 +43,22 @@ class AppointmentController extends Controller
     {
         try {
             $user = $request->user();
-            $paginate = $request->count_per_page?$request->count_per_page:10;
+            $paginate = $request->count_per_page ? $request->count_per_page : 10;
 
-            $order_by = $request->order_by?$request->order_by:'desc';
+            $order_by = $request->order_by ? $request->order_by : 'desc';
             $list = Appointment::orderBy('created_at', $order_by);
 
             $status = $request->appointment_status;
-            if($status){
-                switch ($status){
+            if ($status) {
+                switch ($status) {
                     case 1:
-                        $list = $list->where('appointment_status', false)->whereDate('appointment_date','>=', convertToUTC(now()));
+                        $list = $list->where('appointment_status', false)->whereDate('appointment_date', '>=', convertToUTC(now()));
                         break;
                     case 2:
-                        $list = $list->where('appointment_status', true)->whereDate('appointment_date','<=', convertToUTC(now()));
+                        $list = $list->where('appointment_status', true)->whereDate('appointment_date', '<=', convertToUTC(now()));
                         break;
                     case 3:
-                        $list = $list->where('appointment_status', false)->whereDate('appointment_date','<', convertToUTC(now()));
+                        $list = $list->where('appointment_status', false)->whereDate('appointment_date', '<', convertToUTC(now()));
                         break;
                 }
             }
@@ -73,7 +75,7 @@ class AppointmentController extends Controller
             }
 
             $data = collect();
-            $list->paginate($paginate)->getCollection()->each(function ($appointment) use (&$data){
+            $list->paginate($paginate)->getCollection()->each(function ($appointment) use (&$data) {
                 $data->push($appointment->getData());
             });
 
@@ -88,6 +90,7 @@ class AppointmentController extends Controller
         $validator = Validator::make($request->all(), [
             'doctor_id' => 'required',
             'appointment_type' => 'required',
+            'payment_type' => 'required',
             'appointment_date' => 'required',
             'start_time' => 'required',
             'end_time' => 'required'
@@ -96,11 +99,22 @@ class AppointmentController extends Controller
         if ($validator->fails()) {
             return self::send_bad_request_response($validator->errors()->first());
         }
+        DB::beginTransaction();
 
         try {
+
+            $user = $request->user();
+            $doctor = User::find($request->doctor_id);
+
+            $booking_hours = Carbon::createFromFormat('h:i:s', $request->start_time)->diffInHours(Carbon::createFromFormat('h:i:s', $request->end_time));
+
+            /**
+             * Appointment
+             */
+
             $appointment = new Appointment();
             $last_id = $appointment->latest()->first() ? $appointment->latest()->first()->id : 0;
-            $appointment->appointment_reference = 'APT' . str_pad($last_id + 1, 12, "0", STR_PAD_LEFT);
+            $appointment->appointment_reference = generateReference($user->id, $last_id, 'APT');
             $appointment->user_id = 4;
             $appointment->doctor_id = $request->doctor_id;
             $appointment->appointment_type = $request->appointment_type;
@@ -109,6 +123,64 @@ class AppointmentController extends Controller
             $appointment->end_time = $request->end_time;
             $appointment->payment_type = 1;
             $appointment->save();
+
+            /**
+             * Payment
+             */
+
+            $payment = new Payment();
+            $last_id = $payment->latest()->first() ? $payment->latest()->first()->id : 0;
+            $payment->appointment_id = $appointment->id;
+            $payment->invoice_no = generateReference($user->id, $last_id, 'INV');
+            $payment->payment_type = $request->payment_type;
+            $payment->total_amount = $doctor->amount * $booking_hours;
+
+            $payment->currency_code = $doctor->currency_code ?? config('cashier.currency');
+            $payment->save();
+
+            if ($request->payment_type == 1 || $request->payment_type == 2) {
+
+                $billable_amount = (int)($payment->total_amount * 100);
+
+                $payment_options = [
+                    'description' => config('app.name') . ' appointment reference #' . $appointment->appointment_reference,
+                    'metadata' => [
+                        'reference' => $appointment->appointment_reference,
+                    ]
+                ];
+
+                if ($request->payment_type == 1) {
+                    $paymentMethod = $user->findPaymentMethod($request->payment_method);
+
+                    if (!$paymentMethod) {
+                        DB::rollBack();
+                        return self::send_bad_request_response(['message' => 'Payment processing failed', 'error' => 'Payment processing failed']);
+                    }
+
+                    $paymentIntent = $user->charge($billable_amount, $paymentMethod->id, $payment_options);
+                } else {
+                    $user->updateDefaultPaymentMethod($request->payment_method);
+                    $paymentIntent = $user->charge($billable_amount, $request->payment_method, $payment_options);
+                }
+
+                if ($paymentIntent) {
+                    $charges = collect($paymentIntent->asStripePaymentIntent()->charges->data);
+                    $stripe = new \Stripe\StripeClient(config('cashier.secret'));
+                    $stripeCharge = $stripe->balanceTransactions->retrieve($charges->first()->balance_transaction);
+
+                    $payment->txn_id = $paymentIntent->id;
+                    $payment->transaction_charge = $stripeCharge->fee_details[0]->amount / 100;
+                    $payment->save();
+                    DB::commit();
+                    return self::send_success_response($appointment->getData());
+
+                } else {
+                    DB::rollBack();
+                    return self::send_bad_request_response(['message' => 'Payment processing failed', 'error' => 'Payment processing failed']);
+                }
+            }
+
+            DB::commit();
 
             return self::send_success_response($appointment->getData());
 
