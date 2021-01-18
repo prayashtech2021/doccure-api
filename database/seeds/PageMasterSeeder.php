@@ -5,7 +5,8 @@ use Illuminate\Database\Seeder;
 use App\PageMaster;
 
 class PageMasterSeeder extends Seeder
-{
+{ 
+    
     /**
      * Run the database seeds.
      *
