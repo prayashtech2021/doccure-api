@@ -15,18 +15,19 @@ use Illuminate\Support\Facades\Route;
 */
 
 
-Route::middleware(['secureApi','responseHeader'])->group(function () {
+Route::post('login', 'PassportController@login');
+Route::middleware([])->group(function () {
     Route::get('/',function(){
         return response()->json(['message' => 'Page Not Found'], 404);
     });
     Route::post('register', 'Api\HomeController@register');
-    Route::post('login', 'PassportController@login');
     
     Route::get('getList/{id}','Api\HomeController@getList')->name('getList');
     Route::post('resend-verification-link','Api\HomeController@resendVerificationLink');
     Route::post('verification','Api\HomeController@verification');
     Route::post('password/email', 'PassportController@forgot');
     Route::post('password/reset', 'PassportController@resetPassword');
+    Route::get('language/list', 'Api\LanguageController@list');
 });
 
 Route::middleware(['CheckAuthHeader','auth:api','secureApi','responseHeader'])->group(function () {
@@ -56,6 +57,9 @@ Route::middleware(['CheckAuthHeader','auth:api','secureApi','responseHeader'])->
         Route::get('speacility/list','Api\SpeacilityController@getList')->name('Speacility.getList');
         
     Route::get('logout', 'PassportController@logout');
+    
+    // Language 
+    Route::post('language/update', 'Api\LanguageController@update');
 });
 
 Route::any('{path}', function() {

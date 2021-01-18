@@ -17,7 +17,9 @@ class AlterUsersTable extends Migration
         Schema::table('users', function (Blueprint $table) {
             $table->string('verification_code')->after('profile_image')->nullable(); 
             $table->unsignedTinyInteger('is_verified')->after('verification_code')->default(0);
-            $table->foreign('country_id')->references('id')->on('countries')->onDelete('cascade')->onUpdate('cascade'); 
+            $table->unsignedBigInteger('language_id')->after('time_zone_id')->default(1);
+            // $table->foreign('language_id')->references('id')->on('languages')->onDelete('cascade')->onUpdate('cascade');
+            // $table->foreign('country_id')->references('id')->on('countries')->onDelete('cascade')->onUpdate('cascade'); 
         });
     }
 
@@ -30,8 +32,11 @@ class AlterUsersTable extends Migration
     {
         //
         Schema::table('users', function (Blueprint $table) {
+            $table->dropForeign('country_id');
+            $table->dropForeign('language_id');
             $table->dropColumn('verification_code');
             $table->dropColumn('is_verified');
+            $table->dropColumn('language_id');
         });
     }
 }
