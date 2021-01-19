@@ -22,7 +22,7 @@ class LanguageController extends Controller
 
     public function update(Request $request)
     {
-        $rules = $this->customValidation($request, [
+        $rules = self::customValidation($request, [
             'language_id' => 'required|exists:languages,id',
         ]);
         if($rules){ return $rules;}

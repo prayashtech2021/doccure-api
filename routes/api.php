@@ -52,10 +52,12 @@ Route::middleware(['CheckAuthHeader','auth:api','secureApi','responseHeader'])->
 
        Route::post('doctors-search','Api\DoctorController@doctorList')->name('Doctor.List');
     
-    /* Speciality */
+       /* Speciality */
+       Route::group(['middleware' => ['can:specialization']], function () {
         Route::post('speacility/save','Api\SpecialityController@save')->name('Speciality.save');
         Route::get('speacility/list','Api\SpecialityController@getList')->name('Speciality.getList');
         Route::get('speacility/delete/{id}','Api\SpecialityController@destroy')->name('Speciality.delete');
+       });
 
     /*Prescription */
         Route::post('prescription/save','Api\AppointmentController@savePrescription');

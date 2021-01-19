@@ -27,30 +27,28 @@ class Controller extends BaseController {
 	public static function customDelete($model, $id)
     {
         try {
-			$use = "\App\/".$model;
-            $data = $use::withTrashed()->find($id);
+            $data = $model::withTrashed()->find($id);
             if ($data && $id) {
                 if ($data->trashed()) {
                     $data->restore();
                     $data->deleted_by = null;
 					$data->save();
 					$msg='Record Activated successfully!';
-                    session()->flash('success', 'Record Activated successfully!');
+                    // session()->flash('success', 'Record Activated successfully!');
                 } else {
                     $data->delete();
                     $data->deleted_by =auth()->user()->id;
 					$data->save();
 					$msg='Record Deleted successfully!';
-                    session()->flash('success', 'Record Deleted successfully!');
+                    // session()->flash('success', 'Record Deleted successfully!');
                 }
-
-                return response()->json(['success' => true, 'code' => 200, 'message' => $msg]);
+				return self::send_success_response([], $msg);
             } else {
-                session()->flash('error', 'Sorry try again!');
-                return response()->json(['success' => false, 'code' => 401, 'error' => 'Something went wrong, try again!']);
+                // session()->flash('error', 'Sorry try again!');
+                return self::send_bad_request_response('Something went wrong! Please try again later.');
             }
         } catch (\Exception | \Throwable $e) {
-            return response()->json(['success' => false, 'code' => 500, 'error' => $e->getMessage()]);
+            return self::send_exception_response($e->getMessage());
         }
     }
 
