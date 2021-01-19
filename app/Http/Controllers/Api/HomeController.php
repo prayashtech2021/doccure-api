@@ -222,5 +222,8 @@ class HomeController extends Controller
         }
     }
     
-
+    public function destroy(Request $request)
+    {
+        return self::customDelete('\App\User', $request->id);
+    }
 }

@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 
 use Validator;
-use App\ { User, Speciality, EducationDetail, Country, State, City, UserContactDetail, ClinicInformation, ClinicImage, UserSpeciality, ExperienceDetail, AwardDetail, MembershipDetail, RegistrationDetail };
+use App\ { User, Speciality, EducationDetail, Country, State, City, Address, AddressImage, UserSpeciality, ExperienceDetail, AwardDetail, MembershipDetail, RegistrationDetail };
 use Illuminate\Http\Request;
 use DB;
 
@@ -93,13 +93,13 @@ class DoctorController extends Controller
         $doctor->dob = date('Y-m-d',strtotime(str_replace('/', '-', $request->dob)));
         $doctor->save();
         
-        /* Doctor Contact Details */
-        $get_contact_details = UserContactDetail::whereUserId($user_id)->first();
+        /* Doctor Address Details */
+        $get_contact_details = Address::whereUserId($user_id)->first();
         if($get_contact_details){
             $contact_details = $get_contact_details;
             $contact_details->updated_by = auth()->user()->id;
         }else{
-            $contact_details = new UserContactDetail();
+            $contact_details = new Address();
             $contact_details->user_id = $user_id;
             $contact_details->created_by = auth()->user()->id;
         }
@@ -113,17 +113,20 @@ class DoctorController extends Controller
         $contact_details->save();
 
         /* Doctor Clinic Info */
-        $get_clinic_details = ClinicInformation::whereUserId($user_id)->first();
-        if($get_clinic_details){
+        if($request->clinic_address_id){
+            $get_clinic_details = Address::find($request->clinic_address_id)->first();
+        }
+        
+        if($request->clinic_address_id && (isset($get_clinic_details))){
             $clinic_details = $get_clinic_details;
             $clinic_details->updated_by = auth()->user()->id;
         }else{
-            $clinic_details = new ClinicInformation();
+            $clinic_details = new Address();
             $clinic_details->user_id = $user_id;
-            $clinic_details->created_by = auth()->user()->id;
+            $clinic_details->created_by = auth()->user()->id;    
         }
         
-        $clinic_details->clinic_name = ($request->clinic_name)? $request->clinic_name : '';
+        $clinic_details->name = ($request->clinic_name)? $request->clinic_name : '';
         $clinic_details->line_1 = ($request->clinic_address_line1)? $request->clinic_address_line1 : '';
         $clinic_details->line_2 = ($request->clinic_address_line2)? $request->clinic_address_line2 : '';
         $clinic_details->country_id = ($request->clinic_country_id)? $request->clinic_country_id : '';
@@ -137,27 +140,36 @@ class DoctorController extends Controller
         $images=array();
 
         if($files=$request->file('clinic_images')){
-            $clinic_img = ClinicImage::whereUserId($user_id)->where('clinic_information_id',$clinic_details->id)->delete();
+            $clinic_img = AddressImage::whereUserId($user_id)->where('clinic_information_id',$clinic_details->id)->delete();
 
             foreach($files as $file){
-                $new_clinic_img = new ClinicImage();
+                $new_clinic_img = new AddressImage();
                 $new_clinic_img->user_id = $user_id;
                 $new_clinic_img->clinic_information_id = $clinic_details->id;
                 $new_clinic_img->created_by = auth()->user()->id;
 
-                if (Storage::exists('clinic_images/'.$clinic_details->id.'/')) {
-                    Storage::delete('clinic_images/'.$clinic_details->id.'/');
+                if (Storage::exists('images/address_images/'.$clinic_details->id.'/')) {
+                    Storage::delete('images/address_images/'.$clinic_details->id.'/');
+                }
+                if (!empty($file)) {
+                    $extension = $file->getClientOriginalExtension();
+                    $file_name = date('YmdHis') . '_' . auth()->user()->id . '.png';
+                    $path = 'images/address_images'.$clinic_details->id.'/';
+                    $store = $request->file('image')->storeAs($path, $file_name);
+                }else{
+                    $file_name = '';
                 }
 
-                if (preg_match('/data:image\/(.+);base64,(.*)/', $file, $matchings)) {
+                $new_clinic_img->clinic_image = $file_name;
+                $new_clinic_img->save();
+                
+                /*if (preg_match('/data:image\/(.+);base64,(.*)/', $file, $matchings)) {
                     $imageData = base64_decode($matchings[2]);
                     $extension = $matchings[1];
                     $file_name = date('YmdHis') . rand(100,999). '_' . $clinic_details->id . '.' . $extension;
                     $path = 'clinic_images/'.$clinic_details->id.'/'.$file_name;
-                    Storage::put($path , $imageData);
-                    $new_clinic_img->clinic_image = $file_name;
-                    $new_clinic_img->save();
-                }
+                    Storage::put($path , $imageData);    
+                }*/
             }
         }
 
@@ -256,11 +268,11 @@ class DoctorController extends Controller
         }
 
         // save doctor registration details
-        RegDetail::where('user_id', '=', $user_id)->delete();
+        RegistrationDetail::where('user_id', '=', $user_id)->delete();
         $registrationArray = $request->registration;
         if(count($registrationArray) > 0) {
-            foreach($registrationArray['reg'] as $key => $reg){
-                $registration = new RegDetail();
+            foreach($registrationArray['registration'] as $key => $reg){
+                $registration = new RegistrationDetail();
                 if(!empty($reg) || !empty($registrationArray['reg_year'][$key])){
                     $registration->reg = $reg;
                     $registration->reg_year = $registrationArray['reg_year'][$key];
@@ -282,18 +294,6 @@ class DoctorController extends Controller
             }
         }
 
-        // save doctor RegistrationDetail details
-        RegistrationDetail::where('user_id', '=', $user_id)->delete();
-        $registrationArray = $request->registration;
-        if(count($registrationArray) > 0) {
-            foreach($registrationArray as $value){
-                $registration = new RegistrationDetail();
-                $registration->name = $value;
-                $registration->user_id = $user_id;
-                $registration->registration_year = 
-                $membership->save();
-            }
-        }
         return self::send_success_response([],'Doctor Records Store Successfully');
 
         /*user()->services()->delete();

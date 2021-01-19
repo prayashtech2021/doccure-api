@@ -13,7 +13,7 @@ class UserSpeciality extends Model{
      * @var array
      */
     protected $fillable = [
-         'user_id', 'speciality_id ', 'service','created_by',
+         'user_id', 'speciality_id ',
     ];
 
 
