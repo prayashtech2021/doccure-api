@@ -146,7 +146,6 @@ class HomeController extends Controller
         $input = $request->all();
         $userid = auth()->user()->id;
         $rules = array(
-            'old_password' => 'required',
             'new_password' => 'required|min:6|string',
             'confirm_password' => 'required|same:new_password',
         );
@@ -155,10 +154,7 @@ class HomeController extends Controller
             return self::send_bad_request_response($validator->errors()->first());
         } else {
             try {
-                if ((Hash::check(request('old_password'), auth()->user()->password)) == false) {
-                    $message = "Check your old password.";
-                    return self::send_bad_request_response($message);
-                } else if ((Hash::check(request('new_password'), auth()->user()->password)) == true) {
+                if ((Hash::check(request('new_password'), auth()->user()->password)) == true) {
                     $message = "Please enter a password which is not similar then current password.";
                     return self::send_bad_request_response($message);
                 } else {

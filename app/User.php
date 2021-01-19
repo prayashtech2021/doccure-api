@@ -29,8 +29,8 @@ class User extends Authenticatable implements Wallet, WalletFloat
      * @var array
      */
     protected $fillable = [
-        'first_name', 'last_name', 'email', 'password', 'mobile_number', 'profile_image','country_id','currency_code',
-        'verification_code','is_verified','created_by',
+        'first_name', 'last_name', 'email', 'password', 'mobile_number', 'profile_image','country_id','currency_code','gender','dob','blood_group',
+        'biography','price_type','amount','verification_code','is_verified','currency_code','created_by',
    ];
 
     /**
@@ -42,17 +42,40 @@ class User extends Authenticatable implements Wallet, WalletFloat
         'password','remember_token',
     ];
 
-   public function accessToken()
-    {
+    public function accessToken(){
         return $this->hasMany('App\OauthAccessToken');
     }
-    
-    public function specialities() { 
-        return $this->belongsToMany('App\Speciality', 'user_speciality'); 
+
+    public function userContactDetails(){
+        return $this->hasOne('App\UserContactDetails','user_id');
     }
 
-    public function doctorEducation() { 
-        return $this->hasMany('App\EducationDetail'); 
+    public function doctorClinicInfo(){
+        return $this->hasOne('App\ClinicInformation','user_id');
+    }
+
+    public function doctorSpecialization() { 
+        return $this->hasOne('App\UserSpeciality','user_id');
+    }
+
+    public function doctorEducation(){
+        return $this->hasMany(EducationDetail::class);
+    }
+
+    public function doctorExperience() { 
+        return $this->hasMany(ExperienceDetail::class);
+    }
+
+    public function doctorAwards() { 
+        return $this->hasMany(AwardDetail::class);
+    }
+
+    public function doctorMembership() { 
+        return $this->hasMany(MembershipDetail::class); 
+    }
+
+    public function doctorRegistration() { 
+        return $this->hasMany(RegistrationDetail::class); 
     }
 
     public function basicProfile(){
