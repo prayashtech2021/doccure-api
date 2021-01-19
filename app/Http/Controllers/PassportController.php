@@ -4,11 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Mail\PasswordReset;
 use App\User;
+use App\MultiLanguage;
 use Hash;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Validator;
-use Auth;
+use Illuminate\Support\Facades\Auth;
 
 class PassportController extends Controller {
 
@@ -28,7 +29,6 @@ class PassportController extends Controller {
 		];
 		
 		if (auth()->attempt($credentials)) {
-
 			$user = auth()->user();
 			$chktoken = $user->accessToken(function($qry){
 				$qry->where('revoked',0);
@@ -45,17 +45,22 @@ class PassportController extends Controller {
 				$arr[$key]['id'] = $row['id'];
 				$arr[$key]['name'] = $row['name'];
 			}
-			$user->roles = $arr;
+			$user->role_names = $arr;
 			$user->profile_image = getUserProfileImage($user->id);
 			removeMetaColumn($user);
 			
+
+			$menuList = $this->getAppMenu();
+			// dd($menuList);
 			$response_array = [
 				"code" => "200",
 				"message" => "Logged Successfully",
 				"data" => $user,
 				"token" => $token,
+				"menu_list" => $menuList,
 			];
-	
+			unset($user->tokens);
+			unset($user->roles);
 			return response()->json(self::convertNullsAsEmpty($response_array), 200);
 			
 		} else {
@@ -143,4 +148,61 @@ class PassportController extends Controller {
         }
     }
 
+	public function getAppMenu() {
+		if (auth()->check()) {
+			$menus = [];
+			$lang = MultiLanguage::where(['page_master_id'=>1, 'language_id'=>auth()->user()->language_id])->get();
+			if(auth()->user()->hasRole(['company_admin'])){
+				$menus = [
+					'dashboard' => ucwords($lang->first(function($item) {return $item->keyword == 'dashboard';})->value),
+					'appointments' => ucwords($lang->first(function($item) {return $item->keyword == 'appointments';})->value),
+					'specialization' => ucwords($lang->first(function($item) {return $item->keyword == 'specialization';})->value),
+					'doctors' => ucwords($lang->first(function($item) {return $item->keyword == 'doctors';})->value),
+					'patients' => ucwords($lang->first(function($item) {return $item->keyword == 'patients';})->value),
+					'payment_requests' => ucwords($lang->first(function($item) {return $item->keyword == 'payment_requests';})->value),
+					'settings' => ucwords($lang->first(function($item) {return $item->keyword == 'settings';})->value),
+					'email_template' => ucwords($lang->first(function($item) {return $item->keyword == 'email_template';})->value),
+					'cms' => ucwords($lang->first(function($item) {return $item->keyword == 'cms';})->value),
+					'language' => ucwords($lang->first(function($item) {return $item->keyword == 'language';})->value),
+					'my_profile' => ucwords($lang->first(function($item) {return $item->keyword == 'my_profile';})->value),
+					'change_password' => ucwords($lang->first(function($item) {return $item->keyword == 'change_password';})->value),
+					'logout' => ucwords($lang->first(function($item) {return $item->keyword == 'logout';})->value),
+				];
+			}elseif(auth()->user()->hasRole(['doctor'])){
+				$menus = [
+					'dashboard' => ucwords($lang->first(function($item) {return $item->keyword == 'dashboard';})->value),
+					'appointments' => ucwords($lang->first(function($item) {return $item->keyword == 'appointments';})->value),
+					'my_patients' => ucwords($lang->first(function($item) {return $item->keyword == 'my_patients';})->value),
+					'schedule_timings' => ucwords($lang->first(function($item) {return $item->keyword == 'schedule_timings';})->value),
+					'calendar' => ucwords($lang->first(function($item) {return $item->keyword == 'calendar';})->value),
+					'invoice' => ucwords($lang->first(function($item) {return $item->keyword == 'invoice';})->value),
+					'accounts' => ucwords($lang->first(function($item) {return $item->keyword == 'accounts';})->value),
+					'reviews' => ucwords($lang->first(function($item) {return $item->keyword == 'reviews';})->value),
+					'chat' => ucwords($lang->first(function($item) {return $item->keyword == 'chat';})->value),
+					'social_media' => ucwords($lang->first(function($item) {return $item->keyword == 'social_media';})->value),
+					'patient_search' => ucwords($lang->first(function($item) {return $item->keyword == 'patient_search';})->value),
+					'my_profile' => ucwords($lang->first(function($item) {return $item->keyword == 'my_profile';})->value),
+					'change_password' => ucwords($lang->first(function($item) {return $item->keyword == 'change_password';})->value),
+					'logout' => ucwords($lang->first(function($item) {return $item->keyword == 'logout';})->value),
+				];
+			}elseif(auth()->user()->hasRole(['patient'])){
+				$menus = [
+					'dashboard' => ucwords($lang->first(function($item) {return $item->keyword == 'dashboard';})->value),
+					'appointments' => ucwords($lang->first(function($item) {return $item->keyword == 'appointments';})->value),
+					'calendar' => ucwords($lang->first(function($item) {return $item->keyword == 'calendar';})->value),
+					'invoice' => ucwords($lang->first(function($item) {return $item->keyword == 'invoice';})->value),
+					'accounts' => ucwords($lang->first(function($item) {return $item->keyword == 'accounts';})->value),
+					'chat' => ucwords($lang->first(function($item) {return $item->keyword == 'chat';})->value),
+					'doctor_search' => ucwords($lang->first(function($item) {return $item->keyword == 'doctor_search';})->value),
+					'my_profile' => ucwords($lang->first(function($item) {return $item->keyword == 'my_profile';})->value),
+					'change_password' => ucwords($lang->first(function($item) {return $item->keyword == 'change_password';})->value),
+					'logout' => ucwords($lang->first(function($item) {return $item->keyword == 'logout';})->value),
+				];
+			}
+
+			return $menus;
+		}
+		return [];
+		
+	}
 }

@@ -19,14 +19,15 @@ Route::middleware(['secureApi','responseHeader'])->group(function () {
     Route::get('/',function(){
         return response()->json(['message' => 'Page Not Found'], 404);
     });
-    Route::post('register', 'Api\HomeController@register');
     Route::post('login', 'PassportController@login');
+    Route::post('register', 'Api\HomeController@register');
     
     Route::get('getList/{id}','Api\HomeController@getList')->name('getList');
     Route::post('resend-verification-link','Api\HomeController@resendVerificationLink');
     Route::post('verification','Api\HomeController@verification');
     Route::post('password/email', 'PassportController@forgot');
     Route::post('password/reset', 'PassportController@resetPassword');
+    Route::get('language/list', 'Api\LanguageController@list');
 });
 
 Route::middleware(['CheckAuthHeader','auth:api','secureApi','responseHeader'])->group(function () {
@@ -51,15 +52,20 @@ Route::middleware(['CheckAuthHeader','auth:api','secureApi','responseHeader'])->
 
        Route::post('doctors-search','Api\DoctorController@doctorList')->name('Doctor.List');
     
-    /* Speciality */
+       /* Speciality */
+       Route::group(['middleware' => ['can:specialization']], function () {
         Route::post('speacility/save','Api\SpecialityController@save')->name('Speciality.save');
         Route::get('speacility/list','Api\SpecialityController@getList')->name('Speciality.getList');
         Route::get('speacility/delete/{id}','Api\SpecialityController@destroy')->name('Speciality.delete');
+       });
 
     /*Prescription */
         Route::post('prescription/save','Api\AppointmentController@savePrescription');
         
     Route::get('logout', 'PassportController@logout');
+    
+    // Language 
+    Route::post('language/update', 'Api\LanguageController@update');
 });
 
 Route::any('{path}', function() {

@@ -12,10 +12,15 @@ class StateSeeder extends Seeder
      */
     public function run()
     {
-        DB::table('states')->delete();
         DB::disableQueryLog();
+        DB::table('states')->delete();
         $json = File::get("database/data/states.json");
         $data = json_decode($json, true);
-        State::insert($data);
+        // State::insert($data);
+        foreach($data as $item){
+            if($item['country_id']==101){
+                State::insert($item);
+            }
+        }
     }
 }

@@ -9,8 +9,10 @@ class Role extends Model
 {
     use SoftDeletes;
 
+    protected $guard_name='web';
+    
     protected $fillable = [
-        'name',
+        'name','guard_name','created_by',
     ];
 
     public function users()
