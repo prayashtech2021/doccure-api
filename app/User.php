@@ -57,6 +57,9 @@ class User extends Authenticatable implements Wallet, WalletFloat
     public static function doctorClinicInfo($id){
         return Address::whereNotNull('name')->where('user_id',$id)->first();
     }
+    public static function doctorClinicImage($id){
+        return AddressImage::where('user_id',$id)->first();
+    }
 
     public function doctorSpecialization() { 
        // return $this->hasOne('App\UserSpeciality','user_id');

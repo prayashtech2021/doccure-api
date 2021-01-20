@@ -38,11 +38,11 @@ Route::middleware(['secureApi','responseHeader'])->group(function () {
         Route::get('user/delete/{id}','Api\HomeController@destroy');
 
         /* Admin Profile */
-        Route::get('admin/Profile/{id}','Api\HomeController@adminProfile');
-        Route::post('admin/saveProfile/','Api\HomeController@saveProfile');
+        Route::get('admin/profile/{id}','Api\HomeController@adminProfile');
+        Route::post('admin/saveprofile/','Api\HomeController@saveProfile');
         /* Patient Module */
         Route::get('patient/list','Api\PatientController@patientList');
-        Route::post('patient/saveProfile','Api\PatientController@profile_update');
+        Route::post('patient/saveprofile','Api\PatientController@profile_update');
         Route::get('patient/profile/{id}','Api\PatientController@profile_details');
         
         //appointments
@@ -52,8 +52,8 @@ Route::middleware(['secureApi','responseHeader'])->group(function () {
         /* Doctor Module */
         Route::get('doctor/dashboard','Api\DoctorController@dashboard')->name('Doctor.Dashboard');
         Route::get('doctor/list','Api\DoctorController@doctorList')->name('Doctor.List');
-        Route::get('doctor/Profile/{id}','Api\DoctorController@doctorProfile')->name('Doctor.Profile');
-        Route::post('doctor/saveProfile','Api\DoctorController@saveProfile')->name('Doctor.saveProfile');
+        Route::get('doctor/profile/{id}','Api\DoctorController@doctorProfile')->name('Doctor.Profile');
+        Route::post('doctor/saveprofile','Api\DoctorController@saveProfile')->name('Doctor.saveProfile');
         Route::post('doctors-search','Api\DoctorController@doctorSearchList')->name('Doctor.searchList');
 
         /* Speciality */

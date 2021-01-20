@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use Validator;
-use App\ { User };
+use App\ { User,Address,Appointment };
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use DB;
@@ -21,6 +21,8 @@ class PatientController extends Controller
     public function profile_details($id){
         $data['profile'] = User::find($id);
         $data['address'] = Address::with('country','state','city')->where('user_id',$id)->first();
+        $list = Appointment::whereUserId($id)->orderBy('created_at', 'DESC')->get();
+                $data['last_booking'] = $list;
         return self::send_success_response($data);
     }
 

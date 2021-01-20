@@ -46,8 +46,9 @@ class DoctorController extends Controller
         try {
             
             $doctor['profile'] = User::with('doctorSpecialization','doctorService','doctorEducation','doctorExperience','doctorAwards','doctorMembership','doctorRegistration')->find($user_id);
-            $doctor['doctor_clinic_info'] = User::doctorClinicInfo($user_id);
             $doctor['doctor_contact_info'] = User::userAddress($user_id);
+            $doctor['doctor_clinic_info'] = User::doctorClinicInfo($user_id);
+            $doctor['doctor_clinic_images'] = User::doctorClinicImage($user_id);
          
             return self::send_success_response($doctor);
         } catch (\Exception | \Throwable $exception) {
