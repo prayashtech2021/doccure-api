@@ -12,6 +12,8 @@ use Laravel\Cashier\Billable;
 use Bavix\Wallet\Interfaces\Wallet;
 use Bavix\Wallet\Traits\HasWalletFloat;
 use Bavix\Wallet\Interfaces\WalletFloat;
+use Illuminate\Support\Carbon;
+
 
 class User extends Authenticatable implements Wallet, WalletFloat
 {
@@ -41,6 +43,8 @@ class User extends Authenticatable implements Wallet, WalletFloat
     protected $hidden = [
         'password','remember_token',
     ];
+
+    protected $appends = ['pid','did','age','accountstatus','membersince'];
 
     public function accessToken(){
         return $this->hasMany('App\OauthAccessToken');
@@ -97,6 +101,23 @@ class User extends Authenticatable implements Wallet, WalletFloat
     public function getDidAttribute() { 
         return 'D00'.$this->id; 
     } // Doctor_ID
+
+    public function getAgeAttribute(){
+        return Carbon::parse($this->attributes['dob'])->age;
+    }
+
+    public function getAccountStatusAttribute(){
+        if($this->deleted_at == NULL){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    public function getMemberSinceAttribute(){
+        return date('d M Y H:s A', strtotime($this->created_at));
+    }
+
 
 
 }

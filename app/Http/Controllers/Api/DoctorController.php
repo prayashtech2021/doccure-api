@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 
 use Validator;
-use App\ { User, Speciality, EducationDetail, Country, State, City, Address, AddressImage, UserSpeciality, ExperienceDetail, AwardDetail, MembershipDetail, RegistrationDetail };
+use App\ { User, Speciality, EducationDetail, Service,Country, State, City, Address, AddressImage, UserSpeciality, ExperienceDetail, AwardDetail, MembershipDetail, RegistrationDetail };
 use Illuminate\Http\Request;
 use DB;
 
@@ -38,7 +38,7 @@ class DoctorController extends Controller
         $order_by = $request->order_by ? $request->order_by : 'desc';
 
         $data = User::role('doctor')->with('doctorSpecialization')->orderBy('created_at', $order_by)->get();
-        
+        $data->append('did','accountstatus');
         return self::send_success_response($data);
     }
 
@@ -88,7 +88,7 @@ class DoctorController extends Controller
         $doctor->currency_code = Country::getCurrentCode($request->country_code_id);
         $doctor->dob = date('Y-m-d',strtotime(str_replace('/', '-', $request->dob)));
         $doctor->save();
-        
+      
         /* Doctor Address Details */
         $get_contact_details = Address::whereUserId($user_id)->first();
         if($get_contact_details){
@@ -107,7 +107,7 @@ class DoctorController extends Controller
         $contact_details->city_id = $request->contact_city_id;
         $contact_details->postal_code = $request->contact_postal_code;
         $contact_details->save();
-
+        
         /* Doctor Clinic Info */
         if($request->clinic_address_id){
             $get_clinic_details = Address::find($request->clinic_address_id)->first();
@@ -174,10 +174,18 @@ class DoctorController extends Controller
         $doctor->doctorSpecialization()->attach($request->speciality_id);
         
         // save doctor Services 
-        //$doctor->doctorService()->delete();
-        Service::where('user_id', '=', $user_id)->delete();
-        $serviceArray = $request->services;
-        if(isset($serviceArray) && count($serviceArray) > 0) {
+        if(isset($request->services)){
+            Service::where('user_id', '=', $user_id)->delete();
+            $services = explode(",", $request->services);
+            if(count($services) > 0) {
+                foreach($services as $val){
+                    Service::create(['user_id'=>$user_id,'name'=> $val,'created_by'=>auth()->user()->id]);
+                }
+            }
+        }
+       
+       /* $serviceArray = $request->services;
+        if(isset($serviceArray) ) {
             foreach($serviceArray as $key => $service){
                 $new_service = new Service();
                 if(!empty($service)){
@@ -186,13 +194,13 @@ class DoctorController extends Controller
                     $new_service->save();
                 }
             }
-        }
+        }*/
 
         // save doctor Education details
         //$doctor->doctorEducation()->delete();
         EducationDetail::where('user_id', '=', $user_id)->delete();
         $educationArray = $request->education;
-        if(isset($educationArray) && count($educationArray) > 0) {
+        if(isset($educationArray)) {
             foreach($educationArray['degree'] as $key => $degree){
                 $education = new EducationDetail();
                 if(!empty($degree) || !empty($educationArray['college'][$key]) || !empty($educationArray['completion'][$key])){
@@ -208,7 +216,7 @@ class DoctorController extends Controller
         // save doctor Experience details
         ExperienceDetail::where('user_id', '=', $user_id)->delete();
         $experienceArray = $request->input('experience');
-        if(count($experienceArray) > 0) {
+        if(isset($experienceArray)) {
             foreach($experienceArray['hospital_name'] as $key => $hospital){
                 $experience = new ExperienceDetail();
                 if(!empty($hospital) || !empty($experienceArray['from'][$key])
@@ -226,7 +234,7 @@ class DoctorController extends Controller
         //save doctor awards details
         AwardDetail::where('user_id', '=', $user_id)->delete();
         $awardArray = $request->achievement;
-        if(count($awardArray) > 0) {
+        if(isset($awardArray)) {
             foreach($awardArray['name'] as $key => $award){
                 $achievement = new AwardDetail();
                 if(!empty($award) || !empty($awardArray['award_year'][$key])){
@@ -241,7 +249,7 @@ class DoctorController extends Controller
         // save doctor registration details
         RegistrationDetail::where('user_id', '=', $user_id)->delete();
         $registrationArray = $request->registration;
-        if(count($registrationArray) > 0) {
+        if(isset($registrationArray)) {
             foreach($registrationArray['registration'] as $key => $reg){
                 $registration = new RegistrationDetail();
                 if(!empty($reg) || !empty($registrationArray['reg_year'][$key])){
@@ -256,7 +264,7 @@ class DoctorController extends Controller
         // save doctor MembershipDetail details
         MembershipDetail::where('user_id', '=', $user_id)->delete();
         $membershipArray = $request->membership;
-        if(count($membershipArray) > 0) {
+        if(isset($membershipArray)) {
             foreach($membershipArray as $value){
                 $membership = new MembershipDetail();
                 $membership->name = $value;

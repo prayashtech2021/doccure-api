@@ -26,11 +26,14 @@ class PatientController extends Controller
 
     public function patientList(Request $request){
 
+        $paginate = $request->count_per_page ? $request->count_per_page : 10;
+
         $order_by = $request->order_by ? $request->order_by : 'desc';
 
         $list = User::role('patient')->orderBy('created_at', $order_by)->get();
-        
-        return self::send_success_response($data);
+        $list->append('pid','age','accountstatus');
+        //$list->paginate($paginate)
+        return self::send_success_response($list);
     }
 
     public function profile_update(Request $request){
