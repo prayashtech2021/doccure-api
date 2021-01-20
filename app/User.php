@@ -56,7 +56,7 @@ class User extends Authenticatable implements Wallet, WalletFloat
 
     public function doctorSpecialization() { 
        // return $this->hasOne('App\UserSpeciality','user_id');
-        return $this->belongsToMany('App\Speciality', 'speciality_users');
+        return $this->belongsToMany('App\Speciality', 'user_speciality');
     }
 
     public function doctorService(){
@@ -89,4 +89,14 @@ class User extends Authenticatable implements Wallet, WalletFloat
            'name' => trim($this->first_name . ' '. $this->last_name),
        ];
     }
+
+    public function getPidAttribute() { 
+        return 'PT00'.$this->id; 
+    } // patient_ID
+
+    public function getDidAttribute() { 
+        return 'D00'.$this->id; 
+    } // Doctor_ID
+
+
 }

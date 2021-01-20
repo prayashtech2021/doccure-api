@@ -33,24 +33,23 @@ class DoctorController extends Controller
         }
     }
 
-    public function doctorProfile(Request $request){
+    public function doctorList(Request $request){
+
+        $order_by = $request->order_by ? $request->order_by : 'desc';
+
+        $data = User::role('doctor')->with('doctorSpecialization')->orderBy('created_at', $order_by)->get();
+        
+        return self::send_success_response($data);
+    }
+
+    public function doctorProfile($user_id){
         try {
-            $user_id = $request->user()->id;
             
-            $doctor['profile'] = User::find($user_id)->first();
-            $doctor['speciality'] = user()->specialities->first();
-            $doctor['specialization'] = Speciality::all();        
-            $doctor['education'] = EducationDetail::where('user_id', '=', $user_id)->get();
-            //$doctor['clinic'] = ClinicDetail::orderBy('id', 'DESC')->where('user_id', '=', $user_id)->get();
-
-            $country = getList('get_country');
-
-            $states =  getList('get_states');
-
-            $cities =  getList('get_cities');
-
-            $data = [ 'doctor' => $doctor, 'country' => $country, 'states' => $states, 'cities' => $cities ];
-            return self::send_success_response($data);
+            $doctor['profile'] = User::with('doctorSpecialization','doctorService','doctorEducation','doctorExperience','doctorAwards','doctorMembership','doctorRegistration')->find($user_id);
+            $doctor['doctor_clinic_info'] = User::doctorClinicInfo($user_id);
+            $doctor['doctor_contact_info'] = User::userAddress($user_id);
+         
+            return self::send_success_response($doctor);
         } catch (\Exception | \Throwable $exception) {
             return self::send_exception_response($exception->getMessage());
         }
@@ -268,7 +267,7 @@ class DoctorController extends Controller
 
     }
 
-    public function doctorList(Request $request){
+    public function doctorSearchList(Request $request){
         try{
             $doctors = User::get();//with('specialities');
             if($request->gender){

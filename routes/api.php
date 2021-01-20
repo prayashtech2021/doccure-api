@@ -41,7 +41,7 @@ Route::middleware(['secureApi','responseHeader'])->group(function () {
         Route::get('admin/Profile/{id}','Api\HomeController@adminProfile');
         Route::post('admin/saveProfile/','Api\HomeController@saveProfile');
         /* Patient Module */
-        Route::get('patient/list','Api\PatientController@list');
+        Route::get('patient/list','Api\PatientController@patientList');
         Route::post('patient/saveProfile','Api\PatientController@profile_update');
         Route::get('patient/profile/{id}','Api\PatientController@profile_details');
         
@@ -51,9 +51,10 @@ Route::middleware(['secureApi','responseHeader'])->group(function () {
 
         /* Doctor Module */
         Route::get('doctor/dashboard','Api\DoctorController@dashboard')->name('Doctor.Dashboard');
-        Route::get('doctor/Profile','Api\DoctorController@doctorProfile')->name('Doctor.Profile');
+        Route::get('doctor/list','Api\DoctorController@doctorList')->name('Doctor.List');
+        Route::get('doctor/Profile/{id}','Api\DoctorController@doctorProfile')->name('Doctor.Profile');
         Route::post('doctor/saveProfile','Api\DoctorController@saveProfile')->name('Doctor.saveProfile');
-        Route::post('doctors-search','Api\DoctorController@doctorList')->name('Doctor.List');
+        Route::post('doctors-search','Api\DoctorController@doctorSearchList')->name('Doctor.searchList');
 
         /* Speciality */
         Route::group(['middleware' => ['can:specialization']], function () {
