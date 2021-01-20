@@ -37,9 +37,12 @@ Route::middleware(['secureApi','responseHeader'])->group(function () {
         Route::post('reset-password', 'Api\HomeController@resetPassword');
         Route::get('user/delete/{id}','Api\HomeController@destroy');
 
+        /* Admin Profile */
+        Route::get('admin/Profile/{id}','Api\HomeController@adminProfile');
+        Route::post('admin/saveProfile/','Api\HomeController@saveProfile');
         /* Patient Module */
         Route::get('patient/list','Api\PatientController@list');
-        Route::post('patient/profile_update','Api\PatientController@profile_update');
+        Route::post('patient/saveProfile','Api\PatientController@profile_update');
         Route::get('patient/profile/{id}','Api\PatientController@profile_details');
         
         //appointments

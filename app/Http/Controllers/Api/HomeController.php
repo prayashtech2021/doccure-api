@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use Validator;
-use App\ { User,Country };
+use App\ { User,Country,Address };
 use App\Mail\SendInvitation;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -36,6 +36,7 @@ class HomeController extends Controller
             $array=$request->toArray();
             $array['password'] = Hash::make($request->password);
             $array['created_by'] = 1; //test
+            $array['country_id'] = $request->country_id;
             $array['currency_code'] = Country::getCurrentCode($request->country_id);
 
             $verification_code = mt_rand(100000,999999);
@@ -226,7 +227,75 @@ class HomeController extends Controller
             }
         }
     }
+
+    public function adminProfile($user_id){
+        try{
+            if($user_id){
+                $data['profile'] = User::select('id','first_name','last_name','email','mobile_number','profile_image','biography')->whereId($user_id)->first();
+                if($data['profile']){            
+                    $data['address'] = Address::with('country','state','city')->where('user_id',$user_id)->first();
+
+                    return self::send_success_response($data,'Admin Profile Details Fetched Successfully');
+                }else{
+                    return self::send_unauthorised_request_response('Incorrect User Id, Kindly check and try again.');
+                }
+            }else{
+                return self::send_bad_request_response('User Id not Exists');
+            }
+        } catch (Exception | Throwable $exception) {
+            return self::send_exception_response($exception->getMessage());
+        }
+    }
     
+    public function saveProfile(Request $request){
+        try{    
+            $user_id = $request->user_id;
+            $rules = [
+                'user_id' => 'required|integer',
+                'first_name'  => 'required|string|max:191',
+                'email' => 'required|email|unique:users,email,'.$request->user_id,
+                'country_id' => 'required|integer',
+                'state_id' => 'integer',
+                'city_id' => 'integer',
+            ];
+
+            $validator = Validator::make($request->all(), $rules);
+            if ($validator->fails()) {
+                return self::send_bad_request_response($validator->errors()->first());
+            }
+        
+            //Save admin profile
+            $profile = User::find($user_id);
+            if($profile){
+                $profile->first_name = $request->first_name;
+                $profile->email = $request->email;
+                $profile->biography = ($request->biography)? $request->biography : '';
+                $profile->save();
+                $get_address = User::userAddress($user_id);
+
+                if($get_address){
+                    $address = $get_address;
+                    $address->updated_by = auth()->user()->id;
+                }else{
+                    $address = new Address();
+                    $address->user_id = $profile->save();
+                    $address->created_by = auth()->user()->id; 
+                }
+                $address->country_id = $request->country_id;
+                $address->state_id = ($request->state_id) ? $request->state_id : '';
+                $address->city_id = ($request->city_id) ? $request->city_id : '';
+                $address->save();
+            
+                return self::send_success_response([],'Admin Profile Updated Successfully');
+            }else{
+                return self::send_unauthorised_request_response('Incorrect User Id, Kindly check and try again.');
+            }
+        } catch (Exception | Throwable $exception) {
+            return self::send_exception_response($exception->getMessage());
+        }
+        
+    }
+
     public function destroy(Request $request)
     {
         return self::customDelete('\App\User', $request->id);

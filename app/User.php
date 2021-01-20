@@ -46,16 +46,21 @@ class User extends Authenticatable implements Wallet, WalletFloat
         return $this->hasMany('App\OauthAccessToken');
     }
 
-    public function userContactDetails(){
-        return $this->hasOne('App\UserContactDetails','user_id');
+    public static function userAddress($id){
+        return Address::whereNull('name')->where('user_id',$id)->first();
     }
 
-    public function doctorClinicInfo(){
-        return $this->hasOne('App\ClinicInformation','user_id');
+    public static function doctorClinicInfo($id){
+        return Address::whereNotNull('name')->where('user_id',$id)->first();
     }
 
     public function doctorSpecialization() { 
-        return $this->hasOne('App\UserSpeciality','user_id');
+       // return $this->hasOne('App\UserSpeciality','user_id');
+        return $this->belongsToMany('App\Speciality', 'speciality_users');
+    }
+
+    public function doctorService(){
+        return $this->hasMany(Service::class);
     }
 
     public function doctorEducation(){

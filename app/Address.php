@@ -12,4 +12,18 @@ class Address extends Model
     protected $fillable = [
         'user_id', 'name', 'line_1', 'line_2','country_id', 'state_id','city_id','postal_code','created_by',
    ];
+
+   public function country()
+    {
+        return $this->belongsTo('App\Country','country_id')->select(array('id', 'name'));
+    }
+    public function state()
+    {
+        return $this->belongsTo('App\State','state_id')->select(array('id', 'name'));
+    }
+    public function city()
+    {
+        return $this->belongsTo('App\City','city_id')->select(array('id', 'name'));
+    }
+
 }
