@@ -231,7 +231,9 @@ class HomeController extends Controller
     public function adminProfile($user_id){
         try{
             if($user_id){
-                $data['profile'] = User::select('id','first_name','last_name','email','mobile_number','profile_image','biography')->whereId($user_id)->first();
+                $list = User::select('id','first_name','last_name','email','mobile_number','profile_image','biography')
+                ->whereId($user_id)->first();
+                $data['profile'] = $list;
                 if($data['profile']){            
                     $data['address'] = Address::with('country','state','city')->where('user_id',$user_id)->first();
 

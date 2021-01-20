@@ -293,7 +293,9 @@ class DoctorController extends Controller
 
     public function doctorSearchList(Request $request){
         try{
-            $doctors = User::get();//with('specialities');
+            $doctors = User::role('doctor')->with('doctorSpecialization')->orderBy('created_at', $order_by);
+            $doctors->append('did','accountstatus','gendername');
+
             if($request->gender){
                 $doctors->where('gender',$request->gender);
             }

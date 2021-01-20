@@ -103,7 +103,7 @@ class User extends Authenticatable implements Wallet, WalletFloat
     } // Doctor_ID
 
     public function getAgeAttribute(){
-        return Carbon::parse($this->attributes['dob'])->age;
+        return Carbon::parse($this->dob)->age;
     }
 
     public function getAccountStatusAttribute(){
