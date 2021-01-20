@@ -31,7 +31,7 @@ class PatientController extends Controller
         $order_by = $request->order_by ? $request->order_by : 'desc';
 
         $list = User::role('patient')->orderBy('created_at', $order_by)->get();
-        $list->append('pid','age','accountstatus');
+        $list->append('pid','age','accountstatus','gendername');
         //$list->paginate($paginate)
         return self::send_success_response($list);
     }

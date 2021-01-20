@@ -44,7 +44,7 @@ class User extends Authenticatable implements Wallet, WalletFloat
         'password','remember_token',
     ];
 
-    protected $appends = ['pid','did','age','accountstatus','membersince'];
+    protected $appends = ['pid','did','age','accountstatus','membersince','gendername'];
 
     public function accessToken(){
         return $this->hasMany('App\OauthAccessToken');
@@ -116,6 +116,16 @@ class User extends Authenticatable implements Wallet, WalletFloat
 
     public function getMemberSinceAttribute(){
         return date('d M Y H:s A', strtotime($this->created_at));
+    }
+
+    public function getGenderNameAttribute(){
+        if($this->gender == 1){
+            return 'Male';
+        }elseif($this->gender == 2){
+            return 'Female';
+        }else{
+            return '-';
+        }
     }
 
 

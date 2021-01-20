@@ -38,7 +38,7 @@ class DoctorController extends Controller
         $order_by = $request->order_by ? $request->order_by : 'desc';
 
         $data = User::role('doctor')->with('doctorSpecialization')->orderBy('created_at', $order_by)->get();
-        $data->append('did','accountstatus');
+        $data->append('did','accountstatus','gendername');
         return self::send_success_response($data);
     }
 
