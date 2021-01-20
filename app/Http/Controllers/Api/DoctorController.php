@@ -173,8 +173,24 @@ class DoctorController extends Controller
         $doctor->doctorSpecialization()->detach();
         $doctor->doctorSpecialization()->attach($request->speciality_id);
         
+        // save doctor Services 
+        //$doctor->doctorService()->delete();
+        Service::where('user_id', '=', $user_id)->delete();
+        $serviceArray = $request->services;
+        if(isset($serviceArray) && count($serviceArray) > 0) {
+            foreach($serviceArray as $key => $service){
+                $new_service = new Service();
+                if(!empty($service)){
+                    $new_service->name = $new_service;
+                    $new_service->user_id = $user_id;
+                    $new_service->save();
+                }
+            }
+        }
+
         // save doctor Education details
-        $doctor->doctorEducation()->delete();
+        //$doctor->doctorEducation()->delete();
+        EducationDetail::where('user_id', '=', $user_id)->delete();
         $educationArray = $request->education;
         if(isset($educationArray) && count($educationArray) > 0) {
             foreach($educationArray['degree'] as $key => $degree){
