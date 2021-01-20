@@ -16,7 +16,8 @@ class CreatePaymentRequestsTable extends Migration
         Schema::create('payment_requests', function (Blueprint $table) {
             $table->increments('id');
             $table->unsignedBigInteger('user_id');
-            $table->string('code');
+            $table->unsignedBigInteger('appointment_id')->default(null);
+            $table->string('reference_id');
             $table->text('description');
             $table->char('currency_code',5);
             $table->unsignedTinyInteger('request_type')->comment('1=>Payment,2=>Refund');
@@ -32,6 +33,7 @@ class CreatePaymentRequestsTable extends Migration
 			$table->unsignedBigInteger('deleted_by')->nullable();
 
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
+            $table->foreign('appointment_id')->references('id')->on('appointments')->onDelete('cascade')->onUpdate('cascade');
             $table->foreign('created_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
 			$table->foreign('updated_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
 			$table->foreign('deleted_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');

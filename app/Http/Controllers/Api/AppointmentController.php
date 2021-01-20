@@ -90,12 +90,13 @@ class AppointmentController extends Controller
     public function create(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'doctor_id' => 'required',
+            'doctor_id' => 'required|exists:users,id',
             'appointment_type' => 'required',
             'payment_type' => 'required',
-            'appointment_date' => 'required',
-            'start_time' => 'required',
-            'end_time' => 'required'
+            'appointment_date' => 'required|date_format:d/m/Y',
+            'start_time' => 'required|date_format:"H:i:s"',
+            'end_time' => 'required|date_format:"H:i:s"|after:start_time',
+            'selected_slots' => 'required|numeric',
         ]);
 
         if ($validator->fails()) {
@@ -108,8 +109,7 @@ class AppointmentController extends Controller
             $user = $request->user();
             $doctor = User::find($request->doctor_id);
 
-            $booking_hours = Carbon::createFromFormat('h:i:s', $request->start_time)->diffInHours(Carbon::createFromFormat('h:i:s', $request->end_time));
-
+            // $booking_hours = Carbon::createFromFormat('H:i:s', $request->start_time)->diffInSeconds(Carbon::createFromFormat('H:i:s', $request->end_time));
             /**
              * Appointment
              */
@@ -135,7 +135,11 @@ class AppointmentController extends Controller
             $payment->appointment_id = $appointment->id;
             $payment->invoice_no = generateReference($user->id, $last_id, 'INV');
             $payment->payment_type = $request->payment_type;
-            $payment->total_amount = $doctor->amount * $booking_hours;
+            if($doctor->price_type==2 && $doctor->amount>0){
+            $payment->total_amount = $doctor->amount * $request->selected_slots;
+            }else{
+            $payment->total_amount = 0;
+            }
 
             $payment->currency_code = $doctor->currency_code ?? config('cashier.currency');
             $payment->save();

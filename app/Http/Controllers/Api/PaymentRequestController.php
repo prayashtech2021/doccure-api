@@ -15,6 +15,19 @@ use Validator;
 class PaymentRequestController extends Controller
 {
 
+    public function list(Request $request)
+    {
+        try {
+            $data = PaymentRequest::orderBy('id', 'DESC')->get();
+
+            return self::send_success_response($data, 'PaymentRequest content fetched successfully');
+        } catch (Exception | Throwable $e) {
+            return self::send_exception_response($exception->getMessage());
+        }
+
+    }
+
+
     public function driverPaymentRequest(Request $request)
     {
         $curdate = date('dmYHis');
