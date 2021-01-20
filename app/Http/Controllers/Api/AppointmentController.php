@@ -188,4 +188,38 @@ class AppointmentController extends Controller
             return self::send_exception_response($exception->getMessage());
         }
     }
+
+    public function savedCards(Request $request){
+        try{
+            $user = $request->user();
+
+            if($user->hasRole('patient')){
+                $saved_cards = collect();
+
+                $stripe = new \Stripe\StripeClient(config('cashier.secret'));
+                $stripeCustomer = $user->asStripeCustomer();
+
+                $paymentMethods = $stripe->paymentMethods->all([
+                    'customer' => $stripeCustomer->id,
+                    'type' => 'card',
+                ]);
+
+                foreach ($paymentMethods as $paymentMethod) {
+                    $saved_cards->push([
+                        'id' => $paymentMethod->id,
+                        'brand' => $paymentMethod->card->brand,
+                        'last4' => $paymentMethod->card->last4,
+                        'name' => ucwords($paymentMethod->billing_details->name)
+                    ]);
+                }
+
+                return self::send_success_response($saved_cards->toArray());
+            }else{
+                return self::send_bad_request_response(['message' => 'Invalid request', 'error' => 'Invalid request']);
+            }
+
+        } catch (Exception | Throwable $exception) {
+            return self::send_exception_response($exception->getMessage());
+        }
+    }
 }

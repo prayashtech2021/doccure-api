@@ -46,13 +46,13 @@ class User extends Authenticatable implements Wallet, WalletFloat
     {
         return $this->hasMany('App\OauthAccessToken');
     }
-    
-    public function specialities() { 
-        return $this->belongsToMany('App\Speciality', 'user_speciality'); 
+
+    public function specialities() {
+        return $this->belongsToMany('App\Speciality', 'user_speciality');
     }
 
-    public function doctorEducation() { 
-        return $this->hasMany('App\EducationDetail'); 
+    public function doctorEducation() {
+        return $this->hasMany('App\EducationDetail');
     }
 
     public function basicProfile(){
@@ -60,5 +60,10 @@ class User extends Authenticatable implements Wallet, WalletFloat
            'id' => $this->id,
            'name' => trim($this->first_name . ' '. $this->last_name),
        ];
+    }
+
+    public function payment()
+    {
+        return $this->hasManyThrough(Payment::class, Appointment::class);
     }
 }
