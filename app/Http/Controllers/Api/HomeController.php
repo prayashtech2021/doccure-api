@@ -187,10 +187,10 @@ class HomeController extends Controller
                         $response = Country::select('id','name','phone_code','currency','emoji','emojiU')->get();
                         break;
                     case '2' : 
-                        $response = State::pluck('id','name')->get(); 
+                        $response = State::select('id','name')->get(); 
                         break;
                     case '3' : 
-                        $response = City::pluck('id','name')->get(); 
+                        $response = City::select('id','name')->get(); 
                         break;
                     default : 
                         $response = ['case' => $case, 'status' => 'Action not found']; 
@@ -280,7 +280,7 @@ class HomeController extends Controller
                     $address->updated_by = auth()->user()->id;
                 }else{
                     $address = new Address();
-                    $address->user_id = $profile->save();
+                    $address->user_id = $user_id;
                     $address->created_by = auth()->user()->id; 
                 }
                 $address->country_id = $request->country_id;
