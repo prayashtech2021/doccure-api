@@ -93,7 +93,10 @@ class PermissionSeeder extends Seeder
             ],26 => [
 				'name' => 'map_grid_list',
 				'guard_name' => 'web',
-			],
+			],27 => [
+				'name' => 'prescription',
+				'guard_name' => 'web',
+			]
 		];
 		foreach ($datas as $id => $data) {
 			$row = Permission::firstOrNew([

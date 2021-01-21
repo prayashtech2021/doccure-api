@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 
 use Validator;
-use App\ { User, Speciality, EducationDetail, Country, State, City };
+use App\ { User, Speciality, EducationDetail, Service,Country, State, City, Address, AddressImage, UserSpeciality, ExperienceDetail, AwardDetail, MembershipDetail, RegistrationDetail };
 use Illuminate\Http\Request;
 use DB;
 
@@ -33,30 +33,32 @@ class DoctorController extends Controller
         }
     }
 
-    public function doctorProfile(Request $request){
+    public function doctorList(Request $request){
+
+        $order_by = $request->order_by ? $request->order_by : 'desc';
+
+        $data = User::role('doctor')->with('doctorSpecialization')->orderBy('created_at', $order_by)->get();
+        $data->append('did','accountstatus','gendername');
+        return self::send_success_response($data);
+    }
+
+    public function doctorProfile($user_id){
         try {
-            $user_id = $request->user()->id;
             
-            $doctor['profile'] = User::find($user_id)->first();
-            $doctor['speciality'] = user()->specialities->first();
-            $doctor['specialization'] = Speciality::all();        
-            $doctor['education'] = EducationDetail::where('user_id', '=', $user_id)->get();
-            //$doctor['clinic'] = ClinicDetail::orderBy('id', 'DESC')->where('user_id', '=', $user_id)->get();
-
-            $country = getList('get_country');
-
-            $states =  getList('get_states');
-
-            $cities =  getList('get_cities');
-
-            $data = [ 'doctor' => $doctor, 'country' => $country, 'states' => $states, 'cities' => $cities ];
-            return self::send_success_response($data);
+            $doctor['profile'] = User::with('doctorSpecialization','doctorService','doctorEducation','doctorExperience','doctorAwards','doctorMembership','doctorRegistration')->find($user_id);
+            $doctor['doctor_contact_info'] = User::userAddress($user_id);
+            $doctor['doctor_clinic_info'] = User::doctorClinicInfo($user_id);
+            $doctor['doctor_clinic_images'] = User::doctorClinicImage($user_id);
+         
+            return self::send_success_response($doctor);
         } catch (\Exception | \Throwable $exception) {
             return self::send_exception_response($exception->getMessage());
         }
     }
 
     public function saveProfile(Request $request){
+        try{
+
         $user_id = $request->user_id;
         $rules = [
             'user_id' => 'required|integer',
@@ -67,27 +69,139 @@ class DoctorController extends Controller
             'mobile_number' => 'required|min:10|max:10|unique:users,mobile_number,'.$request->user_id,
             'gender'  => 'required|integer|between:1,2',
             'dob'  => 'date',
+            'price_type' => 'required|between:1,2',
+            'amount' => 'numeric',
+
+            'contact_address_line1' => 'required',
+            
         ];
 
         $validator = Validator::make($request->all(), $rules);
         if ($validator->fails()) {
-            return response()->json(['success' => false, 'code' => 401, 'error' => $validator->errors()->first(), 'error_details' => $validator->errors()]);
+            return self::send_bad_request_response($validator->errors()->first());
         }
         
         //Save doctor profile
         $doctor = User::find($user_id);
+        if($doctor){
         $doctor->fill($request->all());
+        $doctor->country_id = $request->country_code_id;
         $doctor->currency_code = Country::getCurrentCode($request->country_code_id);
         $doctor->dob = date('Y-m-d',strtotime(str_replace('/', '-', $request->dob)));
         $doctor->save();
+      
+        /* Doctor Address Details */
+        $get_contact_details = Address::whereUserId($user_id)->first();
+        if($get_contact_details){
+            $contact_details = $get_contact_details;
+            $contact_details->updated_by = auth()->user()->id;
+        }else{
+            $contact_details = new Address();
+            $contact_details->user_id = $user_id;
+            $contact_details->created_by = auth()->user()->id;
+        }
         
-        $doctor->specialities()->detach();
-        $doctor->specialities()->attach($request->specialist);
+        $contact_details->line_1 = $request->contact_address_line1;
+        $contact_details->line_2 = ($request->contact_address_line2)? $request->contact_address_line2 : '';
+        $contact_details->country_id = $request->contact_country_id;
+        $contact_details->state_id = $request->contact_state_id;
+        $contact_details->city_id = $request->contact_city_id;
+        $contact_details->postal_code = $request->contact_postal_code;
+        $contact_details->save();
+        
+        /* Doctor Clinic Info */
+        if($request->clinic_address_id){
+            $get_clinic_details = Address::find($request->clinic_address_id)->first();
+        }
+        
+        if($request->clinic_address_id && (isset($get_clinic_details))){
+            $clinic_details = $get_clinic_details;
+            $clinic_details->updated_by = auth()->user()->id;
+        }else{
+            $clinic_details = new Address();
+            $clinic_details->user_id = $user_id;
+            $clinic_details->created_by = auth()->user()->id;    
+        }
+        
+        $clinic_details->name = ($request->clinic_name)? $request->clinic_name : '';
+        $clinic_details->line_1 = ($request->clinic_address_line1)? $request->clinic_address_line1 : '';
+        $clinic_details->line_2 = ($request->clinic_address_line2)? $request->clinic_address_line2 : '';
+        $clinic_details->country_id = ($request->clinic_country_id)? $request->clinic_country_id : '';
+        $clinic_details->state_id = ($request->clinic_state_id)? $request->clinic_state_id : '';
+        $clinic_details->city_id = ($request->clinic_city_id)? $request->clinic_city_id : '';
+        $clinic_details->postal_code = ($request->clinic_postal_code)? $request->clinic_postal_code : '';
+        $clinic_details->save();
+
+        /* Clinic Images */
+
+        $images=array();
+
+        if($files=$request->file('clinic_images')){
+            $clinic_img = AddressImage::whereUserId($user_id)->where('clinic_information_id',$clinic_details->id)->delete();
+
+            foreach($files as $file){
+                $new_clinic_img = new AddressImage();
+                $new_clinic_img->user_id = $user_id;
+                $new_clinic_img->clinic_information_id = $clinic_details->id;
+                $new_clinic_img->created_by = auth()->user()->id;
+
+                if (Storage::exists('images/address_images/'.$clinic_details->id.'/')) {
+                    Storage::delete('images/address_images/'.$clinic_details->id.'/');
+                }
+                if (!empty($file)) {
+                    $extension = $file->getClientOriginalExtension();
+                    $file_name = date('YmdHis') . '_' . auth()->user()->id . '.png';
+                    $path = 'images/address_images'.$clinic_details->id.'/';
+                    $store = $request->file('image')->storeAs($path, $file_name);
+                }else{
+                    $file_name = '';
+                }
+
+                $new_clinic_img->clinic_image = $file_name;
+                $new_clinic_img->save();
+                
+                /*if (preg_match('/data:image\/(.+);base64,(.*)/', $file, $matchings)) {
+                    $imageData = base64_decode($matchings[2]);
+                    $extension = $matchings[1];
+                    $file_name = date('YmdHis') . rand(100,999). '_' . $clinic_details->id . '.' . $extension;
+                    $path = 'clinic_images/'.$clinic_details->id.'/'.$file_name;
+                    Storage::put($path , $imageData);    
+                }*/
+            }
+        }
+
+        /* Doctor Specialization */
+        $doctor->doctorSpecialization()->detach();
+        $doctor->doctorSpecialization()->attach($request->speciality_id);
+        
+        // save doctor Services 
+        if(isset($request->services)){
+            Service::where('user_id', '=', $user_id)->delete();
+            $services = explode(",", $request->services);
+            if(count($services) > 0) {
+                foreach($services as $val){
+                    Service::create(['user_id'=>$user_id,'name'=> $val,'created_by'=>auth()->user()->id]);
+                }
+            }
+        }
+       
+       /* $serviceArray = $request->services;
+        if(isset($serviceArray) ) {
+            foreach($serviceArray as $key => $service){
+                $new_service = new Service();
+                if(!empty($service)){
+                    $new_service->name = $new_service;
+                    $new_service->user_id = $user_id;
+                    $new_service->save();
+                }
+            }
+        }*/
 
         // save doctor Education details
-        $doctor->doctorEducation()->delete();
+        //$doctor->doctorEducation()->delete();
+        EducationDetail::where('user_id', '=', $user_id)->delete();
         $educationArray = $request->education;
-        if(isset($educationArray) && count($educationArray) > 0) {
+        if(isset($educationArray)) {
             foreach($educationArray['degree'] as $key => $degree){
                 $education = new EducationDetail();
                 if(!empty($degree) || !empty($educationArray['college'][$key]) || !empty($educationArray['completion'][$key])){
@@ -103,8 +217,8 @@ class DoctorController extends Controller
         // save doctor Experience details
         ExperienceDetail::where('user_id', '=', $user_id)->delete();
         $experienceArray = $request->input('experience');
-        if(count($experienceArray) > 0) {
-            foreach($experienceArray['h_name'] as $key => $hospital){
+        if(isset($experienceArray)) {
+            foreach($experienceArray['hospital_name'] as $key => $hospital){
                 $experience = new ExperienceDetail();
                 if(!empty($hospital) || !empty($experienceArray['from'][$key])
                         || !empty($experienceArray['to'][$key]) || !empty($experienceArray['designation'][$key])){
@@ -120,9 +234,9 @@ class DoctorController extends Controller
 
         //save doctor awards details
         AwardDetail::where('user_id', '=', $user_id)->delete();
-        $awardArray = $request->input('achievement');
-        if(count($awardArray) > 0) {
-            foreach($awardArray['award'] as $key => $award){
+        $awardArray = $request->achievement;
+        if(isset($awardArray)) {
+            foreach($awardArray['name'] as $key => $award){
                 $achievement = new AwardDetail();
                 if(!empty($award) || !empty($awardArray['award_year'][$key])){
                     $achievement->award = $award;
@@ -134,11 +248,11 @@ class DoctorController extends Controller
         }
 
         // save doctor registration details
-        RegDetail::where('user_id', '=', $user_id)->delete();
-        $registrationArray = $request->input('registration');
-        if(count($registrationArray) > 0) {
-            foreach($registrationArray['reg'] as $key => $reg){
-                $registration = new RegDetail();
+        RegistrationDetail::where('user_id', '=', $user_id)->delete();
+        $registrationArray = $request->registration;
+        if(isset($registrationArray)) {
+            foreach($registrationArray['registration'] as $key => $reg){
+                $registration = new RegistrationDetail();
                 if(!empty($reg) || !empty($registrationArray['reg_year'][$key])){
                     $registration->reg = $reg;
                     $registration->reg_year = $registrationArray['reg_year'][$key];
@@ -150,61 +264,88 @@ class DoctorController extends Controller
 
         // save doctor MembershipDetail details
         MembershipDetail::where('user_id', '=', $user_id)->delete();
-        $membershipArray = $request->input('m_ship');
-        if(count($membershipArray) > 0) {
+        $membershipArray = $request->membership;
+        if(isset($membershipArray)) {
             foreach($membershipArray as $value){
                 $membership = new MembershipDetail();
-                $membership->m_ship = $value;
+                $membership->name = $value;
                 $membership->user_id = $user_id;
                 $membership->save();
             }
         }
 
-        user()->services()->delete();
+            return self::send_success_response([],'Doctor Records Store Successfully');
+        }else{
+            return self::send_bad_request_response('Incorrect User id. Please check and try again!');
+        }
+        /*user()->services()->delete();
 
         $services = explode(",", $request->services);
         if(count($services) > 0) {
             foreach($services as $val){
                 user()->services()->create(['service'=> $val]);
             }
+        }*/
+        } catch (\Exception | \Throwable $exception) {
+            return self::send_exception_response($exception->getMessage());
         }
+
     }
 
-    public function doctorList(Request $request){
+    public function doctorSearchList(Request $request){
         try{
-            $doctors = User::get();//with('specialities');
-            if($request->gender){
-                $doctors->where('gender',$request->gender);
+            $paginate = $request->count_per_page ? $request->count_per_page : 10;
+
+            $order_by = $request->order_by ? $request->order_by : 'desc';
+
+            $doctors = User::role('doctor')->with('doctorSpecialization')->orderBy('created_at', $order_by);
+
+            if($request->keywords){
+                $doctors = $doctors->where('first_name', 'like', '%' . $request->keywords . '%')
+                ->orWhere('last_name', 'like', '%' . $request->keywords . '%');
             }
-           /* if($request->speciality){
+            if($request->gender){
+                $doctors->whereIn('gender',[$request->gender]);
+            }
+            if($request->speciality){
                 $sp = $request->speciality;
-                $doctors = $doctors->whereHas('userSpeciality', function ($category) use ($sp) {
-                    $category->whereIn('user_speciality.speciality_id',$sp)->where('user_speciality.deleted_at', null);
+                $doctors = $doctors->whereHas('doctorSpecialization', function ($category) use ($sp) {
+                    $category->whereIn('user_speciality.speciality_id',[$sp]);
                 });
             }
             if($request->country_id){
                 $country_id = $request->country_id;
                 $doctors = $doctors->whereHas('addresses', function ($category) use ($country_id) {
-                    $category->where('addresses.country_id',$country_id)->where('addresses.deleted_at', null);
+                    $category->where('addresses.country_id',$country_id);
                 });
             }
+            
             if($request->state_id){
                 $state_id = $request->state_id;
                 $doctors = $doctors->whereHas('addresses', function ($category) use ($state_id) {
-                    $category->where('addresses.state_id',$state_id)->where('addresses.deleted_at', null);
+                    $category->where('addresses.state_id',$state_id);
                 });
             }
             if($request->city_id){
                 $city_id = $request->city_id;
                 $doctors = $doctors->whereHas('addresses', function ($category) use ($city_id) {
-                    $category->where('addresses.city_id',$city_id)->where('addresses.deleted_at', null);
+                    $category->where('addresses.city_id',$city_id);
                 });
-            }*/
-           // $doctors->get();
+            }
+            
+            if($request->sort == 2){ //latest
+                $doctors = $doctors->where('id','DESC');
+            }
+
+            if($request->sort == 3){ //free
+                $doctors = $doctors->where('price_type',1);
+            }
+            
+            $doctors = $doctors->get();
             if($doctors){
-                return self::send_success_response($doctors,'');
-            }else{
                 return self::send_success_response($doctors,'Doctors data fetched successfully');
+            }else{
+                return self::send_success_response($doctors,'No Records Found');
             }
         } catch (\Exception | \Throwable $exception) {
             return self::send_exception_response($exception->getMessage());

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use Validator;
-use App\ { User,Country };
+use App\ { User,Country,Address,State,City };
 use App\Mail\SendInvitation;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -36,6 +36,7 @@ class HomeController extends Controller
             $array=$request->toArray();
             $array['password'] = Hash::make($request->password);
             $array['created_by'] = 1; //test
+            $array['country_id'] = $request->country_id;
             $array['currency_code'] = Country::getCurrentCode($request->country_id);
 
             $verification_code = mt_rand(100000,999999);
@@ -155,6 +156,7 @@ class HomeController extends Controller
             return self::send_bad_request_response($validator->errors()->first());
         } else {
             try {
+                
                 if ((Hash::check(request('old_password'), auth()->user()->password)) == false) {
                     $message = "Check your old password.";
                     return self::send_bad_request_response($message);
@@ -177,7 +179,7 @@ class HomeController extends Controller
         }
     }
     
-    public function getList($case){
+    public function getList($case,$id=NULL){
         try {
             if ($case) {
                 switch ($case) {
@@ -185,10 +187,18 @@ class HomeController extends Controller
                         $response = Country::select('id','name','phone_code','currency','emoji','emojiU')->get();
                         break;
                     case '2' : 
-                        $response = State::pluck('id','name')->get(); 
+                        $state = State::select('id','name');
+                        if(isset($id)){
+                            $state = $state->where('country_id',$id);
+                        }
+                        $response = $state->get(); 
                         break;
                     case '3' : 
-                        $response = City::pluck('id','name')->get(); 
+                        $city = City::select('id','name');
+                        if(isset($id)){
+                            $city = $city->where('state_id',$id);
+                        }
+                        $response = $city->get(); 
                         break;
                     default : 
                         $response = ['case' => $case, 'status' => 'Action not found']; 
@@ -225,6 +235,124 @@ class HomeController extends Controller
             }
         }
     }
-    
 
+    public function adminProfile($user_id){
+        try{
+            if($user_id){
+                $list = User::select('id','first_name','last_name','email','mobile_number','profile_image','biography')
+                ->whereId($user_id)->first();
+                $data['profile'] = $list;
+                if($data['profile']){            
+                    $data['address'] = Address::with('country','state','city')->where('user_id',$user_id)->first();
+
+                    return self::send_success_response($data,'Admin Profile Details Fetched Successfully');
+                }else{
+                    return self::send_unauthorised_request_response('Incorrect User Id, Kindly check and try again.');
+                }
+            }else{
+                return self::send_bad_request_response('User Id not Exists');
+            }
+        } catch (Exception | Throwable $exception) {
+            return self::send_exception_response($exception->getMessage());
+        }
+    }
+    
+    public function saveProfile(Request $request){
+        try{    
+            $user_id = $request->user_id;
+            $rules = [
+                'user_id' => 'required|integer',
+                'first_name'  => 'required|string|max:191',
+                'email' => 'required|email|unique:users,email,'.$request->user_id,
+                'country_id' => 'required|integer',
+                'state_id' => 'integer',
+                'city_id' => 'integer',
+            ];
+
+            $validator = Validator::make($request->all(), $rules);
+            if ($validator->fails()) {
+                return self::send_bad_request_response($validator->errors()->first());
+            }
+        
+            //Save admin profile
+            $profile = User::find($user_id);
+            if($profile){
+                $profile->first_name = $request->first_name;
+                $profile->email = $request->email;
+                $profile->biography = ($request->biography)? $request->biography : '';
+                $profile->save();
+                $get_address = User::userAddress($user_id);
+
+                if($get_address){
+                    $address = $get_address;
+                    $address->updated_by = auth()->user()->id;
+                }else{
+                    $address = new Address();
+                    $address->user_id = $user_id;
+                    $address->created_by = auth()->user()->id; 
+                }
+                $address->country_id = $request->country_id;
+                $address->state_id = ($request->state_id) ? $request->state_id : '';
+                $address->city_id = ($request->city_id) ? $request->city_id : '';
+                $address->save();
+            
+                return self::send_success_response([],'Admin Profile Updated Successfully');
+            }else{
+                return self::send_unauthorised_request_response('Incorrect User Id, Kindly check and try again.');
+            }
+        } catch (Exception | Throwable $exception) {
+            return self::send_exception_response($exception->getMessage());
+        }
+        
+    }
+
+    public function uploadProfileImage(Request $request, $user_id = null)
+    {
+        $rules = array(
+            'profile_image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+        );
+        
+        $valid = self::customValidation($request, $rules);
+        if($valid){ return $valid;}
+
+        try {
+
+            if ($user_id) {
+                $user = User::find($user_id);
+            } else {
+                $user = User::find(auth()->user()->id);
+            }
+
+            if (!empty($request->image)) {
+                if(!empty($user->profile_image)){
+                    if (Storage::exists('images/profile-images/' . $user->profile_image)) {
+                        Storage::delete('images/profile-images/' . $user->profile_image);
+                    }
+                }
+
+                $extension = $request->file('image')->getClientOriginalExtension();
+                $file_name = date('YmdHis') . '_' . auth()->user()->id . '.png';
+                $path = 'images/profile-images/';
+                $store = $request->file('image')->storeAs($path, $file_name);
+
+                $user->profile_image = $file_name;
+                $user->save();
+            }
+
+            $user->updated_by = auth()->user()->id;
+            $user->save();
+            return self::send_success_response([],'Image updated Successfully');
+
+
+        } catch (Exception | Throwable $e) {
+
+            return response()->json(['success' => false, 'code' => 500, 'error' => $e->getMessage()]);
+
+        }
+    }
+
+    public function destroy(Request $request)
+    {
+        return self::customDelete('\App\User', $request->id);
+    }
 }

@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateClinicImagesTable extends Migration
+class CreateServiceTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,11 @@ class CreateClinicImagesTable extends Migration
      */
     public function up()
     {
-        Schema::create('clinic_images', function (Blueprint $table) {
+        Schema::create('services', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id');
-            $table->unsignedBigInteger('clinic_information_id');
-            $table->string('clinic_image')->nullable();
+            $table->string('name');
+            
             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
             $table->timestamp('updated_at')->nullable();
             $table->softDeletes();
@@ -26,11 +26,9 @@ class CreateClinicImagesTable extends Migration
             $table->unsignedBigInteger('deleted_by')->nullable();
 
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
-            $table->foreign('clinic_information_id')->references('id')->on('clinic_informations')->onDelete('cascade')->onUpdate('cascade');
             $table->foreign('created_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
 			$table->foreign('updated_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
 			$table->foreign('deleted_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
-
         });
     }
 
@@ -41,6 +39,6 @@ class CreateClinicImagesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('clinic_images');
+        Schema::dropIfExists('services');
     }
 }
