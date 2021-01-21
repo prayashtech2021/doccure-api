@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use Validator;
-use App\ { User,Country,Address };
+use App\ { User,Country,Address,State,City };
 use App\Mail\SendInvitation;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -296,6 +296,51 @@ class HomeController extends Controller
             return self::send_exception_response($exception->getMessage());
         }
         
+    }
+
+    public function uploadProfileImage(Request $request, $user_id = null)
+    {
+        $rules = array(
+            'profile_image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+        );
+        
+        $valid = self::customValidation($request, $rules);
+        if($valid){ return $valid;}
+
+        try {
+
+            if ($user_id) {
+                $user = User::find($user_id);
+            } else {
+                $user = User::find(auth()->user()->id);
+            }
+
+            if (!empty($request->image)) {
+                if(!empty($user->profile_image)){
+                    if (Storage::exists('images/profile-images/' . $user->profile_image)) {
+                        Storage::delete('images/profile-images/' . $user->profile_image);
+                    }
+                }
+
+                $extension = $request->file('image')->getClientOriginalExtension();
+                $file_name = date('YmdHis') . '_' . auth()->user()->id . '.png';
+                $path = 'images/profile-images/';
+                $store = $request->file('image')->storeAs($path, $file_name);
+
+                $user->image = $file_name;
+                $user->save();
+            }
+
+            $user->updated_by = auth()->user()->id;
+            $user->save();
+            return self::send_success_response([],'Image updated Successfully');
+
+
+        } catch (Exception | Throwable $e) {
+
+            return response()->json(['success' => false, 'code' => 500, 'error' => $e->getMessage()]);
+
+        }
     }
 
     public function destroy(Request $request)

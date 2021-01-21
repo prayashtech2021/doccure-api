@@ -94,6 +94,7 @@ class User extends Authenticatable implements Wallet, WalletFloat
        return [
            'id' => $this->id,
            'name' => trim($this->first_name . ' '. $this->last_name),
+           'speciality' => $this->doctorSpecialization(),
        ];
     }
 

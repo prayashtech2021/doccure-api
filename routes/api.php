@@ -36,7 +36,7 @@ Route::middleware(['secureApi','responseHeader'])->group(function () {
         Route::post('changepassword', 'Api\HomeController@changePassword');
         Route::post('reset-password', 'Api\HomeController@resetPassword');
         Route::get('user/delete/{id}','Api\HomeController@destroy');
-
+        Route::post('upload/profile-image','Api\HomeController@uploadProfileImage');
         /* Admin Profile */
         Route::get('admin/profile/{id}','Api\HomeController@adminProfile');
         Route::post('admin/saveprofile/','Api\HomeController@saveProfile');
@@ -65,6 +65,7 @@ Route::middleware(['secureApi','responseHeader'])->group(function () {
         /*Prescription */
         Route::post('prescription/save','Api\AppointmentController@savePrescription');
         Route::post('prescription/list','Api\AppointmentController@savePrescription');
+        Route::get('prescription/view','Api\AppointmentController@prescriptionView');
             
         Route::get('logout', 'PassportController@logout');        
         // Language 

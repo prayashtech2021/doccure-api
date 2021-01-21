@@ -194,11 +194,7 @@ class AppointmentController extends Controller
     Public function savePrescription(Request $request){
         $validator = Validator::make($request->all(), [
             'appointment_id' => 'required',
-           /* 'drug_name' => 'required',
-            'quantity' => 'required|integer',
-            'type' => 'required|string',
-            'days' => 'required|integer',
-            'time' => 'required'*/
+            'prescription_details' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -208,23 +204,40 @@ class AppointmentController extends Controller
 
         try {
             $prescription = new Prescription();
+            $prescription->user_id = $request->user_id;
             $prescription->appointment_id = $request->appointment_id;
             if($request->signature_id){
                 $prescription->signature_id = $request->signature_id;
+            }elseif(!empty($request->signature_image)){
+                    $extension = $request->file('signature_image')->getClientOriginalExtension();
+                    $file_name = date('YmdHis') . '_' . auth()->user()->id . '.png';
+                    $path = 'images/signature';
+                    $store = $request->file('signature_image')->storeAs($path, $file_name);
+    
+                    $prescription->signature_id = $file_name;
             }
             $prescription->save();
 
-           /* $prescription_details = new PrescriptionDetail();
-            $prescription_details->prescription_id = $prescription->id;
-            $prescription_details->drug_name = $request->drug_name;
-            $prescription_details->quantity = $request->quantity;
-            $prescription_details->type = $request->type;
-            $prescription_details->days = $request->days;
-            $prescription_details->time = $request->time;
-            $prescription_details->save();
+            PrescriptionDetail::where('prescription_id', '=', $prescription->id)->delete();
+            $medicineArray = $request->prescription_detail;
+            if(isset($medicineArray)) {
+                foreach($medicineArray['drug_name'] as $key => $drug){
+                    $medicine = new PrescriptionDetail();
+                    if(!empty($drug) || !empty($medicineArray['quantity'][$key]) || !empty($medicineArray['type'][$key]) || !empty($medicineArray['days'][$key]) || !empty($medicineArray['time'][$key]) ){
+                        $medicine->drug_name = $drug;
+                        $medicine->quantity = $medicineArray['quantity'][$key];
+                        $medicine->type = $medicineArray['type'][$key];
+                        $medicine->days = $medicineArray['days'][$key];
+                        $medicine->time = $medicineArray['time'][$key];
+                        $medicine->prescription_id = $prescription->id;
+                        $medicine->save();
+                    }
+                }
+            }
+            
             DB::commit();
-*/
-            return self::send_success_response([],'Prescription Added Successfully');
+
+            return self::send_success_response([],'Prescription Stored Successfully');
 
         } catch (Exception | Throwable $exception) {
             DB::rollBack();
@@ -235,13 +248,31 @@ class AppointmentController extends Controller
     public function prescriptionList(){
     
         try {
-            $list = Prescription::with('prescriptionDetails')->get();
+            $paginate = $request->count_per_page ? $request->count_per_page : 10;
 
-            return self::send_success_response($list,'Prescription Added Successfully');
+            $order_by = $request->order_by ? $request->order_by : 'desc';
+
+            $list = Prescription::whereUserId($request->user_id)->orderBy('created_at', $order_by);
+            if($request->appointment_id){
+                $list = $list->where('appointment_id',$request->appointment_id);
+            }
+            $list = $list->get();
+
+            /*$data = collect();
+            $list->paginate($paginate)->getCollection()->each(function ($pres) use (&$data) {
+                $data->push($pres->getData());
+            });*/
+
+            return self::send_success_response($list,'Prescription Details Fetched Successfully');
 
         } catch (Exception | Throwable $exception) {
-            DB::rollBack();
             return self::send_exception_response($exception->getMessage());
         }
+    }
+
+    public function prescriptionView($pid){
+        $get = Prescription::with('prescriptionDetail')->get();
+
+        return self::send_success_response($list,'Prescription Details Fetched Successfully');
     }
 }

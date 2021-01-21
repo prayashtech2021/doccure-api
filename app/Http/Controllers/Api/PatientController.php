@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use Validator;
-use App\ { User,Address,Appointment };
+use App\ { User,Address,Appointment,Prescription,PrescriptionDetails };
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use DB;
@@ -21,8 +21,17 @@ class PatientController extends Controller
     public function profile_details($id){
         $data['profile'] = User::find($id);
         $data['address'] = Address::with('country','state','city')->where('user_id',$id)->first();
-        $list = Appointment::whereUserId($id)->orderBy('created_at', 'DESC')->get();
-                $data['last_booking'] = $list;
+        $list = Appointment::whereUserId($id)->orderBy('created_at', 'DESC');
+        /*$array = collect();
+        $list->getCollection()->each(function ($appointment) use (&$array) {
+            $array->push($appointment->getData());
+        });*/
+        $data['appointments'] = $list->get();
+
+        $prescription = Prescription::with('prescriptionDetails')->whereUserId($id)->orderBy('created_at', 'DESC')->get();
+        
+        $data['prescription'] = $prescription;
+
         return self::send_success_response($data);
     }
 
@@ -95,52 +104,6 @@ class PatientController extends Controller
         }
     }
 
-    public function uploadProfileImage(Request $request, $user_id = null)
-    {
-        $rules = array(
-            'profile_image' => 'required',
-        );
-        $validator = Validator::make($request->all(), $rules);
-        if ($validator->fails()) {
-
-            return response()->json(['success' => false, 'code' => 401, 'error' => 'Validation Error', 'error_details' => $validator->errors()]);
-        }
-
-        try {
-
-            if ($user_id) {
-                $user = User::find($user_id);
-            } else {
-                $user = User::find(auth()->user()->id);
-            }
-
-            if (!empty($request->profile_image)) {
-                if (preg_match('/data:image\/(.+);base64,(.*)/', $request->profile_image, $matchings)) {
-                    $imageData = base64_decode($matchings[2]);
-                    $extension = $matchings[1];
-                    $file_name = date('YmdHis') . rand(100,999). '_' . $user->id . '.' . $extension;
-                    $path = 'profile-images/'.$file_name;
-                    Storage::put($path , $imageData);
-                    // file_put_contents($path, $imageData);
-
-                    if(!empty($user->profile_image)){
-                        if (Storage::exists('profile-images/' . $user->profile_image)) {
-                            Storage::delete('profile-images/' . $user->profile_image);
-                        }
-                    }
-                    $user->profile_image = $file_name;
-                }
-            }
-            $user->updated_by = auth()->user()->id;
-            $user->save();
-
-            return response()->json(['success' => true, 'code' => 200, 'message' => 'Image updated successfully!']);
-
-        } catch (Exception | Throwable $e) {
-
-            return response()->json(['success' => false, 'code' => 500, 'error' => $e->getMessage()]);
-
-        }
-    }
+    
 
 }
