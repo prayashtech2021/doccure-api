@@ -22,7 +22,7 @@ Route::middleware(['secureApi','responseHeader'])->group(function () {
     Route::post('login', 'PassportController@login');
     Route::post('register', 'Api\HomeController@register');
     
-    Route::get('getList/{id}','Api\HomeController@getList')->name('getList');
+    Route::get('getList/{case}/{id?}','Api\HomeController@getList')->name('getList');
     Route::post('resend-verification-link','Api\HomeController@resendVerificationLink');
     Route::post('verification','Api\HomeController@verification');
     Route::post('password/email', 'PassportController@forgot');

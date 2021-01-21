@@ -179,7 +179,7 @@ class HomeController extends Controller
         }
     }
     
-    public function getList($case){
+    public function getList($case,$id=NULL){
         try {
             if ($case) {
                 switch ($case) {
@@ -187,10 +187,18 @@ class HomeController extends Controller
                         $response = Country::select('id','name','phone_code','currency','emoji','emojiU')->get();
                         break;
                     case '2' : 
-                        $response = State::select('id','name')->get(); 
+                        $state = State::select('id','name');
+                        if(isset($id)){
+                            $state = $state->where('country_id',$id);
+                        }
+                        $response = $state->get(); 
                         break;
                     case '3' : 
-                        $response = City::select('id','name')->get(); 
+                        $city = City::select('id','name');
+                        if(isset($id)){
+                            $city = $city->where('state_id',$id);
+                        }
+                        $response = $city->get(); 
                         break;
                     default : 
                         $response = ['case' => $case, 'status' => 'Action not found']; 

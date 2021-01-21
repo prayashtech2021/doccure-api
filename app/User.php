@@ -44,7 +44,7 @@ class User extends Authenticatable implements Wallet, WalletFloat
         'password','remember_token',
     ];
 
-    protected $appends = ['pid','did','age','accountstatus','membersince','gendername'];
+    protected $appends = ['pid','did','age','accountstatus','membersince','gendername','doctorfees'];
 
     public function accessToken(){
         return $this->hasMany('App\OauthAccessToken');
@@ -59,6 +59,10 @@ class User extends Authenticatable implements Wallet, WalletFloat
     }
     public static function doctorClinicImage($id){
         return AddressImage::where('user_id',$id)->first();
+    }
+
+    public function addresses(){
+        return $this->hasMany(Address::class);
     }
 
     public function doctorSpecialization() { 
@@ -132,6 +136,13 @@ class User extends Authenticatable implements Wallet, WalletFloat
         }
     }
 
+    public function getDoctorFeesAttribute(){
+        if($this->price_type == 1){ 
+            return 'Free';
+        }else{
+            return $this->amount;
+        }
+    }
 
 
 }

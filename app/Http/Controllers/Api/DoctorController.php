@@ -294,41 +294,58 @@ class DoctorController extends Controller
 
     public function doctorSearchList(Request $request){
         try{
-            $doctors = User::role('doctor')->with('doctorSpecialization')->orderBy('created_at', $order_by);
-            $doctors->append('did','accountstatus','gendername');
+            $paginate = $request->count_per_page ? $request->count_per_page : 10;
 
+            $order_by = $request->order_by ? $request->order_by : 'desc';
+
+            $doctors = User::role('doctor')->with('doctorSpecialization')->orderBy('created_at', $order_by);
+
+            if($request->keywords){
+                $doctors = $doctors->where('first_name', 'like', '%' . $request->keywords . '%')
+                ->orWhere('last_name', 'like', '%' . $request->keywords . '%');
+            }
             if($request->gender){
                 $doctors->where('gender',$request->gender);
             }
-           /* if($request->speciality){
+            if($request->speciality){
                 $sp = $request->speciality;
-                $doctors = $doctors->whereHas('userSpeciality', function ($category) use ($sp) {
-                    $category->whereIn('user_speciality.speciality_id',$sp)->where('user_speciality.deleted_at', null);
+                $doctors = $doctors->whereHas('doctorSpecialization', function ($category) use ($sp) {
+                    $category->whereIn('user_speciality.speciality_id',[$sp]);
                 });
             }
             if($request->country_id){
                 $country_id = $request->country_id;
                 $doctors = $doctors->whereHas('addresses', function ($category) use ($country_id) {
-                    $category->where('addresses.country_id',$country_id)->where('addresses.deleted_at', null);
+                    $category->where('addresses.country_id',$country_id);
                 });
             }
+            
             if($request->state_id){
                 $state_id = $request->state_id;
                 $doctors = $doctors->whereHas('addresses', function ($category) use ($state_id) {
-                    $category->where('addresses.state_id',$state_id)->where('addresses.deleted_at', null);
+                    $category->where('addresses.state_id',$state_id);
                 });
             }
             if($request->city_id){
                 $city_id = $request->city_id;
                 $doctors = $doctors->whereHas('addresses', function ($category) use ($city_id) {
-                    $category->where('addresses.city_id',$city_id)->where('addresses.deleted_at', null);
+                    $category->where('addresses.city_id',$city_id);
                 });
-            }*/
-           // $doctors->get();
+            }
+            
+            if($request->sort == 2){ //latest
+                $doctors = $doctors->where('id','DESC');
+            }
+
+            if($request->sort == 3){ //free
+                $doctors = $doctors->where('price_type',1);
+            }
+            
+            $doctors = $doctors->get();
             if($doctors){
-                return self::send_success_response($doctors,'');
-            }else{
                 return self::send_success_response($doctors,'Doctors data fetched successfully');
+            }else{
+                return self::send_success_response($doctors,'No Records Found');
             }
         } catch (\Exception | \Throwable $exception) {
             return self::send_exception_response($exception->getMessage());
