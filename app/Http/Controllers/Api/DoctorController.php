@@ -305,7 +305,7 @@ class DoctorController extends Controller
                 ->orWhere('last_name', 'like', '%' . $request->keywords . '%');
             }
             if($request->gender){
-                $doctors->where('gender',$request->gender);
+                $doctors->whereIn('gender',[$request->gender]);
             }
             if($request->speciality){
                 $sp = $request->speciality;
