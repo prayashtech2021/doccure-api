@@ -19,7 +19,7 @@ class CreatePaymentsTable extends Migration
             $table->string('txn_id')->nullable();
             $table->decimal('tax', 12, 2);
             $table->decimal('tax_amount', 12, 2);
-            $table->string('transaction_charge')->nullable();
+            $table->decimal('transaction_charge', 12, 2);
             $table->text('transaction_miscellaneous');
             $table->timestamps();
 

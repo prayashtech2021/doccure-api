@@ -21,7 +21,7 @@ class DatabaseSeeder extends Seeder
         $this->call(MultiLanguageSeeder::class);
         $this->call(RoleSeeder::class);
         $this->call(TimezoneSeeder::class);
-        
+        $this->call(SettingSeeder::class);
     }
 
 }

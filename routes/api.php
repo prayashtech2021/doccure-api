@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -12,22 +11,21 @@ use Illuminate\Support\Facades\Route;
 | routes are loaded by the RouteServiceProvider within a group which
 | is assigned the "api" middleware group. Enjoy building your API!
 |
-*/
+ */
 
-
-Route::middleware(['secureApi','responseHeader'])->group(function () {
-    Route::get('/',function(){
+Route::middleware(['secureApi', 'responseHeader'])->group(function () {
+    Route::get('/', function () {
         return response()->json(['message' => 'Page Not Found'], 404);
     });
     Route::post('login', 'PassportController@login');
     Route::post('register', 'Api\HomeController@register');
-    
-    Route::get('getList/{case}/{id?}','Api\HomeController@getList')->name('getList');
-    Route::post('resend-verification-link','Api\HomeController@resendVerificationLink');
-    Route::post('verification','Api\HomeController@verification');
+
+    Route::get('getList/{case}/{id?}', 'Api\HomeController@getList')->name('getList');
+    Route::post('resend-verification-link', 'Api\HomeController@resendVerificationLink');
+    Route::post('verification', 'Api\HomeController@verification');
     Route::post('password/email', 'PassportController@forgot');
     Route::post('password/reset', 'PassportController@resetPassword');
-    Route::post('check-email','Api\HomeController@checkEmail')->name('checkEmail');
+    Route::post('check-email', 'Api\HomeController@checkEmail')->name('checkEmail');
     Route::get('language/list', 'Api\LanguageController@list');
     Route::get('speacility/list','Api\SpecialityController@getList');
     Route::post('doctors-search','Api\DoctorController@doctorSearchList');
@@ -74,11 +72,22 @@ Route::middleware(['secureApi','responseHeader'])->group(function () {
         Route::get('logout', 'PassportController@logout');        
         // Language 
         Route::post('language/update', 'Api\LanguageController@update');
-    });
+ 
+    /*Prescription */
+    Route::post('prescription/save', 'Api\AppointmentController@savePrescription');
+    Route::post('prescription/list', 'Api\AppointmentController@savePrescription');
+    Route::get('prescription/view', 'Api\AppointmentController@prescriptionView');
 
-Route::any('{path}', function() {
+    Route::get('logout', 'PassportController@logout');
+    // Language
+    Route::post('language/update', 'Api\LanguageController@update');
+
+    Route::post('payment/list', 'Api\PaymentRequestController@list')->name('paymentList');
+    Route::post('accounts/save', 'Api\PaymentRequestController@accountUpdate')->name('accountUpdate');
+});
+
+Route::any('{path}', function () {
     return response()->json([
-        'message' => 'Route not found'
+        'message' => 'Route not found',
     ], 404);
 })->where('path', '.*');
-
