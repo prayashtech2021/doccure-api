@@ -327,7 +327,7 @@ class HomeController extends Controller
                 $path = 'images/profile-images/';
                 $store = $request->file('image')->storeAs($path, $file_name);
 
-                $user->image = $file_name;
+                $user->profile_image = $file_name;
                 $user->save();
             }
 
