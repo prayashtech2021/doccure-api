@@ -1,21 +1,21 @@
 <?php
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
-
 use App\Appointment;
+use App\AppointmentLog;
+use App\Http\Controllers\Controller;
 use App\Payment;
+use App\Prescription;
+use App\Setting;
 use App\TimeZone;
 use App\User;
-use App\Prescription;
-use App\PrescriptionDetail;
+use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use \Exception;
 use \Throwable;
-use Closure;
 
 class AppointmentController extends Controller
 {
@@ -41,8 +41,7 @@ class AppointmentController extends Controller
         });
     }
 
-    public function list(Request $request)
-    {
+    function list(Request $request) {
         try {
             $user = $request->user();
             $paginate = $request->count_per_page ? $request->count_per_page : 10;
@@ -53,14 +52,14 @@ class AppointmentController extends Controller
             $status = $request->appointment_status;
             if ($status) {
                 switch ($status) {
-                    case 1:
-                        $list = $list->where('appointment_status', false)->whereDate('appointment_date', '>=', convertToUTC(now()));
+                    case 1: //upcoming
+                        $list = $list->where('appointment_status', 1)->whereDate('appointment_date', '>=', convertToUTC(now()));
                         break;
-                    case 2:
-                        $list = $list->where('appointment_status', true)->whereDate('appointment_date', '<=', convertToUTC(now()));
+                    case 2: //missed
+                        $list = $list->where('appointment_status', 1)->whereDate('appointment_date', '<=', convertToUTC(now()));
                         break;
-                    case 3:
-                        $list = $list->where('appointment_status', false)->whereDate('appointment_date', '<', convertToUTC(now()));
+                    case 3: //completed/approved
+                        $list = $list->where('appointment_status', 3)->whereDate('appointment_date', '<', convertToUTC(now()));
                         break;
                 }
             }
@@ -119,12 +118,19 @@ class AppointmentController extends Controller
             $appointment->appointment_reference = generateReference($user->id, $last_id, 'APT');
             $appointment->user_id = 4;
             $appointment->doctor_id = $request->doctor_id;
-            $appointment->appointment_type = $request->appointment_type;
+            $appointment->appointment_type = $request->appointment_type; //1=online, 2=clinic
             $appointment->appointment_date = convertToUTC(Carbon::createFromFormat('d/m/Y', $request->appointment_date));
             $appointment->start_time = $request->start_time;
             $appointment->end_time = $request->end_time;
-            $appointment->payment_type = 1;
+            $appointment->payment_type = $request->payment_type;
+            $appointment->appointment_status = config('custom.appointment_status.new');
             $appointment->save();
+
+            $log = new AppointmentLog;
+            $log->appointment_id = $appointment->id;
+            $log->description = config('custom.appointment_log_message.'.config('custom.appointment_status.new').'');
+            $log->status = $appointment->appointment_status;
+            $log->save();
 
             /**
              * Payment
@@ -135,10 +141,23 @@ class AppointmentController extends Controller
             $payment->appointment_id = $appointment->id;
             $payment->invoice_no = generateReference($user->id, $last_id, 'INV');
             $payment->payment_type = $request->payment_type;
-            if($doctor->price_type==2 && $doctor->amount>0){
-            $payment->total_amount = $doctor->amount * $request->selected_slots;
-            }else{
-            $payment->total_amount = 0;
+            if ($doctor->price_type == 2 && $doctor->amount > 0) {
+                $getSettings = new Setting;
+                $getSettings = $getSettings->getAmount();
+
+                $amount = $doctor->amount * $request->selected_slots;
+                $transaction_charge = ($amount * ($getSettings['trans_percent'] / 100));
+                $total_amount = $amount + $transaction_charge;
+                $tax_amount = (round($total_amount) * $getSettings['tax_percent'] / 100);
+
+                $total_amount = $total_amount + $tax_amount;
+
+                $payment->tax = $getSettings['tax_percent'];
+                $payment->tax_amount = $tax_amount;
+                $payment->transaction_charge = $transaction_charge;
+                $payment->total_amount = $total_amount;
+            } else {
+                $payment->total_amount = 0;
             }
 
             $payment->currency_code = $doctor->currency_code ?? config('cashier.currency');
@@ -146,13 +165,13 @@ class AppointmentController extends Controller
 
             if ($request->payment_type == 1 || $request->payment_type == 2) {
 
-                $billable_amount = (int)($payment->total_amount * 100);
+                $billable_amount = (int) ($payment->total_amount * 100);
 
                 $payment_options = [
                     'description' => config('app.name') . ' appointment reference #' . $appointment->appointment_reference,
                     'metadata' => [
                         'reference' => $appointment->appointment_reference,
-                    ]
+                    ],
                 ];
 
                 if ($request->payment_type == 1) {
@@ -195,14 +214,15 @@ class AppointmentController extends Controller
         }
     }
 
-    Public function savePrescription(Request $request){
+    public function savePrescription(Request $request)
+    {
         $validator = Validator::make($request->all(), [
             'appointment_id' => 'required',
-           /* 'drug_name' => 'required',
-            'quantity' => 'required|integer',
-            'type' => 'required|string',
-            'days' => 'required|integer',
-            'time' => 'required'*/
+            /* 'drug_name' => 'required',
+        'quantity' => 'required|integer',
+        'type' => 'required|string',
+        'days' => 'required|integer',
+        'time' => 'required'*/
         ]);
 
         if ($validator->fails()) {
@@ -213,12 +233,12 @@ class AppointmentController extends Controller
         try {
             $prescription = new Prescription();
             $prescription->appointment_id = $request->appointment_id;
-            if($request->signature_id){
+            if ($request->signature_id) {
                 $prescription->signature_id = $request->signature_id;
             }
             $prescription->save();
 
-           /* $prescription_details = new PrescriptionDetail();
+            /* $prescription_details = new PrescriptionDetail();
             $prescription_details->prescription_id = $prescription->id;
             $prescription_details->drug_name = $request->drug_name;
             $prescription_details->quantity = $request->quantity;
@@ -227,8 +247,8 @@ class AppointmentController extends Controller
             $prescription_details->time = $request->time;
             $prescription_details->save();
             DB::commit();
-*/
-            return self::send_success_response([],'Prescription Added Successfully');
+             */
+            return self::send_success_response([], 'Prescription Added Successfully');
 
         } catch (Exception | Throwable $exception) {
             DB::rollBack();
@@ -236,15 +256,42 @@ class AppointmentController extends Controller
         }
     }
 
-    public function prescriptionList(){
-    
+    public function prescriptionList()
+    {
+
         try {
             $list = Prescription::with('prescriptionDetails')->get();
 
-            return self::send_success_response($list,'Prescription Added Successfully');
+            return self::send_success_response($list, 'Prescription Added Successfully');
 
         } catch (Exception | Throwable $exception) {
             DB::rollBack();
+            return self::send_exception_response($exception->getMessage());
+        }
+    }
+
+    public function appointmentStatusUpdate(Request $request)
+    {
+        $rules = array(
+            'appointment_id' => 'required|exists:appointments,id',
+            'status' => 'required|numeric|min:2|max:6',
+        );
+        $valid = self::customValidation($request, $rules);
+        if ($valid) {return $valid;}
+
+        try {
+            $appointment = Appointment::find($request->appointment_id);
+            $appointment->appointment_status = $request->status;
+            $appointment->save();
+
+            $log = new AppointmentLog;
+            $log->appointment_id = $appointment->id;
+            $log->description = config('custom.appointment_log_message.'.$request->status.'');
+            $log->status = $appointment->appointment_status;
+            $log->save();
+
+            return self::send_success_response([], 'Status updated sucessfully');
+        } catch (Exception | Throwable $e) {
             return self::send_exception_response($exception->getMessage());
         }
     }

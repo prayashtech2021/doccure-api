@@ -44,6 +44,7 @@ Route::middleware(['CheckAuthHeader','auth:api','secureApi','responseHeader'])->
     //appointments
     Route::get('appointments/list','Api\AppointmentController@list');
     Route::post('appointments/create','Api\AppointmentController@create');
+    Route::post('appointment/status/update','Api\AppointmentController@appointmentStatusUpdate');
 
     /* Doctor Module */
        Route::get('doctor/dashboard','Api\DoctorController@dashboard')->name('Doctor.Dashboard');
@@ -66,6 +67,9 @@ Route::middleware(['CheckAuthHeader','auth:api','secureApi','responseHeader'])->
     
     // Language 
     Route::post('language/update', 'Api\LanguageController@update');
+
+    Route::post('payment/list','Api\PaymentRequestController@list')->name('paymentList');
+    Route::post('accounts/save','Api\PaymentRequestController@accountUpdate')->name('accountUpdate');
 });
 
 Route::any('{path}', function() {
