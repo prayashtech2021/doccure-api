@@ -29,6 +29,9 @@ Route::middleware(['secureApi','responseHeader'])->group(function () {
     Route::post('password/reset', 'PassportController@resetPassword');
     Route::post('check-email','Api\HomeController@checkEmail')->name('checkEmail');
     Route::get('language/list', 'Api\LanguageController@list');
+    Route::get('speacility/list','Api\SpecialityController@getList');
+    Route::post('doctors-search','Api\DoctorController@doctorSearchList');
+
 });
 
     Route::middleware(['CheckAuthHeader','auth:api','secureApi','responseHeader'])->group(function () {
@@ -40,7 +43,10 @@ Route::middleware(['secureApi','responseHeader'])->group(function () {
         /* Admin Profile */
         Route::get('admin/profile/{id}','Api\HomeController@adminProfile');
         Route::post('admin/saveprofile/','Api\HomeController@saveProfile');
+        
         /* Patient Module */
+        Route::post('patient-search','Api\PatientController@patientSearchList');
+
         Route::get('patient/list','Api\PatientController@patientList');
         Route::post('patient/saveprofile','Api\PatientController@profile_update');
         Route::get('patient/profile/{id}','Api\PatientController@profile_details');
@@ -50,17 +56,15 @@ Route::middleware(['secureApi','responseHeader'])->group(function () {
         Route::post('appointments/create','Api\AppointmentController@create');
 
         /* Doctor Module */
-        Route::get('doctor/dashboard','Api\DoctorController@dashboard')->name('Doctor.Dashboard');
-        Route::get('doctor/list','Api\DoctorController@doctorList')->name('Doctor.List');
-        Route::get('doctor/profile/{id}','Api\DoctorController@doctorProfile')->name('Doctor.Profile');
-        Route::post('doctor/saveprofile','Api\DoctorController@saveProfile')->name('Doctor.saveProfile');
-        Route::post('doctors-search','Api\DoctorController@doctorSearchList')->name('Doctor.searchList');
+        Route::get('doctor/dashboard','Api\DoctorController@dashboard');
+        Route::get('doctor/list','Api\DoctorController@doctorList');
+        Route::get('doctor/profile/{id}','Api\DoctorController@doctorProfile');
+        Route::post('doctor/saveprofile','Api\DoctorController@saveProfile');
 
         /* Speciality */
         Route::group(['middleware' => ['can:specialization']], function () {
-            Route::post('speacility/save','Api\SpecialityController@save')->name('Speciality.save');
-            Route::get('speacility/list','Api\SpecialityController@getList')->name('Speciality.getList');
-            Route::get('speacility/delete/{id}','Api\SpecialityController@destroy')->name('Speciality.delete');
+            Route::post('speacility/save','Api\SpecialityController@save');
+            Route::get('speacility/delete/{id}','Api\SpecialityController@destroy');
         });
         /*Prescription */
         Route::post('prescription/save','Api\AppointmentController@savePrescription');

@@ -62,7 +62,11 @@ class User extends Authenticatable implements Wallet, WalletFloat
     }
 
     public function addresses(){
-        return $this->hasMany(Address::class);
+        return Address::whereNull('name')->where('user_id',$this->id)->first();
+    }
+
+    public function clinicAddresses(){
+        return Address::with('images')->whereNotNull('name')->where('user_id',$this->id)->first();
     }
 
     public function doctorSpecialization() { 

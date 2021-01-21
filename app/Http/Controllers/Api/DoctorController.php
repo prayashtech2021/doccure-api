@@ -298,7 +298,7 @@ class DoctorController extends Controller
 
             $order_by = $request->order_by ? $request->order_by : 'desc';
 
-            $doctors = User::role('doctor')->with('doctorSpecialization')->orderBy('created_at', $order_by);
+            $doctors = User::role('doctor')->with('doctorSpecialization','addresses','clinicAddresses')->orderBy('created_at', $order_by);
 
             if($request->keywords){
                 $doctors = $doctors->where('first_name', 'like', '%' . $request->keywords . '%')

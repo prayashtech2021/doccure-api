@@ -26,4 +26,8 @@ class Address extends Model
         return $this->belongsTo('App\City','city_id')->select(array('id', 'name'));
     }
 
+    public function images(){
+        return $this->belongsToMany('App\AddressImage','address_id','id');
+    }
+
 }

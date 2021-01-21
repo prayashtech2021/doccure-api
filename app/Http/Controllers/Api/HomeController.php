@@ -165,7 +165,9 @@ class HomeController extends Controller
                     return self::send_bad_request_response($message);
                 } else {
                     User::where('id', $userid)->update(['password' => Hash::make($input['new_password'])]);
-                   
+                    if (auth()->check()) {
+                        auth()->user()->token()->revoke();
+                    }
                     $response_array = [
                         "code" => "200",
                         "message" => "Password updated successfully.",
