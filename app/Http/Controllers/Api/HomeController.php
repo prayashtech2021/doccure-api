@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use Validator;
-use App\ { User,Country,Address };
+use App\ { User,Country,Address,State,City };
 use App\Mail\SendInvitation;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -165,7 +165,9 @@ class HomeController extends Controller
                     return self::send_bad_request_response($message);
                 } else {
                     User::where('id', $userid)->update(['password' => Hash::make($input['new_password'])]);
-                   
+                    if (auth()->check()) {
+                        auth()->user()->token()->revoke();
+                    }
                     $response_array = [
                         "code" => "200",
                         "message" => "Password updated successfully.",
@@ -179,7 +181,7 @@ class HomeController extends Controller
         }
     }
     
-    public function getList($case){
+    public function getList($case,$id=NULL){
         try {
             if ($case) {
                 switch ($case) {
@@ -187,10 +189,18 @@ class HomeController extends Controller
                         $response = Country::select('id','name','phone_code','currency','emoji','emojiU')->get();
                         break;
                     case '2' : 
-                        $response = State::pluck('id','name')->get(); 
+                        $state = State::select('id','name');
+                        if(isset($id)){
+                            $state = $state->where('country_id',$id);
+                        }
+                        $response = $state->get(); 
                         break;
                     case '3' : 
-                        $response = City::pluck('id','name')->get(); 
+                        $city = City::select('id','name');
+                        if(isset($id)){
+                            $city = $city->where('state_id',$id);
+                        }
+                        $response = $city->get(); 
                         break;
                     default : 
                         $response = ['case' => $case, 'status' => 'Action not found']; 
@@ -218,9 +228,9 @@ class HomeController extends Controller
             try{
                 $check_user = User::where('email',$request->email)->first();
                 if($check_user){
-                    return self::send_success_response([],'Email-Id Exists');
+                    return self::send_bad_request_response([],'Email-Id Exists');
                 }else{
-                    return self::send_unauthorised_request_response('Email-Id Not Exists');
+                    return self::send_success_response('Email-Id Not Exists');
                 }
             } catch (Exception | Throwable $exception) {
                 return self::send_exception_response($exception->getMessage());
@@ -231,7 +241,9 @@ class HomeController extends Controller
     public function adminProfile($user_id){
         try{
             if($user_id){
-                $data['profile'] = User::select('id','first_name','last_name','email','mobile_number','profile_image','biography')->whereId($user_id)->first();
+                $list = User::select('id','first_name','last_name','email','mobile_number','profile_image','biography')
+                ->whereId($user_id)->first();
+                $data['profile'] = $list;
                 if($data['profile']){            
                     $data['address'] = Address::with('country','state','city')->where('user_id',$user_id)->first();
 
@@ -278,7 +290,7 @@ class HomeController extends Controller
                     $address->updated_by = auth()->user()->id;
                 }else{
                     $address = new Address();
-                    $address->user_id = $profile->save();
+                    $address->user_id = $user_id;
                     $address->created_by = auth()->user()->id; 
                 }
                 $address->country_id = $request->country_id;
@@ -294,6 +306,52 @@ class HomeController extends Controller
             return self::send_exception_response($exception->getMessage());
         }
         
+    }
+
+    public function uploadProfileImage(Request $request, $user_id = null)
+    {
+        $rules = array(
+            'profile_image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+        );
+        
+        $valid = self::customValidation($request, $rules);
+        if($valid){ return $valid;}
+
+        try {
+
+            if ($user_id) {
+                $user = User::find($user_id);
+            } else {
+                $user = User::find(auth()->user()->id);
+            }
+
+            if (!empty($request->profile_image)) {
+
+                if(!empty($user->profile_image)){
+                    if (Storage::exists('images/profile-images/' . $user->profile_image)) {
+                        Storage::delete('images/profile-images/' . $user->profile_image);
+                    }
+                }
+
+                $extension = $request->file('profile_image')->getClientOriginalExtension();
+                $file_name = date('YmdHis') . '_' . auth()->user()->id . '.png';
+                $path = 'images/profile-images/';
+                $store = $request->file('profile_image')->storeAs($path, $file_name);
+
+                $user->profile_image = $file_name;
+                $user->save();
+            }
+
+            $user->updated_by = auth()->user()->id;
+            $user->save();
+            return self::send_success_response([],'Image updated Successfully');
+
+
+        } catch (Exception | Throwable $e) {
+
+            return response()->json(['success' => false, 'code' => 500, 'error' => $e->getMessage()]);
+
+        }
     }
 
     public function destroy(Request $request)

@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Notifications\RequestPayment;
 use App\PaymentRequest;
 use App\User;
+use App\AccountDetail;
 use Carbon\Carbon;
 use DB;
 use Illuminate\Http\Request;
@@ -14,6 +15,57 @@ use Validator;
 
 class PaymentRequestController extends Controller
 {
+
+    public function list(Request $request)
+    {
+    try {
+        $data = PaymentRequest::orderBy('id', 'DESC');
+        if(auth()->user()->hasRole('doctor')){
+            $data = $data->where('user_id',auth()->user()->id);
+        }
+            $data = $data->get();
+            return self::send_success_response($data, 'PaymentRequest content fetched successfully');
+        } catch (Exception | Throwable $e) {
+            return self::send_exception_response($exception->getMessage());
+        }
+        
+    }
+    
+    public function accountUpdate(Request $request)
+    {
+            $rules = array(
+                'account_name' => 'required|string|max:50',
+                'account_number' => 'required|string|min:9|max:18|unique:account_details,user_id,'.auth()->user()->id,
+                'bank_name' => 'required|string|max:50',
+                'branch_name' => 'required|string|max:50',
+                'ifsc_code' => 'nullable|string|max:10',
+            );
+        
+        $valid = self::customValidation($request, $rules);
+        if($valid){ return $valid;}
+
+    try {
+            $account = AccountDetail::where('user_id',auth()->user()->id)->first();
+            if (!$account) {
+                $account = new AccountDetail();
+                $account->created_by = auth()->user()->id;
+            }else{
+                $account->updated_by = auth()->user()->id;
+            }
+        $account->user_id = auth()->user()->id;
+        $account->account_name = $request->account_name;
+        $account->account_number = $request->account_number;
+        $account->bank_name = $request->bank_name;
+        $account->branch_name = $request->branch_name;
+        $account->ifsc_code = $request->ifsc_code;
+        $account->save();
+
+         return self::send_success_response([], 'Account deatils saved sucessfully');
+    } catch (Exception | Throwable $e) {
+        return self::send_exception_response($exception->getMessage());
+    }
+    }  
+    
 
     public function driverPaymentRequest(Request $request)
     {

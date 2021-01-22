@@ -10,7 +10,7 @@ class Appointment extends Model
     public function getData(){
         return [
             'id' => $this->id,
-            'created' => $this->created_at->format('d/m/Y h:i A'),
+            'created' => Carbon::parse($this->created_at)->format('d/m/Y h:i A'),
             'reference' => $this->appointment_reference,
             'type' => config('appointments.type')[$this->appointment_type],
             'doctor' => $this->doctor()->first()->basicProfile(),

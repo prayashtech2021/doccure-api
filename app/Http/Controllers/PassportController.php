@@ -75,7 +75,7 @@ class PassportController extends Controller {
 				];
 				return response()->json(self::convertNullsAsEmpty($response_array), 200);
             }
-			$message = "Your account is not activated.";
+			$message = "No Records Found.";
             return self::send_unauthorised_request_response($message);
 		}
 	}

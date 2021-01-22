@@ -37,7 +37,7 @@ class DoctorController extends Controller
 
         $order_by = $request->order_by ? $request->order_by : 'desc';
 
-        $data = User::role('doctor')->with('doctorSpecialization')->orderBy('created_at', $order_by)->get();
+        $data = User::role('doctor')->withTrashed()->with(['doctorSpecialization','addresses','homeAddresses'])->orderBy('created_at', $order_by)->get();
         $data->append('did','accountstatus','gendername');
         return self::send_success_response($data);
     }
@@ -46,8 +46,16 @@ class DoctorController extends Controller
         try {
             
             $doctor['profile'] = User::with('doctorSpecialization','doctorService','doctorEducation','doctorExperience','doctorAwards','doctorMembership','doctorRegistration')->find($user_id);
-            $doctor['doctor_clinic_info'] = User::doctorClinicInfo($user_id);
             $doctor['doctor_contact_info'] = User::userAddress($user_id);
+            $doctor['doctor_clinic_info'] = User::doctorClinicInfo($user_id);
+            $doctor['doctor_clinic_images'] = User::doctorClinicImage($user_id);
+            $doctor['feedback'] = [];
+            $doctor['ratings'] = [];
+            $doctor['book_appointment'] = '';
+            $doctor['chat'] = '';
+            $doctor['call'] = '';
+            $doctor['video_call'] = '';
+            $doctor['wishlist'] = '';
          
             return self::send_success_response($doctor);
         } catch (\Exception | \Throwable $exception) {
@@ -292,40 +300,86 @@ class DoctorController extends Controller
     }
 
     public function doctorSearchList(Request $request){
+        dd(json_encode([
+            'monday'     => ['09:00-12:00', '13:00-18:00'],
+            'tuesday'    => ['09:00-12:00', '13:00-18:00'],
+            'wednesday'  => ['09:00-12:00', '13:00-16:00'],
+            'thursday'   => ['09:00-12:00', '13:00-18:00'],
+            'friday'     => ['09:00-12:00', '13:00-20:00'],
+            'saturday'   => ['09:00-12:00'],
+        ]));
+        $rules = array(
+            'keywords' => 'nullable|string',
+            'gender' => 'nullable|string',
+            'speciality' => 'nullable|string',
+            'country_id' => 'nullable|numeric|exists:countries,id',
+            'state_id' => 'nullable|numeric|exists:states,id',
+            'city_id' => 'nullable|numeric|exists:cities,id',
+            'count_per_page' => 'nullable|numeric',
+            'order_by' => 'nullable|in:desc,asc',
+            'sort' => 'nullable|numeric',
+        );
+        $valid = self::customValidation($request, $rules);
+        if ($valid) {return $valid;}
+
         try{
-            $doctors = User::get();//with('specialities');
-            if($request->gender){
-                $doctors->where('gender',$request->gender);
+            $paginate = $request->count_per_page ? $request->count_per_page : 10;
+
+            $doctors = User::role('doctor')->with(['doctorSpecialization','addresses','homeAddresses']);
+            
+            if($request->keywords){
+                $doctors = $doctors->where('first_name', 'like', '%' . $request->keywords . '%')
+                ->orWhere('last_name', 'like', '%' . $request->keywords . '%');
             }
-           /* if($request->speciality){
-                $sp = $request->speciality;
-                $doctors = $doctors->whereHas('userSpeciality', function ($category) use ($sp) {
-                    $category->whereIn('user_speciality.speciality_id',$sp)->where('user_speciality.deleted_at', null);
+
+            if($request->gender){
+                $gender = explode(',',$request->gender);
+                $doctors->whereIn('gender',$gender);
+            }
+
+            if($request->speciality){
+                $speciality = explode(',',$request->speciality);
+                $doctors = $doctors->whereHas('doctorSpecialization', function ($category) use ($speciality) {
+                    $category->whereIn('user_speciality.speciality_id',$speciality);
                 });
             }
+
             if($request->country_id){
                 $country_id = $request->country_id;
                 $doctors = $doctors->whereHas('addresses', function ($category) use ($country_id) {
-                    $category->where('addresses.country_id',$country_id)->where('addresses.deleted_at', null);
+                    $category->where('addresses.country_id',$country_id);
                 });
             }
+            
             if($request->state_id){
                 $state_id = $request->state_id;
                 $doctors = $doctors->whereHas('addresses', function ($category) use ($state_id) {
-                    $category->where('addresses.state_id',$state_id)->where('addresses.deleted_at', null);
+                    $category->where('addresses.state_id',$state_id);
                 });
             }
             if($request->city_id){
                 $city_id = $request->city_id;
                 $doctors = $doctors->whereHas('addresses', function ($category) use ($city_id) {
-                    $category->where('addresses.city_id',$city_id)->where('addresses.deleted_at', null);
+                    $category->where('addresses.city_id',$city_id);
                 });
-            }*/
-           // $doctors->get();
-            if($doctors){
-                return self::send_success_response($doctors,'');
+            }
+            
+            if($request->sort == 2){ //latest
+                $doctors = $doctors->orderBy('created_at', 'DESC');
             }else{
+                $order_by = $request->order_by ? $request->order_by : 'desc';
+                $doctors = $doctors->orderBy('created_at', $order_by);
+            }
+
+            if($request->sort == 3){ //free
+                $doctors = $doctors->where('price_type',1);
+            }
+            $doctors = $doctors->get();
+
+            if($doctors){
                 return self::send_success_response($doctors,'Doctors data fetched successfully');
+            }else{
+                return self::send_success_response($doctors,'No Records Found');
             }
         } catch (\Exception | \Throwable $exception) {
             return self::send_exception_response($exception->getMessage());

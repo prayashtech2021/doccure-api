@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -12,69 +11,77 @@ use Illuminate\Support\Facades\Route;
 | routes are loaded by the RouteServiceProvider within a group which
 | is assigned the "api" middleware group. Enjoy building your API!
 |
-*/
+ */
 
-
-Route::middleware(['secureApi','responseHeader'])->group(function () {
-    Route::get('/',function(){
+Route::middleware(['secureApi', 'responseHeader'])->group(function () {
+    Route::get('/', function () {
         return response()->json(['message' => 'Page Not Found'], 404);
     });
     Route::post('login', 'PassportController@login');
     Route::post('register', 'Api\HomeController@register');
 
-    Route::get('getList/{id}','Api\HomeController@getList')->name('getList');
-    Route::post('resend-verification-link','Api\HomeController@resendVerificationLink');
-    Route::post('verification','Api\HomeController@verification');
+    Route::get('getList/{case}/{id?}', 'Api\HomeController@getList')->name('getList');
+    Route::post('resend-verification-link', 'Api\HomeController@resendVerificationLink');
+    Route::post('verification', 'Api\HomeController@verification');
     Route::post('password/email', 'PassportController@forgot');
     Route::post('password/reset', 'PassportController@resetPassword');
-    Route::post('check-email','Api\HomeController@checkEmail')->name('checkEmail');
+    Route::post('check-email', 'Api\HomeController@checkEmail')->name('checkEmail');
     Route::get('language/list', 'Api\LanguageController@list');
+    Route::get('speacility/list', 'Api\SpecialityController@getList');
+    Route::post('doctors-search', 'Api\DoctorController@doctorSearchList');
+
 });
 
-    Route::middleware(['CheckAuthHeader','auth:api','secureApi','responseHeader'])->group(function () {
-        /* common */
-        Route::post('changepassword', 'Api\HomeController@changePassword');
-        Route::post('reset-password', 'Api\HomeController@resetPassword');
-        Route::get('user/delete/{id}','Api\HomeController@destroy');
+Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader'])->group(function () {
+    /* common */
+    Route::post('changepassword', 'Api\HomeController@changePassword');
+    Route::post('reset-password', 'Api\HomeController@resetPassword');
+    Route::get('user/delete/{id}', 'Api\HomeController@destroy');
+    Route::post('upload/profile-image', 'Api\HomeController@uploadProfileImage');
+    /* Admin Profile */
+    Route::get('admin/profile/{id}', 'Api\HomeController@adminProfile');
+    Route::post('admin/saveprofile/', 'Api\HomeController@saveProfile');
 
-        /* Admin Profile */
-        Route::get('admin/Profile/{id}','Api\HomeController@adminProfile');
-        Route::post('admin/saveProfile/','Api\HomeController@saveProfile');
-        /* Patient Module */
-        Route::get('patient/list','Api\PatientController@patientList');
-        Route::post('patient/saveProfile','Api\PatientController@profile_update');
-        Route::get('patient/profile/{id}','Api\PatientController@profile_details');
-        
-        //appointments
-        Route::get('appointments/list','Api\AppointmentController@list');
-        Route::post('appointments/create','Api\AppointmentController@create');
+    /* Patient Module */
+    Route::post('patient-search', 'Api\PatientController@patientSearchList');
+
+    Route::get('patient/list', 'Api\PatientController@patientList');
+    Route::post('patient/saveprofile', 'Api\PatientController@profile_update');
+    Route::get('patient/profile/{id}', 'Api\PatientController@profile_details');
+
+    //appointments
+    Route::get('appointments/list', 'Api\AppointmentController@list');
+    Route::post('appointments/create', 'Api\AppointmentController@create');
     Route::get('appointments/saved-cards','Api\AppointmentController@savedCards');
+    Route::get('schedule/list', 'Api\AppointmentController@scheduleList');
+    Route::post('appointment/status/update', 'Api\AppointmentController@appointmentStatusUpdate');
 
-        /* Doctor Module */
-        Route::get('doctor/dashboard','Api\DoctorController@dashboard')->name('Doctor.Dashboard');
-        Route::get('doctor/list','Api\DoctorController@doctorList')->name('Doctor.List');
-        Route::get('doctor/Profile/{id}','Api\DoctorController@doctorProfile')->name('Doctor.Profile');
-        Route::post('doctor/saveProfile','Api\DoctorController@saveProfile')->name('Doctor.saveProfile');
-        Route::post('doctors-search','Api\DoctorController@doctorSearchList')->name('Doctor.searchList');
+    /* Doctor Module */
+    Route::get('doctor/dashboard', 'Api\DoctorController@dashboard');
+    Route::get('doctor/list', 'Api\DoctorController@doctorList');
+    Route::get('doctor/profile/{id}', 'Api\DoctorController@doctorProfile');
+    Route::post('doctor/saveprofile', 'Api\DoctorController@saveProfile');
 
-        /* Speciality */
-        Route::group(['middleware' => ['can:specialization']], function () {
-            Route::post('speacility/save','Api\SpecialityController@save')->name('Speciality.save');
-            Route::get('speacility/list','Api\SpecialityController@getList')->name('Speciality.getList');
-            Route::get('speacility/delete/{id}','Api\SpecialityController@destroy')->name('Speciality.delete');
-        });
-        /*Prescription */
-        Route::post('prescription/save','Api\AppointmentController@savePrescription');
-        Route::post('prescription/list','Api\AppointmentController@savePrescription');
-            
-        Route::get('logout', 'PassportController@logout');        
-        // Language 
-        Route::post('language/update', 'Api\LanguageController@update');
+    /* Speciality */
+    Route::group(['middleware' => ['can:specialization']], function () {
+        Route::post('speacility/save', 'Api\SpecialityController@save');
+        Route::get('speacility/delete/{id}', 'Api\SpecialityController@destroy');
     });
+    /*Prescription */
+    Route::post('prescription/save', 'Api\AppointmentController@savePrescription');
+    Route::get('prescription/list', 'Api\AppointmentController@prescriptionList');
+    Route::get('prescription/view/{pid}', 'Api\AppointmentController@prescriptionView');
 
-Route::any('{path}', function() {
+    Route::get('logout', 'PassportController@logout');
+    // Language
+    Route::post('language/update', 'Api\LanguageController@update');
+
+    Route::post('payment/list', 'Api\PaymentRequestController@list')->name('paymentList');
+    Route::post('accounts/save', 'Api\PaymentRequestController@accountUpdate')->name('accountUpdate');
+});
+
+Route::any('{path}', function () {
     return response()->json([
-        'message' => 'Route not found'
+        'message' => 'Route not found',
     ], 404);
 })->where('path', '.*');
-

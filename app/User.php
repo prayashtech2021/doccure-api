@@ -44,7 +44,7 @@ class User extends Authenticatable implements Wallet, WalletFloat
         'password','remember_token',
     ];
 
-    protected $appends = ['pid','did','age','accountstatus','membersince','gendername'];
+    protected $appends = ['pid','did','age','accountstatus','membersince','gendername','doctorfees','userimage'];
 
     public function accessToken(){
         return $this->hasMany('App\OauthAccessToken');
@@ -57,16 +57,23 @@ class User extends Authenticatable implements Wallet, WalletFloat
     public static function doctorClinicInfo($id){
         return Address::whereNotNull('name')->where('user_id',$id)->first();
     }
+    public static function doctorClinicImage($id){
+        return AddressImage::where('user_id',$id)->first();
+    }
 
     public function doctorSpecialization() { 
-       // return $this->hasOne('App\UserSpeciality','user_id');
         return $this->belongsToMany('App\Speciality', 'user_speciality');
     }
 
     public function doctorService(){
         return $this->hasMany(Service::class);
     }
-
+    public function addresses(){
+        return $this->hasMany(Address::class)->with('country','state','city','addImage')->whereNotNull('name');
+    }
+    public function homeAddresses(){
+        return $this->hasMany(Address::class)->with('country','state','city')->whereNull('name');
+    }
     public function doctorEducation(){
         return $this->hasMany(EducationDetail::class);
     }
@@ -87,10 +94,17 @@ class User extends Authenticatable implements Wallet, WalletFloat
         return $this->hasMany(RegistrationDetail::class); 
     }
 
+    public function userAppointment() { 
+        return $this->belongsTo('App\Appointment', 'id','doctor_id'); 
+    }
+
+
     public function basicProfile(){
        return [
            'id' => $this->id,
            'name' => trim($this->first_name . ' '. $this->last_name),
+           'profile_image' => getUserProfileImage($this->id),
+           'speciality' => $this->doctorSpecialization(),
        ];
     }
 
@@ -108,7 +122,7 @@ class User extends Authenticatable implements Wallet, WalletFloat
     } // Doctor_ID
 
     public function getAgeAttribute(){
-        return Carbon::parse($this->attributes['dob'])->age;
+        return Carbon::parse($this->dob)->age;
     }
 
     public function getAccountStatusAttribute(){
@@ -133,6 +147,17 @@ class User extends Authenticatable implements Wallet, WalletFloat
         }
     }
 
+    public function getDoctorFeesAttribute(){
+        if($this->price_type == 1){ 
+            return 'Free';
+        }else{
+            return $this->amount;
+        }
+    }
+
+    public function getUserImageAttribute() { 
+        return getUserProfileImage($this->id); 
+    }
 
 
 }
