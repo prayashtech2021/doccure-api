@@ -44,7 +44,7 @@ class User extends Authenticatable implements Wallet, WalletFloat
         'password','remember_token',
     ];
 
-    protected $appends = ['pid','did','age','accountstatus','membersince','gendername','doctorfees','ProfileImage'];
+    protected $appends = ['pid','did','age','accountstatus','membersince','gendername','doctorfees','profileimage'];
 
     public function accessToken(){
         return $this->hasMany('App\OauthAccessToken');
