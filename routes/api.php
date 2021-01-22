@@ -27,53 +27,49 @@ Route::middleware(['secureApi', 'responseHeader'])->group(function () {
     Route::post('password/reset', 'PassportController@resetPassword');
     Route::post('check-email', 'Api\HomeController@checkEmail')->name('checkEmail');
     Route::get('language/list', 'Api\LanguageController@list');
-    Route::get('speacility/list','Api\SpecialityController@getList');
-    Route::post('doctors-search','Api\DoctorController@doctorSearchList');
+    Route::get('speacility/list', 'Api\SpecialityController@getList');
+    Route::post('doctors-search', 'Api\DoctorController@doctorSearchList');
 
 });
 
-    Route::middleware(['CheckAuthHeader','auth:api','secureApi','responseHeader'])->group(function () {
-        /* common */
-        Route::post('changepassword', 'Api\HomeController@changePassword');
-        Route::post('reset-password', 'Api\HomeController@resetPassword');
-        Route::get('user/delete/{id}','Api\HomeController@destroy');
-        Route::post('upload/profile-image','Api\HomeController@uploadProfileImage');
-        /* Admin Profile */
-        Route::get('admin/profile/{id}','Api\HomeController@adminProfile');
-        Route::post('admin/saveprofile/','Api\HomeController@saveProfile');
-        
-        /* Patient Module */
-        Route::post('patient-search','Api\PatientController@patientSearchList');
+Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader'])->group(function () {
+    /* common */
+    Route::post('changepassword', 'Api\HomeController@changePassword');
+    Route::post('reset-password', 'Api\HomeController@resetPassword');
+    Route::get('user/delete/{id}', 'Api\HomeController@destroy');
+    Route::post('upload/profile-image', 'Api\HomeController@uploadProfileImage');
+    /* Admin Profile */
+    Route::get('admin/profile/{id}', 'Api\HomeController@adminProfile');
+    Route::post('admin/saveprofile/', 'Api\HomeController@saveProfile');
 
-        Route::get('patient/list','Api\PatientController@patientList');
-        Route::post('patient/saveprofile','Api\PatientController@profile_update');
-        Route::get('patient/profile/{id}','Api\PatientController@profile_details');
-        
-        //appointments
-        Route::get('appointments/list','Api\AppointmentController@list');
-        Route::post('appointments/create','Api\AppointmentController@create');
-        Route::get('schedule/list','Api\AppointmentController@scheduleList');
+    /* Patient Module */
+    Route::post('patient-search', 'Api\PatientController@patientSearchList');
 
-        /* Doctor Module */
-        Route::get('doctor/dashboard','Api\DoctorController@dashboard');
-        Route::get('doctor/list','Api\DoctorController@doctorList');
-        Route::get('doctor/profile/{id}','Api\DoctorController@doctorProfile');
-        Route::post('doctor/saveprofile','Api\DoctorController@saveProfile');
+    Route::get('patient/list', 'Api\PatientController@patientList');
+    Route::post('patient/saveprofile', 'Api\PatientController@profile_update');
+    Route::get('patient/profile/{id}', 'Api\PatientController@profile_details');
 
-        /* Speciality */
-        Route::group(['middleware' => ['can:specialization']], function () {
-            Route::post('speacility/save','Api\SpecialityController@save');
-            Route::get('speacility/delete/{id}','Api\SpecialityController@destroy');
-        });
-        /*Prescription */
-        Route::post('prescription/save','Api\AppointmentController@savePrescription');
-        Route::get('prescription/list','Api\AppointmentController@prescriptionList');
-        Route::get('prescription/view/{pid}','Api\AppointmentController@prescriptionView');
-            
-        Route::get('logout', 'PassportController@logout');        
-        // Language 
-        Route::post('language/update', 'Api\LanguageController@update');
- 
+    //appointments
+    Route::get('appointments/list', 'Api\AppointmentController@list');
+    Route::post('appointments/create', 'Api\AppointmentController@create');
+    Route::get('schedule/list', 'Api\AppointmentController@scheduleList');
+    Route::post('appointment/status/update', 'Api\AppointmentController@appointmentStatusUpdate');
+
+    /* Doctor Module */
+    Route::get('doctor/dashboard', 'Api\DoctorController@dashboard');
+    Route::get('doctor/list', 'Api\DoctorController@doctorList');
+    Route::get('doctor/profile/{id}', 'Api\DoctorController@doctorProfile');
+    Route::post('doctor/saveprofile', 'Api\DoctorController@saveProfile');
+
+    /* Speciality */
+    Route::group(['middleware' => ['can:specialization']], function () {
+        Route::post('speacility/save', 'Api\SpecialityController@save');
+        Route::get('speacility/delete/{id}', 'Api\SpecialityController@destroy');
+    });
+    /*Prescription */
+    Route::post('prescription/save', 'Api\AppointmentController@savePrescription');
+    Route::get('prescription/list', 'Api\AppointmentController@prescriptionList');
+    Route::get('prescription/view/{pid}', 'Api\AppointmentController@prescriptionView');
 
     Route::get('logout', 'PassportController@logout');
     // Language
