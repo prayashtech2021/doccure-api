@@ -334,7 +334,7 @@ class AppointmentController extends Controller
             $log->save();
 
             return self::send_success_response([], 'Status updated sucessfully');
-        } catch (Exception | Throwable $e) {
+        } catch (Exception | Throwable $exception) {
             return self::send_exception_response($exception->getMessage());
         }
     }
@@ -386,7 +386,5 @@ class AppointmentController extends Controller
             return self::send_exception_response($exception->getMessage());
         }
     }
-
-
 
 }
