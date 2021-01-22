@@ -12,8 +12,8 @@ class DatabaseSeeder extends Seeder
     public function run()
     {
         $this->call(TimezoneSeeder::class);
-        $this->call(LanguageSeeder::class);
         $this->call(UserSeeder::class);
+        $this->call(LanguageSeeder::class);
         $this->call(CountrySeeder::class);
         $this->call(StateSeeder::class);
         $this->call(CitySeeder::class);
