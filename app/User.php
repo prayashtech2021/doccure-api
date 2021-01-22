@@ -61,23 +61,19 @@ class User extends Authenticatable implements Wallet, WalletFloat
         return AddressImage::where('user_id',$id)->first();
     }
 
-    public function addresses(){
-        return Address::whereNull('name')->where('user_id',$this->id)->first();
-    }
-
-    public function clinicAddresses(){
-        return Address::with('images')->whereNotNull('name')->where('user_id',$this->id)->first();
-    }
-
     public function doctorSpecialization() { 
-       // return $this->hasOne('App\UserSpeciality','user_id');
         return $this->belongsToMany('App\Speciality', 'user_speciality');
     }
 
     public function doctorService(){
         return $this->hasMany(Service::class);
     }
-
+    public function addresses(){
+        return $this->hasMany(Address::class)->with('country','state','city','addImage')->whereNotNull('name');
+    }
+    public function homeAddresses(){
+        return $this->hasMany(Address::class)->with('country','state','city')->whereNull('name');
+    }
     public function doctorEducation(){
         return $this->hasMany(EducationDetail::class);
     }
@@ -97,6 +93,11 @@ class User extends Authenticatable implements Wallet, WalletFloat
     public function doctorRegistration() { 
         return $this->hasMany(RegistrationDetail::class); 
     }
+
+    public function userAppointment() { 
+        return $this->belongsTo('App\Appointment', 'id','doctor_id'); 
+    }
+
 
     public function basicProfile(){
        return [

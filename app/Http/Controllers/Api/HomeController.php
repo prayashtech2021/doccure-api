@@ -228,9 +228,9 @@ class HomeController extends Controller
             try{
                 $check_user = User::where('email',$request->email)->first();
                 if($check_user){
-                    return self::send_success_response([],'Email-Id Exists');
+                    return self::send_bad_request_response([],'Email-Id Exists');
                 }else{
-                    return self::send_unauthorised_request_response('Email-Id Not Exists');
+                    return self::send_success_response('Email-Id Not Exists');
                 }
             } catch (Exception | Throwable $exception) {
                 return self::send_exception_response($exception->getMessage());
@@ -325,17 +325,18 @@ class HomeController extends Controller
                 $user = User::find(auth()->user()->id);
             }
 
-            if (!empty($request->image)) {
+            if (!empty($request->profile_image)) {
+
                 if(!empty($user->profile_image)){
                     if (Storage::exists('images/profile-images/' . $user->profile_image)) {
                         Storage::delete('images/profile-images/' . $user->profile_image);
                     }
                 }
 
-                $extension = $request->file('image')->getClientOriginalExtension();
+                $extension = $request->file('profile_image')->getClientOriginalExtension();
                 $file_name = date('YmdHis') . '_' . auth()->user()->id . '.png';
                 $path = 'images/profile-images/';
-                $store = $request->file('image')->storeAs($path, $file_name);
+                $store = $request->file('profile_image')->storeAs($path, $file_name);
 
                 $user->profile_image = $file_name;
                 $user->save();

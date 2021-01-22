@@ -11,7 +11,7 @@ class Prescription extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'appointment_id', 'signature_id','created_by',
+        'appointment_id', 'user_id','signature_id','created_by',
    ];
 
     /*public function getData(){
@@ -26,6 +26,9 @@ class Prescription extends Model
             'next_visit' => convertToLocal(Carbon::parse($this->next_visit),'','d/m/Y'),
         ];
     }*/
+    public function doctorappointment() { return $this->belongsTo('App\Appointment', 'appointment_id'); }
+    public function doctorsign() { return $this->belongsTo('App\signature', 'signature_id'); }
+
 
     public function prescriptionDetails(){
         return $this->hasMany(PrescriptionDetail::class);

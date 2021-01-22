@@ -37,7 +37,7 @@ class DoctorController extends Controller
 
         $order_by = $request->order_by ? $request->order_by : 'desc';
 
-        $data = User::role('doctor')->with('doctorSpecialization')->orderBy('created_at', $order_by)->get();
+        $data = User::role('doctor')->withTrashed()->with(['doctorSpecialization','addresses','homeAddresses'])->orderBy('created_at', $order_by)->get();
         $data->append('did','accountstatus','gendername');
         return self::send_success_response($data);
     }
@@ -49,6 +49,13 @@ class DoctorController extends Controller
             $doctor['doctor_contact_info'] = User::userAddress($user_id);
             $doctor['doctor_clinic_info'] = User::doctorClinicInfo($user_id);
             $doctor['doctor_clinic_images'] = User::doctorClinicImage($user_id);
+            $doctor['feedback'] = [];
+            $doctor['ratings'] = [];
+            $doctor['book_appointment'] = '';
+            $doctor['chat'] = '';
+            $doctor['call'] = '';
+            $doctor['video_call'] = '';
+            $doctor['wishlist'] = '';
          
             return self::send_success_response($doctor);
         } catch (\Exception | \Throwable $exception) {
@@ -296,23 +303,24 @@ class DoctorController extends Controller
         try{
             $paginate = $request->count_per_page ? $request->count_per_page : 10;
 
-            $order_by = $request->order_by ? $request->order_by : 'desc';
-
-            $doctors = User::role('doctor')->with('doctorSpecialization','addresses','clinicAddresses')->orderBy('created_at', $order_by);
-
+            $doctors = User::role('doctor')->with(['doctorSpecialization','addresses','homeAddresses']);
+            
             if($request->keywords){
                 $doctors = $doctors->where('first_name', 'like', '%' . $request->keywords . '%')
                 ->orWhere('last_name', 'like', '%' . $request->keywords . '%');
             }
+
             if($request->gender){
-                $doctors->whereIn('gender',[$request->gender]);
+                $doctors->whereIn('gender',$request->gender);
             }
+
             if($request->speciality){
                 $sp = $request->speciality;
                 $doctors = $doctors->whereHas('doctorSpecialization', function ($category) use ($sp) {
-                    $category->whereIn('user_speciality.speciality_id',[$sp]);
+                    $category->whereIn('user_speciality.speciality_id',$sp);
                 });
             }
+
             if($request->country_id){
                 $country_id = $request->country_id;
                 $doctors = $doctors->whereHas('addresses', function ($category) use ($country_id) {
@@ -334,14 +342,22 @@ class DoctorController extends Controller
             }
             
             if($request->sort == 2){ //latest
-                $doctors = $doctors->where('id','DESC');
+                $doctors = $doctors->orderBy('created_at', 'DESC');
+            }else{
+                $order_by = $request->order_by ? $request->order_by : 'desc';
+                $doctors = $doctors->orderBy('created_at', $order_by);
             }
 
             if($request->sort == 3){ //free
                 $doctors = $doctors->where('price_type',1);
             }
             
-            $doctors = $doctors->get();
+          $doctors = $doctors->get();
+          /*$data = collect();
+          $doctors->paginate(10)->getCollection()->each(function ($appointment) use (&$data) {
+              $data->push($appointment->basicProfile());
+          });*/
+
             if($doctors){
                 return self::send_success_response($doctors,'Doctors data fetched successfully');
             }else{

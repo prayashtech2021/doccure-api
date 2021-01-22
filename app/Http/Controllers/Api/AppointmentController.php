@@ -6,6 +6,7 @@ use App\AppointmentLog;
 use App\Http\Controllers\Controller;
 use App\Payment;
 use App\Prescription;
+use App\PrescriptionDetail;
 use App\Setting;
 use App\TimeZone;
 use App\User;
@@ -295,6 +296,12 @@ class AppointmentController extends Controller
         }
     }
 
+    public function prescriptionView($pid){
+        $list = Prescription::with('prescriptionDetails','doctorappointment.patient','doctorappointment.doctor','doctorsign')->where('id',$pid)->get();
+
+        return self::send_success_response($list,'Prescription Details Fetched Successfully');
+    }
+
     public function appointmentStatusUpdate(Request $request)
     {
         $rules = array(
@@ -320,9 +327,5 @@ class AppointmentController extends Controller
             return self::send_exception_response($exception->getMessage());
         }
     }
-    public function prescriptionView($pid){
-        $get = Prescription::with('prescriptionDetail')->get();
-
-        return self::send_success_response($list,'Prescription Details Fetched Successfully');
-    }
+    
 }
