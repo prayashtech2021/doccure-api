@@ -300,6 +300,20 @@ class DoctorController extends Controller
     }
 
     public function doctorSearchList(Request $request){
+        $rules = array(
+            'keywords' => 'nullable|string',
+            'gender' => 'nullable|string',
+            'speciality' => 'nullable|string',
+            'country_id' => 'nullable|numeric|exists:countries,id',
+            'state_id' => 'nullable|numeric|exists:states,id',
+            'city_id' => 'nullable|numeric|exists:cities,id',
+            'count_per_page' => 'nullable|numeric',
+            'order_by' => 'nullable|in:desc,asc',
+            'sort' => 'nullable|numeric',
+        );
+        $valid = self::customValidation($request, $rules);
+        if ($valid) {return $valid;}
+
         try{
             $paginate = $request->count_per_page ? $request->count_per_page : 10;
 
@@ -311,13 +325,14 @@ class DoctorController extends Controller
             }
 
             if($request->gender){
-                $doctors->whereIn('gender',$request->gender);
+                $gender = explode(',',$request->gender);
+                $doctors->whereIn('gender',$gender);
             }
 
             if($request->speciality){
-                $sp = $request->speciality;
-                $doctors = $doctors->whereHas('doctorSpecialization', function ($category) use ($sp) {
-                    $category->whereIn('user_speciality.speciality_id',$sp);
+                $speciality = explode(',',$request->speciality);
+                $doctors = $doctors->whereHas('doctorSpecialization', function ($category) use ($speciality) {
+                    $category->whereIn('user_speciality.speciality_id',$speciality);
                 });
             }
 
@@ -351,12 +366,8 @@ class DoctorController extends Controller
             if($request->sort == 3){ //free
                 $doctors = $doctors->where('price_type',1);
             }
-            
-          $doctors = $doctors->get();
-          /*$data = collect();
-          $doctors->paginate(10)->getCollection()->each(function ($appointment) use (&$data) {
-              $data->push($appointment->basicProfile());
-          });*/
+            $doctors->profile_image=getUserProfileImage($doctors->id);
+            $doctors = $doctors->get();
 
             if($doctors){
                 return self::send_success_response($doctors,'Doctors data fetched successfully');

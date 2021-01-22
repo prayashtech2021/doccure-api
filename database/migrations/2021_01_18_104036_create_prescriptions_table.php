@@ -15,7 +15,8 @@ class CreatePrescriptionsTable extends Migration
     {
         Schema::create('prescriptions', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('appointment_id');
+            $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('doctor_id'); 
             $table->unsignedBigInteger('signature_id');
             
             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
@@ -25,7 +26,8 @@ class CreatePrescriptionsTable extends Migration
             $table->unsignedBigInteger('updated_by')->nullable();
             $table->unsignedBigInteger('deleted_by')->nullable();
 
-            $table->foreign('appointment_id')->references('id')->on('appointments')->onDelete('cascade')->onUpdate('cascade');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
+            $table->foreign('doctor_id')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
             $table->foreign('signature_id')->references('id')->on('signatures')->onDelete('cascade')->onUpdate('cascade');
             $table->foreign('created_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
 			$table->foreign('updated_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');

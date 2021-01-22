@@ -75,7 +75,7 @@ Route::middleware(['secureApi', 'responseHeader'])->group(function () {
  
     /*Prescription */
     Route::post('prescription/save', 'Api\AppointmentController@savePrescription');
-    Route::post('prescription/list', 'Api\AppointmentController@savePrescription');
+    Route::post('prescription/list', 'Api\AppointmentController@prescriptionList');
     Route::get('prescription/view', 'Api\AppointmentController@prescriptionView');
 
     Route::get('logout', 'PassportController@logout');

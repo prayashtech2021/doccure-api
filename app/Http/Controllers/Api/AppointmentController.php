@@ -70,13 +70,18 @@ class AppointmentController extends Controller
                 return $qry->whereDate('appointment_date', convertToUTC($appointment_date));
             });
 
+            $data = collect();
             if ($user->hasRole('patient')) {
                 $list = $list->whereUserId($user->id);
+                removeMetaColumn($user);
+                unset($user->roles);
+                $user->profile_image=getUserProfileImage($user->id);
+                $patient['patient_details'] =$user;
+                $data->push($patient);
             } elseif ($user->hasRole('doctor')) {
                 $list = $list->whereDoctorId($user->id);
             }
-
-            $data = collect();
+            
             $list->paginate($paginate)->getCollection()->each(function ($appointment) use (&$data) {
                 $data->push($appointment->getData());
             });
@@ -218,8 +223,8 @@ class AppointmentController extends Controller
     public function savePrescription(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'appointment_id' => 'required',
-            'prescription_details' => 'required',
+            'user_id' => 'required|numeric|exists:users,id',
+            'prescription_detail' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -230,7 +235,7 @@ class AppointmentController extends Controller
         try {
             $prescription = new Prescription();
             $prescription->user_id = $request->user_id;
-            $prescription->appointment_id = $request->appointment_id;
+            $prescription->doctor_id = auth()->user()->id;
             if ($request->signature_id) {
                 $prescription->signature_id = $request->signature_id;
             }elseif(!empty($request->signature_image)){
@@ -270,24 +275,28 @@ class AppointmentController extends Controller
         }
     }
 
-    public function prescriptionList()
+    public function prescriptionList(Request $request)
     {
+        $rules = array(
+            'user_id' => 'nullable|numeric|exists:users,id',
+            'count_per_page' => 'nullable|numeric',
+            'order_by' => 'nullable|in:desc,asc',
+        );
+        $valid = self::customValidation($request, $rules);
+        if ($valid) {return $valid;}
 
         try {
             $paginate = $request->count_per_page ? $request->count_per_page : 10;
-
             $order_by = $request->order_by ? $request->order_by : 'desc';
-
-            $list = Prescription::whereUserId($request->user_id)->orderBy('created_at', $order_by);
-            if($request->appointment_id){
-                $list = $list->where('appointment_id',$request->appointment_id);
+            $user=auth()->user();
+            if ($user->hasRole('patient')) {
+                $user_id=$user->id;
+            }else{
+                $user_id= $request->user_id;
             }
-            $list = $list->get();
+            $list = Prescription::with('prescriptionDetails')->whereUserId($user_id)->orderBy('created_at', $order_by);
 
-            /*$data = collect();
-            $list->paginate($paginate)->getCollection()->each(function ($pres) use (&$data) {
-                $data->push($pres->getData());
-            });*/
+            $list->paginate($paginate);
 
             return self::send_success_response($list,'Prescription Details Fetched Successfully');
 

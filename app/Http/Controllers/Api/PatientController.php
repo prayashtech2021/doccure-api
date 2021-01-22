@@ -27,19 +27,11 @@ class PatientController extends Controller
     
 
     public function profile_details($id){
-        $data['profile'] = User::find($id);
+        $user = User::find($id);
+        $user->profile_image=getUserProfileImage($user->id);
+        unset($user->roles);
+        $data['profile']=removeMetaColumn($user);
         $data['address'] = Address::with('country','state','city')->where('user_id',$id)->first();
-        $list = Appointment::whereUserId($id)->orderBy('created_at', 'DESC');
-        /*$array = collect();
-        $list->getCollection()->each(function ($appointment) use (&$array) {
-           print_r($appointment);
-            // $array->push($appointment->getData());
-        });*/
-        $data['appointments'] = $list->get();
-
-        $prescription = Prescription::with('prescriptionDetails')->whereUserId($id)->orderBy('created_at', 'DESC')->get();
-        
-        $data['prescription'] = $prescription;
 
         return self::send_success_response($data);
     }
@@ -129,6 +121,19 @@ class PatientController extends Controller
     }
 
     public function patientSearchList(Request $request){
+        $rules = array(
+            'keywords' => 'nullable|string',
+            'gender' => 'nullable|string',
+            'country_id' => 'nullable|numeric|exists:countries,id',
+            'state_id' => 'nullable|numeric|exists:states,id',
+            'city_id' => 'nullable|numeric|exists:cities,id',
+            'count_per_page' => 'nullable|numeric',
+            'order_by' => 'nullable|in:desc,asc',
+            'sort' => 'nullable|numeric',
+        );
+        $valid = self::customValidation($request, $rules);
+        if ($valid) {return $valid;}
+
         try{
             $paginate = $request->count_per_page ? $request->count_per_page : 10;
 
@@ -136,7 +141,8 @@ class PatientController extends Controller
             $data = User::role('patient')->with('homeAddresses');
 
             if($request->gender){
-                $data->whereIn('gender',[$request->gender]);
+                $gender = explode(',',$request->gender);
+                $data->whereIn('gender',$gender);
             }
             if($request->blood_group){
                 $data = $data->where('blood_group', $request->blood_group);
