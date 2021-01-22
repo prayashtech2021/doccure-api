@@ -366,8 +366,8 @@ class DoctorController extends Controller
             if($request->sort == 3){ //free
                 $doctors = $doctors->where('price_type',1);
             }
-            $doctors->profile_image=getUserProfileImage($doctors->id);
             $doctors = $doctors->get();
+            $doctors->profile_image=getUserProfileImage($doctors->id);
 
             if($doctors){
                 return self::send_success_response($doctors,'Doctors data fetched successfully');
