@@ -8,6 +8,7 @@ use App\Payment;
 use App\Prescription;
 use App\PrescriptionDetail;
 use App\Setting;
+use App\ScheduleTiming;
 use App\TimeZone;
 use App\User;
 use Closure;
@@ -335,6 +336,18 @@ class AppointmentController extends Controller
         } catch (Exception | Throwable $e) {
             return self::send_exception_response($exception->getMessage());
         }
+    }
+
+    public function scheduleList(){
+        $list=[];
+        if(auth()->user()){
+        $data = collect();
+        $list = ScheduleTiming::where('provider_id',auth()->user()->id);
+        $list->each(function ($schedule_timing) use (&$data) {
+            $data->push($schedule_timing->getData());
+        });
+        }
+        return self::send_success_response($data,'Schedule Details Fetched Successfully');
     }
     
 }

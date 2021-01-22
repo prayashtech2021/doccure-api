@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
         $this->call(PageMasterSeeder::class);
         $this->call(MultiLanguageSeeder::class);
         $this->call(SettingSeeder::class);
+        $this->call(ScheduleTimingSeeder::class);
     }
 
 }

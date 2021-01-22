@@ -300,6 +300,14 @@ class DoctorController extends Controller
     }
 
     public function doctorSearchList(Request $request){
+        dd(json_encode([
+            'monday'     => ['09:00-12:00', '13:00-18:00'],
+            'tuesday'    => ['09:00-12:00', '13:00-18:00'],
+            'wednesday'  => ['09:00-12:00', '13:00-16:00'],
+            'thursday'   => ['09:00-12:00', '13:00-18:00'],
+            'friday'     => ['09:00-12:00', '13:00-20:00'],
+            'saturday'   => ['09:00-12:00'],
+        ]));
         $rules = array(
             'keywords' => 'nullable|string',
             'gender' => 'nullable|string',

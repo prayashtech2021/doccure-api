@@ -52,6 +52,7 @@ Route::middleware(['secureApi', 'responseHeader'])->group(function () {
         //appointments
         Route::get('appointments/list','Api\AppointmentController@list');
         Route::post('appointments/create','Api\AppointmentController@create');
+        Route::get('schedule/list','Api\AppointmentController@scheduleList');
 
         /* Doctor Module */
         Route::get('doctor/dashboard','Api\DoctorController@dashboard');
@@ -73,10 +74,6 @@ Route::middleware(['secureApi', 'responseHeader'])->group(function () {
         // Language 
         Route::post('language/update', 'Api\LanguageController@update');
  
-    /*Prescription */
-    Route::post('prescription/save', 'Api\AppointmentController@savePrescription');
-    Route::post('prescription/list', 'Api\AppointmentController@prescriptionList');
-    Route::get('prescription/view', 'Api\AppointmentController@prescriptionView');
 
     Route::get('logout', 'PassportController@logout');
     // Language
