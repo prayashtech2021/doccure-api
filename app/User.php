@@ -12,6 +12,8 @@ use Laravel\Cashier\Billable;
 use Bavix\Wallet\Interfaces\Wallet;
 use Bavix\Wallet\Traits\HasWalletFloat;
 use Bavix\Wallet\Interfaces\WalletFloat;
+use Illuminate\Support\Carbon;
+
 
 class User extends Authenticatable implements Wallet, WalletFloat
 {
@@ -29,9 +31,9 @@ class User extends Authenticatable implements Wallet, WalletFloat
      * @var array
      */
     protected $fillable = [
-         'first_name', 'last_name', 'email', 'password', 'mobile_number', 'profile_image','country_id','currency_code',
-         'verification_code','is_verified','created_by',
-    ];
+        'first_name', 'last_name', 'email', 'password', 'mobile_number', 'profile_image','country_id','currency_code','gender','dob','blood_group',
+        'biography','price_type','amount','verification_code','is_verified','currency_code','created_by',
+   ];
 
     /**
      * The attributes that should be hidden for arrays.
@@ -42,17 +44,47 @@ class User extends Authenticatable implements Wallet, WalletFloat
         'password','remember_token',
     ];
 
-   public function accessToken()
-    {
+    protected $appends = ['pid','did','age','accountstatus','membersince','gendername'];
+
+    public function accessToken(){
         return $this->hasMany('App\OauthAccessToken');
     }
 
-    public function specialities() {
+    public static function userAddress($id){
+        return Address::whereNull('name')->where('user_id',$id)->first();
+    }
+
+    public static function doctorClinicInfo($id){
+        return Address::whereNotNull('name')->where('user_id',$id)->first();
+    }
+
+    public function doctorSpecialization() { 
+       // return $this->hasOne('App\UserSpeciality','user_id');
         return $this->belongsToMany('App\Speciality', 'user_speciality');
     }
 
-    public function doctorEducation() {
-        return $this->hasMany('App\EducationDetail');
+    public function doctorService(){
+        return $this->hasMany(Service::class);
+    }
+
+    public function doctorEducation(){
+        return $this->hasMany(EducationDetail::class);
+    }
+
+    public function doctorExperience() { 
+        return $this->hasMany(ExperienceDetail::class);
+    }
+
+    public function doctorAwards() { 
+        return $this->hasMany(AwardDetail::class);
+    }
+
+    public function doctorMembership() { 
+        return $this->hasMany(MembershipDetail::class); 
+    }
+
+    public function doctorRegistration() { 
+        return $this->hasMany(RegistrationDetail::class); 
     }
 
     public function basicProfile(){
@@ -66,4 +98,41 @@ class User extends Authenticatable implements Wallet, WalletFloat
     {
         return $this->hasManyThrough(Payment::class, Appointment::class);
     }
+
+    public function getPidAttribute() { 
+        return 'PT00'.$this->id; 
+    } // patient_ID
+
+    public function getDidAttribute() { 
+        return 'D00'.$this->id; 
+    } // Doctor_ID
+
+    public function getAgeAttribute(){
+        return Carbon::parse($this->attributes['dob'])->age;
+    }
+
+    public function getAccountStatusAttribute(){
+        if($this->deleted_at == NULL){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    public function getMemberSinceAttribute(){
+        return date('d M Y H:s A', strtotime($this->created_at));
+    }
+
+    public function getGenderNameAttribute(){
+        if($this->gender == 1){
+            return 'Male';
+        }elseif($this->gender == 2){
+            return 'Female';
+        }else{
+            return '-';
+        }
+    }
+
+
+
 }

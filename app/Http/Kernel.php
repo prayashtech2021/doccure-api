@@ -50,7 +50,6 @@ class Kernel extends HttpKernel
         \App\Http\Middleware\CheckAuthHeader::class,
         \App\Http\Middleware\ApiSecurity::class,
         
-        \App\Http\Middleware\CheckAuthHeader::class, 
         \App\Http\Middleware\Authenticate::class,
         \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
         \Illuminate\Routing\Middleware\SubstituteBindings::class,
