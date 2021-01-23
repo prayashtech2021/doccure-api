@@ -21,6 +21,6 @@ class ScheduleTiming extends Model
     }
 
     public function provider(){
-        return $this->belongsTo(User::class, 'user_id', 'id');
+        return $this->belongsTo(User::class, 'provider_id', 'id');
     }
 }

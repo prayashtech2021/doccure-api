@@ -300,7 +300,6 @@ class DoctorController extends Controller
     }
 
     public function doctorSearchList(Request $request){
-       
         $rules = array(
             'keywords' => 'nullable|string',
             'gender' => 'nullable|string',
