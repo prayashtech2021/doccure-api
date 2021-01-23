@@ -339,9 +339,9 @@ class AppointmentController extends Controller
         }
     }
 
-    public function scheduleList(){
+    public function scheduleList(Request $request){
         $rules = array(
-            'provider_id' => 'required|exists:users,id',
+            'provider_id' => 'required|numeric|exists:users,id',
         );
         $valid = self::customValidation($request, $rules);
         if ($valid) {return $valid;}
