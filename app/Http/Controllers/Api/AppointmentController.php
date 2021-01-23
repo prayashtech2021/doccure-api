@@ -356,8 +356,6 @@ class AppointmentController extends Controller
         return self::send_success_response($data,'Schedule Details Fetched Successfully');
     }
 
-
-
     public function savedCards(Request $request){
         try{
             $user = $request->user();
@@ -365,13 +363,7 @@ class AppointmentController extends Controller
             if($user->hasRole('patient')){
                 $saved_cards = collect();
 
-                $stripe = new \Stripe\StripeClient(config('cashier.secret'));
-                $stripeCustomer = $user->asStripeCustomer();
-
-                $paymentMethods = $stripe->paymentMethods->all([
-                    'customer' => $stripeCustomer->id,
-                    'type' => 'card',
-                ]);
+                $paymentMethods = $user->paymentMethods();
 
                 foreach ($paymentMethods as $paymentMethod) {
                     $saved_cards->push([
@@ -392,4 +384,28 @@ class AppointmentController extends Controller
         }
     }
 
+    public function invoiceList(Request $request){
+        try{
+            $invoice_list = collect();
+            $user = $request->user();
+            if($user->hasRole(['patient', 'doctor'])){
+                $payments = $user->payment()->get();
+
+                foreach ($payments as $payment){
+                    $appointment = $payment->appointment()->first();
+                    $invoice_list->push([
+                        'payment' => $payment->getData(),
+                        'from' => $appointment->getData()['doctor'],
+                        'to' => $appointment->getData()['patient'],
+                        'created' => $payment->getData()['created'],
+                    ]);
+
+                }
+            }
+
+            return self::send_success_response($invoice_list->toArray());
+        } catch (Exception | Throwable $exception) {
+            return self::send_exception_response($exception->getMessage());
+        }
+    }
 }

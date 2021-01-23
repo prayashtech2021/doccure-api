@@ -56,10 +56,14 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
     Route::get('schedule/list', 'Api\AppointmentController@scheduleList');
     Route::post('appointment/status/update', 'Api\AppointmentController@appointmentStatusUpdate');
 
+    //invoice
+    Route::get('invoice/list', 'Api\AppointmentController@invoiceList');
+
+
     /* Doctor Module */
     Route::get('doctor/dashboard', 'Api\DoctorController@dashboard');
     Route::get('doctor/list', 'Api\DoctorController@doctorList');
-    
+
     Route::post('doctor/saveprofile', 'Api\DoctorController@saveProfile');
 
     /* Speciality */
