@@ -19,7 +19,12 @@ class Appointment extends Model
             'start_time' => Carbon::parse($this->start_time)->format('h:i A'),
             'end_time' => Carbon::parse($this->end_time)->format('h:i A'),
             'next_visit' => convertToLocal(Carbon::parse($this->next_visit),'','d/m/Y'),
+            'transaction_data' => $this->payment()->first()->getData()
         ];
+    }
+
+    public function payment(){
+        return $this->hasOne(Payment::class);
     }
 
     public function patient(){

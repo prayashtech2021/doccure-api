@@ -82,7 +82,7 @@ class AppointmentController extends Controller
             } elseif ($user->hasRole('doctor')) {
                 $list = $list->whereDoctorId($user->id);
             }
-            
+
             $list->paginate($paginate)->getCollection()->each(function ($appointment) use (&$data) {
                 $data->push($appointment->getData());
             });
@@ -244,7 +244,7 @@ class AppointmentController extends Controller
                     $file_name = date('YmdHis') . '_' . auth()->user()->id . '.png';
                     $path = 'images/signature';
                     $store = $request->file('signature_image')->storeAs($path, $file_name);
-    
+
                     $prescription->signature_id = $file_name;
             }
             $prescription->save();
@@ -265,7 +265,7 @@ class AppointmentController extends Controller
                     }
                 }
             }
-            
+
             DB::commit();
 
             return self::send_success_response([],'Prescription Stored Successfully');
@@ -302,6 +302,7 @@ class AppointmentController extends Controller
             return self::send_success_response($list,'Prescription Details Fetched Successfully');
 
         } catch (Exception | Throwable $exception) {
+            DB::rollBack();
             return self::send_exception_response($exception->getMessage());
         }
     }
@@ -333,7 +334,7 @@ class AppointmentController extends Controller
             $log->save();
 
             return self::send_success_response([], 'Status updated sucessfully');
-        } catch (Exception | Throwable $e) {
+        } catch (Exception | Throwable $exception) {
             return self::send_exception_response($exception->getMessage());
         }
     }
@@ -354,5 +355,41 @@ class AppointmentController extends Controller
         }
         return self::send_success_response($data,'Schedule Details Fetched Successfully');
     }
-    
+
+
+
+    public function savedCards(Request $request){
+        try{
+            $user = $request->user();
+
+            if($user->hasRole('patient')){
+                $saved_cards = collect();
+
+                $stripe = new \Stripe\StripeClient(config('cashier.secret'));
+                $stripeCustomer = $user->asStripeCustomer();
+
+                $paymentMethods = $stripe->paymentMethods->all([
+                    'customer' => $stripeCustomer->id,
+                    'type' => 'card',
+                ]);
+
+                foreach ($paymentMethods as $paymentMethod) {
+                    $saved_cards->push([
+                        'id' => $paymentMethod->id,
+                        'brand' => $paymentMethod->card->brand,
+                        'last4' => $paymentMethod->card->last4,
+                        'name' => ucwords($paymentMethod->billing_details->name)
+                    ]);
+                }
+
+                return self::send_success_response($saved_cards->toArray());
+            }else{
+                return self::send_bad_request_response(['message' => 'Invalid request', 'error' => 'Invalid request']);
+            }
+
+        } catch (Exception | Throwable $exception) {
+            return self::send_exception_response($exception->getMessage());
+        }
+    }
+
 }
