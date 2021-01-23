@@ -228,7 +228,7 @@ class HomeController extends Controller
             try{
                 $check_user = User::where('email',$request->email)->first();
                 if($check_user){
-                    return self::send_bad_request_response([],'Email-Id Exists');
+                    return self::send_bad_request_response('Email-Id Exists');
                 }else{
                     return self::send_success_response('Email-Id Not Exists');
                 }

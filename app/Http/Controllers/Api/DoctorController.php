@@ -45,7 +45,7 @@ class DoctorController extends Controller
     public function doctorProfile($user_id){
         try {
             
-            $doctor['profile'] = User::with('doctorSpecialization','doctorService','doctorEducation','doctorExperience','doctorAwards','doctorMembership','doctorRegistration')->find($user_id);
+            $doctor['profile'] = User::role('doctor')->with('doctorSpecialization','doctorService','doctorEducation','doctorExperience','doctorAwards','doctorMembership','doctorRegistration')->find($user_id);
             $doctor['doctor_contact_info'] = User::userAddress($user_id);
             $doctor['doctor_clinic_info'] = User::doctorClinicInfo($user_id);
             $doctor['doctor_clinic_images'] = User::doctorClinicImage($user_id);
