@@ -29,7 +29,7 @@ Route::middleware(['secureApi', 'responseHeader'])->group(function () {
     Route::get('language/list', 'Api\LanguageController@list');
     Route::get('speacility/list', 'Api\SpecialityController@getList');
     Route::post('doctors-search', 'Api\DoctorController@doctorSearchList');
-
+    Route::get('doctor/profile/{id}', 'Api\DoctorController@doctorProfile');
 });
 
 Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader'])->group(function () {
@@ -59,7 +59,7 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
     /* Doctor Module */
     Route::get('doctor/dashboard', 'Api\DoctorController@dashboard');
     Route::get('doctor/list', 'Api\DoctorController@doctorList');
-    Route::get('doctor/profile/{id}', 'Api\DoctorController@doctorProfile');
+    
     Route::post('doctor/saveprofile', 'Api\DoctorController@saveProfile');
 
     /* Speciality */
