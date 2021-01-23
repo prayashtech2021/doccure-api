@@ -339,10 +339,15 @@ class AppointmentController extends Controller
     }
 
     public function scheduleList(){
-        $list=[];
-        if(auth()->user()){
+        $rules = array(
+            'provider_id' => 'required|exists:users,id',
+        );
+        $valid = self::customValidation($request, $rules);
+        if ($valid) {return $valid;}
+
         $data = collect();
-        $list = ScheduleTiming::where('provider_id',auth()->user()->id);
+        if(auth()->user()){
+        $list = ScheduleTiming::where('provider_id',$request->provider_id);
         $list->each(function ($schedule_timing) use (&$data) {
             $data->push($schedule_timing->getData());
         });
