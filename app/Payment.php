@@ -12,7 +12,7 @@ class Payment extends Model
             'id' => $this->id,
             'reference' => $this->invoice_no,
             'created' => Carbon::parse($this->created_at)->format('d/m/Y h:i A'),
-            'type' => config('appointments.type')[$this->payment_type],
+            'type' => config('appointments.payment')[$this->payment_type],
             'total_amount' => $this->total_amount,
             'currency_code' => $this->currency_code,
             'txn_id' => $this->txn_id??'NA',
