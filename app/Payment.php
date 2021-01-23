@@ -10,7 +10,7 @@ class Payment extends Model
         return [
             'id' => $this->id,
             'reference' => $this->invoice_no,
-            'type' => config('appointments.type')[$this->payment_type],
+            'type' => config('appointments.payment')[$this->payment_type],
             'total_amount' => $this->total_amount,
             'currency_code' => $this->currency_code,
             'txn_id' => $this->txn_id??'NA',

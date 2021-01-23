@@ -119,6 +119,11 @@ class AppointmentController extends Controller
             /**
              * Appointment
              */
+            $appointment_date=convertToUTC(Carbon::createFromFormat('d/m/Y', $request->appointment_date));
+            $chk = Appointment::where(['user_id'=>$user->id,'doctor_id'=>$doctor->id,'appointment_date'=>$appointment_date->toDateString(),'start_time'=>$request->start_time,'end_time'=>$request->end_time])->first();
+            if($chk){
+                return self::send_bad_request_response(['message' => 'Appointment already exists', 'error' => 'Appointment already exists']);
+            }
 
             $appointment = new Appointment();
             $last_id = $appointment->latest()->first() ? $appointment->latest()->first()->id : 0;
@@ -126,7 +131,7 @@ class AppointmentController extends Controller
             $appointment->user_id = 4;
             $appointment->doctor_id = $request->doctor_id;
             $appointment->appointment_type = $request->appointment_type; //1=online, 2=clinic
-            $appointment->appointment_date = convertToUTC(Carbon::createFromFormat('d/m/Y', $request->appointment_date));
+            $appointment->appointment_date = $appointment_date;
             $appointment->start_time = $request->start_time;
             $appointment->end_time = $request->end_time;
             $appointment->payment_type = $request->payment_type;

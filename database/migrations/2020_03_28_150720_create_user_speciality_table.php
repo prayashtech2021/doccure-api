@@ -17,11 +17,11 @@ class CreateUserSpecialityTable extends Migration
     {
         Schema::create('user_speciality', function (Blueprint $table) {
         
-            $table->unsignedBigInteger('speciality_id');
             $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('speciality_id');
 
-            $table->foreign('speciality_id')->references('id')->on('specialities')->onDelete('cascade');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('speciality_id')->references('id')->on('specialities')->onDelete('cascade');
 
         });
     }

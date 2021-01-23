@@ -46,7 +46,6 @@ class PassportController extends Controller {
 				$arr[$key]['name'] = $row['name'];
 			}
 			$user->role_names = $arr;
-			$user->profile_image = getUserProfileImage($user->id);
 			removeMetaColumn($user);
 			
 
@@ -55,8 +54,8 @@ class PassportController extends Controller {
 			$response_array = [
 				"code" => "200",
 				"message" => "Logged Successfully",
-				"data" => $user,
 				"token" => $token,
+				"data" => $user,
 				"menu_list" => $menuList,
 			];
 			unset($user->tokens);
