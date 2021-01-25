@@ -30,15 +30,15 @@ class PassportController extends Controller {
 		
 		if (auth()->attempt($credentials)) {
 			$user = auth()->user();
-			$chktoken = $user->accessToken(function($qry){
-				$qry->where('revoked',0);
-			});
-			if($chktoken){
-				$userTokens = $user->tokens;
-				foreach($userTokens as $token) {
-					$token->revoke();
-				}
-			}
+			// $chktoken = $user->accessToken(function($qry){
+			// 	$qry->where('revoked',0);
+			// });
+			// if($chktoken){
+			// 	$userTokens = $user->tokens;
+			// 	foreach($userTokens as $token) {
+			// 		$token->revoke();
+			// 	}
+			// }
 			$token = auth()->user()->createToken('APIAUTH')->accessToken;
 			$tmp = $user->roles()->select('id', 'name')->get()->toArray();
 			foreach ($tmp as $key => $row) {
