@@ -54,6 +54,7 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
     Route::post('appointments/create', 'Api\AppointmentController@create');
     Route::get('appointments/saved-cards','Api\AppointmentController@savedCards');
     Route::get('schedule/list', 'Api\AppointmentController@scheduleList');
+    Route::post('schedule/create', 'Api\AppointmentController@scheduleCreate');
     Route::post('appointment/status/update', 'Api\AppointmentController@appointmentStatusUpdate');
 
     /* Doctor Module */

@@ -351,16 +351,94 @@ class AppointmentController extends Controller
         $valid = self::customValidation($request, $rules);
         if ($valid) {return $valid;}
 
+        try {
         $data = collect();
         if(auth()->user()){
-        $list = ScheduleTiming::where('provider_id',$request->provider_id);
+        $user['provider_details'] = User::find($request->provider_id);
+        $data->push($user);
+        $list = ScheduleTiming::where('provider_id',$request->provider_id)->get();
+        // dd(json_decode($list->working_hours));
         $list->each(function ($schedule_timing) use (&$data) {
             $data->push($schedule_timing->getData());
         });
         }
         return self::send_success_response($data,'Schedule Details Fetched Successfully');
+        } catch (Exception | Throwable $exception) {
+            return self::send_exception_response($exception->getMessage());
+        }
     }
 
+    public function scheduleCreate(Request $request){
+        // dd(json_encode(config('custom.empty_working_hours')));
+        $rules = array(
+            'provider_id' => 'required|numeric|exists:users,id',
+            'duration' => 'required|date_format:"H:i:s',
+            'appointment_type' => 'required|numeric|between:1,2',
+            'day' => 'required|numeric|between:1,7',
+            'working_hours' => 'required|string',
+        );
+        $valid = self::customValidation($request, $rules);
+        if ($valid) {return $valid;}
+
+        try {
+            $schedule = ScheduleTiming::where('provider_id',$request->provider_id)->first();
+            $seconds = Carbon::parse('00:00:00')->diffInSeconds(Carbon::parse($request->duration));
+            $seconds = (int)$seconds;
+            if($schedule){ //update
+                $schedule = ScheduleTiming::where('provider_id',$request->provider_id)->where('appointment_type',$request->appointment_type)->first();
+               if($schedule){ //update 
+                
+                if($schedule->duration==$seconds){//update working hrs
+                    $array = json_decode($schedule->working_hours,true);
+                    $array[config('custom.days.'.$request->day)] = explode(',',$request->working_hours);
+                    $schedule->working_hours = json_encode($array);
+                    $schedule->save();
+                }else{// update duration and working hrs 
+                    $array = config('custom.empty_working_hours');
+                    $array[config('custom.days.'.$request->day)] = explode(',',$request->working_hours);
+                    $schedule->duration = $seconds;
+                    $schedule->working_hours = json_encode($array);
+                    $schedule->save();
+
+                    //
+                    $type=($request->appointment_type==1)?2:1;
+                    $schedule2 = ScheduleTiming::where('provider_id',$request->provider_id)->where('appointment_type',$type)->first();
+                    $schedule2->duration = $seconds;
+                    $schedule2->working_hours = json_encode(config('custom.empty_working_hours'));
+                    $schedule2->save();
+                }
+               }
+
+            }else{ // insert
+                for($i=1;$i<=2;$i++){
+                    $schedule = new ScheduleTiming;
+                    $schedule->provider_id = $request->provider_id;
+                    $schedule->appointment_type = $i;
+                    $schedule->duration = $seconds;
+                    if($i==$request->appointment_type){
+                        $array = config('custom.empty_working_hours');
+                        $array[config('custom.days.'.$request->day)] = explode(',',$request->working_hours);
+                        $schedule->working_hours = json_encode($array);
+                    }else{
+                        $schedule->working_hours = json_encode(config('custom.empty_working_hours'));
+                    }
+                    $schedule->save();
+                }
+            }
+
+            $data = collect();
+            $user['provider_details'] = User::find($request->provider_id);
+            $data->push($user);
+            $list = ScheduleTiming::where('provider_id',$request->provider_id)->get();
+            $list->each(function ($schedule_timing) use (&$data) {
+                $data->push($schedule_timing->getData());
+            });
+
+            return self::send_success_response($data,'Schedule details updated successfully');
+        } catch (Exception | Throwable $exception) {
+            return self::send_exception_response($exception->getMessage());
+        }
+    }
 
 
     public function savedCards(Request $request){
