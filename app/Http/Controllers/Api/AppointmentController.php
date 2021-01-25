@@ -77,8 +77,7 @@ class AppointmentController extends Controller
                 removeMetaColumn($user);
                 unset($user->roles);
                 $user->profile_image=getUserProfileImage($user->id);
-                $patient['patient_details'] =$user;
-                $data->push($patient);
+                $result['patient_details'] =$user;
             } elseif ($user->hasRole('doctor')) {
                 $list = $list->whereDoctorId($user->id);
             }
@@ -86,8 +85,9 @@ class AppointmentController extends Controller
             $list->paginate($paginate)->getCollection()->each(function ($appointment) use (&$data) {
                 $data->push($appointment->getData());
             });
+            $result['list'] = $data;
 
-            return self::send_success_response($data);
+            return self::send_success_response($result);
         } catch (Exception | Throwable $exception) {
             return self::send_exception_response($exception->getMessage());
         }
@@ -360,7 +360,7 @@ class AppointmentController extends Controller
         $list->each(function ($schedule_timing) use (&$data) {
             $data->push($schedule_timing->getData());
         });
-        $result['data'] = $data;
+        $result['list'] = $data;
         }
         return self::send_success_response($result,'Schedule Details Fetched Successfully');
         } catch (Exception | Throwable $exception) {
@@ -432,7 +432,7 @@ class AppointmentController extends Controller
             $list->each(function ($schedule_timing) use (&$data) {
                 $data->push($schedule_timing->getData());
             });
-            $result['data'] = $data;
+            $result['list'] = $data;
 
             return self::send_success_response($result,'Schedule details updated successfully');
         } catch (Exception | Throwable $exception) {
