@@ -354,15 +354,15 @@ class AppointmentController extends Controller
         try {
         $data = collect();
         if(auth()->user()){
-        $user['provider_details'] = User::find($request->provider_id);
-        $data->push($user);
+        $result['provider_details'] = User::find($request->provider_id);
         $list = ScheduleTiming::where('provider_id',$request->provider_id)->get();
         // dd(json_decode($list->working_hours));
         $list->each(function ($schedule_timing) use (&$data) {
             $data->push($schedule_timing->getData());
         });
+        $result['data'] = $data;
         }
-        return self::send_success_response($data,'Schedule Details Fetched Successfully');
+        return self::send_success_response($result,'Schedule Details Fetched Successfully');
         } catch (Exception | Throwable $exception) {
             return self::send_exception_response($exception->getMessage());
         }
@@ -427,14 +427,14 @@ class AppointmentController extends Controller
             }
 
             $data = collect();
-            $user['provider_details'] = User::find($request->provider_id);
-            $data->push($user);
+            $result['provider_details'] = User::find($request->provider_id);
             $list = ScheduleTiming::where('provider_id',$request->provider_id)->get();
             $list->each(function ($schedule_timing) use (&$data) {
                 $data->push($schedule_timing->getData());
             });
+            $result['data'] = $data;
 
-            return self::send_success_response($data,'Schedule details updated successfully');
+            return self::send_success_response($result,'Schedule details updated successfully');
         } catch (Exception | Throwable $exception) {
             return self::send_exception_response($exception->getMessage());
         }
