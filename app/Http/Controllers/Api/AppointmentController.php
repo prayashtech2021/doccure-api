@@ -386,14 +386,14 @@ class AppointmentController extends Controller
             $seconds = (int)$seconds;
             if($schedule){ //update
                 $schedule = ScheduleTiming::where('provider_id',$request->provider_id)->where('appointment_type',$request->appointment_type)->first();
-               if($schedule){ //update 
-                
+               if($schedule){ //update
+
                 if($schedule->duration==$seconds){//update working hrs
                     $array = json_decode($schedule->working_hours,true);
                     $array[config('custom.days.'.$request->day)] = explode(',',$request->working_hours);
                     $schedule->working_hours = json_encode($array);
                     $schedule->save();
-                }else{// update duration and working hrs 
+                }else{// update duration and working hrs
                     $array = config('custom.empty_working_hours');
                     $array[config('custom.days.'.$request->day)] = explode(',',$request->working_hours);
                     $schedule->duration = $seconds;
@@ -489,6 +489,41 @@ class AppointmentController extends Controller
             }
 
             return self::send_success_response($invoice_list->toArray());
+        } catch (Exception | Throwable $exception) {
+            return self::send_exception_response($exception->getMessage());
+        }
+    }
+
+    public function viewInvoice(Request $request){
+        try{
+
+            $validator = Validator::make($request->all(), [
+                'invoice_id' => 'required',
+            ]);
+
+            if ($validator->fails()) {
+                return self::send_bad_request_response($validator->errors()->first());
+            }
+
+            $result = [];
+            $user = $request->user();
+            if($user->hasRole(['patient', 'doctor'])){
+                $payment = $user->payment()->where('payments.id', $request->invoice_id)->first();
+                if($payment){
+                    $appointment = $payment->appointment()->first();
+
+                    $result = [
+                        'payment' => $payment->getData(),
+                        'from' => $appointment->getData()['doctor'],
+                        'to' => $appointment->getData()['patient'],
+                        'created' => $payment->getData()['created'],
+                    ];
+                }else{
+                    return self::send_bad_request_response(['message' => 'Invoice not found with ID given', 'error' => 'Invoice not found with ID given']);
+                }
+            }
+
+            return self::send_success_response($result);
         } catch (Exception | Throwable $exception) {
             return self::send_exception_response($exception->getMessage());
         }
