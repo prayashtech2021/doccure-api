@@ -79,8 +79,7 @@ class AppointmentController extends Controller
                 removeMetaColumn($user);
                 unset($user->roles);
                 $user->profile_image=getUserProfileImage($user->id);
-                $patient['patient_details'] =$user;
-                $data->push($patient);
+                $result['patient_details'] =$user;
             } elseif ($user->hasRole('doctor')) {
                 $list = $list->whereDoctorId($user->id);
             }
@@ -88,8 +87,9 @@ class AppointmentController extends Controller
             $list->paginate($paginate)->getCollection()->each(function ($appointment) use (&$data) {
                 $data->push($appointment->getData());
             });
+            $result['list'] = $data;
 
-            return self::send_success_response($data);
+            return self::send_success_response($result);
         } catch (Exception | Throwable $exception) {
             return self::send_exception_response($exception->getMessage());
         }
@@ -121,6 +121,11 @@ class AppointmentController extends Controller
             /**
              * Appointment
              */
+            $appointment_date=convertToUTC(Carbon::createFromFormat('d/m/Y', $request->appointment_date));
+            $chk = Appointment::where(['user_id'=>$user->id,'doctor_id'=>$doctor->id,'appointment_date'=>$appointment_date->toDateString(),'start_time'=>$request->start_time,'end_time'=>$request->end_time])->first();
+            if($chk){
+                return self::send_bad_request_response(['message' => 'Appointment already exists', 'error' => 'Appointment already exists']);
+            }
 
             $appointment = new Appointment();
             $last_id = $appointment->latest()->first() ? $appointment->latest()->first()->id : 0;
@@ -128,7 +133,7 @@ class AppointmentController extends Controller
             $appointment->user_id = 4;
             $appointment->doctor_id = $request->doctor_id;
             $appointment->appointment_type = $request->appointment_type; //1=online, 2=clinic
-            $appointment->appointment_date = convertToUTC(Carbon::createFromFormat('d/m/Y', $request->appointment_date));
+            $appointment->appointment_date = $appointment_date;
             $appointment->start_time = $request->start_time;
             $appointment->end_time = $request->end_time;
             $appointment->payment_type = $request->payment_type;
@@ -400,16 +405,94 @@ exit();
         $valid = self::customValidation($request, $rules);
         if ($valid) {return $valid;}
 
+        try {
         $data = collect();
         if(auth()->user()){
-        $list = ScheduleTiming::where('provider_id',$request->provider_id);
+        $result['provider_details'] = User::find($request->provider_id);
+        $list = ScheduleTiming::where('provider_id',$request->provider_id)->get();
+        // dd(json_decode($list->working_hours));
         $list->each(function ($schedule_timing) use (&$data) {
             $data->push($schedule_timing->getData());
         });
+        $result['list'] = $data;
         }
-        return self::send_success_response($data,'Schedule Details Fetched Successfully');
+        return self::send_success_response($result,'Schedule Details Fetched Successfully');
+        } catch (Exception | Throwable $exception) {
+            return self::send_exception_response($exception->getMessage());
+        }
     }
 
+    public function scheduleCreate(Request $request){
+        // dd(json_encode(config('custom.empty_working_hours')));
+        $rules = array(
+            'provider_id' => 'required|numeric|exists:users,id',
+            'duration' => 'required|date_format:"H:i:s',
+            'appointment_type' => 'required|numeric|between:1,2',
+            'day' => 'required|numeric|between:1,7',
+            'working_hours' => 'required|string',
+        );
+        $valid = self::customValidation($request, $rules);
+        if ($valid) {return $valid;}
+
+        try {
+            $schedule = ScheduleTiming::where('provider_id',$request->provider_id)->first();
+            $seconds = Carbon::parse('00:00:00')->diffInSeconds(Carbon::parse($request->duration));
+            $seconds = (int)$seconds;
+            if($schedule){ //update
+                $schedule = ScheduleTiming::where('provider_id',$request->provider_id)->where('appointment_type',$request->appointment_type)->first();
+               if($schedule){ //update 
+                
+                if($schedule->duration==$seconds){//update working hrs
+                    $array = json_decode($schedule->working_hours,true);
+                    $array[config('custom.days.'.$request->day)] = explode(',',$request->working_hours);
+                    $schedule->working_hours = json_encode($array);
+                    $schedule->save();
+                }else{// update duration and working hrs 
+                    $array = config('custom.empty_working_hours');
+                    $array[config('custom.days.'.$request->day)] = explode(',',$request->working_hours);
+                    $schedule->duration = $seconds;
+                    $schedule->working_hours = json_encode($array);
+                    $schedule->save();
+
+                    //
+                    $type=($request->appointment_type==1)?2:1;
+                    $schedule2 = ScheduleTiming::where('provider_id',$request->provider_id)->where('appointment_type',$type)->first();
+                    $schedule2->duration = $seconds;
+                    $schedule2->working_hours = json_encode(config('custom.empty_working_hours'));
+                    $schedule2->save();
+                }
+               }
+
+            }else{ // insert
+                for($i=1;$i<=2;$i++){
+                    $schedule = new ScheduleTiming;
+                    $schedule->provider_id = $request->provider_id;
+                    $schedule->appointment_type = $i;
+                    $schedule->duration = $seconds;
+                    if($i==$request->appointment_type){
+                        $array = config('custom.empty_working_hours');
+                        $array[config('custom.days.'.$request->day)] = explode(',',$request->working_hours);
+                        $schedule->working_hours = json_encode($array);
+                    }else{
+                        $schedule->working_hours = json_encode(config('custom.empty_working_hours'));
+                    }
+                    $schedule->save();
+                }
+            }
+
+            $data = collect();
+            $result['provider_details'] = User::find($request->provider_id);
+            $list = ScheduleTiming::where('provider_id',$request->provider_id)->get();
+            $list->each(function ($schedule_timing) use (&$data) {
+                $data->push($schedule_timing->getData());
+            });
+            $result['list'] = $data;
+
+            return self::send_success_response($result,'Schedule details updated successfully');
+        } catch (Exception | Throwable $exception) {
+            return self::send_exception_response($exception->getMessage());
+        }
+    }
 
 
     public function savedCards(Request $request){
@@ -419,13 +502,7 @@ exit();
             if($user->hasRole('patient')){
                 $saved_cards = collect();
 
-                $stripe = new \Stripe\StripeClient(config('cashier.secret'));
-                $stripeCustomer = $user->asStripeCustomer();
-
-                $paymentMethods = $stripe->paymentMethods->all([
-                    'customer' => $stripeCustomer->id,
-                    'type' => 'card',
-                ]);
+                $paymentMethods = $user->paymentMethods();
 
                 foreach ($paymentMethods as $paymentMethod) {
                     $saved_cards->push([
@@ -446,5 +523,28 @@ exit();
         }
     }
 
-    
+    public function invoiceList(Request $request){
+        try{
+            $invoice_list = collect();
+            $user = $request->user();
+            if($user->hasRole(['patient', 'doctor'])){
+                $payments = $user->payment()->get();
+
+                foreach ($payments as $payment){
+                    $appointment = $payment->appointment()->first();
+                    $invoice_list->push([
+                        'payment' => $payment->getData(),
+                        'from' => $appointment->getData()['doctor'],
+                        'to' => $appointment->getData()['patient'],
+                        'created' => $payment->getData()['created'],
+                    ]);
+
+                }
+            }
+
+            return self::send_success_response($invoice_list->toArray());
+        } catch (Exception | Throwable $exception) {
+            return self::send_exception_response($exception->getMessage());
+        }
+    }
 }

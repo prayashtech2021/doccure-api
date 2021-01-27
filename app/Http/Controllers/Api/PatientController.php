@@ -30,7 +30,8 @@ class PatientController extends Controller
         $user = User::find($id);
         $user->profile_image=getUserProfileImage($user->id);
         unset($user->roles);
-        $data['profile']=removeMetaColumn($user);
+        removeMetaColumn($user);
+        $data['profile']=$user;
         $data['address'] = Address::with('country','state','city')->where('user_id',$id)->first();
 
         return self::send_success_response($data);

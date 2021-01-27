@@ -54,12 +54,17 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
     Route::post('appointments/create', 'Api\AppointmentController@create');
     Route::get('appointments/saved-cards','Api\AppointmentController@savedCards');
     Route::get('schedule/list', 'Api\AppointmentController@scheduleList');
+    Route::post('schedule/create', 'Api\AppointmentController@scheduleCreate');
     Route::post('appointment/status/update', 'Api\AppointmentController@appointmentStatusUpdate');
+
+    //invoice
+    Route::get('invoice/list', 'Api\AppointmentController@invoiceList');
+
 
     /* Doctor Module */
     Route::get('doctor/dashboard', 'Api\DoctorController@dashboard');
     Route::get('doctor/list', 'Api\DoctorController@doctorList');
-    
+
     Route::post('doctor/saveprofile', 'Api\DoctorController@saveProfile');
 
     /* Speciality */
@@ -68,7 +73,7 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
         Route::get('speacility/delete/{id}', 'Api\SpecialityController@destroy');
     });
     /* signature */
-    Route::get('signature','Api\AppointmentController@getsignature');
+    Route::get('signature/{id}','Api\AppointmentController@getsignature');
     /*Prescription */
     Route::post('prescription/save', 'Api\AppointmentController@savePrescription');
     Route::post('prescription/list', 'Api\AppointmentController@prescriptionList');
