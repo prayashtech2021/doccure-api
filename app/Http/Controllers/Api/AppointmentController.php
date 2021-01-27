@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use \Exception;
 use \Throwable;
+use Storage;
 
 class AppointmentController extends Controller
 {
@@ -252,23 +253,57 @@ class AppointmentController extends Controller
     }
 
     public function getsignature($doctor_id){
-        return Signature::select('id','signature_image')->whereUserId($doctor_id)->get();
+       
+        $sign =  Signature::select('id','signature_image')->whereUserId($doctor_id)->get();
+        return self::send_success_response($sign,'Signature fetched Successfully');
+
     }
 
     public function savePrescription(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'user_id' => 'required|numeric|exists:users,id',
-            'prescription_detail' => 'required',
-        ]);
-
-        if ($validator->fails()) {
-            return self::send_bad_request_response($validator->errors()->first());
+        
+        if ($request->prescription_id) { //edit
+            if($request->signature_id){
+                $rules = array(
+                    'prescription_id' => 'integer',
+                    'user_id' => 'required|numeric|exists:users,id',
+                    'signature_id' => 'required|numeric|exists:signatures,id',
+                    'prescription_detail' => 'required',
+                );
+            }else{
+                $rules = array(
+                    'prescription_id' => 'integer',
+                    'user_id' => 'required|numeric|exists:users,id',
+                    'signature_image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+                    'prescription_detail' => 'required',
+                );
+            }
+        } else {    //add
+            if($request->signature_id){
+                $rules = array(
+                    'user_id' => 'required|numeric|exists:users,id',
+                    'signature_id' => 'required|numeric|exists:signatures,id',
+                    'prescription_detail' => 'required',
+                );
+            }else{
+                $rules = array(
+                    'user_id' => 'required|numeric|exists:users,id',
+                    'signature_image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+                    'prescription_detail' => 'required',
+                );
+            }
         }
+        $valid = self::customValidation($request, $rules);
+        if($valid){ return $valid;}
+
         DB::beginTransaction();
 
         try {
-            $prescription = new Prescription();
+            if(isset($request->prescription_id)){
+                $prescription = Prescription::find($request->precription_id);
+            }else{
+                $prescription = new Prescription();
+            }
             $prescription->user_id = $request->user_id;
             $prescription->doctor_id = auth()->user()->id;
             if ($request->signature_id) {
@@ -284,31 +319,34 @@ class AppointmentController extends Controller
                     $sign = new Signature();
                     $sign->user_id = auth()->user()->id;
                     $sign->signature_image = $file_name;
+                    $sign->created_by = auth()->user()->id;
                     $sign->save();
 
                     $prescription->signature_id = $sign->id;
                 }
             }
-            
+            $prescription->created_by = auth()->user()->id;
             $prescription->save();
 
             PrescriptionDetail::where('prescription_id', '=', $prescription->id)->delete();
             $medicineArray = $request->prescription_detail;
             if(isset($medicineArray)) {
-                foreach($medicineArray['drug_name'] as $key => $drug){
+                foreach($medicineArray as $key=> $drug){
+                    
                     $medicine = new PrescriptionDetail();
-                    if(!empty($drug) || !empty($medicineArray['quantity'][$key]) || !empty($medicineArray['type'][$key]) || !empty($medicineArray['days'][$key]) || !empty($medicineArray['time'][$key]) ){
+                  
+                    if(!empty($medicineArray['quantity'][$key]) || !empty($medicineArray['quantity'][$key]) || !empty($medicineArray['type'][$key]) || !empty($medicineArray['days'][$key]) || !empty($medicineArray['time'][$key]) ){
                         $medicine->drug_name = $drug;
                         $medicine->quantity = $medicineArray['quantity'][$key];
                         $medicine->type = $medicineArray['type'][$key];
                         $medicine->days = $medicineArray['days'][$key];
                         $medicine->time = $medicineArray['time'][$key];
                         $medicine->prescription_id = $prescription->id;
+                        $medicine->created_by = auth()->user()->id;
                         $medicine->save();
                     }
-                }
+               }
             }
-
             DB::commit();
 
             return self::send_success_response([],'Prescription Stored Successfully');
@@ -338,9 +376,9 @@ class AppointmentController extends Controller
             }else{
                 $user_id= $request->user_id;
             }
-            $list = Prescription::with('prescriptionDetails')->whereUserId($user_id)->orderBy('created_at', $order_by);
+            $list = Prescription::with('prescriptionDetails','doctor')->whereUserId($user_id)->orderBy('created_at', $order_by)->get();
 
-            $list->paginate($paginate);
+           // $list->paginate($paginate);
 
             return self::send_success_response($list,'Prescription Details Fetched Successfully');
 
