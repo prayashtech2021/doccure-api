@@ -44,7 +44,8 @@ class User extends Authenticatable implements Wallet, WalletFloat
         'password','remember_token',
     ];
 
-    protected $appends = ['pid','did','age','accountstatus','membersince','gendername','doctorfees','userimage'];
+    protected $appends = ['pid','did','age','accountstatus','membersince','gendername','doctorfees','userimage',
+    'docspecial','permanentaddress','officeaddress'];
 
     public function accessToken(){
         return $this->hasMany('App\OauthAccessToken');
@@ -97,7 +98,6 @@ class User extends Authenticatable implements Wallet, WalletFloat
     public function userAppointment() { 
         return $this->belongsTo('App\Appointment', 'id','doctor_id'); 
     }
-
 
     public function basicProfile(){
        return [
@@ -155,9 +155,23 @@ class User extends Authenticatable implements Wallet, WalletFloat
         }
     }
 
+    public function getDocSpecialAttribute(){
+        //return $this->belongsToMany('App\Speciality', 'user_speciality');
+      return UserSpeciality::where('user_id',$this->id)
+        ->whereHas('special', function ($a) {
+                    $a->select('specialities.name');
+                })
+        ->first();
+    }
+
+    public function getPermanentAddressAttribute(){
+        return Address::whereNull('name')->where('user_id',$this->id)->first();
+    }
+    public function getOfficeAddressAttribute(){
+        return Address::whereNotNull('name')->where('user_id',$this->id)->first();
+    }
     public function getUserImageAttribute() { 
         return getUserProfileImage($this->id); 
     }
-
 
 }

@@ -98,7 +98,7 @@ class DoctorController extends Controller
         $doctor->save();
       
         /* Doctor Address Details */
-        $get_contact_details = Address::whereUserId($user_id)->first();
+        $get_contact_details = Address::whereUserId($user_id)->whereNull('name')->first();
         if($get_contact_details){
             $contact_details = $get_contact_details;
             $contact_details->updated_by = auth()->user()->id;
@@ -110,8 +110,8 @@ class DoctorController extends Controller
         
         $contact_details->line_1 = $request->contact_address_line1;
         $contact_details->line_2 = ($request->contact_address_line2)? $request->contact_address_line2 : '';
-        $contact_details->country_id = $request->contact_country_id;
-        $contact_details->state_id = $request->contact_state_id;
+        $contact_details->country_id = ($request->contact_country_id)? $request->contact_country_id : '';
+        $contact_details->state_id = ($request->contact_state_id)? $request->contact_state_id : '';
         $contact_details->city_id = $request->contact_city_id;
         $contact_details->postal_code = $request->contact_postal_code;
         $contact_details->save();

@@ -11,6 +11,7 @@ use App\Setting;
 use App\ScheduleTiming;
 use App\TimeZone;
 use App\User;
+use App\Signature;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -226,6 +227,10 @@ class AppointmentController extends Controller
         }
     }
 
+    public function getsignature($doctor_id){
+        return Signature::select('id','signature_image')->whereUserId($doctor_id)->get();
+    }
+
     public function savePrescription(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -245,13 +250,22 @@ class AppointmentController extends Controller
             if ($request->signature_id) {
                 $prescription->signature_id = $request->signature_id;
             }elseif(!empty($request->signature_image)){
-                    $extension = $request->file('signature_image')->getClientOriginalExtension();
-                    $file_name = date('YmdHis') . '_' . auth()->user()->id . '.png';
-                    $path = 'images/signature';
-                    $store = $request->file('signature_image')->storeAs($path, $file_name);
+                if (preg_match('/data:image\/(.+);base64,(.*)/', $request->signature_image, $matchings)) {
+                    $imageData = base64_decode($matchings[2]);
+                    $extension = $matchings[1];
+                    $file_name = date('YmdHis') . rand(100,999).'_' . $request->user_id . '.' . $extension;
+                    $path = 'images/signature'.$file_name;
+                    Storage::put($path , $imageData);
+                    
+                    $sign = new Signature();
+                    $sign->user_id = auth()->user()->id;
+                    $sign->signature_image = $file_name;
+                    $sign->save();
 
-                    $prescription->signature_id = $file_name;
+                    $prescription->signature_id = $sign->id;
+                }
             }
+            
             $prescription->save();
 
             PrescriptionDetail::where('prescription_id', '=', $prescription->id)->delete();
