@@ -79,6 +79,14 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
     Route::post('prescription/list', 'Api\AppointmentController@prescriptionList');
     Route::get('prescription/view/{pid}', 'Api\AppointmentController@prescriptionView');
 
+    /* Medical Record */
+    Route::post('record/save', 'Api\MedicalRecordController@save');
+    Route::post('record/list/', 'Api\MedicalRecordController@getList');
+    Route::get('record/view/{id}', 'Api\MedicalRecordController@getView');
+    Route::get('record/delete/{id}', 'Api\MedicalRecordController@destroy');
+    Route::get('record/download/{id}', 'Api\MedicalRecordController@getdownload');
+
+
     Route::get('logout', 'PassportController@logout');
     // Language
     Route::post('language/update', 'Api\LanguageController@update');
