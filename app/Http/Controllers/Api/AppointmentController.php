@@ -307,24 +307,22 @@ class AppointmentController extends Controller
             PrescriptionDetail::where('prescription_id', '=', $prescription->id)->delete();
             $medicineArray = $request->prescription_detail;
             if(isset($medicineArray)) {
-                //print_r($medicineArray);
-               echo 'dd';
                 foreach($medicineArray as $key=> $drug){
-                    print_r($drug);
-                    //$medicine = new PrescriptionDetail();
+                    
+                    $medicine = new PrescriptionDetail();
+                  
                     if(!empty($medicineArray['quantity'][$key]) || !empty($medicineArray['quantity'][$key]) || !empty($medicineArray['type'][$key]) || !empty($medicineArray['days'][$key]) || !empty($medicineArray['time'][$key]) ){
-                       /* $medicine->drug_name = $drug;
+                        $medicine->drug_name = $drug;
                         $medicine->quantity = $medicineArray['quantity'][$key];
                         $medicine->type = $medicineArray['type'][$key];
                         $medicine->days = $medicineArray['days'][$key];
                         $medicine->time = $medicineArray['time'][$key];
                         $medicine->prescription_id = $prescription->id;
                         $medicine->created_by = auth()->user()->id;
-                        $medicine->save();*/
+                        $medicine->save();
                     }
                }
             }
-exit();
             DB::commit();
 
             return self::send_success_response([],'Prescription Stored Successfully');
@@ -354,9 +352,9 @@ exit();
             }else{
                 $user_id= $request->user_id;
             }
-            $list = Prescription::with('prescriptionDetails')->whereUserId($user_id)->orderBy('created_at', $order_by);
+            $list = Prescription::with('prescriptionDetails','doctor')->whereUserId($user_id)->orderBy('created_at', $order_by)->get();
 
-            $list->paginate($paginate);
+           // $list->paginate($paginate);
 
             return self::send_success_response($list,'Prescription Details Fetched Successfully');
 

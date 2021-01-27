@@ -33,5 +33,13 @@ class Prescription extends Model
     public function prescriptionDetails(){
         return $this->hasMany(PrescriptionDetail::class);
     }
+
+    public function patient(){
+        return $this->belongsTo(User::class, 'user_id', 'id');
+    }
+
+    public function doctor(){
+        return $this->belongsTo(User::class, 'doctor_id', 'id');
+    }
     
 }
