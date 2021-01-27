@@ -349,7 +349,7 @@ class AppointmentController extends Controller
     {
         $rules = array(
             'appointment_id' => 'required|exists:appointments,id',
-            'request_type' => 'required|numeric|between:1,2',
+            'request_type' => 'required|numeric|in:1,2',
             'status' => 'required|numeric|min:2|max:6',
         );
         $valid = self::customValidation($request, $rules);
@@ -413,8 +413,8 @@ class AppointmentController extends Controller
         $rules = array(
             'provider_id' => 'required|numeric|exists:users,id',
             'duration' => 'required|date_format:"H:i:s',
-            'appointment_type' => 'required|numeric|between:1,2',
-            'day' => 'required|numeric|between:1,7',
+            'appointment_type' => 'required|numeric|in:1,2',
+            'day' => 'required|numeric|in:1,7',
             'working_hours' => 'required|string',
         );
         $valid = self::customValidation($request, $rules);

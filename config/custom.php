@@ -48,6 +48,6 @@ return [
     'payment_request_status' =>[
         1=>"new",
         2=>"paid",
-        2=>"rejected",
+        3=>"rejected",
     ],
 ];
