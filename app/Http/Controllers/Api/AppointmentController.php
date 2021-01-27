@@ -46,6 +46,15 @@ class AppointmentController extends Controller
 
     function list(Request $request) {
         try {
+            $rules = array(
+                'count_per_page' => 'nullable|numeric',
+                'order_by' => 'nullable|in:desc,asc',
+                'appointment_status' => 'nullable|numeric',
+                'appointment_date' => 'nullable|date_format:d/m/Y',
+            );
+            $valid = self::customValidation($request, $rules);
+            if ($valid) {return $valid;}
+
             $user = $request->user();
             $paginate = $request->count_per_page ? $request->count_per_page : 10;
 
@@ -83,8 +92,10 @@ class AppointmentController extends Controller
             removeMetaColumn($user);
             unset($user->roles);
             $result['user_details'] =$user;
-            $user->accountDetails;
-            removeMetaColumn($user->accountDetails);
+            if(isset($user->accountDetails)){
+                $user->accountDetails;
+                removeMetaColumn($user->accountDetails);
+            }
             $user->user_balance=[
                 'earned'=>$user->paymentRequest(function($ary){
                     $qry->where('status',2);
