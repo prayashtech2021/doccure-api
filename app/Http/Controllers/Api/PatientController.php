@@ -122,7 +122,6 @@ class PatientController extends Controller
 
     public function patientSearchList(Request $request){
         $rules = array(
-            'keywords' => 'nullable|string',
             'gender' => 'nullable|string',
             'blood_group' => 'nullable|string',
             'country_id' => 'nullable|numeric|exists:countries,id',

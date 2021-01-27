@@ -67,6 +67,8 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
         Route::post('speacility/save', 'Api\SpecialityController@save');
         Route::get('speacility/delete/{id}', 'Api\SpecialityController@destroy');
     });
+    /* signature */
+    Route::get('signature','Api\AppointmentController@getsignature');
     /*Prescription */
     Route::post('prescription/save', 'Api\AppointmentController@savePrescription');
     Route::get('prescription/list', 'Api\AppointmentController@prescriptionList');

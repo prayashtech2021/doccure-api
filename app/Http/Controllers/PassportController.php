@@ -30,7 +30,6 @@ class PassportController extends Controller {
 		
 		if (auth()->attempt($credentials)) {
 			$user = auth()->user();
-			$user = $user->with('doctorSpecialization');
 			$chktoken = $user->accessToken(function($qry){
 				$qry->where('revoked',0);
 			});
