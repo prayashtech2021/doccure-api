@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Seeder;
 use App\Appointment;
+use App\Payment;
 
 class AppointmentSeeder extends Seeder
 {
@@ -29,6 +30,28 @@ class AppointmentSeeder extends Seeder
 		];
 		foreach ($datas as $id => $data) {
 			$row = Appointment::firstOrNew([
+				'id' => $id,
+			]);
+			$row->fill($data);
+            $row->save();
+        }
+
+        $datas = [
+			1 => [
+                'appointment_id' => 1,
+                'payment_type' => 3,
+                'invoice_no' => 'INV234232',
+                'total_amount' => '10.00',
+                'currency_code' => 'USD',
+                'txn_id' => 'TXN453432',
+                'tax' => '10',
+                'tax_amount' => '0.8',
+                'transaction_charge' => '0.18',
+            ],
+            
+		];
+		foreach ($datas as $id => $data) {
+			$row = Payment::firstOrNew([
 				'id' => $id,
 			]);
 			$row->fill($data);
