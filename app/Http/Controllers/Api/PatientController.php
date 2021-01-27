@@ -124,6 +124,7 @@ class PatientController extends Controller
         $rules = array(
             'keywords' => 'nullable|string',
             'gender' => 'nullable|string',
+            'blood_group' => 'nullable|string',
             'country_id' => 'nullable|numeric|exists:countries,id',
             'state_id' => 'nullable|numeric|exists:states,id',
             'city_id' => 'nullable|numeric|exists:cities,id',
@@ -136,7 +137,6 @@ class PatientController extends Controller
 
         try{
             $paginate = $request->count_per_page ? $request->count_per_page : 10;
-
 
             $data = User::role('patient')->with('homeAddresses');
 

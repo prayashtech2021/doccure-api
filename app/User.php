@@ -44,7 +44,7 @@ class User extends Authenticatable implements Wallet, WalletFloat
         'password','remember_token',
     ];
 
-    protected $appends = ['pid','did','age','accountstatus','membersince','gendername','doctorfees','userimage'];
+    protected $appends = ['pid','did','age','accountstatus','membersince','gendername','doctorfees','userimage','doctorspecialization'];
 
     public function accessToken(){
         return $this->hasMany('App\OauthAccessToken');
@@ -97,7 +97,6 @@ class User extends Authenticatable implements Wallet, WalletFloat
     public function userAppointment() { 
         return $this->belongsTo('App\Appointment', 'id','doctor_id'); 
     }
-
 
     public function basicProfile(){
        return [
@@ -155,6 +154,9 @@ class User extends Authenticatable implements Wallet, WalletFloat
         }
     }
 
+    public function getDoctorSpecialization(){
+        return $this->doctorSpecialization();
+    }
     public function getUserImageAttribute() { 
         return getUserProfileImage($this->id); 
     }
