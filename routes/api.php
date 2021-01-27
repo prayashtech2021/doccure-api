@@ -81,8 +81,10 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
     // Language
     Route::post('language/update', 'Api\LanguageController@update');
 
-    Route::post('payment/list', 'Api\PaymentRequestController@list')->name('paymentList');
+    Route::get('payment/request/list', 'Api\PaymentRequestController@list')->name('paymentList');
     Route::post('accounts/save', 'Api\PaymentRequestController@accountUpdate')->name('accountUpdate');
+    Route::post('payment/request/create', 'Api\PaymentRequestController@requestPayment')->name('requestPayment');
+    Route::post('payment/request/update', 'Api\PaymentRequestController@updatePaymentRequest')->name('updatePaymentRequest');
 });
 
 Route::any('{path}', function () {

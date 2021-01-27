@@ -63,6 +63,8 @@ class AppointmentController extends Controller
                     case 3: //completed/approved
                         $list = $list->where('appointment_status', 3)->whereDate('appointment_date', '<', convertToUTC(now()));
                         break;
+                    default:
+                        break;    
                 }
             }
 
@@ -74,13 +76,24 @@ class AppointmentController extends Controller
             $data = collect();
             if ($user->hasRole('patient')) {
                 $list = $list->whereUserId($user->id);
-                removeMetaColumn($user);
-                unset($user->roles);
-                $user->profile_image=getUserProfileImage($user->id);
-                $result['patient_details'] =$user;
             } elseif ($user->hasRole('doctor')) {
                 $list = $list->whereDoctorId($user->id);
             }
+            removeMetaColumn($user);
+            unset($user->roles);
+            $result['user_details'] =$user;
+            $user->accountDetails;
+            removeMetaColumn($user->accountDetails);
+            $user->user_balance=[
+                'earned'=>$user->paymentRequest(function($ary){
+                    $qry->where('status',2);
+                })->sum('request_amount'),
+                'balance'=>$user->balanceFloat,
+                'requested'=>$user->paymentRequest(function($ary){
+                    $qry->where('status',1);
+                })->sum('request_amount'),
+            ];
+            unset($user->wallet);
 
             $list->paginate($paginate)->getCollection()->each(function ($appointment) use (&$data) {
                 $data->push($appointment->getData());
@@ -135,12 +148,12 @@ class AppointmentController extends Controller
             $appointment->start_time = $request->start_time;
             $appointment->end_time = $request->end_time;
             $appointment->payment_type = $request->payment_type;
-            $appointment->appointment_status = config('custom.appointment_status.new');
+            $appointment->appointment_status = 1;
             $appointment->save();
 
             $log = new AppointmentLog;
             $log->appointment_id = $appointment->id;
-            $log->description = config('custom.appointment_log_message.'.config('custom.appointment_status.new').'');
+            $log->description = config('custom.appointment_log_message.1');
             $log->status = $appointment->appointment_status;
             $log->save();
 
@@ -322,6 +335,7 @@ class AppointmentController extends Controller
     {
         $rules = array(
             'appointment_id' => 'required|exists:appointments,id',
+            'request_type' => 'required|numeric|between:1,2',
             'status' => 'required|numeric|min:2|max:6',
         );
         $valid = self::customValidation($request, $rules);
@@ -330,13 +344,25 @@ class AppointmentController extends Controller
         try {
             $appointment = Appointment::find($request->appointment_id);
             $appointment->appointment_status = $request->status;
+            $appointment->request_type = $request->request_type;
             $appointment->save();
 
             $log = new AppointmentLog;
             $log->appointment_id = $appointment->id;
             $log->description = config('custom.appointment_log_message.'.$request->status.'');
+            $log->request_type = $appointment->request_type;
             $log->status = $appointment->appointment_status;
             $log->save();
+            if($request->status==3){ //approved
+                if($request->request_type==1){ //payment request
+                    $user =User::find($appointment->user_id);
+                    $requested_amount = $appointment->payment->total_amount-($appointment->payment->tax_amount+$appointment->payment->transaction_charge);
+                }else{
+                    $user =User::find($appointment->doctor_id);
+                    $requested_amount = $appointment->payment->total_amount;
+                }
+                $user->depositFloat($requested_amount);
+            }
 
             return self::send_success_response([], 'Status updated sucessfully');
         } catch (Exception | Throwable $exception) {

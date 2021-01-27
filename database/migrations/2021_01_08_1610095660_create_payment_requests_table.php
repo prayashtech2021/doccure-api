@@ -16,13 +16,12 @@ class CreatePaymentRequestsTable extends Migration
         Schema::create('payment_requests', function (Blueprint $table) {
             $table->increments('id');
             $table->unsignedBigInteger('user_id');
-            $table->unsignedBigInteger('appointment_id')->default(null);
             $table->string('reference_id');
-            $table->text('description');
+            $table->text('description')->nullable();
             $table->char('currency_code',5);
             $table->unsignedTinyInteger('request_type')->comment('1=>Payment,2=>Refund');
             $table->decimal('request_amount',12,2);
-            $table->unsignedTinyInteger('status')->comment('1=>New,2=>Approved,3=>Paid,4=>Rejected');
+            $table->unsignedTinyInteger('status')->comment('1=>New,2=>Paid,3=>Rejected');
             $table->dateTime('action_date')->nullable();
 
             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
@@ -33,7 +32,6 @@ class CreatePaymentRequestsTable extends Migration
 			$table->unsignedBigInteger('deleted_by')->nullable();
 
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
-            $table->foreign('appointment_id')->references('id')->on('appointments')->onDelete('cascade')->onUpdate('cascade');
             $table->foreign('created_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
 			$table->foreign('updated_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
 			$table->foreign('deleted_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');

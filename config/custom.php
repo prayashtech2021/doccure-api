@@ -7,12 +7,12 @@ return [
     'importSecret' => 'OrcaloTaxi1020',
 
     'appointment_status' =>[
-        'new'=>1,
-        'approve_request'=>2,
-        'approved'=>3,
-        'cancelled'=>4,
-        'refund_request'=>5,
-        'expired'=>6
+        1=>'new',
+        2=>'waiting for approval',
+        3=>'approved',
+        4=>'cancelled',
+        5=>'refund',
+        6=>'expired'
     ],
     'appointment_log_message' =>[
         1=>'new appointment created',
@@ -29,7 +29,7 @@ return [
         "wednesday"=> [],
         "thursday"=> [],
         "friday"=> [],
-        "satday"=> [],
+        "saturday"=> [],
     ],
 
     'days' =>[
@@ -39,6 +39,15 @@ return [
         4=>"wednesday",
         5=>"thursday",
         6=>"friday",
-        7=>"satday",
-    ]
+        7=>"saturday",
+    ],
+    'payment_request_type' =>[
+        1=>"payment",
+        2=>"refund",
+    ],
+    'payment_request_status' =>[
+        1=>"new",
+        2=>"paid",
+        2=>"rejected",
+    ],
 ];

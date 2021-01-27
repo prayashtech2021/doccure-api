@@ -63,8 +63,8 @@ class RequestPayment extends Notification implements ShouldQueue
         return [
             'noty_type' => 'payment-requested',
             'request_id' => $this->request->id,
-            'reference' => $this->request->request_id,
-            'message' => 'Payment Request with reference #' . $this->request->request_id . ' has been created!',
+            'reference' => $this->request->reference_id,
+            'message' => 'Payment Request with reference #' . $this->request->reference_id . ' has been created!',
             // 'open_link' => route('paymentRequestView',['id'=>$this->request->id])
         ];
     }

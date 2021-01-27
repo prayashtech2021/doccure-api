@@ -16,6 +16,7 @@ class CreateAppointmentLogsTable extends Migration
         Schema::create('appointment_logs', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('appointment_id');
+            $table->unsignedTinyInteger('request_type')->comment('1=>payment,2=>refund');
             $table->string('description');
             $table->unsignedTinyInteger('status');
 
