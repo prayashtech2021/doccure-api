@@ -367,7 +367,7 @@ class AppointmentController extends Controller
             }else{
                 $user_id= $request->user_id;
             }
-            $list = Prescription::with('prescriptionDetails','doctor')->whereUserId($user_id)->orderBy('created_at', $order_by)->get();
+            $list = Prescription::with('prescriptionDetails','doctor')->whereUserId($user_id)->orderBy('created_at', $order_by);
 
            $list = $list->paginate($paginate);
 
