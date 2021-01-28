@@ -78,6 +78,7 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
     Route::post('prescription/save', 'Api\AppointmentController@savePrescription');
     Route::post('prescription/list', 'Api\AppointmentController@prescriptionList');
     Route::get('prescription/view/{pid}', 'Api\AppointmentController@prescriptionView');
+    Route::get('prescription/delete/{pid}', 'Api\AppointmentController@prescription_destroy');
 
     /* Medical Record */
     Route::post('record/save', 'Api\MedicalRecordController@save');
