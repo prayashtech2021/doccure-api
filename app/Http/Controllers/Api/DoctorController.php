@@ -45,8 +45,11 @@ class DoctorController extends Controller
             $paginate = $request->count_per_page ? $request->count_per_page : 10;
             $order_by = $request->order_by ? $request->order_by : 'desc';
 
-            $data = User::role('doctor')->withTrashed()->orderBy('created_at', $order_by);
-            $data = $data->paginate();
+            $list = User::role('doctor')->withTrashed()->orderBy('created_at', $order_by);
+            $data = collect();
+            $list->paginate($paginate)->getCollection()->each(function ($appointment) use (&$data) {
+                $data->push($appointment->doctorProfile());
+            });
             return self::send_success_response($data,'Doctor Details Fetched Successfully');
         } catch (Exception | Throwable $exception) {
             return self::send_exception_response($exception->getMessage());

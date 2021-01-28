@@ -51,6 +51,30 @@ class User extends Authenticatable implements Wallet, WalletFloat
         return $this->hasMany('App\OauthAccessToken');
     }
 
+    public function doctorProfile(){
+        return [
+            'id' => $this->id,
+            'did' => $this->getDidAttribute(),
+            'name' => trim($this->first_name . ' '. $this->last_name),
+            'email' => $this->email,
+            'mobile_number' => $this->mobile_number,
+            'gendername' => ($this->gender==1)? 'Male' : ($this->gender==2) ? 'Female' : '-',
+            'profile_image' => getUserProfileImage($this->id),
+            'dob' => $this->dob,
+            'age' => Carbon::parse($this->dob)->age,
+            'blood_group' => $this->blood_group,
+            'biography' => $this->biography,
+            'price_type' =>  ($this->price_type == 1)? 'Free' : $this->amount,
+            'currency_code' => $this->currency_code,
+            'time_zone_id' => $this->time_zone_id,
+            'language_id' => $this->language_id,
+            'service' => $this->doctorService()->select('id','name')->get(),
+            'specialization' => $this->doctorSpecialization()->first(),
+            'addresses' => $this->homeAddresses()->first(),
+            'office_addresses' => $this->addresses()->first(),
+            'member_since' => date('d M Y H:s A', strtotime($this->created_at)),
+        ];
+    }
     /*public static function userAddress($id){
         return Address::whereNull('name')->where('user_id',$id)->first();
     }
@@ -104,7 +128,6 @@ class User extends Authenticatable implements Wallet, WalletFloat
            'id' => $this->id,
            'name' => trim($this->first_name . ' '. $this->last_name),
            'profile_image' => getUserProfileImage($this->id),
-           'speciality' => $this->doctorSpecialization(),
        ];
     }
 
@@ -166,10 +189,10 @@ class User extends Authenticatable implements Wallet, WalletFloat
     }
 
     public function getPermanentAddressAttribute(){
-        return Address::whereNull('name')->where('user_id',$this->id)->first();
+        return Address::select('line_1','line_2')->with('country','state','city','addImage')->whereNull('name')->where('user_id',$this->id)->first();
     }
     public function getOfficeAddressAttribute(){
-        return Address::whereNotNull('name')->where('user_id',$this->id)->first();
+        return Address::with('country','state','city','addImage')->whereNotNull('name')->where('user_id',$this->id)->first();
     }
     public function getUserImageAttribute() { 
         return getUserProfileImage($this->id); 
