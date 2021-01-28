@@ -288,7 +288,7 @@ class AppointmentController extends Controller
 
         try {
             if(isset($request->prescription_id)){
-                $prescription = Prescription::find($request->precription_id);
+                $prescription = Prescription::find($request->prescription_id);
             }else{
                 $prescription = new Prescription();
             }
