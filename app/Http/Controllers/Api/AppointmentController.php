@@ -264,7 +264,7 @@ class AppointmentController extends Controller
         
         if ($request->prescription_id) { //edit
             $rules = array(
-                'prescription_id' => 'integer',
+                'prescription_id' => 'integer|exists:prescriptions,id',
                 'user_id' => 'required|numeric|exists:users,id',
                 'prescription_detail' => 'required',
             );
@@ -288,7 +288,7 @@ class AppointmentController extends Controller
 
         try {
             if(isset($request->prescription_id)){
-                $prescription = Prescription::find($request->precription_id);
+                $prescription = Prescription::find($request->prescription_id);
             }else{
                 $prescription = new Prescription();
             }
@@ -318,7 +318,7 @@ class AppointmentController extends Controller
             $prescription->created_by = auth()->user()->id;
             $prescription->save();
 
-            PrescriptionDetail::where('prescription_id', '=', $prescription->id)->delete();
+            PrescriptionDetail::where('prescription_id', '=', $prescription->id)->forcedelete();
           
             $result = json_decode($request->prescription_detail, true);
                 foreach($result as $value){
@@ -367,9 +367,9 @@ class AppointmentController extends Controller
             }else{
                 $user_id= $request->user_id;
             }
-            $list = Prescription::with('prescriptionDetails','doctor')->whereUserId($user_id)->orderBy('created_at', $order_by)->get();
+            $list = Prescription::with('prescriptionDetails','doctor')->whereUserId($user_id)->orderBy('created_at', $order_by);
 
-           $list = $list->paginate($paginate);
+            $list = $list->paginate($paginate);
 
             return self::send_success_response($list,'Prescription Details Fetched Successfully');
 

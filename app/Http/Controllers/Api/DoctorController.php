@@ -34,21 +34,29 @@ class DoctorController extends Controller
     }
 
     public function doctorList(Request $request){
+        $rules = array(
+            'count_per_page' => 'nullable|numeric',
+            'order_by' => 'nullable|in:desc,asc',
+        );
+        $valid = self::customValidation($request, $rules);
+        if ($valid) {return $valid;}
 
-        $order_by = $request->order_by ? $request->order_by : 'desc';
+        try {
+            $paginate = $request->count_per_page ? $request->count_per_page : 10;
+            $order_by = $request->order_by ? $request->order_by : 'desc';
 
-        $data = User::role('doctor')->withTrashed()->with(['doctorSpecialization','addresses','homeAddresses'])->orderBy('created_at', $order_by)->get();
-        $data->append('did','accountstatus','gendername');
-        return self::send_success_response($data);
+            $data = User::role('doctor')->withTrashed()->orderBy('created_at', $order_by);
+            $data = $data->paginate();
+            return self::send_success_response($data,'Doctor Details Fetched Successfully');
+        } catch (Exception | Throwable $exception) {
+            return self::send_exception_response($exception->getMessage());
+        }
     }
 
     public function doctorProfile($user_id){
         try {
             
-            $doctor['profile'] = User::role('doctor')->with('doctorSpecialization','doctorService','doctorEducation','doctorExperience','doctorAwards','doctorMembership','doctorRegistration')->find($user_id);
-            $doctor['doctor_contact_info'] = User::userAddress($user_id);
-            $doctor['doctor_clinic_info'] = User::doctorClinicInfo($user_id);
-            $doctor['doctor_clinic_images'] = User::doctorClinicImage($user_id);
+            $doctor['profile'] = User::role('doctor')->with('doctorService','doctorEducation','doctorExperience','doctorAwards','doctorMembership','doctorRegistration')->find($user_id);
             $doctor['feedback'] = [];
             $doctor['ratings'] = [];
             $doctor['book_appointment'] = '';

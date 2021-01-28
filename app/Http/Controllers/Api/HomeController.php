@@ -283,7 +283,7 @@ class HomeController extends Controller
                 $profile->email = $request->email;
                 $profile->biography = ($request->biography)? $request->biography : '';
                 $profile->save();
-                $get_address = User::userAddress($user_id);
+                $get_address = Address::whereUserId($user_id)->whereNull('name')->first();
 
                 if($get_address){
                     $address = $get_address;

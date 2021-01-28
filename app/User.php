@@ -45,13 +45,13 @@ class User extends Authenticatable implements Wallet, WalletFloat
     ];
 
     protected $appends = ['pid','did','age','accountstatus','membersince','gendername','doctorfees','userimage',
-    'docspecial','permanentaddress','officeaddress'];
+    'providerspeciality','permanentaddress','officeaddress'];
 
     public function accessToken(){
         return $this->hasMany('App\OauthAccessToken');
     }
 
-    public static function userAddress($id){
+    /*public static function userAddress($id){
         return Address::whereNull('name')->where('user_id',$id)->first();
     }
 
@@ -60,10 +60,10 @@ class User extends Authenticatable implements Wallet, WalletFloat
     }
     public static function doctorClinicImage($id){
         return AddressImage::where('user_id',$id)->first();
-    }
+    }*/
 
     public function doctorSpecialization() { 
-        return $this->belongsToMany('App\Speciality', 'user_speciality');
+        return $this->belongsToMany('App\Speciality', 'user_speciality')->select('id','name');
     }
 
     public function doctorService(){
@@ -159,13 +159,10 @@ class User extends Authenticatable implements Wallet, WalletFloat
         }
     }
 
-    public function getDocSpecialAttribute(){
-        //return $this->belongsToMany('App\Speciality', 'user_speciality');
-      return UserSpeciality::where('user_id',$this->id)
-        ->whereHas('special', function ($a) {
-                    $a->select('specialities.name');
-                })
-        ->first();
+    public function getProviderSpecialityAttribute(){
+        return Speciality::select('id','name')->whereHas('speciality', function ($a) {
+                    $a->where('user_speciality.user_id',$this->id);
+                })->first();
     }
 
     public function getPermanentAddressAttribute(){

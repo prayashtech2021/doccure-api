@@ -21,6 +21,6 @@ class UserSpeciality extends Model{
     public function user() { 
         return $this->belongsTo('App\User'); }
     public function special() { 
-        return $this->belongsTo('App\Speciality','speciality_id'); 
+        return $this->belongsTo('App\Speciality','speciality_id','id'); 
     }
 }
