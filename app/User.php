@@ -142,8 +142,11 @@ class User extends Authenticatable implements Wallet, WalletFloat
            'id' => $this->id,
            'name' => trim($this->first_name . ' '. $this->last_name),
            'profile_image' => getUserProfileImage($this->id),
+           'mobile_number' => $this->mobile_number,
+           'email' => $this->email,
+           'address' => $this->getPermanentAddressAttribute(),
            'doctorSpecialization' => $this->doctorSpecialization()->get(),
-        ];
+       ];
     }
 
     public function payment()
