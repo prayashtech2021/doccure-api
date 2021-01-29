@@ -51,6 +51,7 @@ class AppointmentController extends Controller
                 'count_per_page' => 'nullable|numeric',
                 'order_by' => 'nullable|in:desc,asc',
                 'appointment_status' => 'nullable|numeric',
+                'request_type' => 'nullable|numeric|in:1,2',
                 'appointment_date' => 'nullable|date_format:d/m/Y',
             );
             $valid = self::customValidation($request, $rules);
@@ -89,6 +90,10 @@ class AppointmentController extends Controller
                 $list = $list->whereUserId($user->id);
             } elseif ($user->hasRole('doctor')) {
                 $list = $list->whereDoctorId($user->id);
+            }
+
+            if (!empty($request->request_type) && $request->request_type>0) {
+                $list = $list->where('request_type',$request->request_type);
             }
             removeMetaColumn($user);
             unset($user->roles);

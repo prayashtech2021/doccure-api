@@ -67,10 +67,20 @@ class SpecialityController extends Controller
         }
     }
 
-    public function getList()
+    public function getList(Request $request)
     {
-        try {
-            $list = Speciality::withTrashed()->select('id', 'name', 'image')->orderBy('name', 'ASC')->get();
+        $rules = array(
+            'count_per_page' => 'nullable|numeric',
+            'order_by' => 'nullable|in:desc,asc',
+        );
+        $valid = self::customValidation($request, $rules);
+        if ($valid) {return $valid;}
+
+    try {
+        $paginate = $request->count_per_page ? $request->count_per_page : 10;
+        $order_by = $request->order_by ? $request->order_by : 'desc';
+
+            $list = Speciality::withTrashed()->select('id', 'name', 'image')->orderBy('name', $order_by)->get();
 
             return self::send_success_response($list, 'Speciality content fetched successfully');
         } catch (Exception | Throwable $e) {
