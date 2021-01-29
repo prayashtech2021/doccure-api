@@ -268,36 +268,24 @@ class AppointmentController extends Controller
     {
         
         if ($request->prescription_id) { //edit
-            if($request->signature_id){
-                $rules = array(
-                    'prescription_id' => 'integer',
-                    'user_id' => 'required|numeric|exists:users,id',
-                    'signature_id' => 'required|numeric|exists:signatures,id',
-                    'prescription_detail' => 'required',
-                );
-            }else{
-                $rules = array(
-                    'prescription_id' => 'integer',
-                    'user_id' => 'required|numeric|exists:users,id',
-                    'signature_image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
-                    'prescription_detail' => 'required',
-                );
-            }
-        } else {    //add
-            if($request->signature_id){
-                $rules = array(
-                    'user_id' => 'required|numeric|exists:users,id',
-                    'signature_id' => 'required|numeric|exists:signatures,id',
-                    'prescription_detail' => 'required',
-                );
-            }else{
-                $rules = array(
-                    'user_id' => 'required|numeric|exists:users,id',
-                    'signature_image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
-                    'prescription_detail' => 'required',
-                );
-            }
+            $rules = array(
+                'prescription_id' => 'integer',
+                'user_id' => 'required|numeric|exists:users,id',
+                'prescription_detail' => 'required',
+            );
+        }else{
+            $rules = array(
+                'user_id' => 'required|numeric|exists:users,id',
+                'prescription_detail' => 'required',
+            );
         }
+       
+        if($request->signature_id){
+            $rules['signature_id'] = 'required|numeric|exists:signatures,id';
+        }else{
+            $rules['signature_image'] = 'required|string';
+        }
+       
         $valid = self::customValidation($request, $rules);
         if($valid){ return $valid;}
 
@@ -305,7 +293,7 @@ class AppointmentController extends Controller
 
         try {
             if(isset($request->prescription_id)){
-                $prescription = Prescription::find($request->precription_id);
+                $prescription = Prescription::find($request->prescription_id);
             }else{
                 $prescription = new Prescription();
             }
@@ -318,7 +306,7 @@ class AppointmentController extends Controller
                     $imageData = base64_decode($matchings[2]);
                     $extension = $matchings[1];
                     $file_name = date('YmdHis') . rand(100,999).'_' . $request->user_id . '.' . $extension;
-                    $path = 'images/signature'.$file_name;
+                    $path = 'images/signature/'.$file_name;
                     Storage::put($path , $imageData);
                     
                     $sign = new Signature();
@@ -328,30 +316,33 @@ class AppointmentController extends Controller
                     $sign->save();
 
                     $prescription->signature_id = $sign->id;
+                }else{
+                    return self::send_bad_request_response('Image Uploading Failed. Please check and try again!');
                 }
             }
             $prescription->created_by = auth()->user()->id;
             $prescription->save();
 
             PrescriptionDetail::where('prescription_id', '=', $prescription->id)->delete();
-            $medicineArray = $request->prescription_detail;
-            if(isset($medicineArray)) {
-                foreach($medicineArray as $key=> $drug){
-                    
+          
+            $result = json_decode($request->prescription_detail, true);
+                foreach($result as $value){
                     $medicine = new PrescriptionDetail();
                   
-                    if(!empty($medicineArray['quantity'][$key]) || !empty($medicineArray['quantity'][$key]) || !empty($medicineArray['type'][$key]) || !empty($medicineArray['days'][$key]) || !empty($medicineArray['time'][$key]) ){
-                        $medicine->drug_name = $drug;
-                        $medicine->quantity = $medicineArray['quantity'][$key];
-                        $medicine->type = $medicineArray['type'][$key];
-                        $medicine->days = $medicineArray['days'][$key];
-                        $medicine->time = $medicineArray['time'][$key];
+                    if(!empty($value['drug_name']) || !empty($value['quantity']) || !empty($value['type']) || !empty($value['days']) || !empty($value['time']) ){
+                        $medicine->drug_name = $value['drug_name'];
+                        $medicine->quantity = $value['quantity'];
+                        $medicine->type = $value['type'];
+                        $medicine->days = $value['days'];
+                        $medicine->time = $value['time'];
                         $medicine->prescription_id = $prescription->id;
                         $medicine->created_by = auth()->user()->id;
                         $medicine->save();
+                    }else{
+                        return self::send_bad_request_response('Some feilds are missing in Prescription Details. Please check and try again!');
                     }
                }
-            }
+            
             DB::commit();
 
             return self::send_success_response([],'Prescription Stored Successfully');
@@ -381,9 +372,9 @@ class AppointmentController extends Controller
             }else{
                 $user_id= $request->user_id;
             }
-            $list = Prescription::with('prescriptionDetails','doctor')->whereUserId($user_id)->orderBy('created_at', $order_by)->get();
+            $list = Prescription::with('prescriptionDetails','doctor')->whereUserId($user_id)->orderBy('created_at', $order_by);
 
-           // $list->paginate($paginate);
+           $list = $list->paginate($paginate);
 
             return self::send_success_response($list,'Prescription Details Fetched Successfully');
 
@@ -398,6 +389,12 @@ class AppointmentController extends Controller
 
         return self::send_success_response($list,'Prescription Details Fetched Successfully');
     }
+
+    public function prescription_destroy($id){
+        
+        return self::customDelete('\App\Prescription', $id);
+    }
+
 
     public function appointmentStatusUpdate(Request $request)
     {

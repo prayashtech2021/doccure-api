@@ -27,7 +27,7 @@ class Prescription extends Model
         ];
     }*/
     public function doctorappointment() { return $this->belongsTo('App\Appointment', 'appointment_id'); }
-    public function doctorsign() { return $this->belongsTo('App\signature', 'signature_id'); }
+    public function doctorsign() { return $this->belongsTo('App\Signature', 'signature_id'); }
 
 
     public function prescriptionDetails(){
