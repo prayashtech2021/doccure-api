@@ -8,19 +8,21 @@ return [
 
     'appointment_status' =>[
         1=>'new',
-        2=>'waiting for approval',
-        3=>'approved',
-        4=>'cancelled',
-        5=>'refund',
-        6=>'expired'
+        2=>'accepted',
+        3=>'waiting for approval',
+        4=>'approved',
+        5=>'cancelled',
+        6=>'refund',
+        7=>'expired'
     ],
     'appointment_log_message' =>[
         1=>'new appointment created',
-        2=>'request raised for patient approval',
-        3=>'request approved',
-        4=>'request cancelled',
-        5=>'refund request raised for doctor approval',
-        6=>'appointment expired'
+        2=>'request accepted',
+        3=>'request raised for patient approval',
+        4=>'request approved',
+        5=>'request cancelled',
+        6=>'refund request raised for doctor approval',
+        7=>'appointment expired'
     ],
     'empty_working_hours' =>[
         "sunday"=> [],
