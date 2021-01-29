@@ -402,7 +402,7 @@ class AppointmentController extends Controller
     {
         $rules = array(
             'appointment_id' => 'required|exists:appointments,id',
-            'request_type' => 'required|numeric|in:1,2',
+            'request_type' => 'nullable|numeric|in:1,2',
             'status' => 'required|numeric|min:2|max:7',
         );
         $valid = self::customValidation($request, $rules);
