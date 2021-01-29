@@ -411,17 +411,21 @@ class AppointmentController extends Controller
         try {
             $appointment = Appointment::find($request->appointment_id);
             $appointment->appointment_status = $request->status;
+            if(isset($request->request_type)){
             $appointment->request_type = $request->request_type;
+            }
             $appointment->save();
 
             $log = new AppointmentLog;
             $log->appointment_id = $appointment->id;
             $log->description = config('custom.appointment_log_message.' . $request->status . '');
-            $log->request_type = $appointment->request_type;
+            if(isset($request->request_type)){
+            $log->request_type = $request->request_type;
+            }
             $log->status = $appointment->appointment_status;
             $log->save();
-            if ($request->status == 3) { //approved
-                if ($request->request_type == 1) { //payment request
+            if ($request->status == 4) { //approved
+                if (isset($request->request_type) && $request->request_type == 1) { //payment request
                     $user = User::find($appointment->user_id);
                     $requested_amount = $appointment->payment->total_amount - ($appointment->payment->tax_amount + $appointment->payment->transaction_charge);
                 } else {
