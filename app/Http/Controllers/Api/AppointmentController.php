@@ -67,13 +67,13 @@ class AppointmentController extends Controller
             if ($status) {
                 switch ($status) {
                     case 1: //upcoming
-                        $list = $list->where('appointment_status', 1)->whereDate('appointment_date', '>=', convertToUTC(now()));
+                        $list = $list->whereIn('appointment_status', [1,2])->whereDate('appointment_date', '>=', convertToUTC(now()));
                         break;
                     case 2: //missed
-                        $list = $list->where('appointment_status', 1)->whereDate('appointment_date', '<=', convertToUTC(now()));
+                        $list = $list->whereIn('appointment_status', [1,2])->whereDate('appointment_date', '<=', convertToUTC(now()));
                         break;
                     case 3: //completed/approved
-                        $list = $list->where('appointment_status', 3)->whereDate('appointment_date', '<', convertToUTC(now()));
+                        $list = $list->where('appointment_status', 4)->whereDate('appointment_date', '<', convertToUTC(now()));
                         break;
                     default:
                         break;
