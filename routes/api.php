@@ -63,7 +63,7 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
 
     /* Doctor Module */
     Route::get('doctor/dashboard', 'Api\DoctorController@dashboard');
-    Route::post('doctor/list', 'Api\DoctorController@doctorList');
+    Route::get('doctor/list', 'Api\DoctorController@doctorList');
 
     Route::post('doctor/saveprofile', 'Api\DoctorController@saveProfile');
 
@@ -85,8 +85,6 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
     Route::post('record/list/', 'Api\MedicalRecordController@getList');
     Route::get('record/view/{id}', 'Api\MedicalRecordController@getView');
     Route::get('record/delete/{id}', 'Api\MedicalRecordController@destroy');
-    Route::get('record/download/{id}', 'Api\MedicalRecordController@getdownload');
-
 
     Route::get('logout', 'PassportController@logout');
     // Language

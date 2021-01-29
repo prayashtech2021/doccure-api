@@ -11,27 +11,26 @@ class Prescription extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'appointment_id', 'user_id','signature_id','created_by',
+         'user_id','signature_id','created_by',
    ];
 
-    /*public function getData(){
+    public function getData(){
         return [
             'id' => $this->id,
-            'created' => Carbon::parse($this->created_at)->format('d/m/Y h:i A'),
             'doctor' => $this->doctor()->first()->basicProfile(),
             'patient' => $this->patient()->first()->basicProfile(),
-            'date' => convertToLocal(Carbon::parse($this->appointment_date),'','d/m/Y'),
-            'start_time' => Carbon::parse($this->start_time)->format('h:i A'),
-            'end_time' => Carbon::parse($this->end_time)->format('h:i A'),
-            'next_visit' => convertToLocal(Carbon::parse($this->next_visit),'','d/m/Y'),
+            'prescription_details' => $this->prescriptionDetails()->get(),
+            'created' => Carbon::parse($this->created_at)->format('d/m/Y h:i A'),
+            'sign' => $this->doctorsign()->first(),
         ];
-    }*/
-    public function doctorappointment() { return $this->belongsTo('App\Appointment', 'appointment_id'); }
-    public function doctorsign() { return $this->belongsTo('App\Signature', 'signature_id'); }
-
+    }
+    
+    public function doctorsign() { 
+        return $this->belongsTo('App\Signature', 'signature_id','id')->select('id','signature_image'); 
+    }
 
     public function prescriptionDetails(){
-        return $this->hasMany(PrescriptionDetail::class);
+        return $this->hasMany(PrescriptionDetail::class)->select('id','drug_name','quantity','type','days','time');
     }
 
     public function patient(){

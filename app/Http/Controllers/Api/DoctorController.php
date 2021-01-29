@@ -8,6 +8,7 @@ use Validator;
 use App\ { User, Speciality, EducationDetail, Service,Country, State, City, Address, AddressImage, UserSpeciality, ExperienceDetail, AwardDetail, MembershipDetail, RegistrationDetail };
 use Illuminate\Http\Request;
 use DB;
+use Storage;
 
 class DoctorController extends Controller
 {
@@ -45,12 +46,19 @@ class DoctorController extends Controller
             $paginate = $request->count_per_page ? $request->count_per_page : 10;
             $order_by = $request->order_by ? $request->order_by : 'desc';
 
-            $list = User::role('doctor')->withTrashed()->orderBy('created_at', $order_by);
+            $list = User::role('doctor')->orderBy('created_at', $order_by);
+            if(auth()->user()->hasrole('company_admin')){
+                $list = $list->withTrashed();
+            }
             $data = collect();
-            $list->paginate($paginate)->getCollection()->each(function ($appointment) use (&$data) {
-                $data->push($appointment->doctorProfile());
+            $list->paginate($paginate)->getCollection()->each(function ($provider) use (&$data) {
+                $data->push($provider->doctorProfile());
             });
-            return self::send_success_response($data,'Doctor Details Fetched Successfully');
+            if($data){
+                return self::send_success_response($data,'Doctor Details Fetched Successfully');
+            }else{
+                return self::send_bad_request_response('No Records Found');
+            }
         } catch (Exception | Throwable $exception) {
             return self::send_exception_response($exception->getMessage());
         }
@@ -59,16 +67,21 @@ class DoctorController extends Controller
     public function doctorProfile($user_id){
         try {
             
-            $doctor['profile'] = User::role('doctor')->with('doctorService','doctorEducation','doctorExperience','doctorAwards','doctorMembership','doctorRegistration')->find($user_id);
-            $doctor['feedback'] = [];
-            $doctor['ratings'] = [];
-            $doctor['book_appointment'] = '';
-            $doctor['chat'] = '';
-            $doctor['call'] = '';
-            $doctor['video_call'] = '';
-            $doctor['wishlist'] = '';
-         
-            return self::send_success_response($doctor);
+            $list = User::role('doctor')->with('doctorService','doctorEducation','doctorExperience','doctorAwards','doctorMembership','doctorRegistration')->find($user_id);
+            if($list){
+                
+                $doctor['profile'] = $list;
+                $doctor['feedback'] = [];
+                $doctor['ratings'] = [];
+                $doctor['book_appointment'] = '';
+                $doctor['chat'] = '';
+                $doctor['call'] = '';
+                $doctor['video_call'] = '';
+                $doctor['wishlist'] = '';
+                return self::send_success_response($doctor,'Doctor Details Fetched Successfully.');
+            }else{
+                return self::send_bad_request_response('Incorrect User Id. Please check and try again.');
+            }
         } catch (\Exception | \Throwable $exception) {
             return self::send_exception_response($exception->getMessage());
         }
@@ -76,29 +89,28 @@ class DoctorController extends Controller
 
     public function saveProfile(Request $request){
         try{
-
+         
         $user_id = $request->user_id;
-        $rules = [
-            'user_id' => 'required|integer',
+        $rules = array(
+            'user_id' => 'required|integer|exists:users,id',
             'first_name'  => 'required|string|max:191',
             'last_name'  => 'string|max:191',
-            'email' => 'required|email|unique:users,email,'.$request->user_id,
-            'country_code_id' => 'required|integer',
+            'country_code_id' => 'required|integer|exists:countries,id',
             'mobile_number' => 'required|min:10|max:10|unique:users,mobile_number,'.$request->user_id,
             'gender'  => 'required|integer|between:1,2',
             'dob'  => 'date',
             'price_type' => 'required|between:1,2',
-            'amount' => 'numeric',
+            'amount' => 'decimal',
+            'contact_address_line1' => 'required',   
+        );
 
-            'contact_address_line1' => 'required',
-            
-        ];
-
-        $validator = Validator::make($request->all(), $rules);
-        if ($validator->fails()) {
-            return self::send_bad_request_response($validator->errors()->first());
+        if($request->clinic_name){
+            $rules['clinic_address_line1'] = 'required';
         }
-        
+
+        $valid = self::customValidation($request, $rules);
+        if($valid){ return $valid;}
+
         //Save doctor profile
         $doctor = User::find($user_id);
         if($doctor){
@@ -120,19 +132,17 @@ class DoctorController extends Controller
         }
         
         $contact_details->line_1 = $request->contact_address_line1;
-        $contact_details->line_2 = ($request->contact_address_line2)? $request->contact_address_line2 : '';
-        $contact_details->country_id = ($request->contact_country_id)? $request->contact_country_id : '';
-        $contact_details->state_id = ($request->contact_state_id)? $request->contact_state_id : '';
-        $contact_details->city_id = $request->contact_city_id;
-        $contact_details->postal_code = $request->contact_postal_code;
+        $contact_details->line_2 = ($request->contact_address_line2)? $request->contact_address_line2 : NULL;
+        $contact_details->country_id = ($request->contact_country_id)? $request->contact_country_id : NULL;
+        $contact_details->state_id = ($request->contact_state_id)? $request->contact_state_id : NULL;
+        $contact_details->city_id = ($request->contact_city_id)? $request->contact_city_id : NULL ;
+        $contact_details->postal_code = ($request->contact_postal_code)? $request->contact_postal_code : NULL;
         $contact_details->save();
-        
+       
         /* Doctor Clinic Info */
-        if($request->clinic_address_id){
-            $get_clinic_details = Address::find($request->clinic_address_id)->first();
-        }
+            $get_clinic_details = Address::whereUserId($user_id)->whereNotNull('name')->first();
         
-        if($request->clinic_address_id && (isset($get_clinic_details))){
+        if(isset($get_clinic_details)){
             $clinic_details = $get_clinic_details;
             $clinic_details->updated_by = auth()->user()->id;
         }else{
@@ -142,25 +152,25 @@ class DoctorController extends Controller
         }
         
         $clinic_details->name = ($request->clinic_name)? $request->clinic_name : '';
-        $clinic_details->line_1 = ($request->clinic_address_line1)? $request->clinic_address_line1 : '';
-        $clinic_details->line_2 = ($request->clinic_address_line2)? $request->clinic_address_line2 : '';
-        $clinic_details->country_id = ($request->clinic_country_id)? $request->clinic_country_id : '';
-        $clinic_details->state_id = ($request->clinic_state_id)? $request->clinic_state_id : '';
-        $clinic_details->city_id = ($request->clinic_city_id)? $request->clinic_city_id : '';
-        $clinic_details->postal_code = ($request->clinic_postal_code)? $request->clinic_postal_code : '';
+        $clinic_details->line_1 = $request->clinic_address_line1;
+        $clinic_details->line_2 = ($request->clinic_address_line2)? $request->clinic_address_line2 : NULL;
+        $clinic_details->country_id = ($request->clinic_country_id)? $request->clinic_country_id : NULL;
+        $clinic_details->state_id = ($request->clinic_state_id)? $request->clinic_state_id : NULL;
+        $clinic_details->city_id = ($request->clinic_city_id)? $request->clinic_city_id : NULL;
+        $clinic_details->postal_code = ($request->clinic_postal_code)? $request->clinic_postal_code : NULL;
         $clinic_details->save();
-
+        
         /* Clinic Images */
 
         $images=array();
 
         if($files=$request->file('clinic_images')){
-            $clinic_img = AddressImage::whereUserId($user_id)->where('clinic_information_id',$clinic_details->id)->delete();
+            $clinic_img = AddressImage::whereUserId($user_id)->where('address_id',$clinic_details->id)->delete();
 
             foreach($files as $file){
                 $new_clinic_img = new AddressImage();
                 $new_clinic_img->user_id = $user_id;
-                $new_clinic_img->clinic_information_id = $clinic_details->id;
+                $new_clinic_img->address_id	 = $clinic_details->id;
                 $new_clinic_img->created_by = auth()->user()->id;
 
                 if (Storage::exists('images/address_images/'.$clinic_details->id.'/')) {
@@ -175,16 +185,9 @@ class DoctorController extends Controller
                     $file_name = '';
                 }
 
-                $new_clinic_img->clinic_image = $file_name;
+                $new_clinic_img->image = $file_name;
                 $new_clinic_img->save();
                 
-                /*if (preg_match('/data:image\/(.+);base64,(.*)/', $file, $matchings)) {
-                    $imageData = base64_decode($matchings[2]);
-                    $extension = $matchings[1];
-                    $file_name = date('YmdHis') . rand(100,999). '_' . $clinic_details->id . '.' . $extension;
-                    $path = 'clinic_images/'.$clinic_details->id.'/'.$file_name;
-                    Storage::put($path , $imageData);    
-                }*/
             }
         }
 
@@ -203,20 +206,6 @@ class DoctorController extends Controller
             }
         }
        
-       /* $serviceArray = $request->services;
-        if(isset($serviceArray) ) {
-            foreach($serviceArray as $key => $service){
-                $new_service = new Service();
-                if(!empty($service)){
-                    $new_service->name = $new_service;
-                    $new_service->user_id = $user_id;
-                    $new_service->save();
-                }
-            }
-        }*/
-
-        // save doctor Education details
-        //$doctor->doctorEducation()->delete();
         EducationDetail::where('user_id', '=', $user_id)->delete();
         $educationArray = $request->education;
         if(isset($educationArray)) {
@@ -269,11 +258,11 @@ class DoctorController extends Controller
         RegistrationDetail::where('user_id', '=', $user_id)->delete();
         $registrationArray = $request->registration;
         if(isset($registrationArray)) {
-            foreach($registrationArray['registration'] as $key => $reg){
+            foreach($registrationArray['name'] as $key => $reg){
                 $registration = new RegistrationDetail();
-                if(!empty($reg) || !empty($registrationArray['reg_year'][$key])){
-                    $registration->reg = $reg;
-                    $registration->reg_year = $registrationArray['reg_year'][$key];
+                if(!empty($reg) || !empty($registrationArray['registration_year'][$key])){
+                    $registration->reg = $registrationArray['name'];
+                    $registration->reg_year = $registrationArray['registration_year'][$key];
                     $registration->user_id = $user_id;
                     $registration->save();
                 }
@@ -291,20 +280,15 @@ class DoctorController extends Controller
                 $membership->save();
             }
         }
+        
 
             return self::send_success_response([],'Doctor Records Store Successfully');
         }else{
             return self::send_bad_request_response('Incorrect User id. Please check and try again!');
         }
-        /*user()->services()->delete();
-
-        $services = explode(",", $request->services);
-        if(count($services) > 0) {
-            foreach($services as $val){
-                user()->services()->create(['service'=> $val]);
-            }
-        }*/
+       
         } catch (\Exception | \Throwable $exception) {
+          //  DB::rollback();
             return self::send_exception_response($exception->getMessage());
         }
 
@@ -328,7 +312,7 @@ class DoctorController extends Controller
         try{
             $paginate = $request->count_per_page ? $request->count_per_page : 10;
 
-            $doctors = User::role('doctor')->with(['doctorSpecialization','addresses','homeAddresses']);
+            $doctors = User::role('doctor');
             
             if($request->keywords){
                 $doctors = $doctors->where('first_name', 'like', '%' . $request->keywords . '%')
@@ -349,20 +333,20 @@ class DoctorController extends Controller
 
             if($request->country_id){
                 $country_id = $request->country_id;
-                $doctors = $doctors->whereHas('addresses', function ($category) use ($country_id) {
+                $doctors = $doctors->whereHas('homeAddress', function ($category) use ($country_id) {
                     $category->where('addresses.country_id',$country_id);
                 });
             }
             
             if($request->state_id){
                 $state_id = $request->state_id;
-                $doctors = $doctors->whereHas('addresses', function ($category) use ($state_id) {
+                $doctors = $doctors->whereHas('homeAddress', function ($category) use ($state_id) {
                     $category->where('addresses.state_id',$state_id);
                 });
             }
             if($request->city_id){
                 $city_id = $request->city_id;
-                $doctors = $doctors->whereHas('addresses', function ($category) use ($city_id) {
+                $doctors = $doctors->whereHas('homeAddress', function ($category) use ($city_id) {
                     $category->where('addresses.city_id',$city_id);
                 });
             }
@@ -377,12 +361,16 @@ class DoctorController extends Controller
             if($request->sort == 3){ //free
                 $doctors = $doctors->where('price_type',1);
             }
-            $doctors = $doctors->get();
 
-            if($doctors){
-                return self::send_success_response($doctors,'Doctors data fetched successfully');
+            $data = collect();
+            $doctors->paginate($paginate)->getCollection()->each(function ($provider) use (&$data) {
+                $data->push($provider->doctorProfile());
+            });
+
+            if($data){
+                return self::send_success_response($data,'Doctors data fetched successfully');
             }else{
-                return self::send_success_response($doctors,'No Records Found');
+                return self::send_bad_request_response($doctors,'No Records Found');
             }
         } catch (\Exception | \Throwable $exception) {
             return self::send_exception_response($exception->getMessage());

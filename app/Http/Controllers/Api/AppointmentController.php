@@ -255,8 +255,11 @@ class AppointmentController extends Controller
     public function getsignature($doctor_id){
        
         $sign =  Signature::select('id','signature_image')->whereUserId($doctor_id)->get();
-        return self::send_success_response($sign,'Signature fetched Successfully');
-
+        if($sign){
+            return self::send_success_response($sign,'Signature fetched Successfully');
+        }else{
+            return self::send_bad_request_response('No Records Found');
+        }
     }
 
     public function savePrescription(Request $request)
@@ -367,11 +370,19 @@ class AppointmentController extends Controller
             }else{
                 $user_id= $request->user_id;
             }
-            $list = Prescription::with('prescriptionDetails','doctor')->whereUserId($user_id)->orderBy('created_at', $order_by);
-
-            $list = $list->paginate($paginate);
-
-            return self::send_success_response($list,'Prescription Details Fetched Successfully');
+            $list = Prescription::whereUserId($user_id)->orderBy('created_at', $order_by);
+            
+            $data = collect();
+            
+            $list->paginate($paginate)->getCollection()->each(function ($prescription) use (&$data) {
+                $data->push($prescription->getData());
+            });
+            
+            if($data){
+                return self::send_success_response($data,'Prescription Details Fetched Successfully');
+            }else{
+                return self::send_bad_request_response('No Records Found');
+            }
 
         } catch (Exception | Throwable $exception) {
             DB::rollBack();

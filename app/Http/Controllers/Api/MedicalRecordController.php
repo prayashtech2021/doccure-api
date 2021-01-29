@@ -7,6 +7,7 @@ use App\ { MedicalRecord };
 use DB;
 use Illuminate\Http\Request;
 use Validator;
+use Storage;
 
 class MedicalRecordController extends Controller
 {
@@ -81,9 +82,12 @@ class MedicalRecordController extends Controller
             if($request->consumer_id){
                 $list = $list->where('consumer_id',$request->consumer_id);
             }
-            $list = $list->withTrashed()->orderBy('id', 'ASC')->get();
-
-            return self::send_success_response($list, 'Medical Record content fetched successfully');
+            $list = $list->orderBy('id', 'ASC')->get();
+            if($list){
+                return self::send_success_response($list, 'Medical Record content fetched successfully');
+            }else{
+                return self::send_bad_request_response('No Records Found');
+            }
         } catch (Exception | Throwable $e) {
             DB::rollback();
             return self::send_exception_response($exception->getMessage());
@@ -92,20 +96,13 @@ class MedicalRecordController extends Controller
 
     public function getView($record_id){
         try {
-            $list = MedicalRecord::withTrashed()->with('doctor','patient')->where('id',$record_id)->orderBy('id', 'ASC')->get();
 
-            return self::send_success_response($list, 'Medical Record content fetched successfully');
-        } catch (Exception | Throwable $e) {
-            DB::rollback();
-            return self::send_exception_response($exception->getMessage());
-        }
-    }
-
-    public function getdownload($id){
-        try {
-            $list = MedicalRecord::where('id',$record_id)->first();
-            //$list->document_file;
-            return self::send_success_response($list, 'Medical Record content fetched successfully');
+            $list = MedicalRecord::with('doctor','patient')->where('id',$record_id)->orderBy('id', 'ASC')->get();
+            if($list){
+                return self::send_success_response($list, 'Medical Record content fetched successfully');
+            }else{
+                return self::send_bad_request_response('No Records Found');
+            }
         } catch (Exception | Throwable $e) {
             DB::rollback();
             return self::send_exception_response($exception->getMessage());

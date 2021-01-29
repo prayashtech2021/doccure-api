@@ -64,41 +64,55 @@ class User extends Authenticatable implements Wallet, WalletFloat
             'age' => Carbon::parse($this->dob)->age,
             'blood_group' => $this->blood_group,
             'biography' => $this->biography,
-            'price_type' =>  ($this->price_type == 1)? 'Free' : $this->amount,
+            'fees' =>  ($this->price_type == 1)? 'Free' : $this->amount,
             'currency_code' => $this->currency_code,
             'time_zone_id' => $this->time_zone_id,
             'language_id' => $this->language_id,
             'service' => $this->doctorService()->select('id','name')->get(),
-            'specialization' => $this->doctorSpecialization()->first(),
-            'addresses' => $this->homeAddresses()->first(),
-            'office_addresses' => $this->addresses()->first(),
+            'providerspeciality' => $this->doctorSpecialization()->first(),
+            'permanent_address' => $this->getPermanentAddressAttribute(),
+            'office_address' => $this->getOfficeAddressAttribute(),
             'member_since' => date('d M Y H:s A', strtotime($this->created_at)),
+            'accountstatus' => $this->getAccountStatusAttribute(),
         ];
     }
-    /*public static function userAddress($id){
-        return Address::whereNull('name')->where('user_id',$id)->first();
-    }
 
-    public static function doctorClinicInfo($id){
-        return Address::whereNotNull('name')->where('user_id',$id)->first();
+    public function patientProfile(){
+        return [
+            'id' => $this->id,
+            'pid' => $this->getPidAttribute(),
+            'name' => trim($this->first_name . ' '. $this->last_name),
+            'email' => $this->email,
+            'mobile_number' => $this->mobile_number,
+            'gendername' => ($this->gender==1)? 'Male' : ($this->gender==2) ? 'Female' : '-',
+            'profile_image' => getUserProfileImage($this->id),
+            'dob' => $this->dob,
+            'age' => Carbon::parse($this->dob)->age,
+            'blood_group' => $this->blood_group,
+            'time_zone_id' => $this->time_zone_id,
+            'language_id' => $this->language_id,
+            'permanent_address' => $this->getPermanentAddressAttribute(),
+            'member_since' => date('d M Y H:s A', strtotime($this->created_at)),
+            'accountstatus' => $this->getAccountStatusAttribute(),
+        ];
     }
-    public static function doctorClinicImage($id){
-        return AddressImage::where('user_id',$id)->first();
-    }*/
 
     public function doctorSpecialization() { 
         return $this->belongsToMany('App\Speciality', 'user_speciality')->select('id','name');
     }
 
     public function doctorService(){
-        return $this->hasMany(Service::class);
+        return $this->hasMany(Service::class)->select('id','name');
     }
-    public function addresses(){
-        return $this->hasMany(Address::class)->with('country','state','city','addImage')->whereNotNull('name');
-    }
-    public function homeAddresses(){
+    
+    public function homeAddress(){
         return $this->hasMany(Address::class)->with('country','state','city')->whereNull('name');
     }
+
+    public function clinicAddress(){
+        return $this->hasMany(Address::class)->with('country','state','city','addressImage')->whereNotNull('name');
+    }
+
     public function doctorEducation(){
         return $this->hasMany(EducationDetail::class);
     }
@@ -118,9 +132,9 @@ class User extends Authenticatable implements Wallet, WalletFloat
     public function doctorRegistration() { 
         return $this->hasMany(RegistrationDetail::class); 
     }
-
-    public function userAppointment() { 
-        return $this->belongsTo('App\Appointment', 'id','doctor_id'); 
+    
+    public function appointments() { 
+        return $this->hasMany('App\Appointment','user_id'); 
     }
 
     public function basicProfile(){
@@ -128,7 +142,8 @@ class User extends Authenticatable implements Wallet, WalletFloat
            'id' => $this->id,
            'name' => trim($this->first_name . ' '. $this->last_name),
            'profile_image' => getUserProfileImage($this->id),
-       ];
+           'doctorSpecialization' => $this->doctorSpecialization()->get(),
+        ];
     }
 
     public function payment()
@@ -189,10 +204,10 @@ class User extends Authenticatable implements Wallet, WalletFloat
     }
 
     public function getPermanentAddressAttribute(){
-        return Address::select('line_1','line_2')->with('country','state','city','addImage')->whereNull('name')->where('user_id',$this->id)->first();
+        return Address::with('country','state','city')->whereNull('name')->where('user_id',$this->id)->first();
     }
     public function getOfficeAddressAttribute(){
-        return Address::with('country','state','city','addImage')->whereNotNull('name')->where('user_id',$this->id)->first();
+        return Address::with('country','state','city','addressImage')->whereNotNull('name')->where('user_id',$this->id)->first();
     }
     public function getUserImageAttribute() { 
         return getUserProfileImage($this->id); 
