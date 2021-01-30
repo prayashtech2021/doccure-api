@@ -397,9 +397,15 @@ class AppointmentController extends Controller
 
     public function prescriptionView($pid)
     {
-        $list = Prescription::with('prescriptionDetails', 'doctorappointment.patient', 'doctorappointment.doctor', 'doctorsign')->where('id', $pid)->get();
-
-        return self::send_success_response($list, 'Prescription Details Fetched Successfully');
+        //$list = Prescription::with('prescriptionDetails', 'doctorappointment.patient', 'doctorappointment.doctor', 'doctorsign')->where('id', $pid)->get();
+        $list = Prescription::whereId($pid);
+            
+        $data = collect();
+        
+        $list->paginate(10)->getCollection()->each(function ($prescription) use (&$data) {
+            $data->push($prescription->getData());
+        });
+        return self::send_success_response($data, 'Prescription Details Fetched Successfully');
     }
 
     public function prescription_destroy($id)

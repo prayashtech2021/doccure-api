@@ -68,7 +68,7 @@ class User extends Authenticatable implements Wallet, WalletFloat
             'currency_code' => $this->currency_code,
             'time_zone_id' => $this->time_zone_id,
             'language_id' => $this->language_id,
-            'service' => $this->doctorService()->select('id','name')->get(),
+            'service' => $this->doctorService()->get(),
             'providerspeciality' => $this->doctorSpecialization()->first(),
             'permanent_address' => $this->getPermanentAddressAttribute(),
             'office_address' => $this->getOfficeAddressAttribute(),
@@ -102,7 +102,7 @@ class User extends Authenticatable implements Wallet, WalletFloat
     }
 
     public function doctorService(){
-        return $this->hasMany(Service::class)->select('id','name');
+        return $this->hasMany(Service::class);
     }
     
     public function homeAddress(){

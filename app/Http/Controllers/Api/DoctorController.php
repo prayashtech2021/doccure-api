@@ -197,7 +197,7 @@ class DoctorController extends Controller
         
         // save doctor Services 
         if(isset($request->services)){
-            Service::where('user_id', '=', $user_id)->delete();
+            Service::where('user_id', '=', $user_id)->forcedelete();
             $services = explode(",", $request->services);
             if(count($services) > 0) {
                 foreach($services as $val){
@@ -206,77 +206,84 @@ class DoctorController extends Controller
             }
         }
        
-        EducationDetail::where('user_id', '=', $user_id)->delete();
-        $educationArray = $request->education;
-        if(isset($educationArray)) {
-            foreach($educationArray['degree'] as $key => $degree){
+        EducationDetail::where('user_id', '=', $user_id)->forcedelete();
+        if($request->education) {
+            $education_result = json_decode($request->education, true);
+            foreach($education_result as $degree){
                 $education = new EducationDetail();
-                if(!empty($degree) || !empty($educationArray['college'][$key]) || !empty($educationArray['completion'][$key])){
-                    $education->degree = $degree;
-                    $education->college = $educationArray['college'][$key];
-                    $education->completion = $educationArray['completion'][$key];
+                if(!empty($degree['degree']) || !empty($degree['college']) || !empty($degree['completion'])){
+                    $education->degeree = $degree['degree'];
+                    $education->institute = $degree['college'];
+                    $education->year_of_completion = $degree['completion'];
                     $education->user_id = $user_id;
-                    $education->save();
+                    $education->created_by = auth()->user()->id;
+                 //   $education->save();
                 }
             }
         }
 
         // save doctor Experience details
-        ExperienceDetail::where('user_id', '=', $user_id)->delete();
-        $experienceArray = $request->input('experience');
-        if(isset($experienceArray)) {
-            foreach($experienceArray['hospital_name'] as $key => $hospital){
+        ExperienceDetail::where('user_id', '=', $user_id)->forcedelete();
+        if($request->experience) {
+            $experience_result = json_decode($request->experience, true);
+            foreach($experience_result as $hospital){
                 $experience = new ExperienceDetail();
-                if(!empty($hospital) || !empty($experienceArray['from'][$key])
-                        || !empty($experienceArray['to'][$key]) || !empty($experienceArray['designation'][$key])){
-                    $experience->h_name = $hospital;
-                    $experience->from = $experienceArray['from'][$key];
-                    $experience->to = $experienceArray['to'][$key];
-                    $experience->designation = $experienceArray['designation'][$key];
+                if(!empty($hospital['hospital_name']) || !empty($hospital['from']) || !empty($hospital['to']) || !empty($hospital['designation'])){
+                    $experience->hospital_name = $hospital['hospital_name'];
+                    $experience->from = $hospital['from'];
+                    $experience->to = $hospital['to'];
+                    $experience->designation = $hospital['designation'];
                     $experience->user_id = $user_id;
+                    $experience->created_by = auth()->user()->id;
                     $experience->save();
                 }
             }
         }
 
         //save doctor awards details
-        AwardDetail::where('user_id', '=', $user_id)->delete();
+        AwardDetail::where('user_id', '=', $user_id)->forcedelete();
         $awardArray = $request->achievement;
         if(isset($awardArray)) {
-            foreach($awardArray['name'] as $key => $award){
+            $achievement_result = json_decode($request->achievement, true);
+            foreach($achievement_result as $award){
                 $achievement = new AwardDetail();
-                if(!empty($award) || !empty($awardArray['award_year'][$key])){
-                    $achievement->award = $award;
-                    $achievement->year = $awardArray['award_year'][$key];
+                if(!empty($award['name']) || !empty($award['award_year'])){
+                    $achievement->name = $award['name'];
+                    $achievement->award_year = $award['award_year'];
                     $achievement->user_id = $user_id;
+                    $achievement->created_by = auth()->user()->id;
                     $achievement->save();
                 }
             }
         }
 
         // save doctor registration details
-        RegistrationDetail::where('user_id', '=', $user_id)->delete();
+        RegistrationDetail::where('user_id', '=', $user_id)->forcedelete();
         $registrationArray = $request->registration;
         if(isset($registrationArray)) {
-            foreach($registrationArray['name'] as $key => $reg){
+            $registration_result = json_decode($request->registration, true);
+            foreach($registration_result as $reg){
                 $registration = new RegistrationDetail();
-                if(!empty($reg) || !empty($registrationArray['registration_year'][$key])){
-                    $registration->reg = $registrationArray['name'];
-                    $registration->reg_year = $registrationArray['registration_year'][$key];
+                if(!empty($reg['name']) || !empty($reg['registration_year'])){
+                    $registration->name = $reg['name'];
+                    $registration->registration_year = $reg['registration_year'];
                     $registration->user_id = $user_id;
+                    $registration->created_by = auth()->user()->id;
                     $registration->save();
                 }
             }
         }
 
         // save doctor MembershipDetail details
-        MembershipDetail::where('user_id', '=', $user_id)->delete();
+        MembershipDetail::where('user_id', '=', $user_id)->forcedelete();
         $membershipArray = $request->membership;
         if(isset($membershipArray)) {
-            foreach($membershipArray as $value){
+            $membership_result = json_decode($request->membership, true);
+            foreach($membership_result as $value){
                 $membership = new MembershipDetail();
-                $membership->name = $value;
+                $membership->name = $value['name'];
                 $membership->user_id = $user_id;
+                $membership->created_by = auth()->user()->id;
                 $membership->save();
             }
         }

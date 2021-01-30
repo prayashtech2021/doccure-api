@@ -25,12 +25,16 @@ class Prescription extends Model
         ];
     }
     
+    public function doctorappointment() { 
+        return $this->belongsTo('App\Appointment', 'user_id','user_id'); 
+    }
+
     public function doctorsign() { 
         return $this->belongsTo('App\Signature', 'signature_id','id')->select('id','signature_image'); 
     }
 
     public function prescriptionDetails(){
-        return $this->hasMany(PrescriptionDetail::class)->select('id','drug_name','quantity','type','days','time');
+        return $this->hasMany(PrescriptionDetail::class);
     }
 
     public function patient(){
