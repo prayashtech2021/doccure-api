@@ -165,10 +165,13 @@ class HomeController extends Controller
                     $message = "Please enter a password which is not similar then current password.";
                     return self::send_bad_request_response($message);
                 } else {
+                    DB::beginTransaction();
+
                     User::where('id', $userid)->update(['password' => Hash::make($input['new_password'])]);
                     if (auth()->check()) {
                         auth()->user()->token()->revoke();
                     }
+                    DB::commit();
                     $response_array = [
                         "code" => "200",
                         "message" => "Password updated successfully.",
@@ -177,6 +180,7 @@ class HomeController extends Controller
                     return response()->json(self::convertNullsAsEmpty($response_array), 200);
                 }
             } catch (\Exception | \Throwable $exception) {
+                DB::rollback();
                 return self::send_exception_response($exception->getMessage());
             }
         }
@@ -265,12 +269,13 @@ class HomeController extends Controller
         try{    
             $user_id = $request->user_id;
             $rules = [
-                'user_id' => 'required|integer',
+                'user_id' => 'required|integer|exists:users,id',
                 'first_name'  => 'required|string|max:191',
+                'last_name'  => 'string|max:191',
                 'email' => 'required|email|unique:users,email,'.$request->user_id,
-                'country_id' => 'required|integer',
-                'state_id' => 'integer',
-                'city_id' => 'integer',
+                'country_id' => 'nullable|numeric|exists:countries,id',
+                'state_id' => 'nullable|numeric|exists:states,id',
+                'city_id' => 'nullable|numeric|exists:cities,id',
             ];
 
             $validator = Validator::make($request->all(), $rules);

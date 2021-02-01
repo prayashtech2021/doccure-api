@@ -58,7 +58,7 @@ class User extends Authenticatable implements Wallet, WalletFloat
             'name' => trim($this->first_name . ' '. $this->last_name),
             'email' => $this->email,
             'mobile_number' => $this->mobile_number,
-            'gendername' => ($this->gender==1)? 'Male' : ($this->gender==2) ? 'Female' : '-',
+            'gendername' => $this->getGenderNameAttribute(),
             'profile_image' => getUserProfileImage($this->id),
             'dob' => $this->dob,
             'age' => Carbon::parse($this->dob)->age,
@@ -84,7 +84,7 @@ class User extends Authenticatable implements Wallet, WalletFloat
             'name' => trim($this->first_name . ' '. $this->last_name),
             'email' => $this->email,
             'mobile_number' => $this->mobile_number,
-            'gendername' => ($this->gender==1)? 'Male' : ($this->gender==2) ? 'Female' : '-',
+            'gendername' => $this->getGenderNameAttribute(),
             'profile_image' => getUserProfileImage($this->id),
             'dob' => $this->dob,
             'age' => Carbon::parse($this->dob)->age,
@@ -98,7 +98,7 @@ class User extends Authenticatable implements Wallet, WalletFloat
     }
 
     public function doctorSpecialization() { 
-        return $this->belongsToMany('App\Speciality', 'user_speciality')->select('id','name');
+        return $this->belongsToMany('App\Speciality', 'user_speciality')->select('id','name','image');
     }
 
     public function doctorService(){

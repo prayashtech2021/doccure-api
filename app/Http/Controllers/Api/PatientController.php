@@ -198,7 +198,7 @@ class PatientController extends Controller
                 $list->push($provider->patientProfile());
             });
             
-            if($list){
+            if(count($list)>0){
                 return self::send_success_response($list,'Patient data fetched successfully');
             }else{
                 return self::send_bad_request_response('No Records Found');
