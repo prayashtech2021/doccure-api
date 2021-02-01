@@ -102,6 +102,7 @@ class DoctorController extends Controller
             'price_type' => 'required|between:1,2',
             'amount' => 'numeric',
             'contact_address_line1' => 'required',   
+            'speciality_id' => 'nullable|numeric|exists:specialities,id',   
         );
 
         if($request->clinic_name){
@@ -208,8 +209,8 @@ class DoctorController extends Controller
                 }
             }
         
-            EducationDetail::where('user_id', '=', $user_id)->forcedelete();
             if($request->education) {
+                EducationDetail::where('user_id', '=', $user_id)->forcedelete();
                 $education_result = json_decode($request->education, true);
                 foreach($education_result as $degree){
                     $education = new EducationDetail();
@@ -225,8 +226,8 @@ class DoctorController extends Controller
             }
 
             // save doctor Experience details
-            ExperienceDetail::where('user_id', '=', $user_id)->forcedelete();
             if($request->experience) {
+                ExperienceDetail::where('user_id', '=', $user_id)->forcedelete();
                 $experience_result = json_decode($request->experience, true);
                 foreach($experience_result as $hospital){
                     $experience = new ExperienceDetail();
@@ -243,8 +244,8 @@ class DoctorController extends Controller
             }
 
             //save doctor awards details
-            AwardDetail::where('user_id', '=', $user_id)->forcedelete();
             $awardArray = $request->achievement;
+            AwardDetail::where('user_id', '=', $user_id)->forcedelete();
             if(isset($awardArray)) {
                 $achievement_result = json_decode($request->achievement, true);
                 foreach($achievement_result as $award){
@@ -260,9 +261,9 @@ class DoctorController extends Controller
             }
 
             // save doctor registration details
-            RegistrationDetail::where('user_id', '=', $user_id)->forcedelete();
             $registrationArray = $request->registration;
             if(isset($registrationArray)) {
+                RegistrationDetail::where('user_id', '=', $user_id)->forcedelete();
                 $registration_result = json_decode($request->registration, true);
                 foreach($registration_result as $reg){
                     $registration = new RegistrationDetail();
@@ -277,9 +278,9 @@ class DoctorController extends Controller
             }
 
             // save doctor MembershipDetail details
-            MembershipDetail::where('user_id', '=', $user_id)->forcedelete();
             $membershipArray = $request->membership;
             if(isset($membershipArray)) {
+                MembershipDetail::where('user_id', '=', $user_id)->forcedelete();
                 $membership_result = json_decode($request->membership, true);
                 foreach($membership_result as $value){
                     $membership = new MembershipDetail();

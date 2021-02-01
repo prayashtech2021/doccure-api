@@ -86,6 +86,7 @@ class AppointmentController extends Controller
             });
 
             $data = collect();
+
             if ($user->hasRole('patient')) {
                 $list = $list->whereUserId($user->id);
             } elseif ($user->hasRole('doctor')) {
@@ -94,7 +95,12 @@ class AppointmentController extends Controller
 
             if (!empty($request->request_type) && $request->request_type > 0) {
                 $list = $list->where('request_type', $request->request_type);
+            }elseif ($user->hasRole('patient')) {
+                $list = $list->where('appointment_status','<>',3);
+            } elseif ($user->hasRole('doctor')) {
+                $list = $list->where('appointment_status','<>',6);
             }
+            
             removeMetaColumn($user);
             unset($user->roles);
             $result['user_details'] = $user;
@@ -151,7 +157,7 @@ class AppointmentController extends Controller
              * Appointment
              */
             $appointment_date = convertToUTC(Carbon::createFromFormat('d/m/Y', $request->appointment_date));
-            $chk = Appointment::where(['user_id' => $user->id, 'doctor_id' => $doctor->id, 'appointment_date' => $appointment_date->toDateString(), 'start_time' => $request->start_time, 'end_time' => $request->end_time])->first();
+            $chk = Appointment::where(['doctor_id' => $doctor->id, 'appointment_date' => $appointment_date->toDateString(), 'start_time' => $request->start_time, 'end_time' => $request->end_time])->first();
             if ($chk) {
                 return self::send_bad_request_response(['message' => 'Appointment already exists', 'error' => 'Appointment already exists']);
             }
@@ -574,7 +580,7 @@ class AppointmentController extends Controller
             if ($schedule) {
                 $array = json_decode($schedule->working_hours, true);
                 $inner_arr = $array[config('custom.days.' . $request->day)];
-                if (($key = array_search($request->working_hours, $inner_arr)) !== false) {
+                if (($key = array_search($request->working_hours, $inner_arr,true)) !== false) {
                     array_splice($inner_arr, $key, 1);
                 } else {
                     return self::send_bad_request_response('No matches found');
