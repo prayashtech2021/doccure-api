@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use Validator;
-use App\ { User,Address,Appointment,Prescription,PrescriptionDetails };
+use App\ { User,Address,Appointment,Prescription,PrescriptionDetails,Country };
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use DB;
@@ -124,11 +124,11 @@ class PatientController extends Controller
             }
             
             $contact_details->line_1 = $request->contact_address_line1;
-            $contact_details->line_2 = ($request->contact_address_line2)? $request->contact_address_line2 : '';
-            $contact_details->country_id = $request->contact_country_id;
-            $contact_details->state_id = $request->contact_state_id;
-            $contact_details->city_id = $request->contact_city_id;
-            $contact_details->postal_code = $request->contact_postal_code;
+            $contact_details->line_2 = ($request->contact_address_line2)? $request->contact_address_line2 : NULL;
+            $contact_details->country_id = ($request->contact_country_id)? $request->contact_country_id : NULL;
+            $contact_details->state_id = ($request->contact_state_id)? $request->contact_state_id : NULL;
+            $contact_details->city_id = ($request->contact_city_id)? $request->contact_city_id : NULL;
+            $contact_details->postal_code = ($request->contact_postal_code) ? $request->contact_postal_code : NULL;
             $contact_details->save();
             
                 return self::send_success_response([],'Patient Profile Updated Successfully');
