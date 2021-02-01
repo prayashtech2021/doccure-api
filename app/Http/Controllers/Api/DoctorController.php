@@ -195,12 +195,15 @@ class DoctorController extends Controller
             }
 
             /* Doctor Specialization */
-            $doctor->doctorSpecialization()->detach();
-            $doctor->doctorSpecialization()->attach($request->speciality_id);
+            if($request->speciality_id){
+                $doctor->doctorSpecialization()->detach();
+                $doctor->doctorSpecialization()->attach($request->speciality_id);
+            }
             
             // save doctor Services 
+            Service::where('user_id', '=', $user_id)->forcedelete();
+
             if(isset($request->services)){
-                Service::where('user_id', '=', $user_id)->forcedelete();
                 $services = explode(",", $request->services);
                 if(count($services) > 0) {
                     foreach($services as $val){
@@ -208,9 +211,9 @@ class DoctorController extends Controller
                     }
                 }
             }
-        
+
+            EducationDetail::where('user_id', '=', $user_id)->forcedelete();
             if($request->education) {
-                EducationDetail::where('user_id', '=', $user_id)->forcedelete();
                 $education_result = json_decode($request->education, true);
                 foreach($education_result as $degree){
                     $education = new EducationDetail();
@@ -226,8 +229,8 @@ class DoctorController extends Controller
             }
 
             // save doctor Experience details
+            ExperienceDetail::where('user_id', '=', $user_id)->forcedelete();
             if($request->experience) {
-                ExperienceDetail::where('user_id', '=', $user_id)->forcedelete();
                 $experience_result = json_decode($request->experience, true);
                 foreach($experience_result as $hospital){
                     $experience = new ExperienceDetail();
@@ -262,8 +265,8 @@ class DoctorController extends Controller
 
             // save doctor registration details
             $registrationArray = $request->registration;
+            RegistrationDetail::where('user_id', '=', $user_id)->forcedelete();
             if(isset($registrationArray)) {
-                RegistrationDetail::where('user_id', '=', $user_id)->forcedelete();
                 $registration_result = json_decode($request->registration, true);
                 foreach($registration_result as $reg){
                     $registration = new RegistrationDetail();
@@ -279,8 +282,8 @@ class DoctorController extends Controller
 
             // save doctor MembershipDetail details
             $membershipArray = $request->membership;
+            MembershipDetail::where('user_id', '=', $user_id)->forcedelete();
             if(isset($membershipArray)) {
-                MembershipDetail::where('user_id', '=', $user_id)->forcedelete();
                 $membership_result = json_decode($request->membership, true);
                 foreach($membership_result as $value){
                     $membership = new MembershipDetail();
@@ -378,10 +381,10 @@ class DoctorController extends Controller
                 $data->push($provider->doctorProfile());
             });
 
-            if($data){
+            if(count($data)>0){
                 return self::send_success_response($data,'Doctors data fetched successfully');
             }else{
-                return self::send_bad_request_response($doctors,'No Records Found');
+                return self::send_bad_request_response('No Records Found');
             }
         } catch (\Exception | \Throwable $exception) {
             return self::send_exception_response($exception->getMessage());
