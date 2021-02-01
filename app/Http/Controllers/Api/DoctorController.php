@@ -102,6 +102,7 @@ class DoctorController extends Controller
             'price_type' => 'required|between:1,2',
             'amount' => 'numeric',
             'contact_address_line1' => 'required',   
+            'speciality_id' => 'nullable|exists:specialities,id',
         );
 
         if($request->clinic_name){
@@ -194,8 +195,10 @@ class DoctorController extends Controller
             }
 
             /* Doctor Specialization */
-            $doctor->doctorSpecialization()->detach();
-            $doctor->doctorSpecialization()->attach($request->speciality_id);
+            if($request->speciality_id){
+                $doctor->doctorSpecialization()->detach();
+                $doctor->doctorSpecialization()->attach($request->speciality_id);
+            }
             
             // save doctor Services 
             if(isset($request->services)){
@@ -377,10 +380,10 @@ class DoctorController extends Controller
                 $data->push($provider->doctorProfile());
             });
 
-            if($data){
+            if(count($data)>0){
                 return self::send_success_response($data,'Doctors data fetched successfully');
             }else{
-                return self::send_bad_request_response($doctors,'No Records Found');
+                return self::send_bad_request_response('No Records Found');
             }
         } catch (\Exception | \Throwable $exception) {
             return self::send_exception_response($exception->getMessage());
