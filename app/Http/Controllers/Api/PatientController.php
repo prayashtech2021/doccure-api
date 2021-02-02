@@ -88,11 +88,11 @@ class PatientController extends Controller
         try{    
             $user_id = $request->user_id;
             $rules = [
-                'user_id' => 'required|integer',
+                'user_id' => 'required|numeric|exists:users,id',
                 'first_name'  => 'required|string|max:191',
                 'last_name'  => 'string|max:191',
                 'email' => 'required|email|unique:users,email,'.$request->user_id,
-                'country_code_id' => 'required|integer',
+                'country_code_id' => 'required|numeric|exists:countries,id',
                 'mobile_number' => 'required|min:10|max:10|unique:users,mobile_number,'.$request->user_id,
                 'gender'  => 'required|integer|between:1,2',
                 'dob'  => 'date',

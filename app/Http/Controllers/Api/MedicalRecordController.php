@@ -20,7 +20,7 @@ class MedicalRecordController extends Controller
     {
         if ($request->medical_record_id) { //edit
             $rules = array(
-                'medical_record_id' => 'required',
+                'medical_record_id' => 'required|numeric|exists:medical_records,id',
                 'consumer_id' => 'required|numeric|exists:users,id',
                 'description' => 'required',
                 'document_file' => 'required|image|mimes:jpeg,png,jpg,pdf,doc|max:2048',
@@ -39,9 +39,6 @@ class MedicalRecordController extends Controller
             DB::beginTransaction();
             if ($request->medical_record_id) {
                 $record = MedicalRecord::find($request->medical_record_id);
-                if (!$record) {
-                    return self::send_bad_request_response('Incorrect Medical Record id. Please check and try again!');
-                }
                 $record->updated_by = auth()->user()->id;
             } else {
                 $record = new MedicalRecord();
@@ -89,7 +86,6 @@ class MedicalRecordController extends Controller
                 return self::send_bad_request_response('No Records Found');
             }
         } catch (Exception | Throwable $e) {
-            DB::rollback();
             return self::send_exception_response($exception->getMessage());
         }
     }
