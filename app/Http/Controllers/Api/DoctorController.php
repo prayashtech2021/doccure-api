@@ -169,7 +169,7 @@ class DoctorController extends Controller
             $images=array();
 
             if($files=$request->file('clinic_images')){
-                $clinic_img = AddressImage::whereUserId($user_id)->where('address_id',$clinic_details->id)->delete();
+                $clinic_img = AddressImage::whereUserId($user_id)->where('address_id',$clinic_details->id)->forcedelete();
 
                 foreach($files as $file){
                     $new_clinic_img = new AddressImage();
@@ -183,8 +183,8 @@ class DoctorController extends Controller
                     if (!empty($file)) {
                         $extension = $file->getClientOriginalExtension();
                         $file_name = date('YmdHis') . '_' . auth()->user()->id . '.png';
-                        $path = 'images/address_images'.$clinic_details->id.'/';
-                        $store = $request->file('image')->storeAs($path, $file_name);
+                        $path = 'images/address_images/'.$clinic_details->id.'/';
+                        $store = $file->storeAs($path, $file_name);
                     }else{
                         $file_name = '';
                     }
