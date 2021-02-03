@@ -170,25 +170,23 @@ class DoctorController extends Controller
 
             if($files=$request->file('clinic_images')){
                 $clinic_img = AddressImage::whereUserId($user_id)->where('address_id',$clinic_details->id)->forcedelete();
-
+               
                 foreach($files as $file){
+                   
                     $new_clinic_img = new AddressImage();
                     $new_clinic_img->user_id = $user_id;
                     $new_clinic_img->address_id	 = $clinic_details->id;
                     $new_clinic_img->created_by = auth()->user()->id;
 
-                    if (Storage::exists('images/address_images/'.$clinic_details->id.'/')) {
-                        Storage::delete('images/address_images/'.$clinic_details->id.'/');
-                    }
-                    if (!empty($file)) {
-                        $extension = $file->getClientOriginalExtension();
-                        $file_name = date('YmdHis') . '_' . auth()->user()->id . '.png';
-                        $path = 'images/address_images/'.$clinic_details->id.'/';
-                        $store = $file->storeAs($path, $file_name);
+                   if (!empty($file)) {
+                        $dateTime = date('YmdHis');
+                        $file_name = $dateTime . '_'.auth()->user()->id.'_'.$file->getClientOriginalName();
+                        $savePath = storage_path('app/public/images/address_images/'.$clinic_details->id.'/');
+                        $file->move($savePath, $file_name);
                     }else{
                         $file_name = '';
                     }
-
+                    
                     $new_clinic_img->image = $file_name;
                     $new_clinic_img->save();
                     
