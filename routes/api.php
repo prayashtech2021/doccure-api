@@ -96,6 +96,10 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
     Route::post('accounts/save', 'Api\PaymentRequestController@accountUpdate')->name('accountUpdate');
     Route::post('payment/request/create', 'Api\PaymentRequestController@requestPayment')->name('requestPayment');
     Route::post('payment/request/update', 'Api\PaymentRequestController@updatePaymentRequest')->name('updatePaymentRequest');
+
+    Route::get('settings','Api\SettingController@getSetting');
+    Route::post('settings/save','Api\SettingController@save');
+
 });
 
 Route::any('{path}', function () {
