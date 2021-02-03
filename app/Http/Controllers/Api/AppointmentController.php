@@ -447,6 +447,7 @@ class AppointmentController extends Controller
             $log->status = $appointment->appointment_status;
             $log->save();
             if ($request->status == 4) { //approved
+                if($appointment->payment->total_amount>0){
                 if (isset($request->request_type) && $request->request_type == 1) { //payment request
                     $user = User::find($appointment->user_id);
                     $requested_amount = $appointment->payment->total_amount - ($appointment->payment->tax_amount + $appointment->payment->transaction_charge);
@@ -455,6 +456,7 @@ class AppointmentController extends Controller
                     $requested_amount = $appointment->payment->total_amount;
                 }
                 $user->depositFloat($requested_amount);
+            }
             }
 
             return self::send_success_response([], 'Status updated sucessfully');
