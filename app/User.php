@@ -201,7 +201,7 @@ class User extends Authenticatable implements Wallet, WalletFloat
     }
 
     public function getProviderSpecialityAttribute(){
-        return Speciality::select('id','name')->whereHas('speciality', function ($a) {
+        return Speciality::select('id','name','image')->whereHas('speciality', function ($a) {
                     $a->where('user_speciality.user_id',$this->id);
                 })->first();
     }

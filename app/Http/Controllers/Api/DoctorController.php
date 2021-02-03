@@ -108,7 +108,7 @@ class DoctorController extends Controller
         if($request->clinic_name){
             $rules['clinic_address_line1'] = 'required';
         }
-
+       
         $valid = self::customValidation($request, $rules);
         if($valid){ return $valid;}
         
@@ -143,51 +143,50 @@ class DoctorController extends Controller
             $contact_details->save();
         
             /* Doctor Clinic Info */
+            if($request->clinic_name){
                 $get_clinic_details = Address::whereUserId($user_id)->whereNotNull('name')->first();
-            
-            if(isset($get_clinic_details)){
-                $clinic_details = $get_clinic_details;
-                $clinic_details->updated_by = auth()->user()->id;
-            }else{
-                $clinic_details = new Address();
-                $clinic_details->user_id = $user_id;
-                $clinic_details->created_by = auth()->user()->id;    
+                
+                if(isset($get_clinic_details)){
+                    $clinic_details = $get_clinic_details;
+                    $clinic_details->updated_by = auth()->user()->id;
+                }else{
+                    $clinic_details = new Address();
+                    $clinic_details->user_id = $user_id;
+                    $clinic_details->created_by = auth()->user()->id;    
+                }
+                
+                $clinic_details->name = $request->clinic_name;
+                $clinic_details->line_1 = $request->clinic_address_line1;
+                $clinic_details->line_2 = ($request->clinic_address_line2)? $request->clinic_address_line2 : NULL;
+                $clinic_details->country_id = ($request->clinic_country_id)? $request->clinic_country_id : NULL;
+                $clinic_details->state_id = ($request->clinic_state_id)? $request->clinic_state_id : NULL;
+                $clinic_details->city_id = ($request->clinic_city_id)? $request->clinic_city_id : NULL;
+                $clinic_details->postal_code = ($request->clinic_postal_code)? $request->clinic_postal_code : NULL;
+                $clinic_details->save();
             }
-            
-            $clinic_details->name = ($request->clinic_name)? $request->clinic_name : '';
-            $clinic_details->line_1 = $request->clinic_address_line1;
-            $clinic_details->line_2 = ($request->clinic_address_line2)? $request->clinic_address_line2 : NULL;
-            $clinic_details->country_id = ($request->clinic_country_id)? $request->clinic_country_id : NULL;
-            $clinic_details->state_id = ($request->clinic_state_id)? $request->clinic_state_id : NULL;
-            $clinic_details->city_id = ($request->clinic_city_id)? $request->clinic_city_id : NULL;
-            $clinic_details->postal_code = ($request->clinic_postal_code)? $request->clinic_postal_code : NULL;
-            $clinic_details->save();
-            
             /* Clinic Images */
 
             $images=array();
 
             if($files=$request->file('clinic_images')){
-                $clinic_img = AddressImage::whereUserId($user_id)->where('address_id',$clinic_details->id)->delete();
-
+                $clinic_img = AddressImage::whereUserId($user_id)->where('address_id',$clinic_details->id)->forcedelete();
+               
                 foreach($files as $file){
+                   
                     $new_clinic_img = new AddressImage();
                     $new_clinic_img->user_id = $user_id;
                     $new_clinic_img->address_id	 = $clinic_details->id;
                     $new_clinic_img->created_by = auth()->user()->id;
 
-                    if (Storage::exists('images/address_images/'.$clinic_details->id.'/')) {
-                        Storage::delete('images/address_images/'.$clinic_details->id.'/');
-                    }
-                    if (!empty($file)) {
-                        $extension = $file->getClientOriginalExtension();
-                        $file_name = date('YmdHis') . '_' . auth()->user()->id . '.png';
-                        $path = 'images/address_images'.$clinic_details->id.'/';
-                        $store = $request->file('image')->storeAs($path, $file_name);
+                   if (!empty($file)) {
+                        $dateTime = date('YmdHis');
+                        $file_name = $dateTime . '_'.auth()->user()->id.'_'.$file->getClientOriginalName();
+                        $savePath = storage_path('app/public/images/address_images/'.$clinic_details->id.'/');
+                        $file->move($savePath, $file_name);
                     }else{
                         $file_name = '';
                     }
-
+                    
                     $new_clinic_img->image = $file_name;
                     $new_clinic_img->save();
                     
@@ -216,6 +215,11 @@ class DoctorController extends Controller
             if($request->education) {
                 $education_result = json_decode($request->education, true);
                 foreach($education_result as $degree){
+                    $year = (int)$degree['completion'];
+                    if($year<1000 || $year>2100){
+                        DB::rollback();
+                        return self::send_bad_request_response('Invalid Year of Completion . Please check and try again.');
+                    }
                     $education = new EducationDetail();
                     if(!empty($degree['degree']) || !empty($degree['college']) || !empty($degree['completion'])){
                         $education->degeree = $degree['degree'];
@@ -233,6 +237,14 @@ class DoctorController extends Controller
             if($request->experience) {
                 $experience_result = json_decode($request->experience, true);
                 foreach($experience_result as $hospital){
+                    $from_year = (int)$hospital['from'];
+                    $to_year = (int)$hospital['to'];
+
+                    if($from_year<1000 || $from_year>2100 || $to_year<1000 || $to_year>2100 || $from_year > $to_year){
+                        DB::rollback();
+                        return self::send_bad_request_response('Incorrect From or To year. Please check and try again.');
+                    }                 
+                   
                     $experience = new ExperienceDetail();
                     if(!empty($hospital['hospital_name']) || !empty($hospital['from']) || !empty($hospital['to']) || !empty($hospital['designation'])){
                         $experience->hospital_name = $hospital['hospital_name'];
@@ -252,6 +264,11 @@ class DoctorController extends Controller
             if(isset($awardArray)) {
                 $achievement_result = json_decode($request->achievement, true);
                 foreach($achievement_result as $award){
+                    $awardyear = (int)$award['award_year'];
+                    if($awardyear<1000 || $awardyear>2100){
+                        DB::rollback();
+                        return self::send_bad_request_response('Invalid Awarded Year . Please check and try again.');
+                    }
                     $achievement = new AwardDetail();
                     if(!empty($award['name']) || !empty($award['award_year'])){
                         $achievement->name = $award['name'];
@@ -269,6 +286,11 @@ class DoctorController extends Controller
             if(isset($registrationArray)) {
                 $registration_result = json_decode($request->registration, true);
                 foreach($registration_result as $reg){
+                    $regyear = (int)$reg['registration_year'];
+                    if($regyear<1000 || $regyear>2100){
+                        DB::rollback();
+                        return self::send_bad_request_response('Invalid Registration Year . Please check and try again.');
+                    }
                     $registration = new RegistrationDetail();
                     if(!empty($reg['name']) || !empty($reg['registration_year'])){
                         $registration->name = $reg['name'];

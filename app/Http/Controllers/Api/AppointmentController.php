@@ -658,4 +658,39 @@ class AppointmentController extends Controller
             return self::send_exception_response($exception->getMessage());
         }
     }
+
+    public function viewInvoice(Request $request){
+        try{
+
+            $validator = Validator::make($request->all(), [
+                'invoice_id' => 'required',
+            ]);
+
+            if ($validator->fails()) {
+                return self::send_bad_request_response($validator->errors()->first());
+            }
+
+            $result = [];
+            $user = $request->user();
+            if($user->hasRole(['patient', 'doctor'])){
+                $payment = $user->payment()->where('payments.id', $request->invoice_id)->first();
+                if($payment){
+                    $appointment = $payment->appointment()->first();
+
+                    $result = [
+                        'payment' => $payment->getData(),
+                        'from' => $appointment->getData()['doctor'],
+                        'to' => $appointment->getData()['patient'],
+                        'created' => $payment->getData()['created'],
+                    ];
+                }else{
+                    return self::send_bad_request_response(['message' => 'Invoice not found with ID given', 'error' => 'Invoice not found with ID given']);
+                }
+            }
+
+            return self::send_success_response($result);
+        } catch (Exception | Throwable $exception) {
+            return self::send_exception_response($exception->getMessage());
+        }
+    }
 }

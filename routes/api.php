@@ -60,6 +60,7 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
 
     //invoice
     Route::get('invoice/list', 'Api\AppointmentController@invoiceList');
+    Route::post('invoice/view', 'Api\AppointmentController@viewInvoice');
 
 
     /* Doctor Module */
