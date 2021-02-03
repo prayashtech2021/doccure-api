@@ -28,7 +28,7 @@ class PaymentRequest extends Model
             'request_amount' => $this->request_amount,
             'user_details' => $this->user()->first()->basicProfile(),
             'action_date' => convertToLocal(Carbon::parse($this->action_date),'','d/m/Y'),
-            'account_details' => $this->user->accountDetails()->first()->getData(),
+            'account_details' => ($this->user->accountDetails()->first())?$this->user->accountDetails()->first()->getData():[],
         ];
     }
 
