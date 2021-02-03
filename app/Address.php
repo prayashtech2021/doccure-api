@@ -26,7 +26,7 @@ class Address extends Model
         return $this->belongsTo('App\City','city_id')->select(array('id', 'name'));
     }
 
-    public function addImage(){
+    public function addressImage(){
         return $this->hasMany(AddressImage::class);
     }
 

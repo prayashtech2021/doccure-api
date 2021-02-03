@@ -7,20 +7,22 @@ return [
     'importSecret' => 'OrcaloTaxi1020',
 
     'appointment_status' =>[
-        'new'=>1,
-        'approve_request'=>2,
-        'approved'=>3,
-        'cancelled'=>4,
-        'refund_request'=>5,
-        'expired'=>6
+        1=>'new',
+        2=>'accepted',
+        3=>'waiting for approval',
+        4=>'approved',
+        5=>'cancelled',
+        6=>'refund',
+        7=>'expired'
     ],
     'appointment_log_message' =>[
         1=>'new appointment created',
-        2=>'request raised for patient approval',
-        3=>'request approved',
-        4=>'request cancelled',
-        5=>'refund request raised for doctor approval',
-        6=>'appointment expired'
+        2=>'request accepted',
+        3=>'request raised for patient approval',
+        4=>'request approved',
+        5=>'request cancelled',
+        6=>'refund request raised for doctor approval',
+        7=>'appointment expired'
     ],
     'empty_working_hours' =>[
         "sunday"=> [],
@@ -29,7 +31,7 @@ return [
         "wednesday"=> [],
         "thursday"=> [],
         "friday"=> [],
-        "satday"=> [],
+        "saturday"=> [],
     ],
 
     'days' =>[
@@ -39,6 +41,15 @@ return [
         4=>"wednesday",
         5=>"thursday",
         6=>"friday",
-        7=>"satday",
-    ]
+        7=>"saturday",
+    ],
+    'payment_request_type' =>[
+        1=>"payment",
+        2=>"refund",
+    ],
+    'payment_request_status' =>[
+        1=>"new",
+        2=>"paid",
+        3=>"rejected",
+    ],
 ];

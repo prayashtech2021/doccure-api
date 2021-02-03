@@ -17,4 +17,7 @@ class Speciality extends Model
         'name', 'image', 'created_by',
    ];
 
+    public function speciality() { 
+        return $this->belongsTo('App\UserSpeciality','id','speciality_id'); 
+    }
 }

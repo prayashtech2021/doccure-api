@@ -11,6 +11,8 @@ class UserSpeciality extends Model{
      *
      * @var array
      */
+    protected $table = 'user_speciality';
+
     protected $fillable = [
          'user_id', 'speciality_id',
     ];
@@ -18,7 +20,7 @@ class UserSpeciality extends Model{
 
     public function user() { 
         return $this->belongsTo('App\User'); }
-    public function speciality() { 
-        return $this->belongsTo('App\Speciality'); 
+    public function special() { 
+        return $this->belongsTo('App\Speciality','speciality_id','id'); 
     }
 }

@@ -55,6 +55,7 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
     Route::get('appointments/saved-cards','Api\AppointmentController@savedCards');
     Route::get('schedule/list', 'Api\AppointmentController@scheduleList');
     Route::post('schedule/create', 'Api\AppointmentController@scheduleCreate');
+    Route::post('schedule/delete', 'Api\AppointmentController@scheduleDelete');
     Route::post('appointment/status/update', 'Api\AppointmentController@appointmentStatusUpdate');
 
     //invoice
@@ -73,17 +74,28 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
         Route::post('speacility/save', 'Api\SpecialityController@save');
         Route::get('speacility/delete/{id}', 'Api\SpecialityController@destroy');
     });
+    /* signature */
+    Route::get('signature/{id}','Api\AppointmentController@getsignature');
     /*Prescription */
     Route::post('prescription/save', 'Api\AppointmentController@savePrescription');
-    Route::get('prescription/list', 'Api\AppointmentController@prescriptionList');
+    Route::post('prescription/list', 'Api\AppointmentController@prescriptionList');
     Route::get('prescription/view/{pid}', 'Api\AppointmentController@prescriptionView');
+    Route::get('prescription/delete/{pid}', 'Api\AppointmentController@prescription_destroy');
+
+    /* Medical Record */
+    Route::post('record/save', 'Api\MedicalRecordController@save');
+    Route::post('record/list/', 'Api\MedicalRecordController@getList');
+    Route::get('record/view/{id}', 'Api\MedicalRecordController@getView');
+    Route::get('record/delete/{id}', 'Api\MedicalRecordController@destroy');
 
     Route::get('logout', 'PassportController@logout');
     // Language
     Route::post('language/update', 'Api\LanguageController@update');
 
-    Route::post('payment/list', 'Api\PaymentRequestController@list')->name('paymentList');
+    Route::get('payment/request/list', 'Api\PaymentRequestController@list')->name('paymentList');
     Route::post('accounts/save', 'Api\PaymentRequestController@accountUpdate')->name('accountUpdate');
+    Route::post('payment/request/create', 'Api\PaymentRequestController@requestPayment')->name('requestPayment');
+    Route::post('payment/request/update', 'Api\PaymentRequestController@updatePaymentRequest')->name('updatePaymentRequest');
 });
 
 Route::any('{path}', function () {

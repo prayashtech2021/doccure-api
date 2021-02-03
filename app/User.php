@@ -44,36 +44,75 @@ class User extends Authenticatable implements Wallet, WalletFloat
         'password','remember_token',
     ];
 
-    protected $appends = ['pid','did','age','accountstatus','membersince','gendername','doctorfees','userimage'];
+    protected $appends = ['pid','did','age','accountstatus','membersince','gendername','doctorfees','userimage',
+    'providerspeciality','permanentaddress','officeaddress'];
 
     public function accessToken(){
         return $this->hasMany('App\OauthAccessToken');
     }
 
-    public static function userAddress($id){
-        return Address::whereNull('name')->where('user_id',$id)->first();
+    public function doctorProfile(){
+        return [
+            'id' => $this->id,
+            'did' => $this->getDidAttribute(),
+            'name' => trim($this->first_name . ' '. $this->last_name),
+            'email' => $this->email,
+            'mobile_number' => $this->mobile_number,
+            'gendername' => $this->getGenderNameAttribute(),
+            'profile_image' => getUserProfileImage($this->id),
+            'dob' => $this->dob,
+            'age' => Carbon::parse($this->dob)->age,
+            'blood_group' => $this->blood_group,
+            'biography' => $this->biography,
+            'fees' =>  ($this->price_type == 1)? 'Free' : $this->amount,
+            'currency_code' => $this->currency_code,
+            'time_zone_id' => $this->time_zone_id,
+            'language_id' => $this->language_id,
+            'service' => $this->doctorService()->get(),
+            'providerspeciality' => $this->doctorSpecialization()->first(),
+            'permanent_address' => $this->getPermanentAddressAttribute(),
+            'office_address' => $this->getOfficeAddressAttribute(),
+            'member_since' => date('d M Y H:s A', strtotime($this->created_at)),
+            'accountstatus' => $this->getAccountStatusAttribute(),
+        ];
     }
 
-    public static function doctorClinicInfo($id){
-        return Address::whereNotNull('name')->where('user_id',$id)->first();
-    }
-    public static function doctorClinicImage($id){
-        return AddressImage::where('user_id',$id)->first();
+    public function patientProfile(){
+        return [
+            'id' => $this->id,
+            'pid' => $this->getPidAttribute(),
+            'name' => trim($this->first_name . ' '. $this->last_name),
+            'email' => $this->email,
+            'mobile_number' => $this->mobile_number,
+            'gendername' => $this->getGenderNameAttribute(),
+            'profile_image' => getUserProfileImage($this->id),
+            'dob' => $this->dob,
+            'age' => Carbon::parse($this->dob)->age,
+            'blood_group' => $this->blood_group,
+            'time_zone_id' => $this->time_zone_id,
+            'language_id' => $this->language_id,
+            'permanent_address' => $this->getPermanentAddressAttribute(),
+            'member_since' => date('d M Y H:s A', strtotime($this->created_at)),
+            'accountstatus' => $this->getAccountStatusAttribute(),
+        ];
     }
 
     public function doctorSpecialization() { 
-        return $this->belongsToMany('App\Speciality', 'user_speciality');
+        return $this->belongsToMany('App\Speciality', 'user_speciality')->select('id','name','image');
     }
 
     public function doctorService(){
         return $this->hasMany(Service::class);
     }
-    public function addresses(){
-        return $this->hasMany(Address::class)->with('country','state','city','addImage')->whereNotNull('name');
-    }
-    public function homeAddresses(){
+    
+    public function homeAddress(){
         return $this->hasMany(Address::class)->with('country','state','city')->whereNull('name');
     }
+
+    public function clinicAddress(){
+        return $this->hasMany(Address::class)->with('country','state','city','addressImage')->whereNotNull('name');
+    }
+
     public function doctorEducation(){
         return $this->hasMany(EducationDetail::class);
     }
@@ -93,24 +132,30 @@ class User extends Authenticatable implements Wallet, WalletFloat
     public function doctorRegistration() { 
         return $this->hasMany(RegistrationDetail::class); 
     }
-
-    public function userAppointment() { 
-        return $this->belongsTo('App\Appointment', 'id','doctor_id'); 
+    
+    public function appointments() { 
+        return $this->hasMany('App\Appointment','user_id'); 
     }
-
 
     public function basicProfile(){
        return [
            'id' => $this->id,
            'name' => trim($this->first_name . ' '. $this->last_name),
            'profile_image' => getUserProfileImage($this->id),
-           'speciality' => $this->doctorSpecialization(),
+           'mobile_number' => $this->mobile_number,
+           'email' => $this->email,
+           'address' => $this->getPermanentAddressAttribute(),
+           'doctorSpecialization' => $this->doctorSpecialization()->get(),
        ];
     }
 
     public function payment()
     {
         return $this->hasManyThrough(Payment::class, Appointment::class);
+    }
+    public function providerPayment()
+    {
+        return $this->hasManyThrough(Payment::class, Appointment::class,'doctor_id');
     }
 
     public function getPidAttribute() { 
@@ -155,9 +200,27 @@ class User extends Authenticatable implements Wallet, WalletFloat
         }
     }
 
+    public function getProviderSpecialityAttribute(){
+        return Speciality::select('id','name')->whereHas('speciality', function ($a) {
+                    $a->where('user_speciality.user_id',$this->id);
+                })->first();
+    }
+
+    public function getPermanentAddressAttribute(){
+        return Address::with('country','state','city')->whereNull('name')->where('user_id',$this->id)->first();
+    }
+    public function getOfficeAddressAttribute(){
+        return Address::with('country','state','city','addressImage')->whereNotNull('name')->where('user_id',$this->id)->first();
+    }
     public function getUserImageAttribute() { 
         return getUserProfileImage($this->id); 
     }
 
+    public function accountDetails() { 
+        return $this->hasOne('App\AccountDetail', 'user_id');
+    }
 
+    public function paymentRequest() { 
+        return $this->hasMany('App\PaymentRequest', 'user_id');
+    }
 }

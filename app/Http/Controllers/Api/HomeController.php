@@ -10,6 +10,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Mail;
 use DB;
 use Hash;
+use Storage;
 
 class HomeController extends Controller
 {
@@ -164,10 +165,13 @@ class HomeController extends Controller
                     $message = "Please enter a password which is not similar then current password.";
                     return self::send_bad_request_response($message);
                 } else {
+                    DB::beginTransaction();
+
                     User::where('id', $userid)->update(['password' => Hash::make($input['new_password'])]);
                     if (auth()->check()) {
                         auth()->user()->token()->revoke();
                     }
+                    DB::commit();
                     $response_array = [
                         "code" => "200",
                         "message" => "Password updated successfully.",
@@ -176,6 +180,7 @@ class HomeController extends Controller
                     return response()->json(self::convertNullsAsEmpty($response_array), 200);
                 }
             } catch (\Exception | \Throwable $exception) {
+                DB::rollback();
                 return self::send_exception_response($exception->getMessage());
             }
         }
@@ -243,6 +248,7 @@ class HomeController extends Controller
             if($user_id){
                 $list = User::select('id','first_name','last_name','email','mobile_number','profile_image','biography')
                 ->whereId($user_id)->first();
+                
                 $data['profile'] = $list;
                 if($data['profile']){            
                     $data['address'] = Address::with('country','state','city')->where('user_id',$user_id)->first();
@@ -263,19 +269,20 @@ class HomeController extends Controller
         try{    
             $user_id = $request->user_id;
             $rules = [
-                'user_id' => 'required|integer',
+                'user_id' => 'required|integer|exists:users,id',
                 'first_name'  => 'required|string|max:191',
+                'last_name'  => 'string|max:191',
                 'email' => 'required|email|unique:users,email,'.$request->user_id,
-                'country_id' => 'required|integer',
-                'state_id' => 'integer',
-                'city_id' => 'integer',
+                'country_id' => 'nullable|numeric|exists:countries,id',
+                'state_id' => 'nullable|numeric|exists:states,id',
+                'city_id' => 'nullable|numeric|exists:cities,id',
             ];
 
             $validator = Validator::make($request->all(), $rules);
             if ($validator->fails()) {
                 return self::send_bad_request_response($validator->errors()->first());
             }
-        
+            DB::beginTransaction();
             //Save admin profile
             $profile = User::find($user_id);
             if($profile){
@@ -283,7 +290,7 @@ class HomeController extends Controller
                 $profile->email = $request->email;
                 $profile->biography = ($request->biography)? $request->biography : '';
                 $profile->save();
-                $get_address = User::userAddress($user_id);
+                $get_address = Address::whereUserId($user_id)->whereNull('name')->first();
 
                 if($get_address){
                     $address = $get_address;
@@ -297,12 +304,13 @@ class HomeController extends Controller
                 $address->state_id = ($request->state_id) ? $request->state_id : '';
                 $address->city_id = ($request->city_id) ? $request->city_id : '';
                 $address->save();
-            
+                DB::commit();
                 return self::send_success_response([],'Admin Profile Updated Successfully');
             }else{
                 return self::send_unauthorised_request_response('Incorrect User Id, Kindly check and try again.');
             }
         } catch (Exception | Throwable $exception) {
+            DB::rollback();
             return self::send_exception_response($exception->getMessage());
         }
         
@@ -318,6 +326,7 @@ class HomeController extends Controller
         if($valid){ return $valid;}
 
         try {
+            DB::beginTransaction();
 
             if ($user_id) {
                 $user = User::find($user_id);
@@ -344,11 +353,13 @@ class HomeController extends Controller
 
             $user->updated_by = auth()->user()->id;
             $user->save();
+            DB::commit();
+
             return self::send_success_response([],'Image updated Successfully');
 
 
         } catch (Exception | Throwable $e) {
-
+            DB::rollback();
             return response()->json(['success' => false, 'code' => 500, 'error' => $e->getMessage()]);
 
         }

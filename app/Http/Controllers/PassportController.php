@@ -18,6 +18,7 @@ class PassportController extends Controller {
 		$validator = Validator::make($request->all(), [
 			'email' => 'required|email',
 			'password' => 'required',
+			'type' => 'required|in:0,1', //1=>admin login
 		]);
 		if ($validator->fails()) {
             return self::send_bad_request_response($validator->errors()->first());
@@ -30,6 +31,9 @@ class PassportController extends Controller {
 		
 		if (auth()->attempt($credentials)) {
 			$user = auth()->user();
+			if($request->type==0 && $user->hasRole('company_admin')){
+                return self::send_bad_request_response('You are not authorized to login here.');
+			}
 			// $chktoken = $user->accessToken(function($qry){
 			// 	$qry->where('revoked',0);
 			// });

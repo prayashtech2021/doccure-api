@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use Validator;
-use App\ { User,Address,Appointment,Prescription,PrescriptionDetails };
+use App\ { User,Address,Appointment,Prescription,PrescriptionDetails,Country };
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use DB;
@@ -25,42 +25,61 @@ class PatientController extends Controller
      */
 
     
-
     public function profile_details($id){
-        $user = User::find($id);
-        $user->profile_image=getUserProfileImage($user->id);
-        unset($user->roles);
-        removeMetaColumn($user);
-        $data['profile']=$user;
-        $data['address'] = Address::with('country','state','city')->where('user_id',$id)->first();
-
-        return self::send_success_response($data);
+        try {
+            $user = User::find($id);
+            $user->profile_image=getUserProfileImage($user->id);
+            unset($user->roles);
+            removeMetaColumn($user);
+        
+            if($user){
+                return self::send_success_response($user,'Patient Profile Detail Fetched Successfully');
+            }else{
+                return self::send_bad_request_response('No Records Found');
+            }
+        } catch (Exception | Throwable $exception) {
+            return self::send_exception_response($exception->getMessage());
+        }  
     }
 
     public function patientList(Request $request){
+        $rules = array(
+            'count_per_page' => 'nullable|numeric',
+            'order_by' => 'nullable|in:desc,asc',
+        );
+        $valid = self::customValidation($request, $rules);
+        if ($valid) {return $valid;}
 
-        $paginate = $request->count_per_page ? $request->count_per_page : 10;
+        try {
+            $paginate = $request->count_per_page ? $request->count_per_page : 10;
+            $order_by = $request->order_by ? $request->order_by : 'desc';
 
-        $order_by = $request->order_by ? $request->order_by : 'desc';
+            if(auth()->user()->hasrole('doctor')){ //doctors -> my patients who attended appointments
+                $doctor_id = auth()->user()->id;
+                $list = User::orderBy('created_at', $order_by);
 
-        if(auth()->user()->hasrole('doctor')){ //doctors -> my patients who attended appointments
-            $doctor_id = auth()->user()->id;
-            $list = User::with('homeAddresses')->orderBy('created_at', $order_by);
-                
-            $list = $list->whereHas('userAppointment', function ($category) use ($doctor_id) {
-                $category->where('appointments.doctor_id',$doctor_id);
+                $list = $list->whereHas('appointments', function ($qry) use ($doctor_id) {
+                    $qry->where('appointments.doctor_id',$doctor_id);
+                });
+            
+            }else{ //for Admin -> patient list
+                $list = User::role('patient')->orderBy('created_at', $order_by);
+                if(auth()->user()->hasrole('company_admin')){
+                    $list = $list->withTrashed();
+                }
+            }
+            $data = collect();
+            $list->paginate($paginate)->getCollection()->each(function ($provider) use (&$data) {
+                $data->push($provider->patientProfile());
             });
 
-        }else{ //for Admin -> patient list
-            $list = User::role('patient')->withTrashed()->with('homeAddresses')->orderBy('created_at', $order_by);
-        }
-        $list = $list->get();
-
-        //$list->paginate($paginate)
-        if($list){
-            return self::send_success_response($list,'Patient List fetched successfully');
-        }else{
-            return self::send_success_response($list,'No Records Found');
+            if($data){
+                return self::send_success_response($data,'Patient List fetched successfully');
+            }else{
+                return self::send_bad_request_response('No Records Found');
+            }
+        } catch (Exception | Throwable $exception) {
+            return self::send_exception_response($exception->getMessage());
         }
     }
 
@@ -69,11 +88,11 @@ class PatientController extends Controller
         try{    
             $user_id = $request->user_id;
             $rules = [
-                'user_id' => 'required|integer',
+                'user_id' => 'required|numeric|exists:users,id',
                 'first_name'  => 'required|string|max:191',
                 'last_name'  => 'string|max:191',
                 'email' => 'required|email|unique:users,email,'.$request->user_id,
-                'country_code_id' => 'required|integer',
+                'country_code_id' => 'required|numeric|exists:countries,id',
                 'mobile_number' => 'required|min:10|max:10|unique:users,mobile_number,'.$request->user_id,
                 'gender'  => 'required|integer|between:1,2',
                 'dob'  => 'date',
@@ -105,11 +124,11 @@ class PatientController extends Controller
             }
             
             $contact_details->line_1 = $request->contact_address_line1;
-            $contact_details->line_2 = ($request->contact_address_line2)? $request->contact_address_line2 : '';
-            $contact_details->country_id = $request->contact_country_id;
-            $contact_details->state_id = $request->contact_state_id;
-            $contact_details->city_id = $request->contact_city_id;
-            $contact_details->postal_code = $request->contact_postal_code;
+            $contact_details->line_2 = ($request->contact_address_line2)? $request->contact_address_line2 : NULL;
+            $contact_details->country_id = ($request->contact_country_id)? $request->contact_country_id : NULL;
+            $contact_details->state_id = ($request->contact_state_id)? $request->contact_state_id : NULL;
+            $contact_details->city_id = ($request->contact_city_id)? $request->contact_city_id : NULL;
+            $contact_details->postal_code = ($request->contact_postal_code) ? $request->contact_postal_code : NULL;
             $contact_details->save();
             
                 return self::send_success_response([],'Patient Profile Updated Successfully');
@@ -123,8 +142,8 @@ class PatientController extends Controller
 
     public function patientSearchList(Request $request){
         $rules = array(
-            'keywords' => 'nullable|string',
             'gender' => 'nullable|string',
+            'blood_group' => 'nullable|string',
             'country_id' => 'nullable|numeric|exists:countries,id',
             'state_id' => 'nullable|numeric|exists:states,id',
             'city_id' => 'nullable|numeric|exists:cities,id',
@@ -138,8 +157,7 @@ class PatientController extends Controller
         try{
             $paginate = $request->count_per_page ? $request->count_per_page : 10;
 
-
-            $data = User::role('patient')->with('homeAddresses');
+            $data = User::role('patient');
 
             if($request->gender){
                 $gender = explode(',',$request->gender);
@@ -150,21 +168,21 @@ class PatientController extends Controller
             }
             if($request->country_id){
                 $country_id = $request->country_id;
-                $data = $data->whereHas('homeAddresses', function ($category) use ($country_id) {
-                    $category->where('homeAddresses.country_id',$country_id);
+                $data = $data->whereHas('homeAddress', function ($category) use ($country_id) {
+                    $category->where('addresses.country_id',$country_id);
                 });
             }
             
             if($request->state_id){
                 $state_id = $request->state_id;
-                $data = $data->whereHas('homeAddresses', function ($category) use ($state_id) {
-                    $category->where('homeAddresses.state_id',$state_id);
+                $data = $data->whereHas('homeAddress', function ($category) use ($state_id) {
+                    $category->where('addresses.state_id',$state_id);
                 });
             }
             if($request->city_id){
                 $city_id = $request->city_id;
-                $data = $data->whereHas('homeAddresses', function ($category) use ($city_id) {
-                    $category->where('homeAddresses.city_id',$city_id);
+                $data = $data->whereHas('homeAddress', function ($category) use ($city_id) {
+                    $category->where('addresses.city_id',$city_id);
                 });
             }
             
@@ -174,12 +192,16 @@ class PatientController extends Controller
                 $order_by = $request->order_by ? $request->order_by : 'desc';
                 $data = $data->orderBy('created_at', $order_by);
             }
- 
-            $data = $data->get();
-            if($data){
-                return self::send_success_response($data,'Patient data fetched successfully');
+
+            $list = collect();
+            $data->paginate($paginate)->getCollection()->each(function ($provider) use (&$list) {
+                $list->push($provider->patientProfile());
+            });
+            
+            if(count($list)>0){
+                return self::send_success_response($list,'Patient data fetched successfully');
             }else{
-                return self::send_success_response($data,'No Records Found');
+                return self::send_bad_request_response('No Records Found');
             }
         } catch (\Exception | \Throwable $exception) {
             return self::send_exception_response($exception->getMessage());
