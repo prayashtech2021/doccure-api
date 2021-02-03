@@ -334,14 +334,12 @@ class DoctorController extends Controller
             }
 
             if($request->gender){
-                $gender = explode(',',$request->gender);
-                $doctors->whereIn('gender',$gender);
+                $doctors->whereIn('gender',[$request->gender]);
             }
 
             if($request->speciality){
-                $speciality = explode(',',$request->speciality);
-                $doctors = $doctors->whereHas('doctorSpecialization', function ($category) use ($speciality) {
-                    $category->whereIn('user_speciality.speciality_id',$speciality);
+                $doctors = $doctors->whereHas('doctorSpecialization', function ($category) use ($request) {
+                    $category->whereIn('user_speciality.speciality_id',[$request->speciality]);
                 });
             }
 

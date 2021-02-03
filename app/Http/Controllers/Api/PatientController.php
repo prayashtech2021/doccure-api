@@ -160,8 +160,7 @@ class PatientController extends Controller
             $data = User::role('patient');
 
             if($request->gender){
-                $gender = explode(',',$request->gender);
-                $data->whereIn('gender',$gender);
+                $data->whereIn('gender',[$request->gender]);
             }
             if($request->blood_group){
                 $data = $data->where('blood_group', $request->blood_group);
