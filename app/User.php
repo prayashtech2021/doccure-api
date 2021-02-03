@@ -95,7 +95,7 @@ class User extends Authenticatable implements Wallet, WalletFloat
             'permanent_address' => $this->getPermanentAddressAttribute(),
             'member_since' => date('d M Y H:s A', strtotime($this->created_at)),
             'accountstatus' => $this->getAccountStatusAttribute(),
-            'last_visit' => ($this->appointments())?$this->appointments()->orderby('id','desc')->first()->appointment_date:'',
+            'last_visit' => ($this->appointments()->first())?$this->appointments()->orderby('id','desc')->first()->appointment_date:'',
             'patient_paid' => ($this->payment())?$this->payment()->sum('total_amount'):'',
         ];
     }
