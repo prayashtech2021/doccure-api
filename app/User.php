@@ -74,7 +74,7 @@ class User extends Authenticatable implements Wallet, WalletFloat
             'office_address' => $this->getOfficeAddressAttribute(),
             'member_since' => date('d M Y H:s A', strtotime($this->created_at)),
             'accountstatus' => $this->getAccountStatusAttribute(),
-            'doctor_earned' => 0, //$this->providerPayment()->select(DB::raw('sum(total_amount - transaction_charge - tax_amount) as earned'))->first(),
+            'doctor_earned' => ($this->providerPayment())?$this->providerPayment()->sum(DB::raw('total_amount-(transaction_charge + tax_amount)')):'',
         ];
     }
 
@@ -95,8 +95,8 @@ class User extends Authenticatable implements Wallet, WalletFloat
             'permanent_address' => $this->getPermanentAddressAttribute(),
             'member_since' => date('d M Y H:s A', strtotime($this->created_at)),
             'accountstatus' => $this->getAccountStatusAttribute(),
-            'last_visit' => $this->appointments()->select('appointment_date')->orderby('id','desc')->first(),
-            'patient_paid' => 0, //$this->consumerPayment()->select(DB::raw('total_amount as paid'))->orderby('id','desc')->first(),
+            'last_visit' => ($this->appointments())?$this->appointments()->orderby('id','desc')->first()->appointment_date:'',
+            'patient_paid' => ($this->payment())?$this->payment()->sum('total_amount'):'',
         ];
     }
 
@@ -160,11 +160,6 @@ class User extends Authenticatable implements Wallet, WalletFloat
     public function providerPayment()
     {
         return $this->hasManyThrough(Payment::class, Appointment::class,'doctor_id');
-    }
-
-    public function consumerPayment()
-    {
-        return $this->hasManyThrough(Payment::class, Appointment::class,'user_id');
     }
 
     public function getPidAttribute() { 
