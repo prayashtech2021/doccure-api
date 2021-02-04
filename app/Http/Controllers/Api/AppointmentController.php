@@ -114,7 +114,7 @@ class AppointmentController extends Controller
                     $qry->where('status', 2);
                 })->sum('request_amount'),
                 'balance' => $user->balanceFloat,
-                'requested' => $user2->paymentRequest(function ($qry) {
+                'requested' => $user->paymentRequest(function ($qry) {
                     $qry->where('status', 1);
                 })->sum('request_amount'),
             ];
