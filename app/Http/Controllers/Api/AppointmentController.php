@@ -108,12 +108,13 @@ class AppointmentController extends Controller
                 $user->accountDetails;
                 removeMetaColumn($user->accountDetails);
             }
+            // $user2 = User::find(auth()->user()->id);
             $user->user_balance = [
-                'earned' => $user->paymentRequest(function ($ary) {
+                'earned' => $user->paymentRequest(function ($qry) {
                     $qry->where('status', 2);
                 })->sum('request_amount'),
                 'balance' => $user->balanceFloat,
-                'requested' => $user->paymentRequest(function ($ary) {
+                'requested' => $user2->paymentRequest(function ($qry) {
                     $qry->where('status', 1);
                 })->sum('request_amount'),
             ];
