@@ -112,11 +112,11 @@ class AppointmentController extends Controller
             $user->user_balance = [
                 'earned' => $user->paymentRequest(function ($qry) {
                     $qry->where('status', 2);
-                })->sum('request_amount'),
+                })->where('payment_requests.status', 2)->sum('request_amount'),
                 'balance' => $user->balanceFloat,
                 'requested' => $user2->paymentRequest(function ($qry) {
                     $qry->where('status', 1);
-                })->sum('request_amount'),
+                })->where('payment_requests.status', 1)->sum('request_amount'),
             ];
             unset($user->wallet);
 
