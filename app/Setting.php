@@ -26,4 +26,12 @@ class Setting extends Model
         ];
         return $data;
     }
+
+    public function getData(){
+        //$getSettings = $this->where('slug','general_settings')->get();
+        
+        return [
+            $this->keyword => $this->value,
+        ];
+    }
 }

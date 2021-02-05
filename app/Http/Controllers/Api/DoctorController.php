@@ -90,244 +90,242 @@ class DoctorController extends Controller
     public function saveProfile(Request $request){
         try{
          
-        $user_id = $request->user_id;
-        $rules = array(
-            'user_id' => 'required|integer|exists:users,id',
-            'first_name'  => 'required|string|max:191',
-            'last_name'  => 'string|max:191',
-            'country_code_id' => 'required|integer|exists:countries,id',
-            'mobile_number' => 'required|min:10|max:10|unique:users,mobile_number,'.$request->user_id,
-            'gender'  => 'required|integer|between:1,2',
-            'dob'  => 'date',
-            'price_type' => 'required|between:1,2',
-            'amount' => 'numeric',
-            'contact_address_line1' => 'required',   
-            'speciality_id' => 'nullable|numeric|exists:specialities,id',   
-        );
+            $user_id = $request->user_id;
+            $rules = array(
+                'user_id' => 'required|integer|exists:users,id',
+                'first_name'  => 'required|string|max:191',
+                'last_name'  => 'string|max:191',
+                'country_code_id' => 'required|integer|exists:countries,id',
+                'mobile_number' => 'required|min:10|max:10|unique:users,mobile_number,'.$request->user_id,
+                'gender'  => 'required|integer|between:1,2',
+                'dob'  => 'date',
+                'price_type' => 'required|between:1,2',
+                'amount' => 'numeric',
+                'contact_address_line1' => 'required',   
+                'speciality_id' => 'nullable|numeric|exists:specialities,id',   
+            );
 
-        if($request->clinic_name){
-            $rules['clinic_address_line1'] = 'required';
-        }
-       
-        $valid = self::customValidation($request, $rules);
-        if($valid){ return $valid;}
-        
-        DB::beginTransaction();
-
-        //Save doctor profile
-        $doctor = User::find($user_id);
-        if($doctor){
-            $doctor->fill($request->all());
-            $doctor->country_id = $request->country_code_id;
-            $doctor->currency_code = Country::getCurrentCode($request->country_code_id);
-            $doctor->dob = date('Y-m-d',strtotime(str_replace('/', '-', $request->dob)));
-            $doctor->save();
-        
-            /* Doctor Address Details */
-            $get_contact_details = Address::whereUserId($user_id)->whereNull('name')->first();
-            if($get_contact_details){
-                $contact_details = $get_contact_details;
-                $contact_details->updated_by = auth()->user()->id;
-            }else{
-                $contact_details = new Address();
-                $contact_details->user_id = $user_id;
-                $contact_details->created_by = auth()->user()->id;
-            }
-            
-            $contact_details->line_1 = $request->contact_address_line1;
-            $contact_details->line_2 = ($request->contact_address_line2)? $request->contact_address_line2 : NULL;
-            $contact_details->country_id = ($request->contact_country_id)? $request->contact_country_id : NULL;
-            $contact_details->state_id = ($request->contact_state_id)? $request->contact_state_id : NULL;
-            $contact_details->city_id = ($request->contact_city_id)? $request->contact_city_id : NULL ;
-            $contact_details->postal_code = ($request->contact_postal_code)? $request->contact_postal_code : NULL;
-            $contact_details->save();
-        
-            /* Doctor Clinic Info */
             if($request->clinic_name){
-                $get_clinic_details = Address::whereUserId($user_id)->whereNotNull('name')->first();
-                
-                if(isset($get_clinic_details)){
-                    $clinic_details = $get_clinic_details;
-                    $clinic_details->updated_by = auth()->user()->id;
+                $rules['clinic_address_line1'] = 'required';
+            }
+            
+            $valid = self::customValidation($request, $rules);
+            if($valid){ return $valid;}
+            
+            DB::beginTransaction();
+
+            //Save doctor profile
+            $doctor = User::find($user_id);
+            if($doctor){
+                $doctor->fill($request->all());
+                $doctor->country_id = $request->country_code_id;
+                $doctor->currency_code = Country::getCurrentCode($request->country_code_id);
+                $doctor->dob = date('Y-m-d',strtotime(str_replace('/', '-', $request->dob)));
+                $doctor->save();
+            
+                /* Doctor Address Details */
+                $get_contact_details = Address::whereUserId($user_id)->whereNull('name')->first();
+                if($get_contact_details){
+                    $contact_details = $get_contact_details;
+                    $contact_details->updated_by = auth()->user()->id;
                 }else{
-                    $clinic_details = new Address();
-                    $clinic_details->user_id = $user_id;
-                    $clinic_details->created_by = auth()->user()->id;    
+                    $contact_details = new Address();
+                    $contact_details->user_id = $user_id;
+                    $contact_details->created_by = auth()->user()->id;
                 }
                 
-                $clinic_details->name = $request->clinic_name;
-                $clinic_details->line_1 = $request->clinic_address_line1;
-                $clinic_details->line_2 = ($request->clinic_address_line2)? $request->clinic_address_line2 : NULL;
-                $clinic_details->country_id = ($request->clinic_country_id)? $request->clinic_country_id : NULL;
-                $clinic_details->state_id = ($request->clinic_state_id)? $request->clinic_state_id : NULL;
-                $clinic_details->city_id = ($request->clinic_city_id)? $request->clinic_city_id : NULL;
-                $clinic_details->postal_code = ($request->clinic_postal_code)? $request->clinic_postal_code : NULL;
-                $clinic_details->save();
-            }
-            /* Clinic Images */
-
-            $images=array();
-
-            if($files=$request->file('clinic_images')){
-                $clinic_img = AddressImage::whereUserId($user_id)->where('address_id',$clinic_details->id)->forcedelete();
-               
-                foreach($files as $file){
-                   
-                    $new_clinic_img = new AddressImage();
-                    $new_clinic_img->user_id = $user_id;
-                    $new_clinic_img->address_id	 = $clinic_details->id;
-                    $new_clinic_img->created_by = auth()->user()->id;
-
-                   if (!empty($file)) {
-                        $dateTime = date('YmdHis');
-                        $file_name = $dateTime . '_'.auth()->user()->id.'_'.$file->getClientOriginalName();
-                        $savePath = storage_path('app/public/images/address_images/'.$clinic_details->id.'/');
-                        $file->move($savePath, $file_name);
+                $contact_details->line_1 = $request->contact_address_line1;
+                $contact_details->line_2 = ($request->contact_address_line2)? $request->contact_address_line2 : NULL;
+                $contact_details->country_id = ($request->contact_country_id)? $request->contact_country_id : NULL;
+                $contact_details->state_id = ($request->contact_state_id)? $request->contact_state_id : NULL;
+                $contact_details->city_id = ($request->contact_city_id)? $request->contact_city_id : NULL ;
+                $contact_details->postal_code = ($request->contact_postal_code)? $request->contact_postal_code : NULL;
+                $contact_details->save();
+            
+                /* Doctor Clinic Info */
+                if($request->clinic_name){
+                    $get_clinic_details = Address::whereUserId($user_id)->whereNotNull('name')->first();
+                    
+                    if(isset($get_clinic_details)){
+                        $clinic_details = $get_clinic_details;
+                        $clinic_details->updated_by = auth()->user()->id;
                     }else{
-                        $file_name = '';
+                        $clinic_details = new Address();
+                        $clinic_details->user_id = $user_id;
+                        $clinic_details->created_by = auth()->user()->id;    
                     }
                     
-                    $new_clinic_img->image = $file_name;
-                    $new_clinic_img->save();
+                    $clinic_details->name = $request->clinic_name;
+                    $clinic_details->line_1 = $request->clinic_address_line1;
+                    $clinic_details->line_2 = ($request->clinic_address_line2)? $request->clinic_address_line2 : NULL;
+                    $clinic_details->country_id = ($request->clinic_country_id)? $request->clinic_country_id : NULL;
+                    $clinic_details->state_id = ($request->clinic_state_id)? $request->clinic_state_id : NULL;
+                    $clinic_details->city_id = ($request->clinic_city_id)? $request->clinic_city_id : NULL;
+                    $clinic_details->postal_code = ($request->clinic_postal_code)? $request->clinic_postal_code : NULL;
+                    $clinic_details->save();
+                }
+                /* Clinic Images */
+
+                $images=array();
+
+                if($files=$request->file('clinic_images')){
+                    $clinic_img = AddressImage::whereUserId($user_id)->where('address_id',$clinic_details->id)->forcedelete();
+                
+                    foreach($files as $file){
                     
-                }
-            }
+                        $new_clinic_img = new AddressImage();
+                        $new_clinic_img->user_id = $user_id;
+                        $new_clinic_img->address_id	 = $clinic_details->id;
+                        $new_clinic_img->created_by = auth()->user()->id;
 
-            /* Doctor Specialization */
-            if($request->speciality_id){
-                $doctor->doctorSpecialization()->detach();
-                $doctor->doctorSpecialization()->attach($request->speciality_id);
-            }
-            
-            // save doctor Services 
-            Service::where('user_id', '=', $user_id)->forcedelete();
-
-            if(isset($request->services)){
-                $services = explode(",", $request->services);
-                if(count($services) > 0) {
-                    foreach($services as $val){
-                        Service::create(['user_id'=>$user_id,'name'=> $val,'created_by'=>auth()->user()->id]);
+                    if (!empty($file)) {
+                            $dateTime = date('YmdHis');
+                            $file_name = $dateTime . '_'.auth()->user()->id.'_'.$file->getClientOriginalName();
+                            $savePath = storage_path('app/public/images/address_images/'.$clinic_details->id.'/');
+                            $file->move($savePath, $file_name);
+                        }else{
+                            $file_name = '';
+                        }
+                        
+                        $new_clinic_img->image = $file_name;
+                        $new_clinic_img->save();
+                        
                     }
                 }
-            }
 
-            EducationDetail::where('user_id', '=', $user_id)->forcedelete();
-            if($request->education) {
-                $education_result = json_decode($request->education, true);
-                foreach($education_result as $degree){
-                    $year = (int)$degree['completion'];
-                    if($year<1000 || $year>2100){
-                        DB::rollback();
-                        return self::send_bad_request_response('Invalid Year of Completion . Please check and try again.');
-                    }
-                    $education = new EducationDetail();
-                    if(!empty($degree['degree']) || !empty($degree['college']) || !empty($degree['completion'])){
-                        $education->degeree = $degree['degree'];
-                        $education->institute = $degree['college'];
-                        $education->year_of_completion = $degree['completion'];
-                        $education->user_id = $user_id;
-                        $education->created_by = auth()->user()->id;
-                        $education->save();
+                /* Doctor Specialization */
+                if($request->speciality_id){
+                    $doctor->doctorSpecialization()->detach();
+                    $doctor->doctorSpecialization()->attach($request->speciality_id);
+                }
+                
+                // save doctor Services 
+                Service::where('user_id', '=', $user_id)->forcedelete();
+
+                if(isset($request->services)){
+                    $services = explode(",", $request->services);
+                    if(count($services) > 0) {
+                        foreach($services as $val){
+                            Service::create(['user_id'=>$user_id,'name'=> $val,'created_by'=>auth()->user()->id]);
+                        }
                     }
                 }
-            }
 
-            // save doctor Experience details
-            ExperienceDetail::where('user_id', '=', $user_id)->forcedelete();
-            if($request->experience) {
-                $experience_result = json_decode($request->experience, true);
-                foreach($experience_result as $hospital){
-                    $from_year = (int)$hospital['from'];
-                    $to_year = (int)$hospital['to'];
-
-                    if($from_year<1000 || $from_year>2100 || $to_year<1000 || $to_year>2100 || $from_year > $to_year){
-                        DB::rollback();
-                        return self::send_bad_request_response('Incorrect From or To year. Please check and try again.');
-                    }                 
-                   
-                    $experience = new ExperienceDetail();
-                    if(!empty($hospital['hospital_name']) || !empty($hospital['from']) || !empty($hospital['to']) || !empty($hospital['designation'])){
-                        $experience->hospital_name = $hospital['hospital_name'];
-                        $experience->from = $hospital['from'];
-                        $experience->to = $hospital['to'];
-                        $experience->designation = $hospital['designation'];
-                        $experience->user_id = $user_id;
-                        $experience->created_by = auth()->user()->id;
-                        $experience->save();
+                EducationDetail::where('user_id', '=', $user_id)->forcedelete();
+                if($request->education) {
+                    $education_result = json_decode($request->education, true);
+                    foreach($education_result as $degree){
+                        $year = (int)$degree['completion'];
+                        if($year<1000 || $year>2100){
+                            DB::rollback();
+                            return self::send_bad_request_response('Invalid Year of Completion . Please check and try again.');
+                        }
+                        $education = new EducationDetail();
+                        if(!empty($degree['degree']) || !empty($degree['college']) || !empty($degree['completion'])){
+                            $education->degeree = $degree['degree'];
+                            $education->institute = $degree['college'];
+                            $education->year_of_completion = $degree['completion'];
+                            $education->user_id = $user_id;
+                            $education->created_by = auth()->user()->id;
+                            $education->save();
+                        }
                     }
                 }
-            }
 
-            //save doctor awards details
-            $awardArray = $request->achievement;
-            AwardDetail::where('user_id', '=', $user_id)->forcedelete();
-            if(isset($awardArray)) {
-                $achievement_result = json_decode($request->achievement, true);
-                foreach($achievement_result as $award){
-                    $awardyear = (int)$award['award_year'];
-                    if($awardyear<1000 || $awardyear>2100){
-                        DB::rollback();
-                        return self::send_bad_request_response('Invalid Awarded Year . Please check and try again.');
-                    }
-                    $achievement = new AwardDetail();
-                    if(!empty($award['name']) || !empty($award['award_year'])){
-                        $achievement->name = $award['name'];
-                        $achievement->award_year = $award['award_year'];
-                        $achievement->user_id = $user_id;
-                        $achievement->created_by = auth()->user()->id;
-                        $achievement->save();
+                // save doctor Experience details
+                ExperienceDetail::where('user_id', '=', $user_id)->forcedelete();
+                if($request->experience) {
+                    $experience_result = json_decode($request->experience, true);
+                    foreach($experience_result as $hospital){
+                        $from_year = (int)$hospital['from'];
+                        $to_year = (int)$hospital['to'];
+
+                        if($from_year<1000 || $from_year>2100 || $to_year<1000 || $to_year>2100 || $from_year > $to_year){
+                            DB::rollback();
+                            return self::send_bad_request_response('Incorrect From or To year. Please check and try again.');
+                        }                 
+                    
+                        $experience = new ExperienceDetail();
+                        if(!empty($hospital['hospital_name']) || !empty($hospital['from']) || !empty($hospital['to']) || !empty($hospital['designation'])){
+                            $experience->hospital_name = $hospital['hospital_name'];
+                            $experience->from = $hospital['from'];
+                            $experience->to = $hospital['to'];
+                            $experience->designation = $hospital['designation'];
+                            $experience->user_id = $user_id;
+                            $experience->created_by = auth()->user()->id;
+                            $experience->save();
+                        }
                     }
                 }
-            }
 
-            // save doctor registration details
-            $registrationArray = $request->registration;
-            RegistrationDetail::where('user_id', '=', $user_id)->forcedelete();
-            if(isset($registrationArray)) {
-                $registration_result = json_decode($request->registration, true);
-                foreach($registration_result as $reg){
-                    $regyear = (int)$reg['registration_year'];
-                    if($regyear<1000 || $regyear>2100){
-                        DB::rollback();
-                        return self::send_bad_request_response('Invalid Registration Year . Please check and try again.');
-                    }
-                    $registration = new RegistrationDetail();
-                    if(!empty($reg['name']) || !empty($reg['registration_year'])){
-                        $registration->name = $reg['name'];
-                        $registration->registration_year = $reg['registration_year'];
-                        $registration->user_id = $user_id;
-                        $registration->created_by = auth()->user()->id;
-                        $registration->save();
+                //save doctor awards details
+                $awardArray = $request->achievement;
+                AwardDetail::where('user_id', '=', $user_id)->forcedelete();
+                if(isset($awardArray)) {
+                    $achievement_result = json_decode($request->achievement, true);
+                    foreach($achievement_result as $award){
+                        $awardyear = (int)$award['award_year'];
+                        if($awardyear<1000 || $awardyear>2100){
+                            DB::rollback();
+                            return self::send_bad_request_response('Invalid Awarded Year . Please check and try again.');
+                        }
+                        $achievement = new AwardDetail();
+                        if(!empty($award['name']) || !empty($award['award_year'])){
+                            $achievement->name = $award['name'];
+                            $achievement->award_year = $award['award_year'];
+                            $achievement->user_id = $user_id;
+                            $achievement->created_by = auth()->user()->id;
+                            $achievement->save();
+                        }
                     }
                 }
-            }
 
-            // save doctor MembershipDetail details
-            $membershipArray = $request->membership;
-            MembershipDetail::where('user_id', '=', $user_id)->forcedelete();
-            if(isset($membershipArray)) {
-                $membership_result = json_decode($request->membership, true);
-                foreach($membership_result as $value){
-                    $membership = new MembershipDetail();
-                    $membership->name = $value['name'];
-                    $membership->user_id = $user_id;
-                    $membership->created_by = auth()->user()->id;
-                    $membership->save();
+                // save doctor registration details
+                $registrationArray = $request->registration;
+                RegistrationDetail::where('user_id', '=', $user_id)->forcedelete();
+                if(isset($registrationArray)) {
+                    $registration_result = json_decode($request->registration, true);
+                    foreach($registration_result as $reg){
+                        $regyear = (int)$reg['registration_year'];
+                        if($regyear<1000 || $regyear>2100){
+                            DB::rollback();
+                            return self::send_bad_request_response('Invalid Registration Year . Please check and try again.');
+                        }
+                        $registration = new RegistrationDetail();
+                        if(!empty($reg['name']) || !empty($reg['registration_year'])){
+                            $registration->name = $reg['name'];
+                            $registration->registration_year = $reg['registration_year'];
+                            $registration->user_id = $user_id;
+                            $registration->created_by = auth()->user()->id;
+                            $registration->save();
+                        }
+                    }
                 }
-            }    
-            
-                DB::commit();
+
+                // save doctor MembershipDetail details
+                $membershipArray = $request->membership;
+                MembershipDetail::where('user_id', '=', $user_id)->forcedelete();
+                if(isset($membershipArray)) {
+                    $membership_result = json_decode($request->membership, true);
+                    foreach($membership_result as $value){
+                        $membership = new MembershipDetail();
+                        $membership->name = $value['name'];
+                        $membership->user_id = $user_id;
+                        $membership->created_by = auth()->user()->id;
+                        $membership->save();
+                    }
+                }    
+                
+                    DB::commit();
 
                 return self::send_success_response([],'Doctor Records Store Successfully');
             }else{
                 return self::send_bad_request_response('Incorrect User id. Please check and try again!');
             }
-       
         } catch (\Exception | \Throwable $exception) {
             DB::rollback();
             return self::send_exception_response($exception->getMessage());
         }
-
     }
 
     public function doctorSearchList(Request $request){
