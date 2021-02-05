@@ -320,7 +320,7 @@ class HomeController extends Controller
     public function uploadProfileImage(Request $request, $user_id = null)
     {
         $rules = array(
-            'profile_image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+            'profile_image' => 'required',
         );
         
         $valid = self::customValidation($request, $rules);
@@ -342,16 +342,20 @@ class HomeController extends Controller
                         Storage::delete('images/profile-images/' . $user->profile_image);
                     }
                 }
+                if (preg_match('/data:image\/(.+);base64,(.*)/', $request->profile_image, $matchings)) {
+                    $imageData = base64_decode($matchings[2]);
+                    $extension = $matchings[1];
+                    $file_name = date('YmdHis') . rand(100, 999) . '_' . $request->user_id . '.' . $extension;
+                    $path = 'images/profile-images/' . $file_name;
+                    Storage::put($path, $imageData);
 
-                $extension = $request->file('profile_image')->getClientOriginalExtension();
-                $file_name = date('YmdHis') . '_' . auth()->user()->id . '.png';
-                $path = 'images/profile-images/';
-                $store = $request->file('profile_image')->storeAs($path, $file_name);
-
-                $user->profile_image = $file_name;
-                $user->save();
+                    $user->profile_image = $file_name;
+                    $user->save();
+                } else {
+                    return self::send_bad_request_response('Image Uploading Failed. Please check and try again!');
+                }
             }
-
+            
             $user->updated_by = auth()->user()->id;
             $user->save();
             DB::commit();

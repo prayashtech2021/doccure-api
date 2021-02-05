@@ -263,7 +263,7 @@ class AppointmentController extends Controller
 
     public function getsignature($doctor_id){
        
-        $sign =  Signature::select('id','signature_image')->whereUserId($doctor_id)->get();
+        $sign =  Signature::select('id','signature_image')->whereUserId($doctor_id)->orderBy('id','desc')->first();
         if($sign){
             return self::send_success_response($sign,'Signature fetched Successfully');
         }else{
