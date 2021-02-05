@@ -21,6 +21,7 @@ class PaymentRequestController extends Controller
         $rules = array(
             'count_per_page' => 'nullable|numeric',
             'order_by' => 'nullable|in:desc,asc',
+            'page' => 'nullable|numeric',
         );
         $valid = self::customValidation($request, $rules);
         if ($valid) {return $valid;}
@@ -28,10 +29,11 @@ class PaymentRequestController extends Controller
     try {
         $paginate = $request->count_per_page ? $request->count_per_page : 10;
         $order_by = $request->order_by ? $request->order_by : 'desc';
+        $pageNumber = $request->page ? $request->page : 1;
 
         $data = collect();
         $list = PaymentRequest::orderBy('id', $order_by);
-        $list->paginate($paginate)->getCollection()->each(function ($paymentRequest) use (&$data) {
+        $list->paginate($paginate, ['*'], 'page', $pageNumber)->getCollection()->each(function ($paymentRequest) use (&$data) {
             $data->push($paymentRequest->getData());
         });
             return self::send_success_response($data, 'Payment Request content fetched successfully');

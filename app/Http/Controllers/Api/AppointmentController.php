@@ -49,6 +49,7 @@ class AppointmentController extends Controller
         try {
             $rules = array(
                 'count_per_page' => 'nullable|numeric',
+                'page' => 'nullable|numeric',
                 'order_by' => 'nullable|in:desc,asc',
                 'appointment_status' => 'nullable|numeric',
                 'request_type' => 'nullable|numeric|in:1,2',
@@ -59,9 +60,10 @@ class AppointmentController extends Controller
 
             $user = $request->user();
             $paginate = $request->count_per_page ? $request->count_per_page : 10;
+            $pageNumber = $request->page ? $request->page : 1;
 
             $order_by = $request->order_by ? $request->order_by : 'desc';
-            $list = Appointment::orderBy('created_at', 'DESC');
+            $list = Appointment::orderBy('created_at', $order_by);
 
             $status = $request->appointment_status;
             if ($status) {
@@ -115,7 +117,7 @@ class AppointmentController extends Controller
             ];
             unset($user->wallet);
 
-            $list->paginate($paginate)->getCollection()->each(function ($appointment) use (&$data) {
+            $list->paginate($paginate, ['*'], 'page', $pageNumber)->getCollection()->each(function ($appointment) use (&$data) {
                 $data->push($appointment->getData());
             });
             $result['list'] = $data;
@@ -364,6 +366,7 @@ class AppointmentController extends Controller
             'user_id' => 'nullable|numeric|exists:users,id',
             'count_per_page' => 'nullable|numeric',
             'order_by' => 'nullable|in:desc,asc',
+            'page' => 'nullable|numeric',
         );
         $valid = self::customValidation($request, $rules);
         if ($valid) {return $valid;}
@@ -371,6 +374,8 @@ class AppointmentController extends Controller
         try {
             $paginate = $request->count_per_page ? $request->count_per_page : 10;
             $order_by = $request->order_by ? $request->order_by : 'desc';
+            $pageNumber = $request->page ? $request->page : 1;
+
             $user = auth()->user();
             if ($user->hasRole('patient')) {
                 $user_id = $user->id;
@@ -381,7 +386,7 @@ class AppointmentController extends Controller
             
             $data = collect();
             
-            $list->paginate($paginate)->getCollection()->each(function ($prescription) use (&$data) {
+            $list->paginate($paginate, ['*'], 'page', $pageNumber)->getCollection()->each(function ($prescription) use (&$data) {
                 $data->push($prescription->getData());
             });
             
