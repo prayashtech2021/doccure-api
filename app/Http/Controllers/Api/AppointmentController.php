@@ -61,7 +61,7 @@ class AppointmentController extends Controller
             $paginate = $request->count_per_page ? $request->count_per_page : 10;
 
             $order_by = $request->order_by ? $request->order_by : 'desc';
-            $list = Appointment::orderBy('created_at', $order_by);
+            $list = Appointment::orderBy('created_at', 'DESC');
 
             $status = $request->appointment_status;
             if ($status) {
@@ -109,13 +109,9 @@ class AppointmentController extends Controller
                 removeMetaColumn($user->accountDetails);
             }
             $user->user_balance = [
-                'earned' => $user->paymentRequest(function ($ary) {
-                    $qry->where('status', 2);
-                })->sum('request_amount'),
+                'earned' => $user->paymentRequest()->where('payment_requests.status', 2)->sum('request_amount'),
                 'balance' => $user->balanceFloat,
-                'requested' => $user->paymentRequest(function ($ary) {
-                    $qry->where('status', 1);
-                })->sum('request_amount'),
+                'requested' => $user->paymentRequest()->where('payment_requests.status', 1)->sum('request_amount'),
             ];
             unset($user->wallet);
 
@@ -265,7 +261,7 @@ class AppointmentController extends Controller
 
     public function getsignature($doctor_id){
        
-        $sign =  Signature::select('id','signature_image')->whereUserId($doctor_id)->get();
+        $sign =  Signature::select('id','signature_image')->whereUserId($doctor_id)->orderBy('id','desc')->first();
         if($sign){
             return self::send_success_response($sign,'Signature fetched Successfully');
         }else{
@@ -449,10 +445,10 @@ class AppointmentController extends Controller
             if ($request->status == 4) { //approved
                 if($appointment->payment->total_amount>0){
                 if (isset($request->request_type) && $request->request_type == 1) { //payment request
-                    $user = User::find($appointment->user_id);
+                    $user = User::find($appointment->doctor_id);
                     $requested_amount = $appointment->payment->total_amount - ($appointment->payment->tax_amount + $appointment->payment->transaction_charge);
                 } else {
-                    $user = User::find($appointment->doctor_id);
+                    $user = User::find($appointment->user_id);
                     $requested_amount = $appointment->payment->total_amount;
                 }
                 $user->depositFloat($requested_amount);
