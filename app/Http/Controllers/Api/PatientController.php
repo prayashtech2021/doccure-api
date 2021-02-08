@@ -46,6 +46,7 @@ class PatientController extends Controller
         $rules = array(
             'count_per_page' => 'nullable|numeric',
             'order_by' => 'nullable|in:desc,asc',
+            'page' => 'nullable|numeric',
         );
         $valid = self::customValidation($request, $rules);
         if ($valid) {return $valid;}
@@ -53,6 +54,7 @@ class PatientController extends Controller
         try {
             $paginate = $request->count_per_page ? $request->count_per_page : 10;
             $order_by = $request->order_by ? $request->order_by : 'desc';
+            $pageNumber = $request->page ? $request->page : 1;
 
             if(auth()->user()->hasrole('doctor')){ //doctors -> my patients who attended appointments
                 $doctor_id = auth()->user()->id;
@@ -69,7 +71,7 @@ class PatientController extends Controller
                 }
             }
             $data = collect();
-            $list->paginate($paginate)->getCollection()->each(function ($provider) use (&$data) {
+            $list->paginate($paginate, ['*'], 'page', $pageNumber)->getCollection()->each(function ($provider) use (&$data) {
                 $data->push($provider->patientProfile());
             });
 
