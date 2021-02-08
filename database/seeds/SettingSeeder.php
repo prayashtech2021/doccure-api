@@ -146,6 +146,96 @@ class SettingSeeder extends Seeder
                 'value' => '',
                 'created_by' => 1,
             ],
+            23 => [
+                'slug' => 'payment_gateway',
+                'keyword' => 'paypal_sandbox_email',
+                'value' => '',
+                'created_by' => 1,
+            ],
+            24 => [
+                'slug' => 'payment_gateway',
+                'keyword' => 'paypal_live_email',
+                'value' => '',
+                'created_by' => 1,
+            ],
+            25 => [
+                'slug' => 'payment_gateway',
+                'keyword' => 'paypal_sanbox_live',
+                'value' => '',
+                'created_by' => 1,
+            ],
+            26 => [
+                'slug' => 'payment_gateway',
+                'keyword' => 'stripe_sandbox_api_key',
+                'value' => '',
+                'created_by' => 1,
+            ],
+            27 => [
+                'slug' => 'payment_gateway',
+                'keyword' => 'stripe_sandbox_rest_key',
+                'value' => '',
+                'created_by' => 1,
+            ],
+            28 => [
+                'slug' => 'payment_gateway',
+                'keyword' => 'stripe_live_api_key',
+                'value' => '',
+                'created_by' => 1,
+            ],
+            29 => [
+                'slug' => 'payment_gateway',
+                'keyword' => 'stripe_live_rest_key',
+                'value' => '',
+                'created_by' => 1,
+            ],
+            30 => [
+                'slug' => 'payment_gateway',
+                'keyword' => 'stripe_sandbox_live',
+                'value' => '',
+                'created_by' => 1,
+            ],
+            31 => [
+                'slug' => 'payment_gateway',
+                'keyword' => 'razorpay_sandbox_key_id',
+                'value' => '',
+                'created_by' => 1,
+            ],
+            32 => [
+                'slug' => 'payment_gateway',
+                'keyword' => 'razorpay_sandbox_key_secret',
+                'value' => '',
+                'created_by' => 1,
+            ],
+            33 => [
+                'slug' => 'payment_gateway',
+                'keyword' => 'razorpay_live_key_id',
+                'value' => '',
+                'created_by' => 1,
+            ],
+            34 => [
+                'slug' => 'payment_gateway',
+                'keyword' => 'razorpay_live_key_secret',
+                'value' => '',
+                'created_by' => 1,
+            ],
+            35 => [
+                'slug' => 'payment_gateway',
+                'keyword' => 'razorpay_is_sandbox_live',
+                'value' => '',
+                'created_by' => 1,
+            ],
+            36 => [
+                'slug' => 'tokbox',
+                'keyword' => 'tokbox_api_key',
+                'value' => '',
+                'created_by' => 1,
+            ],
+            37 => [
+                'slug' => 'tokbox',
+                'keyword' => 'tokbox_api_secret',
+                'value' => '',
+                'created_by' => 1,
+            ],
             
 		];
 		foreach ($datas as $id => $data) {

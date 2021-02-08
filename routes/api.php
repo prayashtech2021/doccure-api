@@ -100,6 +100,10 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
     Route::get('settings','Api\SettingController@getSetting');
     Route::post('settings/save','Api\SettingController@save');
 
+
+    Route::get('admin/dashboard','Api\HomeController@adminDashboard');
+    Route::get('patient/dashboard','Api\PatientController@patientDashboard');
+    Route::get('doctor/dashboard','Api\doctorController@doctorDashboard');
 });
 
 Route::any('{path}', function () {
