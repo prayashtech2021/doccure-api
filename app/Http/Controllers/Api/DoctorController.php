@@ -169,30 +169,33 @@ class DoctorController extends Controller
                 /* Clinic Images */
 
                 $images=array();
-
-                if($files=$request->file('clinic_images')){
+                if($request->clinic_images){
                     $clinic_img = AddressImage::whereUserId($user_id)->where('address_id',$clinic_details->id)->forcedelete();
-                
-                    foreach($files as $file){
-                    
+                    if (Storage::exists('images/address_images/' . $clinic_details->id.'/')) {
+                        $files =   Storage::allFiles('images/address_images/' . $clinic_details->id.'/');
+                        Storage::delete($files);
+                    }
+                    $image_result = json_decode($request->clinic_images, true);
+                    foreach($image_result as $result){
+                        $file = $result['name'];
                         $new_clinic_img = new AddressImage();
                         $new_clinic_img->user_id = $user_id;
                         $new_clinic_img->address_id	 = $clinic_details->id;
                         $new_clinic_img->created_by = auth()->user()->id;
 
-                    if (!empty($file)) {
-                            $dateTime = date('YmdHis');
-                            $file_name = $dateTime . '_'.auth()->user()->id.'_'.$file->getClientOriginalName();
-                            $savePath = storage_path('app/public/images/address_images/'.$clinic_details->id.'/');
-                            $file->move($savePath, $file_name);
-                        }else{
-                            $file_name = '';
-                        }
-                        
-                        $new_clinic_img->image = $file_name;
-                        $new_clinic_img->save();
-                        
-                    }
+                        if (preg_match('/data:image\/(.+);base64,(.*)/', $file, $matchings)) {
+                            $imageData = base64_decode($matchings[2]);
+                            $extension = $matchings[1];
+                            $file_name = date('YmdHis') . rand(100, 999) . '_' . $user_id . '.' . $extension;
+                            $path = 'images/address_images/'.$clinic_details->id.'/'. $file_name;
+                            Storage::put($path, $imageData);
+        
+                            $new_clinic_img->image = $file_name;
+                            $new_clinic_img->save();
+                        } else {
+                            return self::send_bad_request_response('Image Uploading Failed. Please check and try again!');
+                        }   
+                    }    
                 }
 
                 /* Doctor Specialization */
@@ -378,6 +381,7 @@ class DoctorController extends Controller
                     $category->where('addresses.state_id',$state_id);
                 });
             }
+
             if($request->city_id){
                 $city_id = $request->city_id;
                 $doctors = $doctors->whereHas('homeAddress', function ($category) use ($city_id) {
