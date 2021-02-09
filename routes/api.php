@@ -104,6 +104,11 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
     Route::get('admin/dashboard','Api\HomeController@adminDashboard');
     Route::get('patient/dashboard','Api\PatientController@patientDashboard');
     Route::get('doctor/dashboard','Api\doctorController@doctorDashboard');
+
+    /* Reviews */
+    Route::post('review/save','Api\ReviewController@save');
+
+    Route::get('review/list','Api\ReviewController@getList');
 });
 
 Route::any('{path}', function () {
