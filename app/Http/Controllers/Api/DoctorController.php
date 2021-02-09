@@ -3,12 +3,16 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Api\AppointmentController;
 
 use Validator;
 use App\ { User, Speciality, EducationDetail, Service,Country, State, City, Address, AddressImage, UserSpeciality, ExperienceDetail, AwardDetail, MembershipDetail, RegistrationDetail };
+use App\Appointment;
 use Illuminate\Http\Request;
 use DB;
 use Storage;
+use Illuminate\Support\Carbon;
+
 
 class DoctorController extends Controller
 {
@@ -18,15 +22,37 @@ class DoctorController extends Controller
      * @return \Illuminate\Http\Response
      */
    
-    public function dashboard(Request $request) {
+    public function doctorDashboard(Request $request) {
         try {
-            $user_id = $request->user()->id;
+            $user_id = auth()->user()->id;
             if($user_id){
-                $patient = User::get()->count();
-                $data = [ 'total_patient' => $patient ];
-                return self::send_success_response($data);
+                $patient = Appointment::where('doctor_id',$user_id)->groupBy('user_id')->count();
+                $total_patient = Appointment::where('doctor_id',$user_id)->whereDate('appointment_date', date('Y-m-d'))->count();
+                $appointment = Appointment::where('doctor_id',$user_id)->count();
+
+                /* Patient Appointment 
+                $myRequest = new Request();
+                $myRequest->request->add([
+                    
+                    'count_per_page' => ($request->count_per_page)? $request->count_per_page : '', 
+                    'page'=> ($request->page)? $request->page : '', 
+                    'order_by'=> ($request->order_by)? $request->order_by : '', 
+                    'appointment_status'=> ($request->appointment_status)? $request->appointment_status : '', 
+                    'request_type'=> ($request->request_type)? $request->request_type : '', 
+                    'appointment_date'=> ($request->appointment_date)? $request->appointment_date : '', 
+                ]);
+
+                $appointment_result = (new AppointmentController)->list($myRequest);*/
+
+                $result = [ 
+                    'total_patient' => $patient, 
+                    'today_patient' => $total_patient,
+                    'appointments' => $appointment, 
+                //'patient_appointment'=>$appointment_result
+                ];
+                return self::send_success_response($result);
             }else{
-                $message = "Your account is not activated.";
+                $message = "Unauthorised request.";
                 return self::send_unauthorised_request_response($message);
             }
         } catch (\Exception | \Throwable $exception) {
@@ -170,11 +196,6 @@ class DoctorController extends Controller
 
                 $images=array();
                 if($request->clinic_images){
-                    $clinic_img = AddressImage::whereUserId($user_id)->where('address_id',$clinic_details->id)->forcedelete();
-                    if (Storage::exists('images/address_images/' . $clinic_details->id.'/')) {
-                        $files =   Storage::allFiles('images/address_images/' . $clinic_details->id.'/');
-                        Storage::delete($files);
-                    }
                     $image_result = json_decode($request->clinic_images, true);
                     foreach($image_result as $result){
                         $file = $result['name'];
@@ -415,4 +436,23 @@ class DoctorController extends Controller
         }
     }
     
+    public function deleteAddressImage($address_image_id){
+
+        try{
+            $address_img = AddressImage::where('id',$address_image_id)->first();
+            if(!$address_img){
+                return self::send_bad_request_response('Invalid Address Image Id. Kindly check and try again.');
+            }
+            if(!empty($address_img->image)){
+                if (Storage::exists('images/address_images/' . $address_img->address_id.'/'.$address_img->image)) {
+                    Storage::delete('images/address_images/' . $address_img->address_id.'/'.$address_img->image);
+                }
+            }
+            $address_img->forcedelete();
+            return self::send_success_response([],'Address Image Deleted successfully');
+           
+        } catch (\Exception | \Throwable $exception) {
+            return self::send_exception_response($exception->getMessage());
+        }
+    }
 }
