@@ -102,7 +102,7 @@ class AppointmentController extends Controller
             } elseif ($user->hasRole('doctor')) {
                 $list = $list->where('appointment_status','<>',6);
             }
-            
+
             removeMetaColumn($user);
             unset($user->roles);
             $result['user_details'] = $user;
@@ -262,7 +262,7 @@ class AppointmentController extends Controller
     }
 
     public function getsignature($doctor_id){
-       
+
         $sign =  Signature::select('id','signature_image')->whereUserId($doctor_id)->orderBy('id','desc')->first();
         if($sign){
             return self::send_success_response($sign,'Signature fetched Successfully');
@@ -331,7 +331,7 @@ class AppointmentController extends Controller
             $prescription->save();
 
             PrescriptionDetail::where('prescription_id', '=', $prescription->id)->forcedelete();
-          
+
             $result = json_decode($request->prescription_detail, true);
             foreach ($result as $value) {
                 $medicine = new PrescriptionDetail();
@@ -383,13 +383,13 @@ class AppointmentController extends Controller
                 $user_id = $request->user_id;
             }
             $list = Prescription::whereUserId($user_id)->orderBy('created_at', $order_by);
-            
+
             $data = collect();
-            
+
             $list->paginate($paginate, ['*'], 'page', $pageNumber)->getCollection()->each(function ($prescription) use (&$data) {
                 $data->push($prescription->getData());
             });
-            
+
             if($data){
                 return self::send_success_response($data,'Prescription Details Fetched Successfully');
             }else{
@@ -406,9 +406,9 @@ class AppointmentController extends Controller
     {
         //$list = Prescription::with('prescriptionDetails', 'doctorappointment.patient', 'doctorappointment.doctor', 'doctorsign')->where('id', $pid)->get();
         $list = Prescription::whereId($pid);
-            
+
         $data = collect();
-        
+
         $list->paginate(10)->getCollection()->each(function ($prescription) use (&$data) {
             $data->push($prescription->getData());
         });
@@ -614,18 +614,9 @@ class AppointmentController extends Controller
 
             if ($user->hasRole('patient')) {
                 $saved_cards = collect();
-
-                $paymentMethods = $user->paymentMethods();
-
-                foreach ($paymentMethods as $paymentMethod) {
-                    $saved_cards->push([
-                        'id' => $paymentMethod->id,
-                        'brand' => $paymentMethod->card->brand,
-                        'last4' => $paymentMethod->card->last4,
-                        'name' => ucwords($paymentMethod->billing_details->name),
-                    ]);
+                foreach ($user->payment()->get() as $payment){
+                    $saved_cards->push($payment->cardDetails());
                 }
-
                 return self::send_success_response($saved_cards->toArray());
             } else {
                 return self::send_bad_request_response(['message' => 'Invalid request', 'error' => 'Invalid request']);
