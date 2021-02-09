@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use Validator;
-use App\ { User,Country,Address,State,City };
+use App\ { User,Country,Address,State,City,Appointment };
 use App\Mail\SendInvitation;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -11,6 +11,10 @@ use Illuminate\Support\Facades\Mail;
 use DB;
 use Hash;
 use Storage;
+use App\Http\Controllers\Api\PatientController;
+use App\Http\Controllers\Api\DoctorController;
+use App\Http\Controllers\Api\AppointmentController;
+
 
 class HomeController extends Controller
 {
@@ -373,5 +377,47 @@ class HomeController extends Controller
     public function destroy(Request $request)
     {
         return self::customDelete('\App\User', $request->id);
+    }
+
+    public function adminDashboard(Request $request){
+        try {
+            $user_id = auth()->user()->id;
+            if($user_id){
+                $doctor = User::role('doctor')->count();
+                $patient = User::role('patient')->count();
+                $appointment = Appointment::count();
+
+                
+                $myRequest = new Request();
+                $myRequest->request->add([
+                    
+                    'count_per_page' => ($request->count_per_page)? $request->count_per_page : '', 
+                    'page'=> ($request->page)? $request->page : '', 
+                    'order_by'=> ($request->order_by)? $request->order_by : '', 
+                    'appointment_status'=> ($request->appointment_status)? $request->appointment_status : '', 
+                    'request_type'=> ($request->request_type)? $request->request_type : '', 
+                    'appointment_date'=> ($request->appointment_date)? $request->appointment_date : '', 
+                ]);
+
+                $patient_result = (new PatientController)->patientList($myRequest);
+                $doctor_result = (new DoctorController)->doctorList($myRequest);
+                $app_result = (new AppointmentController)->list($myRequest);
+
+                $result = [ 
+                    'doctor' => $doctor, 
+                    'patient' => $patient,
+                    'appointment' => $appointment, 
+                    'patient_list'=>$patient_result,
+                    'doctor_list'=>$doctor_result,
+                    //'app_list'=>$app_result
+                ];
+                return self::send_success_response($result);
+            }else{
+                $message = "Unauthorised request.";
+                return self::send_unauthorised_request_response($message);
+            }
+        } catch (\Exception | \Throwable $exception) {
+           return self::send_exception_response($exception->getMessage());
+        }
     }
 }

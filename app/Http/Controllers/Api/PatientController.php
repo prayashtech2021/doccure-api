@@ -10,6 +10,8 @@ use DB;
 use Closure;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use App\Http\Controllers\Api\AppointmentController;
+use App\Http\Controllers\Api\MedicalRecordController;
 
 use \Exception;
 use \Throwable;
@@ -206,6 +208,40 @@ class PatientController extends Controller
             }
         } catch (\Exception | \Throwable $exception) {
             return self::send_exception_response($exception->getMessage());
+        }
+    }
+
+    public function patientDashboard(Request $request){
+        try {
+            $user_id = auth()->user()->id;
+            if($user_id){
+                
+                $myRequest = new Request();
+                $myRequest->request->add([
+                    
+                    'count_per_page' => ($request->count_per_page)? $request->count_per_page : '', 
+                    'page'=> ($request->page)? $request->page : '', 
+                    'order_by'=> ($request->order_by)? $request->order_by : '', 
+                    'appointment_status'=> ($request->appointment_status)? $request->appointment_status : '', 
+                    'request_type'=> ($request->request_type)? $request->request_type : '', 
+                    'appointment_date'=> ($request->appointment_date)? $request->appointment_date : '', 
+                ]);
+
+               
+                $app_result = (new AppointmentController)->list($myRequest);
+                $medical_record_result = (new MedicalRecordController)->getList($myRequest);
+
+                $result = [ 
+                    //'app_list'=>$app_result,
+                    'medical_record_list'=>$medical_record_result,
+                ];
+                return self::send_success_response($result);
+            }else{
+                $message = "Unauthorised request.";
+                return self::send_unauthorised_request_response($message);
+            }
+        } catch (\Exception | \Throwable $exception) {
+           return self::send_exception_response($exception->getMessage());
         }
     }
 

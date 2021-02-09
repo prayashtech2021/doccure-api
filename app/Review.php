@@ -20,11 +20,11 @@ class Review extends Model
     public function getData(){
         return [
             'id' => $this->id,
-           // 'user' => $this->user()->first()->basicProfile(),
-            //'reviewer' => $this->reviewer()->first()->basicProfile(),
+            'user' => $this->user()->first()->basicProfile(),
+            'reviewer' => $this->reviewer()->first()->basicProfile(),
             'rating' => $this->rating,
             'description' => $this->description,
-         //   'created' => Carbon::parse($this->created_at)->format('d/m/Y h:i A'),
+            'created' => Carbon::parse($this->created_at)->format('d/m/Y h:i A'),
         ];
     }
 
