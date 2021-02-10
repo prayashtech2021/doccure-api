@@ -107,6 +107,7 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
     /* Reviews */
     Route::post('review/save','Api\ReviewController@save');
     Route::get('review/list','Api\ReviewController@getList');
+    Route::get('review/delete/{id}','Api\ReviewController@destroy');
 
     /*Email Template */
     Route::post('email-template/save','Api\EmailTemplateController@save');
