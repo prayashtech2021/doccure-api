@@ -19,7 +19,7 @@ class SpecialityController extends Controller
     {
         if ($request->speciality_id) { //edit
             $rules = array(
-                'speciality_id' => 'integer',
+                'speciality_id' => 'integer|exists:specialities,id',
                 'name' => 'required|unique:specialities,id,' . $request->speciality_id,
                 'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             );

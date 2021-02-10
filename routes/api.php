@@ -66,7 +66,6 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
     /* Doctor Module */
     Route::get('doctor/dashboard', 'Api\DoctorController@dashboard');
     Route::get('doctor/list', 'Api\DoctorController@doctorList');
-
     Route::post('doctor/saveprofile', 'Api\DoctorController@saveProfile');
     Route::get('doctor/address-image/delete/{address_image_id}','Api\DoctorController@deleteAddressImage');
 
@@ -97,18 +96,27 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
     Route::post('accounts/save', 'Api\PaymentRequestController@accountUpdate')->name('accountUpdate');
     Route::post('payment/request/create', 'Api\PaymentRequestController@requestPayment')->name('requestPayment');
     Route::post('payment/request/update', 'Api\PaymentRequestController@updatePaymentRequest')->name('updatePaymentRequest');
-
+    /* Settings */
     Route::get('settings','Api\SettingController@getSetting');
     Route::post('settings/save','Api\SettingController@save');
-
+    /* Dashboard */
     Route::get('admin/dashboard','Api\HomeController@adminDashboard');
     Route::get('patient/dashboard','Api\PatientController@patientDashboard');
     Route::get('doctor/dashboard','Api\DoctorController@doctorDashboard');
 
     /* Reviews */
     Route::post('review/save','Api\ReviewController@save');
-
     Route::get('review/list','Api\ReviewController@getList');
+
+    /*Email Template */
+    Route::post('email-template/save','Api\EmailTemplateController@save');
+    Route::get('email-template/list','Api\EmailTemplateController@getList');
+    Route::get('email-template/view/{id}','Api\EmailTemplateController@view');
+
+    /* Social Media */
+    Route::post('social-media/save','Api\SocialMediaController@save');
+    Route::get('social-media/view/{provider_id}','Api\SocialMediaController@view');
+
 });
 
 Route::any('{path}', function () {
