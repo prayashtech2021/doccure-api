@@ -92,6 +92,7 @@ class User extends Authenticatable implements Wallet, WalletFloat
             'blood_group' => $this->blood_group,
             'time_zone_id' => $this->time_zone_id,
             'language_id' => $this->language_id,
+            'currency_code' => $this->currency_code,
             'permanent_address' => $this->getPermanentAddressAttribute(),
             'member_since' => date('d M Y H:s A', strtotime($this->created_at)),
             'accountstatus' => $this->getAccountStatusAttribute(),
@@ -138,6 +139,10 @@ class User extends Authenticatable implements Wallet, WalletFloat
     
     public function appointments() { 
         return $this->hasMany('App\Appointment','user_id'); 
+    }
+
+    public function userFavourite() { 
+        return $this->belongsToMany('App\User', 'user_favourites');
     }
 
     public function basicProfile(){
@@ -215,9 +220,11 @@ class User extends Authenticatable implements Wallet, WalletFloat
     public function getPermanentAddressAttribute(){
         return Address::with('country','state','city')->whereNull('name')->where('user_id',$this->id)->first();
     }
+    
     public function getOfficeAddressAttribute(){
         return Address::with('country','state','city','addressImage')->whereNotNull('name')->where('user_id',$this->id)->first();
     }
+
     public function getUserImageAttribute() { 
         return getUserProfileImage($this->id); 
     }

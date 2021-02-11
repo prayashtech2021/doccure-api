@@ -3,12 +3,16 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Api\AppointmentController;
 
 use Validator;
 use App\ { User, Speciality, EducationDetail, Service,Country, State, City, Address, AddressImage, UserSpeciality, ExperienceDetail, AwardDetail, MembershipDetail, RegistrationDetail };
+use App\Appointment;
 use Illuminate\Http\Request;
 use DB;
 use Storage;
+use Illuminate\Support\Carbon;
+
 
 class DoctorController extends Controller
 {
@@ -18,15 +22,25 @@ class DoctorController extends Controller
      * @return \Illuminate\Http\Response
      */
    
-    public function dashboard(Request $request) {
+    public function doctorDashboard(Request $request) {
         try {
-            $user_id = $request->user()->id;
+            $user_id = auth()->user()->id;
             if($user_id){
-                $patient = User::get()->count();
-                $data = [ 'total_patient' => $patient ];
-                return self::send_success_response($data);
+                $patient = Appointment::where('doctor_id',$user_id)->groupBy('user_id')->count();
+                $total_patient = Appointment::where('doctor_id',$user_id)->whereDate('appointment_date', date('Y-m-d'))->count();
+                $appointment = Appointment::where('doctor_id',$user_id)->count();
+
+                $appointment_result = (new AppointmentController)->list($request,1);
+
+                $result = [ 
+                    'total_patient' => $patient, 
+                    'today_patient' => $total_patient,
+                    'appointments' => $appointment, 
+                    'patient_appointment'=> $appointment_result
+                ];
+                return self::send_success_response($result);
             }else{
-                $message = "Your account is not activated.";
+                $message = "Unauthorised request.";
                 return self::send_unauthorised_request_response($message);
             }
         } catch (\Exception | \Throwable $exception) {
@@ -57,7 +71,7 @@ class DoctorController extends Controller
                 $data->push($provider->doctorProfile());
             });
             if($data){
-                return self::send_success_response($data,'Doctor Details Fetched Successfully');
+               return self::send_success_response($data,'Doctor Details Fetched Successfully');
             }else{
                 return self::send_bad_request_response('No Records Found');
             }
@@ -170,11 +184,6 @@ class DoctorController extends Controller
 
                 $images=array();
                 if($request->clinic_images){
-                    $clinic_img = AddressImage::whereUserId($user_id)->where('address_id',$clinic_details->id)->forcedelete();
-                    if (Storage::exists('images/address_images/' . $clinic_details->id.'/')) {
-                        $files =   Storage::allFiles('images/address_images/' . $clinic_details->id.'/');
-                        Storage::delete($files);
-                    }
                     $image_result = json_decode($request->clinic_images, true);
                     foreach($image_result as $result){
                         $file = $result['name'];
@@ -341,7 +350,7 @@ class DoctorController extends Controller
             'country_id' => 'nullable|numeric|exists:countries,id',
             'state_id' => 'nullable|numeric|exists:states,id',
             'city_id' => 'nullable|numeric|exists:cities,id',
-            'count_per_page' => 'nullable|numeric',
+            //'count_per_page' => 'nullable|numeric',
             'order_by' => 'nullable|in:desc,asc',
             'sort' => 'nullable|numeric',
         );
@@ -349,7 +358,7 @@ class DoctorController extends Controller
         if ($valid) {return $valid;}
 
         try{
-            $paginate = $request->count_per_page ? $request->count_per_page : 10;
+           // $paginate = $request->count_per_page ? $request->count_per_page : 10;
 
             $doctors = User::role('doctor');
             
@@ -401,7 +410,7 @@ class DoctorController extends Controller
             }
 
             $data = collect();
-            $doctors->paginate($paginate)->getCollection()->each(function ($provider) use (&$data) {
+            $doctors->each(function ($provider) use (&$data) {
                 $data->push($provider->doctorProfile());
             });
 
@@ -415,4 +424,23 @@ class DoctorController extends Controller
         }
     }
     
+    public function deleteAddressImage($address_image_id){
+
+        try{
+            $address_img = AddressImage::where('id',$address_image_id)->first();
+            if(!$address_img){
+                return self::send_bad_request_response('Invalid Address Image Id. Kindly check and try again.');
+            }
+            if(!empty($address_img->image)){
+                if (Storage::exists('images/address_images/' . $address_img->address_id.'/'.$address_img->image)) {
+                    Storage::delete('images/address_images/' . $address_img->address_id.'/'.$address_img->image);
+                }
+            }
+            $address_img->forcedelete();
+            return self::send_success_response([],'Address Image Deleted successfully');
+           
+        } catch (\Exception | \Throwable $exception) {
+            return self::send_exception_response($exception->getMessage());
+        }
+    }
 }

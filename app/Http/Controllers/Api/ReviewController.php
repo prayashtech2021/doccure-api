@@ -40,8 +40,10 @@ class ReviewController extends Controller
             DB::beginTransaction();
             if ($request->review_id) {
                 $data = Review::find($request->review_id);
+                $data->updated_by = auth()->user()->id;
             } else {
                 $data = new Review();
+                $data->created_by = auth()->user()->id;
             }
 
             $data->user_id = $request->user_id;
@@ -68,10 +70,10 @@ class ReviewController extends Controller
         $valid = self::customValidation($request, $rules);
         if ($valid) {return $valid;}
 
-    try {
-        $paginate = $request->count_per_page ? $request->count_per_page : 10;
-        $order_by = $request->order_by ? $request->order_by : 'desc';
-        $pageNumber = $request->page ? $request->page : 1;
+        try {
+            $paginate = $request->count_per_page ? $request->count_per_page : 10;
+            $order_by = $request->order_by ? $request->order_by : 'desc';
+            $pageNumber = $request->page ? $request->page : 1;
 
             $list = Review::orderBy('id', $order_by);
             
@@ -80,7 +82,7 @@ class ReviewController extends Controller
                 $data->push($provider->getData());
             });
 
-            return self::send_success_response($list, 'Review content fetched successfully');
+            return self::send_success_response($data, 'Review content fetched successfully');
         } catch (Exception | Throwable $e) {
             DB::rollback();
             return self::send_exception_response($exception->getMessage());
@@ -89,6 +91,6 @@ class ReviewController extends Controller
 
     public function destroy(Request $request)
     {
-        return self::customDelete('\App\Speciality', $request->id);
+        return self::customDelete('\App\Review', $request->id);
     }
 }

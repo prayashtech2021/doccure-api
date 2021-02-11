@@ -10,7 +10,8 @@ use DB;
 use Closure;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
-
+use App\Http\Controllers\Api\AppointmentController;
+use App\Http\Controllers\Api\MedicalRecordController;
 use \Exception;
 use \Throwable;
 
@@ -149,7 +150,7 @@ class PatientController extends Controller
             'country_id' => 'nullable|numeric|exists:countries,id',
             'state_id' => 'nullable|numeric|exists:states,id',
             'city_id' => 'nullable|numeric|exists:cities,id',
-            'count_per_page' => 'nullable|numeric',
+           // 'count_per_page' => 'nullable|numeric',
             'order_by' => 'nullable|in:desc,asc',
             'sort' => 'nullable|numeric',
         );
@@ -157,7 +158,7 @@ class PatientController extends Controller
         if ($valid) {return $valid;}
 
         try{
-            $paginate = $request->count_per_page ? $request->count_per_page : 10;
+           // $paginate = $request->count_per_page ? $request->count_per_page : 10;
 
             $data = User::role('patient');
 
@@ -195,7 +196,7 @@ class PatientController extends Controller
             }
 
             $list = collect();
-            $data->paginate($paginate)->getCollection()->each(function ($provider) use (&$list) {
+            $data->each(function ($provider) use (&$list) {
                 $list->push($provider->patientProfile());
             });
             
@@ -205,6 +206,82 @@ class PatientController extends Controller
                 return self::send_bad_request_response('No Records Found');
             }
         } catch (\Exception | \Throwable $exception) {
+            return self::send_exception_response($exception->getMessage());
+        }
+    }
+
+    public function patientDashboard(Request $request){
+        $rules = array(
+            'consumer_id' => 'required|numeric|exists:users,id',
+            'count_per_page' => 'nullable|numeric',
+            'order_by' => 'nullable|in:desc,asc',
+            'page' => 'nullable|numeric',
+        );
+        $valid = self::customValidation($request, $rules);
+        if ($valid) {return $valid;}
+
+        try {
+            $user_id = auth()->user()->id;
+            if($user_id){
+                
+                $appointment_result = (new AppointmentController)->list($request,1);
+                $prescription_result = (new AppointmentController)->prescriptionList($request,1);
+                $medical_record_result = (new MedicalRecordController)->getList($request,1);
+
+                $result = [ 
+                    'appointment_list'=> $appointment_result,
+                    'prescription_list' => $prescription_result,
+                    'medical_record_list'=> $medical_record_result,
+                ];
+                return self::send_success_response($result);
+            }else{
+                $message = "Unauthorised request.";
+                return self::send_unauthorised_request_response($message);
+            }
+        } catch (\Exception | \Throwable $exception) {
+           return self::send_exception_response($exception->getMessage());
+        }
+    }
+
+    public function favouriteSave(Request $request){
+        try{    
+            $user_id = auth()->user()->id;
+            $favourite_id = $request->favourite_id;
+            $rules = [
+                'favourite_id' => 'required|integer|exists:users,id',
+            ];
+
+            $valid = self::customValidation($request, $rules);
+            if($valid){ return $valid;}
+
+            DB::beginTransaction();
+            //Save admin profile
+            $user = User::find($user_id);
+            if($user){    
+                $user->userFavourite()->detach();
+                $user->userFavourite()->attach($favourite_id);
+
+                DB::commit();
+                return self::send_success_response([],'Favourite Updated Successfully');
+            }else{
+                $message = "Unauthorised request.";
+                return self::send_unauthorised_request_response($message);
+            }
+           
+        } catch (Exception | Throwable $exception) {
+            DB::rollback();
+            return self::send_exception_response($exception->getMessage());
+        }
+    }
+
+    public function getFavouriteList(){
+        try{    
+            $user_id = auth()->user()->id;
+            $fav =  auth()->user()->userFavourite();
+            return self::send_success_response($fav,'Patient Favourite List');
+
+        } catch (Exception | Throwable $exception) {
+            DB::rollback();
             return self::send_exception_response($exception->getMessage());
         }
     }

@@ -46,7 +46,7 @@ class AppointmentController extends Controller
         });
     }
 
-    function list(Request $request) {
+    function list(Request $request,$flag = NULL) {
         try {
             $rules = array(
                 'count_per_page' => 'nullable|numeric',
@@ -103,7 +103,7 @@ class AppointmentController extends Controller
             } elseif ($user->hasRole('doctor')) {
                 $list = $list->where('appointment_status','<>',4);
             }
-            
+
             removeMetaColumn($user);
             unset($user->roles);
             $result['user_details'] = $user;
@@ -117,16 +117,21 @@ class AppointmentController extends Controller
                 'requested' => $user->paymentRequest()->where('payment_requests.status', 1)->sum('request_amount'),
             ];
             unset($user->wallet);
-
-            $list->paginate($paginate, ['*'], 'page', $pageNumber)->getCollection()->each(function ($appointment) use (&$data) {
-                $data->push($appointment->getData());
-            });
-            $result['list'] = $data;
-
-            // $this->updateStatus();
-            
-            return self::send_success_response($result);
+            if($flag){
+                $list->paginate(10)->getCollection()->each(function ($appointment) use (&$data) {
+                    $data->push($appointment->basicData());
+                });
+                return $data;
+            }else{
+                $list->paginate($paginate, ['*'], 'page', $pageNumber)->getCollection()->each(function ($appointment) use (&$data) {
+                    $data->push($appointment->getData());
+                });
+                $result['list'] = $data;
+                return self::send_success_response($result);
+            }
+           
         } catch (Exception | Throwable $exception) {
+            dd($exception);
             return self::send_exception_response($exception->getMessage());
         }
     }
@@ -274,7 +279,7 @@ class AppointmentController extends Controller
     }
 
     public function getsignature($doctor_id){
-       
+
         $sign =  Signature::select('id','signature_image')->whereUserId($doctor_id)->orderBy('id','desc')->first();
         if($sign){
             return self::send_success_response($sign,'Signature fetched Successfully');
@@ -289,11 +294,13 @@ class AppointmentController extends Controller
         if ($request->prescription_id) { //edit
             $rules = array(
                 'prescription_id' => 'integer|exists:prescriptions,id',
+                'appointment_id' => 'required|numeric|exists:appointments,id',
                 'user_id' => 'required|numeric|exists:users,id',
                 'prescription_detail' => 'required',
             );
         } else {
             $rules = array(
+                'appointment_id' => 'required|numeric|exists:appointments,id',
                 'user_id' => 'required|numeric|exists:users,id',
                 'prescription_detail' => 'required',
             );
@@ -316,6 +323,7 @@ class AppointmentController extends Controller
             } else {
                 $prescription = new Prescription();
             }
+            $prescription->appointment_id = $request->appointment_id;
             $prescription->user_id = $request->user_id;
             $prescription->doctor_id = auth()->user()->id;
             if ($request->signature_id) {
@@ -343,7 +351,7 @@ class AppointmentController extends Controller
             $prescription->save();
 
             PrescriptionDetail::where('prescription_id', '=', $prescription->id)->forcedelete();
-          
+
             $result = json_decode($request->prescription_detail, true);
             foreach ($result as $value) {
                 $medicine = new PrescriptionDetail();
@@ -375,7 +383,7 @@ class AppointmentController extends Controller
     public function prescriptionList(Request $request)
     {
         $rules = array(
-            'user_id' => 'nullable|numeric|exists:users,id',
+            'consumer_id' => 'nullable|numeric|exists:users,id',
             'count_per_page' => 'nullable|numeric',
             'order_by' => 'nullable|in:desc,asc',
             'page' => 'nullable|numeric',
@@ -392,16 +400,16 @@ class AppointmentController extends Controller
             if ($user->hasRole('patient')) {
                 $user_id = $user->id;
             } else {
-                $user_id = $request->user_id;
+                $user_id = $request->consumer_id;
             }
             $list = Prescription::whereUserId($user_id)->orderBy('created_at', $order_by);
-            
+
             $data = collect();
-            
+
             $list->paginate($paginate, ['*'], 'page', $pageNumber)->getCollection()->each(function ($prescription) use (&$data) {
                 $data->push($prescription->getData());
             });
-            
+
             if($data){
                 return self::send_success_response($data,'Prescription Details Fetched Successfully');
             }else{
@@ -416,12 +424,11 @@ class AppointmentController extends Controller
 
     public function prescriptionView($pid)
     {
-        //$list = Prescription::with('prescriptionDetails', 'doctorappointment.patient', 'doctorappointment.doctor', 'doctorsign')->where('id', $pid)->get();
         $list = Prescription::whereId($pid);
-            
+
         $data = collect();
-        
-        $list->paginate(10)->getCollection()->each(function ($prescription) use (&$data) {
+
+        $list->each(function ($prescription) use (&$data) {
             $data->push($prescription->getData());
         });
         return self::send_success_response($data, 'Prescription Details Fetched Successfully');
@@ -620,18 +627,9 @@ class AppointmentController extends Controller
 
             if ($user->hasRole('patient')) {
                 $saved_cards = collect();
-
-                $paymentMethods = $user->paymentMethods();
-
-                foreach ($paymentMethods as $paymentMethod) {
-                    $saved_cards->push([
-                        'id' => $paymentMethod->id,
-                        'brand' => $paymentMethod->card->brand,
-                        'last4' => $paymentMethod->card->last4,
-                        'name' => ucwords($paymentMethod->billing_details->name),
-                    ]);
+                foreach ($user->payment()->get() as $payment){
+                    $saved_cards->push($payment->cardDetails());
                 }
-
                 return self::send_success_response($saved_cards->toArray());
             } else {
                 return self::send_bad_request_response(['message' => 'Invalid request', 'error' => 'Invalid request']);
