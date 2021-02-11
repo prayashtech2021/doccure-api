@@ -92,6 +92,7 @@ class User extends Authenticatable implements Wallet, WalletFloat
             'blood_group' => $this->blood_group,
             'time_zone_id' => $this->time_zone_id,
             'language_id' => $this->language_id,
+            'currency_code' => $this->currency_code,
             'permanent_address' => $this->getPermanentAddressAttribute(),
             'member_since' => date('d M Y H:s A', strtotime($this->created_at)),
             'accountstatus' => $this->getAccountStatusAttribute(),
