@@ -69,7 +69,7 @@ class User extends Authenticatable implements Wallet, WalletFloat
             'time_zone_id' => $this->time_zone_id,
             'language_id' => $this->language_id,
             'service' => $this->doctorService()->get(),
-            'providerspeciality' => $this->doctorSpecialization()->first(),
+            'providerspeciality' => $this->getProviderSpecialityAttribute(),
             'permanent_address' => $this->getPermanentAddressAttribute(),
             'office_address' => $this->getOfficeAddressAttribute(),
             'member_since' => date('d M Y H:s A', strtotime($this->created_at)),
@@ -101,7 +101,7 @@ class User extends Authenticatable implements Wallet, WalletFloat
     }
 
     public function doctorSpecialization() { 
-        return $this->belongsToMany('App\Speciality', 'user_speciality')->select('id','name','image');
+        return $this->belongsToMany('App\Speciality', 'user_speciality');
     }
 
     public function doctorService(){
@@ -148,7 +148,7 @@ class User extends Authenticatable implements Wallet, WalletFloat
            'mobile_number' => $this->mobile_number,
            'email' => $this->email,
            'address' => $this->getPermanentAddressAttribute(),
-           'doctorSpecialization' => $this->doctorSpecialization()->get(),
+           'doctorSpecialization' => $this->getProviderSpecialityAttribute(),
        ];
     }
 
@@ -205,9 +205,11 @@ class User extends Authenticatable implements Wallet, WalletFloat
     }
 
     public function getProviderSpecialityAttribute(){
-        return Speciality::select('id','name','image')->whereHas('speciality', function ($a) {
+        $speciality = Speciality::whereHas('speciality', function ($a) {
                     $a->where('user_speciality.user_id',$this->id);
-                })->first();
+                })->get();
+        removeMetaColumn($speciality);
+        return $speciality;
     }
 
     public function getPermanentAddressAttribute(){

@@ -17,7 +17,7 @@ class CreateScheduleTimingsTable extends Migration
             $table->id();
             $table->unsignedBigInteger('provider_id')->comment('service provider,user_id'); //user id
             $table->unsignedTinyInteger('appointment_type')->comment('1=>online,2=>offline');
-            $table->string('duration')->comment('in seconds');
+            // $table->string('duration')->comment('in seconds');
             $table->json('working_hours');
 
             $table->timestamps();

@@ -14,11 +14,13 @@ class CreatePaymentsTable extends Migration
             $table->unsignedBigInteger('appointment_id');
             $table->tinyInteger('payment_type'); // stripe or cash
             $table->string('invoice_no');
+            $table->integer('duration')->comment('in seconds');
             $table->decimal('total_amount', 12, 2);
             $table->string('currency_code');
             $table->string('txn_id')->nullable();
             $table->decimal('tax', 12, 2);
             $table->decimal('tax_amount', 12, 2);
+            $table->decimal('transaction', 12, 2);
             $table->decimal('transaction_charge', 12, 2);
             $table->text('transaction_miscellaneous');
             $table->timestamps();

@@ -22,11 +22,15 @@ class SpecialityController extends Controller
                 'speciality_id' => 'integer',
                 'name' => 'required|unique:specialities,id,' . $request->speciality_id,
                 'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+                'duration' => 'required|date_format:"H:i:s',
+                'amount' => 'required|numeric',
             );
         } else {
             $rules = array(
                 'name' => 'required|unique:specialities',
                 'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+                'duration' => 'required|date_format:"H:i:s',
+                'amount' => 'required|numeric',
             );
         }
         $valid = self::customValidation($request, $rules);
@@ -45,7 +49,12 @@ class SpecialityController extends Controller
                 $speciality->created_by = auth()->user()->id;
             }
 
+            $seconds = Carbon::parse('00:00:00')->diffInSeconds(Carbon::parse($request->duration));
+            $seconds = (int) $seconds;
+
             $speciality->name = $request->name;
+            $speciality->duration = $request->duration;
+            $speciality->amount = $request->amount;
             $speciality->save();
 
             if (!empty($request->image)) {
@@ -80,8 +89,8 @@ class SpecialityController extends Controller
         $paginate = $request->count_per_page ? $request->count_per_page : 10;
         $order_by = $request->order_by ? $request->order_by : 'desc';
 
-            $list = Speciality::withTrashed()->select('id', 'name', 'image')->orderBy('name', $order_by)->get();
-
+            $list = Speciality::withTrashed()->orderBy('name', $order_by)->get();
+            removeMetaColumn($list);
             return self::send_success_response($list, 'Speciality content fetched successfully');
         } catch (Exception | Throwable $e) {
             DB::rollback();

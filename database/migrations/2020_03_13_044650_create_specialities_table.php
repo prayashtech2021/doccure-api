@@ -17,6 +17,8 @@ class CreateSpecialitiesTable extends Migration
             $table->id();
             $table->string('name')->unique();
             $table->string('image')->nullable();
+            $table->integer('duration')->comment('in seconds');
+            $table->decimal('amount',12,2);
 
             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
 			$table->timestamp('updated_at')->nullable();

@@ -24,7 +24,7 @@ class CreateAppointmentsTable extends Migration
             $table->text('tokbox_token')->nullable();
             $table->boolean('payment_status')->default(true);
             $table->string('time_zone')->default('Asia\Kolkata');
-            $table->unsignedTinyInteger('appointment_status')->comment('1=>new,2=>approve_request,3=>approved,4=>cancelled,5=>refund,6=>expired');
+            $table->unsignedTinyInteger('appointment_status')->comment('1=>new,2=>accepted,3=>completed,4=>refund,5=>refund_approved,6=>cancelled,7=>expired');
             $table->unsignedTinyInteger('request_type')->default(0)->comment('1=>payment,2=>refund');
             $table->boolean('call_status')->default(false);
             $table->boolean('review_status')->default(false);

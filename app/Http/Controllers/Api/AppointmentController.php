@@ -8,6 +8,7 @@ use App\Payment;
 use App\Prescription;
 use App\PrescriptionDetail;
 use App\ScheduleTiming;
+use App\Speciality;
 use App\Setting;
 use App\Signature;
 use App\TimeZone;
@@ -75,7 +76,7 @@ class AppointmentController extends Controller
                         $list = $list->whereIn('appointment_status', [1,2])->whereDate('appointment_date', '<=', convertToUTC(now()));
                         break;
                     case 3: //completed/approved
-                        $list = $list->where('appointment_status', 4)->whereDate('appointment_date', '<', convertToUTC(now()));
+                        $list = $list->where('appointment_status', 3)->whereDate('appointment_date', '<', convertToUTC(now()));
                         break;
                     default:
                         break;
@@ -98,9 +99,9 @@ class AppointmentController extends Controller
             if (!empty($request->request_type) && $request->request_type > 0) {
                 $list = $list->where('request_type', $request->request_type);
             }elseif ($user->hasRole('patient')) {
-                $list = $list->where('appointment_status','<>',3);
+                // $list = $list->where('appointment_status','<>',3);
             } elseif ($user->hasRole('doctor')) {
-                $list = $list->where('appointment_status','<>',6);
+                $list = $list->where('appointment_status','<>',4);
             }
             
             removeMetaColumn($user);
@@ -122,6 +123,8 @@ class AppointmentController extends Controller
             });
             $result['list'] = $data;
 
+            // $this->updateStatus();
+            
             return self::send_success_response($result);
         } catch (Exception | Throwable $exception) {
             return self::send_exception_response($exception->getMessage());
@@ -138,6 +141,7 @@ class AppointmentController extends Controller
             'start_time' => 'required|date_format:"H:i:s"',
             'end_time' => 'required|date_format:"H:i:s"|after:start_time',
             'selected_slots' => 'required|numeric',
+            'speciality_id' => 'required|exists:specialities,id',
         ]);
 
         if ($validator->fails()) {
@@ -170,6 +174,7 @@ class AppointmentController extends Controller
             $appointment->start_time = $request->start_time;
             $appointment->end_time = $request->end_time;
             $appointment->payment_type = $request->payment_type;
+            $appointment->request_type = 1;
             $appointment->appointment_status = 1;
             $appointment->save();
 
@@ -188,11 +193,13 @@ class AppointmentController extends Controller
             $payment->appointment_id = $appointment->id;
             $payment->invoice_no = generateReference($user->id, $last_id, 'INV');
             $payment->payment_type = $request->payment_type;
-            if ($doctor->price_type == 2 && $doctor->amount > 0) {
+            if ($doctor->price_type == 2) {
                 $getSettings = new Setting;
                 $getSettings = $getSettings->getAmount();
 
-                $amount = $doctor->amount * $request->selected_slots;
+                $speciality = Speciality::find($request->speciality_id);
+                $speciality_amt = ($speciality)?$speciality->amount:0;
+                $amount = $speciality_amt * $request->selected_slots;
                 $transaction_charge = ($amount * ($getSettings['trans_percent'] / 100));
                 $total_amount = $amount + $transaction_charge;
                 $tax_amount = (round($total_amount) * $getSettings['tax_percent'] / 100);
@@ -200,7 +207,9 @@ class AppointmentController extends Controller
                 $total_amount = $total_amount + $tax_amount;
 
                 $payment->tax = $getSettings['tax_percent'];
+                $payment->duration = $speciality->duration;
                 $payment->tax_amount = $tax_amount;
+                $payment->transaction = $getSettings['trans_percent'];
                 $payment->transaction_charge = $transaction_charge;
                 $payment->total_amount = $total_amount;
             } else {
@@ -209,6 +218,9 @@ class AppointmentController extends Controller
 
             $payment->currency_code = $doctor->currency_code ?? config('cashier.currency');
             $payment->save();
+
+            $requested_amount = $payment->total_amount - ($payment->tax_amount + $payment->transaction_charge);
+            $doctor->depositFloat($requested_amount);
 
             if ($request->payment_type == 1 || $request->payment_type == 2) {
 
@@ -447,17 +459,10 @@ class AppointmentController extends Controller
             }
             $log->status = $appointment->appointment_status;
             $log->save();
-            if ($request->status == 4) { //approved
-                if($appointment->payment->total_amount>0){
-                if (isset($request->request_type) && $request->request_type == 1) { //payment request
-                    $user = User::find($appointment->doctor_id);
-                    $requested_amount = $appointment->payment->total_amount - ($appointment->payment->tax_amount + $appointment->payment->transaction_charge);
-                } else {
-                    $user = User::find($appointment->user_id);
-                    $requested_amount = $appointment->payment->total_amount;
-                }
+            if ($request->status == 5 && $appointment->payment->total_amount>0) { // refund approved
+                $user = User::find($appointment->user_id);
+                $requested_amount = $appointment->payment->total_amount - $appointment->payment->transaction_charge;
                 $user->depositFloat($requested_amount);
-            }
             }
 
             return self::send_success_response([], 'Status updated sucessfully');
@@ -477,13 +482,14 @@ class AppointmentController extends Controller
         try {
             $data = collect();
             if (auth()->user()) {
-                $result['provider_details'] = User::find($request->provider_id);
+                $result['provider_details'] = $user = User::find($request->provider_id);
                 $list = ScheduleTiming::where('provider_id', $request->provider_id)->get();
                 // dd(json_decode($list->working_hours));
                 $list->each(function ($schedule_timing) use (&$data) {
                     $data->push($schedule_timing->getData());
                 });
                 $result['list'] = $data;
+                $result['specialities'] = $user->getProviderSpecialityAttribute();
             }
             return self::send_success_response($result, 'Schedule Details Fetched Successfully');
         } catch (Exception | Throwable $exception) {
@@ -496,7 +502,7 @@ class AppointmentController extends Controller
         // dd(json_encode(config('custom.empty_working_hours')));
         $rules = array(
             'provider_id' => 'required|numeric|exists:users,id',
-            'duration' => 'required|date_format:"H:i:s',
+            // 'duration' => 'required|date_format:"H:i:s',
             'appointment_type' => 'required|numeric|in:1,2',
             'day' => 'required|numeric|in:1,2,3,4,5,6,7',
             'working_hours' => 'required|string',
@@ -506,31 +512,31 @@ class AppointmentController extends Controller
 
         try {
             $schedule = ScheduleTiming::where('provider_id', $request->provider_id)->first();
-            $seconds = Carbon::parse('00:00:00')->diffInSeconds(Carbon::parse($request->duration));
-            $seconds = (int) $seconds;
+            // $seconds = Carbon::parse('00:00:00')->diffInSeconds(Carbon::parse($request->duration));
+            // $seconds = (int) $seconds;
             if ($schedule) { //update
                 $schedule = ScheduleTiming::where('provider_id', $request->provider_id)->where('appointment_type', $request->appointment_type)->first();
                 if ($schedule) { //update
 
-                    if ($schedule->duration == $seconds) { //update working hrs
+                    // if ($schedule->duration == $seconds) { //update working hrs
                         $array = json_decode($schedule->working_hours, true);
                         $array[config('custom.days.' . $request->day)] = explode(',', $request->working_hours);
                         $schedule->working_hours = json_encode($array);
                         $schedule->save();
-                    } else { // update duration and working hrs
-                        $array = config('custom.empty_working_hours');
-                        $array[config('custom.days.' . $request->day)] = explode(',', $request->working_hours);
-                        $schedule->duration = $seconds;
-                        $schedule->working_hours = json_encode($array);
-                        $schedule->save();
+                    // } else { // update duration and working hrs
+                    //     $array = config('custom.empty_working_hours');
+                    //     $array[config('custom.days.' . $request->day)] = explode(',', $request->working_hours);
+                    //     $schedule->duration = $seconds;
+                    //     $schedule->working_hours = json_encode($array);
+                    //     $schedule->save();
 
-                        //
-                        $type = ($request->appointment_type == 1) ? 2 : 1;
-                        $schedule2 = ScheduleTiming::where('provider_id', $request->provider_id)->where('appointment_type', $type)->first();
-                        $schedule2->duration = $seconds;
-                        $schedule2->working_hours = json_encode(config('custom.empty_working_hours'));
-                        $schedule2->save();
-                    }
+                    //     //
+                    //     $type = ($request->appointment_type == 1) ? 2 : 1;
+                    //     $schedule2 = ScheduleTiming::where('provider_id', $request->provider_id)->where('appointment_type', $type)->first();
+                    //     $schedule2->duration = $seconds;
+                    //     $schedule2->working_hours = json_encode(config('custom.empty_working_hours'));
+                    //     $schedule2->save();
+                    // }
                 }
 
             } else { // insert
@@ -538,7 +544,7 @@ class AppointmentController extends Controller
                     $schedule = new ScheduleTiming;
                     $schedule->provider_id = $request->provider_id;
                     $schedule->appointment_type = $i;
-                    $schedule->duration = $seconds;
+                    // $schedule->duration = $seconds;
                     if ($i == $request->appointment_type) {
                         $array = config('custom.empty_working_hours');
                         $array[config('custom.days.' . $request->day)] = explode(',', $request->working_hours);
@@ -568,7 +574,7 @@ class AppointmentController extends Controller
     {
         $rules = array(
             'provider_id' => 'required|numeric|exists:users,id',
-            'duration' => 'required|date_format:"H:i:s',
+            // 'duration' => 'required|date_format:"H:i:s',
             'appointment_type' => 'required|numeric|in:1,2',
             'day' => 'required|numeric|in:1,2,3,4,5,6,7',
             'working_hours' => 'required|string',
@@ -579,7 +585,7 @@ class AppointmentController extends Controller
         try {
             $seconds = Carbon::parse('00:00:00')->diffInSeconds(Carbon::parse($request->duration));
             $seconds = (int) $seconds;
-            $schedule = ScheduleTiming::where('provider_id', $request->provider_id)->where('appointment_type', $request->appointment_type)->where('duration', $seconds)->first();
+            $schedule = ScheduleTiming::where('provider_id', $request->provider_id)->where('appointment_type', $request->appointment_type)->first();
             if ($schedule) {
                 $array = json_decode($schedule->working_hours, true);
                 $inner_arr = $array[config('custom.days.' . $request->day)];

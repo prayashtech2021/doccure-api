@@ -24,6 +24,7 @@ class AppointmentSeeder extends Seeder
                 'end_time' => '14:30:00',
                 'payment_type' => 3,
                 'payment_status' => 1,
+                'request_type' => 1,
                 'appointment_status' => 1,
             ],
             
@@ -41,6 +42,7 @@ class AppointmentSeeder extends Seeder
                 'appointment_id' => 1,
                 'payment_type' => 3,
                 'invoice_no' => 'INV234232',
+                'duration' => 600,
                 'total_amount' => '10.00',
                 'currency_code' => 'USD',
                 'txn_id' => 'TXN453432',

@@ -9,19 +9,19 @@ return [
     'appointment_status' =>[
         1=>'new',
         2=>'accepted',
-        3=>'waiting for approval',
-        4=>'approved',
-        5=>'cancelled',
-        6=>'refund',
+        3=>'completed',
+        4=>'refund',
+        5=>'refund_approved',
+        6=>'cancelled',
         7=>'expired'
     ],
     'appointment_log_message' =>[
         1=>'new appointment created',
         2=>'request accepted',
-        3=>'request raised for patient approval',
-        4=>'request approved',
-        5=>'request cancelled',
-        6=>'refund request raised for doctor approval',
+        3=>'appointment completed',
+        4=>'refund request raised for doctor approval',
+        5=>'request approved',
+        6=>'request cancelled',
         7=>'appointment expired'
     ],
     'empty_working_hours' =>[

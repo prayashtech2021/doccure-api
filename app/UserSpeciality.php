@@ -12,6 +12,7 @@ class UserSpeciality extends Model{
      * @var array
      */
     protected $table = 'user_speciality';
+    public $timestamps = false;
 
     protected $fillable = [
          'user_id', 'speciality_id',

@@ -15,7 +15,7 @@ class ScheduleTiming extends Model
         return [
             'id' => $this->id,
             'appointment_type' => ($this->appointment_type == 1)?'Online':'Offline',
-            'duration' => Carbon::parse((int)$this->duration)->format('i'),
+            // 'duration' => Carbon::parse((int)$this->duration)->format('i'),
             'working_hours' => $this->working_hours,
         ];
     }
