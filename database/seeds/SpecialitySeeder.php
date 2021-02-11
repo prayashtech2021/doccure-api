@@ -18,6 +18,7 @@ class SpecialitySeeder extends Seeder
                 'name' => 'Skin care',
                 'duration' => 600,
                 'amount' => 10,
+                'created_by' => 1,
             ],
             
 		];
