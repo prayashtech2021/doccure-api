@@ -14,7 +14,7 @@ class Review extends Model
 
     
     protected $fillable = [
-        'user_id', 'reviewer_id', 'rating', 'description',
+        'user_id', 'reviewer_id', 'rating', 'description','created_by',
     ];
 
     public function getData(){

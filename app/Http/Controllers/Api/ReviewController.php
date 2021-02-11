@@ -40,8 +40,10 @@ class ReviewController extends Controller
             DB::beginTransaction();
             if ($request->review_id) {
                 $data = Review::find($request->review_id);
+                $data->updated_by = auth()->user()->id;
             } else {
                 $data = new Review();
+                $data->created_by = auth()->user()->id;
             }
 
             $data->user_id = $request->user_id;

@@ -118,6 +118,9 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
     Route::post('social-media/save','Api\SocialMediaController@save');
     Route::get('social-media/view/{provider_id}','Api\SocialMediaController@view');
 
+    /* Favourite */
+    Route::post('favourite/save','Api\PatientController@favouriteSave');
+    Route::get('favourite/list','Api\PatientController@getFavouriteList');
 });
 
 Route::any('{path}', function () {

@@ -141,6 +141,10 @@ class User extends Authenticatable implements Wallet, WalletFloat
         return $this->hasMany('App\Appointment','user_id'); 
     }
 
+    public function userFavourite() { 
+        return $this->belongsToMany('App\User', 'user_favourites');
+    }
+
     public function basicProfile(){
        return [
            'id' => $this->id,
@@ -214,9 +218,11 @@ class User extends Authenticatable implements Wallet, WalletFloat
     public function getPermanentAddressAttribute(){
         return Address::with('country','state','city')->whereNull('name')->where('user_id',$this->id)->first();
     }
+    
     public function getOfficeAddressAttribute(){
         return Address::with('country','state','city','addressImage')->whereNotNull('name')->where('user_id',$this->id)->first();
     }
+
     public function getUserImageAttribute() { 
         return getUserProfileImage($this->id); 
     }

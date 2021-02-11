@@ -243,4 +243,47 @@ class PatientController extends Controller
         }
     }
 
+    public function favouriteSave(Request $request){
+        try{    
+            $user_id = auth()->user()->id;
+            $favourite_id = $request->favourite_id;
+            $rules = [
+                'favourite_id' => 'required|integer|exists:users,id',
+            ];
+
+            $valid = self::customValidation($request, $rules);
+            if($valid){ return $valid;}
+
+            DB::beginTransaction();
+            //Save admin profile
+            $user = User::find($user_id);
+            if($user){    
+                $user->userFavourite()->detach();
+                $user->userFavourite()->attach($favourite_id);
+
+                DB::commit();
+                return self::send_success_response([],'Favourite Updated Successfully');
+            }else{
+                $message = "Unauthorised request.";
+                return self::send_unauthorised_request_response($message);
+            }
+           
+        } catch (Exception | Throwable $exception) {
+            DB::rollback();
+            return self::send_exception_response($exception->getMessage());
+        }
+    }
+
+    public function getFavouriteList(){
+        try{    
+            $user_id = auth()->user()->id;
+            $fav =  auth()->user()->userFavourite();
+            return self::send_success_response($fav,'Patient Favourite List');
+
+        } catch (Exception | Throwable $exception) {
+            DB::rollback();
+            return self::send_exception_response($exception->getMessage());
+        }
+    }
+
 }

@@ -17,6 +17,7 @@ class Prescription extends Model
     public function getData(){
         return [
             'id' => $this->id,
+            'appointment_id' => $this->appointment_id,
             'doctor' => $this->doctor()->first()->basicProfile(),
             'patient' => $this->patient()->first()->basicProfile(),
             'prescription_details' => $this->prescriptionDetails()->get(),
