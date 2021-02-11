@@ -401,15 +401,14 @@ class HomeController extends Controller
 
                 $patient_result = (new PatientController)->patientList($myRequest);
                 $doctor_result = (new DoctorController)->doctorList($myRequest);
-                $app_result = (new AppointmentController)->list($myRequest);
-
+                $app_result = (new AppointmentController)->list($request,1);
                 $result = [ 
                     'doctor' => $doctor, 
                     'patient' => $patient,
                     'appointment' => $appointment, 
                     'patient_list'=>$patient_result,
                     'doctor_list'=>$doctor_result,
-                    //'app_list'=>$app_result
+                    'app_list'=>$app_result
                 ];
                 return self::send_success_response($result);
             }else{

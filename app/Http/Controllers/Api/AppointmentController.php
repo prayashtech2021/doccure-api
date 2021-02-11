@@ -45,7 +45,7 @@ class AppointmentController extends Controller
         });
     }
 
-    function list(Request $request) {
+    function list(Request $request,$flag = NULL) {
         try {
             $rules = array(
                 'count_per_page' => 'nullable|numeric',
@@ -116,14 +116,21 @@ class AppointmentController extends Controller
                 'requested' => $user->paymentRequest()->where('payment_requests.status', 1)->sum('request_amount'),
             ];
             unset($user->wallet);
-
-            $list->paginate($paginate, ['*'], 'page', $pageNumber)->getCollection()->each(function ($appointment) use (&$data) {
-                $data->push($appointment->getData());
-            });
-            $result['list'] = $data;
-
-            return self::send_success_response($result);
+            if($flag){
+                $list->paginate(10)->getCollection()->each(function ($appointment) use (&$data) {
+                    $data->push($appointment->basicData());
+                });
+                return $data;
+            }else{
+                $list->paginate($paginate, ['*'], 'page', $pageNumber)->getCollection()->each(function ($appointment) use (&$data) {
+                    $data->push($appointment->getData());
+                });
+                $result['list'] = $data;
+                return self::send_success_response($result);
+            }
+           
         } catch (Exception | Throwable $exception) {
+            dd($exception);
             return self::send_exception_response($exception->getMessage());
         }
     }
@@ -277,11 +284,13 @@ class AppointmentController extends Controller
         if ($request->prescription_id) { //edit
             $rules = array(
                 'prescription_id' => 'integer|exists:prescriptions,id',
+                'appointment_id' => 'required|numeric|exists:appointments,id',
                 'user_id' => 'required|numeric|exists:users,id',
                 'prescription_detail' => 'required',
             );
         } else {
             $rules = array(
+                'appointment_id' => 'required|numeric|exists:appointments,id',
                 'user_id' => 'required|numeric|exists:users,id',
                 'prescription_detail' => 'required',
             );
@@ -304,6 +313,7 @@ class AppointmentController extends Controller
             } else {
                 $prescription = new Prescription();
             }
+            $prescription->appointment_id = $request->appointment_id;
             $prescription->user_id = $request->user_id;
             $prescription->doctor_id = auth()->user()->id;
             if ($request->signature_id) {
@@ -363,7 +373,7 @@ class AppointmentController extends Controller
     public function prescriptionList(Request $request)
     {
         $rules = array(
-            'user_id' => 'nullable|numeric|exists:users,id',
+            'consumer_id' => 'nullable|numeric|exists:users,id',
             'count_per_page' => 'nullable|numeric',
             'order_by' => 'nullable|in:desc,asc',
             'page' => 'nullable|numeric',
@@ -380,7 +390,7 @@ class AppointmentController extends Controller
             if ($user->hasRole('patient')) {
                 $user_id = $user->id;
             } else {
-                $user_id = $request->user_id;
+                $user_id = $request->consumer_id;
             }
             $list = Prescription::whereUserId($user_id)->orderBy('created_at', $order_by);
 
@@ -404,12 +414,11 @@ class AppointmentController extends Controller
 
     public function prescriptionView($pid)
     {
-        //$list = Prescription::with('prescriptionDetails', 'doctorappointment.patient', 'doctorappointment.doctor', 'doctorsign')->where('id', $pid)->get();
         $list = Prescription::whereId($pid);
 
         $data = collect();
 
-        $list->paginate(10)->getCollection()->each(function ($prescription) use (&$data) {
+        $list->each(function ($prescription) use (&$data) {
             $data->push($prescription->getData());
         });
         return self::send_success_response($data, 'Prescription Details Fetched Successfully');

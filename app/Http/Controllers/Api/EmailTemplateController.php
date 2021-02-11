@@ -44,6 +44,7 @@ class EmailTemplateController extends Controller
 
             $template->slug = $request->slug;
             $template->subject = $request->subject;
+            //$htmlcode = htmlentities(htmlspecialchars($request->content)); 
             $template->content = $request->content;
             $template->save();
 
@@ -65,11 +66,11 @@ class EmailTemplateController extends Controller
         $valid = self::customValidation($request, $rules);
         if ($valid) {return $valid;}
 
-    try {
-        $paginate = $request->count_per_page ? $request->count_per_page : 10;
-        $order_by = $request->order_by ? $request->order_by : 'desc';
+        try {
+            $paginate = $request->count_per_page ? $request->count_per_page : 10;
+            $order_by = $request->order_by ? $request->order_by : 'desc';
 
-            $list = EmailTemplate::select('id', 'slug', 'subject', 'content')->orderBy('slug', $order_by)->get();
+            $list = EmailTemplate::select('id', 'slug', 'subject')->orderBy('slug', $order_by)->get();
             if($list){
                 return self::send_success_response($list, 'Email Template content fetched successfully');
             }else{
@@ -85,6 +86,13 @@ class EmailTemplateController extends Controller
         try {
             
             $view = EmailTemplate::select('id', 'slug', 'subject', 'content')->where('id', $id)->first();
+            $array = [
+                'id' => $view->id,
+                'slug' => $view->slug,
+                'subject'=> $view->subject,
+                'content' => $view->content,
+               // 'content' => html_entity_decode(htmlspecialchars_decode($view->content)),
+            ];
             if($view){
                 return self::send_success_response($view, 'Email Template content fetched successfully');
             }else{

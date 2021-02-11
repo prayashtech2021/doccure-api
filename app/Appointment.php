@@ -29,6 +29,19 @@ class Appointment extends Model
         ];
     }
 
+    public function basicData(){
+        return [
+            'id' => $this->id,
+            'created' => Carbon::parse($this->created_at)->format('d/m/Y h:i A'),
+            'type' => config('appointments.type')[$this->appointment_type],
+            'appointment_status' => config('custom.appointment_status')[$this->appointment_status],
+            'doctor' => $this->doctor()->first()->basicProfile(),
+            'patient' => $this->patient()->first()->basicProfile(),
+            'date' => convertToLocal(Carbon::parse($this->appointment_date),'','d/m/Y'),
+            'amount' => $this->payment()->select('currency_code','total_amount')->first(),
+        ];
+    }
+
     public function payment(){
         return $this->hasOne(Payment::class);
     }

@@ -30,25 +30,13 @@ class DoctorController extends Controller
                 $total_patient = Appointment::where('doctor_id',$user_id)->whereDate('appointment_date', date('Y-m-d'))->count();
                 $appointment = Appointment::where('doctor_id',$user_id)->count();
 
-                /* Patient Appointment 
-                $myRequest = new Request();
-                $myRequest->request->add([
-                    
-                    'count_per_page' => ($request->count_per_page)? $request->count_per_page : '', 
-                    'page'=> ($request->page)? $request->page : '', 
-                    'order_by'=> ($request->order_by)? $request->order_by : '', 
-                    'appointment_status'=> ($request->appointment_status)? $request->appointment_status : '', 
-                    'request_type'=> ($request->request_type)? $request->request_type : '', 
-                    'appointment_date'=> ($request->appointment_date)? $request->appointment_date : '', 
-                ]);
-
-                $appointment_result = (new AppointmentController)->list($myRequest);*/
+                $appointment_result = (new AppointmentController)->list($request,1);
 
                 $result = [ 
                     'total_patient' => $patient, 
                     'today_patient' => $total_patient,
                     'appointments' => $appointment, 
-                //'patient_appointment'=>$appointment_result
+                    'patient_appointment'=> $appointment_result
                 ];
                 return self::send_success_response($result);
             }else{
@@ -83,7 +71,7 @@ class DoctorController extends Controller
                 $data->push($provider->doctorProfile());
             });
             if($data){
-                return self::send_success_response($data,'Doctor Details Fetched Successfully');
+               return self::send_success_response($data,'Doctor Details Fetched Successfully');
             }else{
                 return self::send_bad_request_response('No Records Found');
             }
@@ -362,7 +350,7 @@ class DoctorController extends Controller
             'country_id' => 'nullable|numeric|exists:countries,id',
             'state_id' => 'nullable|numeric|exists:states,id',
             'city_id' => 'nullable|numeric|exists:cities,id',
-            'count_per_page' => 'nullable|numeric',
+            //'count_per_page' => 'nullable|numeric',
             'order_by' => 'nullable|in:desc,asc',
             'sort' => 'nullable|numeric',
         );
@@ -370,7 +358,7 @@ class DoctorController extends Controller
         if ($valid) {return $valid;}
 
         try{
-            $paginate = $request->count_per_page ? $request->count_per_page : 10;
+           // $paginate = $request->count_per_page ? $request->count_per_page : 10;
 
             $doctors = User::role('doctor');
             
@@ -422,7 +410,7 @@ class DoctorController extends Controller
             }
 
             $data = collect();
-            $doctors->paginate($paginate)->getCollection()->each(function ($provider) use (&$data) {
+            $doctors->each(function ($provider) use (&$data) {
                 $data->push($provider->doctorProfile());
             });
 

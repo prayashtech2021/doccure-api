@@ -21,12 +21,14 @@ class MedicalRecordController extends Controller
         if ($request->medical_record_id) { //edit
             $rules = array(
                 'medical_record_id' => 'required|numeric|exists:medical_records,id',
+                'appointment_id' => 'required|numeric|exists:appointments,id',
                 'consumer_id' => 'required|numeric|exists:users,id',
                 'description' => 'required',
                 'document_file' => 'required|image|mimes:jpeg,png,jpg,pdf,doc|max:2048',
             );
         } else {
             $rules = array(
+                'appointment_id' => 'required|numeric|exists:appointments,id',
                 'consumer_id' => 'required|numeric|exists:users,id',
                 'description' => 'required',
                 'document_file' => 'required|image|mimes:jpeg,png,jpg,pdf,doc|max:2048',
@@ -44,7 +46,7 @@ class MedicalRecordController extends Controller
                 $record = new MedicalRecord();
                 $record->created_by = auth()->user()->id;
             }
-
+            $record->appointment_id = $request->appointment_id;
             $record->provider_id = auth()->user()->id;
             $record->consumer_id = $request->consumer_id;
             $record->description = $request->description;
@@ -71,7 +73,20 @@ class MedicalRecordController extends Controller
 
     public function getList(Request $request)
     {
+        $rules = array(
+            'consumer_id' => 'required|numeric|exists:users,id',
+            'count_per_page' => 'nullable|numeric',
+            'order_by' => 'nullable|in:desc,asc',
+            'page' => 'nullable|numeric',
+        );
+        $valid = self::customValidation($request, $rules);
+        if ($valid) {return $valid;}
+
         try {
+            $paginate = $request->count_per_page ? $request->count_per_page : 10;
+            $order_by = $request->order_by ? $request->order_by : 'desc';
+            $pageNumber = $request->page ? $request->page : 1;
+
             $list = MedicalRecord::with('doctor');
             if(auth()->user()->hasrole('doctor')){
                 $list = $list->where('provider_id',auth()->user()->id);
@@ -79,9 +94,15 @@ class MedicalRecordController extends Controller
             if($request->consumer_id){
                 $list = $list->where('consumer_id',$request->consumer_id);
             }
-            $list = $list->orderBy('id', 'ASC')->get();
-            if($list){
-                return self::send_success_response($list, 'Medical Record content fetched successfully');
+            $list = $list->orderBy('id', $order_by);
+
+            $data = collect();
+            $list->paginate($paginate, ['*'], 'page', $pageNumber)->getCollection()->each(function ($result) use (&$data) {
+                $data->push($result->getData());
+            });
+
+            if($data){
+                return self::send_success_response($data, 'Medical Record content fetched successfully');
             }else{
                 return self::send_bad_request_response('No Records Found');
             }

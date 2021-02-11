@@ -11,7 +11,7 @@ class Prescription extends Model
     use SoftDeletes;
 
     protected $fillable = [
-         'user_id','signature_id','created_by',
+         'appointment_id','user_id','signature_id','created_by',
    ];
 
     public function getData(){
@@ -20,13 +20,14 @@ class Prescription extends Model
             'doctor' => $this->doctor()->first()->basicProfile(),
             'patient' => $this->patient()->first()->basicProfile(),
             'prescription_details' => $this->prescriptionDetails()->get(),
+            'appointment_reference_no' => $this->appointment()->select('appointment_reference')->first(),
             'created' => Carbon::parse($this->created_at)->format('d/m/Y h:i A'),
             'sign' => $this->doctorsign()->first(),
         ];
     }
-    
-    public function doctorappointment() { 
-        return $this->belongsTo('App\Appointment', 'user_id','user_id'); 
+
+    public function appointment(){
+        return $this->belongsTo(Appointment::class, 'appointment_id', 'id');
     }
 
     public function doctorsign() { 
