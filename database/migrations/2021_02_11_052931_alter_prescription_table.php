@@ -14,7 +14,7 @@ class AlterPrescriptionTable extends Migration
     public function up()
     {
         Schema::table('prescriptions', function (Blueprint $table) {
-            $table->unsignedBigInteger('appointment_id')->after('id')->default(1);
+            $table->unsignedBigInteger('appointment_id')->after('id');
             $table->foreign('appointment_id')->references('id')->on('appointments')->onDelete('cascade')->onUpdate('cascade');
         });
     }

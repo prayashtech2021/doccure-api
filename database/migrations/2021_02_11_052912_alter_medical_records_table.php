@@ -14,7 +14,7 @@ class AlterMedicalRecordsTable extends Migration
     public function up()
     {
         Schema::table('medical_records', function (Blueprint $table) {
-            $table->unsignedBigInteger('appointment_id')->after('id')->default(1);
+            $table->unsignedBigInteger('appointment_id')->after('id');
             $table->foreign('appointment_id')->references('id')->on('appointments')->onDelete('cascade')->onUpdate('cascade');
         });
     }
