@@ -129,7 +129,7 @@ class AppointmentController extends Controller
                 $result['list'] = $data;
                 return self::send_success_response($result);
             }
-           
+
         } catch (Exception | Throwable $exception) {
             dd($exception);
             return self::send_exception_response($exception->getMessage());
@@ -238,7 +238,7 @@ class AppointmentController extends Controller
                     ],
                 ];
 
-                if ($request->payment_type == 1) {
+                if ($request->payment_type == 2) {
                     $paymentMethod = $user->findPaymentMethod($request->payment_method);
 
                     if (!$paymentMethod) {
