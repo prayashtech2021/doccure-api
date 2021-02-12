@@ -25,6 +25,7 @@ class DatabaseSeeder extends Seeder
         $this->call(ScheduleTimingSeeder::class);
         $this->call(AppointmentSeeder::class);
         $this->call(SpecialitySeeder::class);
+        $this->call(PageContentSeeder::class);
     }
 
 }

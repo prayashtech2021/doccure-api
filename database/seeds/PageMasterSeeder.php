@@ -18,6 +18,9 @@ class PageMasterSeeder extends Seeder
 			1 => [
                 'name' => 'menu',
             ],
+            2 => [
+                'name' => 'landing_page',
+            ],
         ];
             foreach ($datas as $id => $data) {
                 $row = PageMaster::firstOrNew([
