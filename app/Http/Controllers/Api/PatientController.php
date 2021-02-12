@@ -274,10 +274,20 @@ class PatientController extends Controller
 
     public function getFavouriteList(){
         try{    
-            $user_id = auth()->user()->id;
-            $fav =  auth()->user()->userFav();
-            return self::send_success_response($fav,'Patient Favourite List');
+            $user = auth()->user();
+            if($user->hasrole('patient')){
+                $list =  auth()->user()->userFav;
+                
+                $data = collect();
+                $list->each(function ($provider) use (&$data) {
+                    $data->push($provider->basicProfile());
+                });
 
+                return self::send_success_response($data,'Patient Favourite List');
+            }else{
+                $message = "Unauthorised request.";
+                return self::send_unauthorised_request_response($message);
+            }
         } catch (Exception | Throwable $exception) {
             DB::rollback();
             return self::send_exception_response($exception->getMessage());
