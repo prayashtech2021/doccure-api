@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use Validator;
-use App\ { User,Address,Appointment,Prescription,PrescriptionDetails,Country };
+use App\ { User,Address,Appointment,Prescription,PrescriptionDetails,Country,UserFavourite };
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use DB;
@@ -255,12 +255,10 @@ class PatientController extends Controller
             if($valid){ return $valid;}
 
             DB::beginTransaction();
-            //Save admin profile
+
             $user = User::find($user_id);
             if($user){    
-                $user->userFavourite()->detach();
-                $user->userFavourite()->attach($favourite_id);
-
+                $user->userFav()->sync($favourite_id);
                 DB::commit();
                 return self::send_success_response([],'Favourite Updated Successfully');
             }else{
@@ -277,7 +275,7 @@ class PatientController extends Controller
     public function getFavouriteList(){
         try{    
             $user_id = auth()->user()->id;
-            $fav =  auth()->user()->userFavourite();
+            $fav =  auth()->user()->userFav();
             return self::send_success_response($fav,'Patient Favourite List');
 
         } catch (Exception | Throwable $exception) {
