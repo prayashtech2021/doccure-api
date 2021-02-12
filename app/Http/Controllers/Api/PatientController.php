@@ -258,7 +258,7 @@ class PatientController extends Controller
 
             $user = User::find($user_id);
             if($user){    
-                $user->userFav()->sync($favourite_id);
+                $user->userFav()->sync($favourite_id,false);
                 DB::commit();
                 return self::send_success_response([],'Favourite Updated Successfully');
             }else{
