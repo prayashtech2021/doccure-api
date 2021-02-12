@@ -93,7 +93,8 @@ class DoctorController extends Controller
                 $doctor['chat'] = '';
                 $doctor['call'] = '';
                 $doctor['video_call'] = '';
-                $doctor['wishlist'] = '';
+                $doctor['wishlist'] =  (auth()->user()) ? $list->userHasFav() : NULL;
+
                 return self::send_success_response($doctor,'Doctor Details Fetched Successfully.');
             }else{
                 return self::send_bad_request_response('Incorrect User Id. Please check and try again.');

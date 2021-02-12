@@ -76,7 +76,9 @@ class ReviewController extends Controller
             $pageNumber = $request->page ? $request->page : 1;
 
             $list = Review::orderBy('id', $order_by);
-            
+            if(auth()->user()->hasRole('doctor')){
+                $list = $list->whereUserId(auth()->user()->id);
+            }
             $data = collect();
             $list->paginate($paginate, ['*'], 'page', $pageNumber)->getCollection()->each(function ($provider) use (&$data) {
                 $data->push($provider->getData());
@@ -84,6 +86,31 @@ class ReviewController extends Controller
 
             return self::send_success_response($data, 'Review content fetched successfully');
         } catch (Exception | Throwable $e) {
+            DB::rollback();
+            return self::send_exception_response($exception->getMessage());
+        }
+    }
+
+    public function doctorReply(Request $request){
+        $rules = array(
+            'review_id' => 'integer|exists:reviews,id',
+            );
+        
+        $valid = self::customValidation($request, $rules);
+        if($valid){ return $valid;}
+
+        try {
+            DB::beginTransaction();
+
+            $update = Review::find($request->review_id);
+            $update->reply = $request->reply;
+            $update->updated_by = auth()->user()->id;
+            $update->save();
+
+            DB::commit();
+            return self::send_success_response([], 'Updated Sucessfully');
+
+        } catch (Exception | Throwable $exception) {
             DB::rollback();
             return self::send_exception_response($exception->getMessage());
         }

@@ -14,7 +14,7 @@ class Review extends Model
 
     
     protected $fillable = [
-        'user_id', 'reviewer_id', 'rating', 'description','created_by',
+        'user_id', 'reviewer_id', 'rating', 'description','reply','created_by',
     ];
 
     public function getData(){
@@ -24,6 +24,7 @@ class Review extends Model
             'reviewer' => $this->reviewer()->first()->basicProfile(),
             'rating' => $this->rating,
             'description' => $this->description,
+            'reply' => $this->reply,
             'created' => Carbon::parse($this->created_at)->format('d/m/Y h:i A'),
         ];
     }
