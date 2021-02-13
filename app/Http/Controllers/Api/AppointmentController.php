@@ -700,4 +700,27 @@ class AppointmentController extends Controller
             return self::send_exception_response($exception->getMessage());
         }
     }
+
+    public function calendarList(Request $request){
+        try{
+            $user = auth()->user();
+            
+            $list = Appointment::orderBy('created_at','DESC');
+            $data = collect();
+
+            if ($user->hasRole('patient')) {
+                $list = $list->whereUserId($user->id);
+            } elseif ($user->hasRole('doctor')) {
+                $list = $list->whereDoctorId($user->id);
+            }
+
+            $list->each(function ($appointment) use (&$data) {
+                $data->push($appointment->basicData());
+            });
+
+            return self::send_success_response($data);
+        } catch (Exception | Throwable $exception) {
+            return self::send_exception_response($exception->getMessage());
+        }
+    }
 }

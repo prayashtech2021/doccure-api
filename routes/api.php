@@ -57,6 +57,7 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
     Route::post('schedule/create', 'Api\AppointmentController@scheduleCreate');
     Route::post('schedule/delete', 'Api\AppointmentController@scheduleDelete');
     Route::post('appointment/status/update', 'Api\AppointmentController@appointmentStatusUpdate');
+    Route::get('appointment/calendar', 'Api\AppointmentController@calendarList');
 
     //invoice
     Route::get('invoice/list', 'Api\AppointmentController@invoiceList');
