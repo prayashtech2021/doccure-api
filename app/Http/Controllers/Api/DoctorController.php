@@ -87,7 +87,8 @@ class DoctorController extends Controller
             if($list){
                 
                 $doctor['profile'] = $list;
-                $doctor['feedback'] = [];
+                $doctor['average_rating'] = $list->avgRating();
+                $doctor['feedback'] = ($list->doctorRatings())? $list->doctorRatings()->where('user_id',$user_id)->count() : 0 ;
                 $review = Review::orderBy('id','desc')->where('user_id',$user_id);
                 $result = collect();
                 $review->each(function ($provider) use (&$result) {
@@ -99,7 +100,7 @@ class DoctorController extends Controller
                 $doctor['chat'] = '';
                 $doctor['call'] = '';
                 $doctor['video_call'] = '';
-                $doctor['wishlist'] =  (auth()->user()) ? $list->userHasFav() : NULL;
+                $doctor['wishlist'] =  (isset(auth()->user()->id)) ? $list->userHasFav() : NULL;
 
                 return self::send_success_response($doctor,'Doctor Details Fetched Successfully.');
             }else{
@@ -125,7 +126,7 @@ class DoctorController extends Controller
                 'price_type' => 'required|between:1,2',
                 'amount' => 'numeric',
                 'contact_address_line1' => 'required',   
-                'speciality_id' => 'nullable|numeric|exists:specialities,id',   
+                'speciality_id' => 'nullable',   
             );
 
             if($request->clinic_name){
@@ -217,7 +218,12 @@ class DoctorController extends Controller
                 /* Doctor Specialization */
                 if($request->speciality_id){
                     $doctor->doctorSpecialization()->detach();
-                    $doctor->doctorSpecialization()->attach($request->speciality_id);
+                    $spl = explode(",", $request->speciality_id);
+                    if(count($spl) > 0) {
+                        foreach($spl as $value){
+                            $doctor->doctorSpecialization()->sync($value,false);
+                        }
+                    }
                 }
                 
                 // save doctor Services 

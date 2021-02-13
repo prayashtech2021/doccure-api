@@ -54,7 +54,7 @@ class SpecialityController extends Controller
             $seconds = (int) $seconds;
 
             $speciality->name = $request->name;
-            $speciality->duration = $request->duration;
+            $speciality->duration = $seconds;
             $speciality->amount = $request->amount;
             $speciality->save();
 
@@ -90,8 +90,13 @@ class SpecialityController extends Controller
         $paginate = $request->count_per_page ? $request->count_per_page : 10;
         $order_by = $request->order_by ? $request->order_by : 'desc';
 
-            $list = Speciality::withTrashed()->orderBy('name', $order_by)->get();
-            removeMetaColumn($list);
+            $spl = Speciality::withTrashed()->orderBy('name', $order_by);
+
+            $list = collect();
+            $spl->each(function ($speciality) use (&$list) {
+                $list->push($speciality->getData());
+            });
+            
             return self::send_success_response($list, 'Speciality content fetched successfully');
         } catch (Exception | Throwable $e) {
             DB::rollback();
