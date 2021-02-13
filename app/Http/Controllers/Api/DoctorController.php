@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\Api\AppointmentController;
 
 use Validator;
-use App\ { User, Speciality, EducationDetail, Service,Country, State, City, Address, AddressImage, UserSpeciality, ExperienceDetail, AwardDetail, MembershipDetail, RegistrationDetail };
+use App\ { User, Speciality, EducationDetail, Service,Country, State, City, Address, AddressImage, UserSpeciality, ExperienceDetail, AwardDetail, MembershipDetail, RegistrationDetail, Review };
 use App\Appointment;
 use Illuminate\Http\Request;
 use DB;
@@ -88,7 +88,13 @@ class DoctorController extends Controller
                 
                 $doctor['profile'] = $list;
                 $doctor['feedback'] = [];
-                $doctor['ratings'] = [];
+                $review = Review::orderBy('id','desc')->where('user_id',$user_id);
+                $result = collect();
+                $review->each(function ($provider) use (&$result) {
+                    $result->push($provider->getData());
+                });
+                
+                $doctor['review'] = $result;
                 $doctor['book_appointment'] = '';
                 $doctor['chat'] = '';
                 $doctor['call'] = '';

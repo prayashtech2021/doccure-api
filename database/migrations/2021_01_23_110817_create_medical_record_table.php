@@ -15,6 +15,7 @@ class CreateMedicalRecordTable extends Migration
     {
         Schema::create('medical_records', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('appointment_id');
             $table->unsignedBigInteger('consumer_id');
             $table->unsignedBigInteger('provider_id');
             $table->string('description');
@@ -25,7 +26,8 @@ class CreateMedicalRecordTable extends Migration
             $table->unsignedBigInteger('created_by');
             $table->unsignedBigInteger('updated_by')->nullable();
             $table->unsignedBigInteger('deleted_by')->nullable();
-
+            
+            $table->foreign('appointment_id')->references('id')->on('appointments')->onDelete('cascade')->onUpdate('cascade');
             $table->foreign('consumer_id')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
             $table->foreign('provider_id')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
             $table->foreign('created_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');

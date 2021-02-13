@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\ { Review };
+use App\ { Review,Appointment };
 use DB;
 use Illuminate\Http\Request;
 use Validator;
@@ -20,14 +20,16 @@ class ReviewController extends Controller
         if ($request->review_id) { //edit
             $rules = array(
                 'review_id' => 'integer|exists:reviews,id',
-                'user_id' => 'integer|exists:users,id',
+                'appointment_id' => 'required|integer|exists:appointments,id',
+                'user_id' => 'required|integer|exists:users,id',
                 'reviewer_id' => 'integer|exists:users,id',
                 'rating' => 'integer|min:1|max:5',
                 'description' => 'nullable',
             );
         } else {
             $rules = array(
-                'user_id' => 'integer|exists:users,id',
+                'appointment_id' => 'required|integer|exists:appointments,id',
+                'user_id' => 'required|integer|exists:users,id',
                 'reviewer_id' => 'integer|exists:users,id',
                 'rating' => 'integer|min:1|max:5',
                 'description' => 'nullable',
@@ -44,8 +46,9 @@ class ReviewController extends Controller
             } else {
                 $data = new Review();
                 $data->created_by = auth()->user()->id;
+                Appointment::where('id',$request->appointment_id)->update(['review_status'=>1]);
             }
-
+            $data->appointment_id = $request->appointment_id;
             $data->user_id = $request->user_id;
             $data->reviewer_id = $request->reviewer_id;
             $data->rating = $request->rating;

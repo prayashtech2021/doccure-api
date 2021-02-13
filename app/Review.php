@@ -14,12 +14,13 @@ class Review extends Model
 
     
     protected $fillable = [
-        'user_id', 'reviewer_id', 'rating', 'description','reply','created_by',
+        'appointment_id','user_id', 'reviewer_id', 'rating', 'description','reply','created_by',
     ];
 
     public function getData(){
         return [
             'id' => $this->id,
+            'appointment_id' => $this->appointment_id,
             'user' => $this->user()->first()->basicProfile(),
             'reviewer' => $this->reviewer()->first()->basicProfile(),
             'rating' => $this->rating,

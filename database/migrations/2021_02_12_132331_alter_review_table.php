@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AlterPrescriptionTable extends Migration
+class AlterReviewTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,9 +13,11 @@ class AlterPrescriptionTable extends Migration
      */
     public function up()
     {
-        Schema::table('prescriptions', function (Blueprint $table) {
+        Schema::table('reviews', function (Blueprint $table) {
+
             $table->unsignedBigInteger('appointment_id')->after('id');
             $table->foreign('appointment_id')->references('id')->on('appointments')->onDelete('cascade')->onUpdate('cascade');
+
         });
     }
 
@@ -26,7 +28,7 @@ class AlterPrescriptionTable extends Migration
      */
     public function down()
     {
-        Schema::table('prescriptions', function (Blueprint $table) {
+        Schema::table('reviews', function (Blueprint $table) {
             $table->dropForeign('appointment_id');
             $table->dropColumn('appointment_id');
         });
