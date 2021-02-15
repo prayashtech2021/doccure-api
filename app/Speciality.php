@@ -21,7 +21,7 @@ class Speciality extends Model
         return [
             'id' => $this->id,
             'name' => $this->name,
-            'duration' => Carbon::parse((int)$this->duration)->format('i'),
+            'duration' => $this->duration, //Carbon::parse((int)$this->duration)->format('i'),
             'image' => $this->image,
             'amount' => $this->amount,
             'created_at' => $this->created_at,
