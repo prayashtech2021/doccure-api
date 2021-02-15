@@ -100,7 +100,7 @@ class DoctorController extends Controller
                 $doctor['chat'] = '';
                 $doctor['call'] = '';
                 $doctor['video_call'] = '';
-                $doctor['wishlist'] = ($request->bearerToken()) ? $list->userHasFav(auth()->guard('api')->user()->id) : NULL;
+                $doctor['favourite'] = ($request->bearerToken()) ? $list->userHasFav(auth('api')->user()->id) : NULL;
 
                 return self::send_success_response($doctor,'Doctor Details Fetched Successfully.');
             }else{
