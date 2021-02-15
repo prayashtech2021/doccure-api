@@ -26,7 +26,7 @@ class Review extends Model
             'rating' => $this->rating,
             'description' => $this->description,
             'reply' => $this->reply,
-            'created' => Carbon::parse($this->created_at)->format('d/m/Y h:i A'),
+            'created' => $this->created_at->diffForHumans(), //Carbon::parse($this->created_at)->format('d/m/Y h:i A'),
         ];
     }
 
