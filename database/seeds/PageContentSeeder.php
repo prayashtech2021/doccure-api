@@ -60,6 +60,13 @@ class PageContentSeeder extends Seeder
                 'sub_title' => '',
                 'content' => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
             ],
+            7 => [
+                'page_master_id' => 2,
+                'slug' => 'login',
+                'title' => 'Login',
+                'sub_title' => '',
+                'content' => '',
+            ],
             
         ];
             foreach ($datas as $id => $data) {
