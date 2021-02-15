@@ -103,7 +103,7 @@ class DoctorController extends Controller
                 $doctor['favourite'] = ($request->bearerToken()) ? $list->userHasFav(auth('api')->user()->id) : NULL;
 print_r($request->bearerToken());
 print_r(auth('api')->user()->id);
-
+print_r(auth()->guard('api')->user()->id);
                 return self::send_success_response($doctor,'Doctor Details Fetched Successfully.');
             }else{
                 return self::send_bad_request_response('Incorrect User Id. Please check and try again.');
