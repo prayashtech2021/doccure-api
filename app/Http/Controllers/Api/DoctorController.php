@@ -80,14 +80,14 @@ class DoctorController extends Controller
         }
     }
 
-    public function doctorProfile($user_id){
+    public function doctorProfile(Request $request,$user_id){
         try {
             
             $list = User::role('doctor')->with('doctorService','doctorEducation','doctorExperience','doctorAwards','doctorMembership','doctorRegistration')->find($user_id);
             if($list){
                 
                 $doctor['profile'] = $list;
-                $doctor['average_rating'] = $list->avgRating();
+                $doctor['average_rating'] = ($list->avgRating())? $list->avgRating() : 0;
                 $doctor['feedback'] = ($list->doctorRatings())? $list->doctorRatings()->where('user_id',$user_id)->count() : 0 ;
                 $review = Review::orderBy('id','desc')->where('user_id',$user_id);
                 $result = collect();
@@ -100,7 +100,7 @@ class DoctorController extends Controller
                 $doctor['chat'] = '';
                 $doctor['call'] = '';
                 $doctor['video_call'] = '';
-                $doctor['wishlist'] =  (isset(auth()->user()->id)) ? $list->userHasFav() : NULL;
+                $doctor['wishlist'] = ($request->bearerToken()) ? $list->userHasFav(auth()->guard('api')->user()->id) : NULL;
 
                 return self::send_success_response($doctor,'Doctor Details Fetched Successfully.');
             }else{

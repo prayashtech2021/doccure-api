@@ -123,6 +123,10 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
     /* Favourite */
     Route::post('favourite/save','Api\PatientController@favouriteSave');
     Route::get('favourite/list','Api\PatientController@getFavouriteList');
+
+    /* Page Content */
+    Route::post('page-content/save','Api\PageContentController@save');
+    Route::get('page-content/list','Api\PageContentController@getList');
 });
 
 Route::any('{path}', function () {

@@ -25,6 +25,7 @@ class Speciality extends Model
             'image' => $this->image,
             'amount' => $this->amount,
             'created_at' => $this->created_at,
+            'deleted_at' => $this->deleted_at,        
         ];
     }
 

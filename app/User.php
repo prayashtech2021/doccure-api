@@ -76,8 +76,7 @@ class User extends Authenticatable implements Wallet, WalletFloat
             'accountstatus' => $this->getAccountStatusAttribute(),
             'doctor_earned' => ($this->providerPayment())?$this->providerPayment()->sum(DB::raw('total_amount-(transaction_charge + tax_amount)')):'',
             'doctorRating' => ($this->avgRating())? $this->avgRating() : 0,
-            'feedback_count' => ($this->doctorRatings())? $this->doctorRatings()->count() : 0,
-
+            'feedback_count' => ($this->doctorRatings())? $this->doctorRatings()->where('user_id',$this->id)->count() : 0,
         ];
     }
 
@@ -148,9 +147,9 @@ class User extends Authenticatable implements Wallet, WalletFloat
         return $this->belongsToMany('App\User', 'user_favourites', 'user_id', 'favourite_id');
     }
 
-    public function userHasFav(){
-        return $this->whereHas('userFav', function ($a) {
-            $a->where('user_favourites.favourite_id',$this->id)->where('user_id',auth()->user()->id);
+    public function userHasFav($consumer_id){
+        return $this->whereHas('userFav', function ($a) use($consumer_id) {
+            $a->where('user_favourites.favourite_id',$this->id)->where('user_id',$consumer_id);
         })->count();
     }
 
@@ -252,6 +251,6 @@ class User extends Authenticatable implements Wallet, WalletFloat
         return $this->hasMany("App\Review","user_id");
     }
     public function avgRating(){
-        return $this->doctorRatings->average('rating');
+        return $this->doctorRatings()->average('rating');
     }
 }

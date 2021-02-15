@@ -22,14 +22,14 @@ class SpecialityController extends Controller
             $rules = array(
                 'speciality_id' => 'integer|exists:specialities,id',
                 'name' => 'required|unique:specialities,id,' . $request->speciality_id,
-                'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+                'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048|dimensions:max_width=74,max_height=74',
                 'duration' => 'required|date_format:"H:i:s',
                 'amount' => 'required|numeric',
             );
         } else {
             $rules = array(
                 'name' => 'required|unique:specialities',
-                'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+                'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048|dimensions:max_width=74,max_height=74',
                 'duration' => 'required|date_format:"H:i:s',
                 'amount' => 'required|numeric',
             );
@@ -90,8 +90,10 @@ class SpecialityController extends Controller
         $paginate = $request->count_per_page ? $request->count_per_page : 10;
         $order_by = $request->order_by ? $request->order_by : 'desc';
 
-            $spl = Speciality::withTrashed()->orderBy('name', $order_by);
-
+            $spl = Speciality::orderBy('name', $order_by);
+            if($request->withtrash){
+                $spl = $spl->withTrashed();
+            }
             $list = collect();
             $spl->each(function ($speciality) use (&$list) {
                 $list->push($speciality->getData());
