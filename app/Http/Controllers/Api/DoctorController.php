@@ -81,7 +81,7 @@ class DoctorController extends Controller
     }
 
     public function doctorProfile(Request $request,$user_id){
-        try {
+        //try {
             
             $list = User::role('doctor')->with('doctorService','doctorEducation','doctorExperience','doctorAwards','doctorMembership','doctorRegistration')->find($user_id);
             if($list){
@@ -100,17 +100,17 @@ class DoctorController extends Controller
                 $doctor['chat'] = '';
                 $doctor['call'] = '';
                 $doctor['video_call'] = '';
-                $doctor['favourite'] = ($request->bearerToken()) ? $list->userHasFav(auth('api')->user()->id) : NULL;
-print_r($request->bearerToken());
-print_r(auth('api')->user()->id);
-print_r(auth()->guard('api')->user()->id);
+                $doctor['favourite'] = 0; //($request->bearerToken()) ? $list->userHasFav(auth('api')->user()->id) : NULL;
+//print_r($request->bearerToken());
+//print_r(auth('api')->user()->id);
+//print_r(auth()->guard('api')->user()->id);
                 return self::send_success_response($doctor,'Doctor Details Fetched Successfully.');
             }else{
                 return self::send_bad_request_response('Incorrect User Id. Please check and try again.');
             }
-        } catch (\Exception | \Throwable $exception) {
+       /* } catch (\Exception | \Throwable $exception) {
             return self::send_exception_response($exception->getMessage());
-        }
+        }*/
     }
 
     public function saveProfile(Request $request){
