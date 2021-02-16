@@ -247,8 +247,12 @@ class AppointmentController extends Controller
                     }
 
                     $paymentIntent = $user->charge($billable_amount, $paymentMethod->id, $payment_options);
-                } else {
                     $user->updateDefaultPaymentMethod($request->payment_method);
+                } else {
+                    if(!$user->hasStripeId()){
+                        $user->createAsStripeCustomer();
+                    }
+                    $user->addPaymentMethod($request->payment_method);
                     $paymentIntent = $user->charge($billable_amount, $request->payment_method, $payment_options);
                 }
 
@@ -627,8 +631,16 @@ class AppointmentController extends Controller
 
             if ($user->hasRole('patient')) {
                 $saved_cards = collect();
-                foreach ($user->payment()->get() as $payment){
-                    $saved_cards->push($payment->cardDetails());
+                foreach ($user->paymentMethods() as $paymentMethod){
+                    $saved_cards->push([
+                        'id' => $paymentMethod->id,
+                        'brand' => $paymentMethod->card->brand,
+                        'last4' => $paymentMethod->card->last4,
+                        'name' => ucwords($paymentMethod->billing_details->name),
+                        'exp_month' => $paymentMethod->card->exp_month,
+                        'exp_year' => $paymentMethod->card->exp_year,
+                        'card_type' => $paymentMethod->card->funding,
+                    ]);
                 }
                 return self::send_success_response($saved_cards->toArray());
             } else {
@@ -704,7 +716,7 @@ class AppointmentController extends Controller
     public function calendarList(Request $request){
         try{
             $user = auth()->user();
-            
+
             $list = Appointment::orderBy('created_at','DESC');
             $data = collect();
 
