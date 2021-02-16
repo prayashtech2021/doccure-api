@@ -247,8 +247,12 @@ class AppointmentController extends Controller
                     }
 
                     $paymentIntent = $user->charge($billable_amount, $paymentMethod->id, $payment_options);
-                } else {
                     $user->updateDefaultPaymentMethod($request->payment_method);
+                } else {
+                    if(!$user->hasStripeId()){
+                        $user->createAsStripeCustomer();
+                    }
+                    $user->addPaymentMethod($request->payment_method);
                     $paymentIntent = $user->charge($billable_amount, $request->payment_method, $payment_options);
                 }
 
@@ -704,7 +708,7 @@ class AppointmentController extends Controller
     public function calendarList(Request $request){
         try{
             $user = auth()->user();
-            
+
             $list = Appointment::orderBy('created_at','DESC');
             $data = collect();
 
