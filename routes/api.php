@@ -96,8 +96,8 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
     Route::post('language/update', 'Api\LanguageController@update');
     Route::post('language/save','Api\LanguageController@save');
     /* Multi Language */
-    Route::post('language/multi-language/edit','Api\LanguageController@multiLangEdit');
-    Route::post('language/multi-language/save','Api\LanguageController@multiLangSave');
+    Route::post('multi-language/edit','Api\LanguageController@multiLangEdit');
+    Route::post('multi-language/save','Api\LanguageController@multiLangSave');
 
     Route::get('payment/request/list', 'Api\PaymentRequestController@list')->name('paymentList');
     Route::post('accounts/save', 'Api\PaymentRequestController@accountUpdate')->name('accountUpdate');
