@@ -387,20 +387,8 @@ class HomeController extends Controller
                 $patient = User::role('patient')->count();
                 $appointment = Appointment::count();
 
-                
-                $myRequest = new Request();
-                $myRequest->request->add([
-                    
-                    'count_per_page' => ($request->count_per_page)? $request->count_per_page : '', 
-                    'page'=> ($request->page)? $request->page : '', 
-                    'order_by'=> ($request->order_by)? $request->order_by : '', 
-                    'appointment_status'=> ($request->appointment_status)? $request->appointment_status : '', 
-                    'request_type'=> ($request->request_type)? $request->request_type : '', 
-                    'appointment_date'=> ($request->appointment_date)? $request->appointment_date : '', 
-                ]);
-
-                $patient_result = (new PatientController)->patientList($myRequest);
-                $doctor_result = (new DoctorController)->doctorList($myRequest);
+                $patient_result = (new PatientController)->patientList($request);
+                $doctor_result = (new DoctorController)->doctorList($request);
                 $app_result = (new AppointmentController)->list($request,1);
                 $result = [ 
                     'doctor' => $doctor, 

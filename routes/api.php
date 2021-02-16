@@ -30,6 +30,8 @@ Route::middleware(['secureApi', 'responseHeader'])->group(function () {
     Route::get('speacility/list', 'Api\SpecialityController@getList');
     Route::post('doctors-search', 'Api\DoctorController@doctorSearchList');
     Route::get('doctor/profile/{id}', 'Api\DoctorController@doctorProfile');
+    Route::get('testing/{id}','Api\DoctorController@test');
+
 });
 
 Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader'])->group(function () {
@@ -92,6 +94,10 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
     Route::get('logout', 'PassportController@logout');
     // Language
     Route::post('language/update', 'Api\LanguageController@update');
+    Route::post('language/save','Api\LanguageController@save');
+    /* Multi Language */
+    Route::post('language/multi-language/edit','Api\LanguageController@multiLangEdit');
+    Route::post('language/multi-language/save','Api\LanguageController@multiLangSave');
 
     Route::get('payment/request/list', 'Api\PaymentRequestController@list')->name('paymentList');
     Route::post('accounts/save', 'Api\PaymentRequestController@accountUpdate')->name('accountUpdate');
@@ -127,6 +133,7 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
     /* Page Content */
     Route::post('page-content/save','Api\PageContentController@save');
     Route::get('page-content/list','Api\PageContentController@getList');
+
 });
 
 Route::any('{path}', function () {
