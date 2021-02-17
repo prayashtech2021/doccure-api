@@ -46,21 +46,30 @@ class LanguageController extends Controller
     }
 
     public function save(Request $request){
-        $rules = [
-            'name' => 'required|unique:languages',
-            'code' => 'required',
-            'is_default' => 'required',
-            ];
-
         if ($request->language_id) {
-            $rules['language_id'] = 'required|numeric|exists:languages,id';
-        } 
+            $rules = [
+                'language_id' => 'required|numeric|exists:languages,id',
+                'name' => 'required|unique:languages,name,'.$request->language_id,
+                'code' => 'required',
+                'is_default' => 'required',
+                ];
+        }else{
+            $rules = [
+                'name' => 'required|unique:languages',
+                'code' => 'required',
+                'is_default' => 'required',
+                ];
+        }
         
         $valid = self::customValidation($request, $rules);
         if($valid){ return $valid;}
 
         try {
             DB::beginTransaction();
+            if($request->is_default == 1){  
+                Language::where('id', '>', 0)->update(['is_default'=>0]);
+                DB::commit();
+            }
             if ($request->language_id) {
                 $language = Language::find($request->language_id);
                 $language->updated_by = auth()->user()->id;
@@ -70,13 +79,13 @@ class LanguageController extends Controller
             }
             $language->name = $request->name;
             $language->code = $request->code;
-            if($request->is_default == 1){  
-                Language::where('id', '>', 0)->update(['is_default'=>0]);
-            }
             $language->is_default = $request->is_default;
             $language->save();
-
             DB::commit();
+            if(Language::where('is_default',1)->count() == 0){  //if all sets as not defualt
+                Language::where('id', 1)->update(['is_default'=>1]);    //automatically english will be set
+                DB::commit();
+            }
             return self::send_success_response([],'Language Updated Successfully');
         } catch (Exception | Throwable $exception) {
             DB::rollback();
