@@ -285,8 +285,13 @@ class AppointmentController extends Controller
     public function getsignature($doctor_id){
 
         $sign =  Signature::select('id','signature_image')->whereUserId($doctor_id)->orderBy('id','desc')->first();
-        if($sign){
-            return self::send_success_response($sign,'Signature fetched Successfully');
+        if($sign && !empty($sign->signature_image) && Storage::exists('images/signature/' . $sign->signature_image)) {
+            $img = (config('filesystems.default') == 's3') ? Storage::temporaryUrl('app/public/images/signature/' . $sign->signature_image, now()->addMinutes(5)) : Storage::url('app/public/images/signature/' . $sign->signature_image);
+            $data = [
+                'id' => $sign->id,
+                'signature_image' => $img,
+            ];
+            return self::send_success_response($data,'Signature fetched Successfully');
         }else{
             return self::send_bad_request_response('No Records Found');
         }
@@ -428,14 +433,16 @@ class AppointmentController extends Controller
 
     public function prescriptionView($pid)
     {
-        $list = Prescription::whereId($pid);
-
-        $data = collect();
-
-        $list->each(function ($prescription) use (&$data) {
-            $data->push($prescription->getData());
-        });
-        return self::send_success_response($data, 'Prescription Details Fetched Successfully');
+        $list = Prescription::where('id',$pid);
+        if($list->get()){
+            $data = collect();
+            $list->each(function ($prescription) use (&$data) {
+                $data->push($prescription->getData());
+            });
+            return self::send_success_response($data, 'Prescription Details Fetched Successfully');
+        }else{
+            return self::send_bad_request_response('No Records Found');
+        }
     }
 
     public function prescription_destroy($id)

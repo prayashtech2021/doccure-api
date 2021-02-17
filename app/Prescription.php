@@ -5,6 +5,7 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
+use Storage;
 
 class Prescription extends Model
 {
@@ -23,7 +24,7 @@ class Prescription extends Model
             'prescription_details' => $this->prescriptionDetails()->get(),
             'appointment_reference_no' => $this->appointment()->select('appointment_reference')->first(),
             'created' => Carbon::parse($this->created_at)->format('d/m/Y h:i A'),
-            'sign' => $this->doctorsign()->first(),
+            'sign' => $this->signature(),
         ];
     }
 
@@ -45,6 +46,15 @@ class Prescription extends Model
 
     public function doctor(){
         return $this->belongsTo(User::class, 'doctor_id', 'id');
+    }
+
+    public function signature(){
+        $sign = $this->doctorsign()->first();
+        if($sign && !empty($sign->signature_image) && Storage::exists('images/signature/' . $sign->signature_image)) {
+           return (config('filesystems.default') == 's3') ? Storage::temporaryUrl('app/public/images/signature/' . $sign->signature_image, now()->addMinutes(5)) : Storage::url('app/public/images/signature/' . $sign->signature_image);
+        }else{
+            return '';
+        }
     }
     
 }

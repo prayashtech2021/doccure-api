@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\Api\AppointmentController;
 
 use Validator;
-use App\ { User, Speciality, EducationDetail, Service,Country, State, City, Address, AddressImage, UserSpeciality, ExperienceDetail, AwardDetail, MembershipDetail, RegistrationDetail, Review };
+use App\ { User, Speciality, EducationDetail, Service,Country, State, City, Address, AddressImage, UserSpeciality, ExperienceDetail, AwardDetail, MembershipDetail, RegistrationDetail, Review, ScheduleTiming };
 use App\Appointment;
 use Illuminate\Http\Request;
 use DB;
@@ -26,7 +26,7 @@ class DoctorController extends Controller
         try {
             $user_id = auth()->user()->id;
             if($user_id){
-                $patient = Appointment::where('doctor_id',$user_id)->groupBy('user_id')->count();
+                $patient = Appointment::where('doctor_id',$user_id)->groupby('user_id')->get()->count();
                 $total_patient = Appointment::where('doctor_id',$user_id)->whereDate('appointment_date', date('Y-m-d'))->count();
                 $appointment = Appointment::where('doctor_id',$user_id)->count();
 
@@ -94,13 +94,24 @@ class DoctorController extends Controller
                 $review->each(function ($provider) use (&$result) {
                     $result->push($provider->getData());
                 });
-                
+
+                $data = collect();
+                $shedule = ScheduleTiming::where('provider_id', $user_id)->get();
+                $shedule->each(function ($schedule_timing) use (&$data) {
+                    $data->push($schedule_timing->getData());
+                });
+
+                $doctor['business_hours'] = $data;
                 $doctor['review'] = $result;
                 $doctor['book_appointment'] = '';
                 $doctor['chat'] = '';
                 $doctor['call'] = '';
                 $doctor['video_call'] = '';
-                $doctor['favourite'] = 0; 
+                $fav = 0;
+                if($request->bearerToken()){
+                    $fav = $list->userHasFav(auth('api')->user()->id);
+                }
+                $doctor['favourite'] = $fav; 
                 return self::send_success_response($doctor,'Doctor Details Fetched Successfully.');
             }else{
                 return self::send_bad_request_response('Incorrect User Id. Please check and try again.');

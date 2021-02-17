@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use Validator;
-use App\ { User,Country,Address,State,City,Appointment };
+use App\ { User,Country,Address,State,City,Appointment,Payment };
 use App\Mail\SendInvitation;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -386,17 +386,33 @@ class HomeController extends Controller
                 $doctor = User::role('doctor')->count();
                 $patient = User::role('patient')->count();
                 $appointment = Appointment::count();
+                
+                $revenue_graph = Payment::whereYear('created_at', date('Y'));
+
+                $revenue = $revenue_graph->select(DB::raw('sum(transaction_charge + tax_amount) as data'),DB::raw('YEAR(created_at) year'))->get();
+                $revenue_graph = $revenue_graph->select(DB::raw('sum(transaction_charge + tax_amount) as `data`'),DB::raw('YEAR(created_at) year, MONTH(created_at) month'))->groupby('year','month')->get();
+
+                $patient_graph = User::role('patient')->select(DB::raw('count(id) as data'),DB::raw('YEAR(created_at) year, MONTH(created_at) month'))
+                ->whereYear('created_at', date('Y'))->groupby('year','month')->get()->makeHidden(['pid','did','age','accountstatus','membersince','gendername','doctorfees','userimage','providerspeciality','permanentaddress','officeaddress']);
+
+                $doctor_graph = User::role('doctor')->select(DB::raw('count(id) as data'),DB::raw('YEAR(created_at) year, MONTH(created_at) month'))
+                ->whereYear('created_at', date('Y'))->groupby('year','month')->get()->makeHidden(['pid','did','age','accountstatus','membersince','gendername','doctorfees','userimage','providerspeciality','permanentaddress','officeaddress']);
 
                 $patient_result = (new PatientController)->patientList($request);
                 $doctor_result = (new DoctorController)->doctorList($request);
                 $app_result = (new AppointmentController)->list($request,1);
+                
                 $result = [ 
                     'doctor' => $doctor, 
                     'patient' => $patient,
                     'appointment' => $appointment, 
                     'patient_list'=>$patient_result,
                     'doctor_list'=>$doctor_result,
-                    'app_list'=>$app_result
+                    'app_list'=>$app_result,
+                    'revenue' => $revenue,
+                    'revenue_graph' => $revenue_graph,
+                    'patient_graph' => $patient_graph, 
+                    'doctor_graph' => $doctor_graph, 
                 ];
                 return self::send_success_response($result);
             }else{
