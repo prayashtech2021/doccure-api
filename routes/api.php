@@ -30,7 +30,7 @@ Route::middleware(['secureApi', 'responseHeader'])->group(function () {
     Route::get('speacility/list', 'Api\SpecialityController@getList');
     Route::post('doctors-search', 'Api\DoctorController@doctorSearchList');
     Route::get('doctor/profile/{id}', 'Api\DoctorController@doctorProfile');
-    Route::get('testing/{id}','Api\DoctorController@test');
+    Route::get('page-content/list','Api\PageContentController@getList');
 
 });
 
@@ -132,7 +132,6 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
 
     /* Page Content */
     Route::post('page-content/save','Api\PageContentController@save');
-    Route::get('page-content/list','Api\PageContentController@getList');
 
 });
 

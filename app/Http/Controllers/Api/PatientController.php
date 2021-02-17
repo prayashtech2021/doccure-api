@@ -247,6 +247,7 @@ class PatientController extends Controller
         try{    
             $user_id = auth()->user()->id;
             $favourite_id = $request->favourite_id;
+        
             $rules = [
                 'favourite_id' => 'required|integer|exists:users,id',
             ];
@@ -257,8 +258,12 @@ class PatientController extends Controller
             DB::beginTransaction();
 
             $user = User::find($user_id);
-            if($user){    
-                $user->userFav()->sync($favourite_id,false);
+            if($user){   
+                if($request->set==0){ //unset user favourite
+                    $user->userFav()->detach($favourite_id);
+                }else{
+                    $user->userFav()->sync($favourite_id,false);
+                } 
                 DB::commit();
                 return self::send_success_response([],'Favourite Updated Successfully');
             }else{

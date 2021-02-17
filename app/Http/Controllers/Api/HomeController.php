@@ -387,10 +387,10 @@ class HomeController extends Controller
                 $patient = User::role('patient')->count();
                 $appointment = Appointment::count();
                 
-                $revenue_graph = Payment::whereYear('created_at', date('Y'));
+                $revenue = Payment::whereYear('created_at', date('Y'));
 
-                $revenue = $revenue_graph->select(DB::raw('sum(transaction_charge + tax_amount) as data'),DB::raw('YEAR(created_at) year'))->get();
-                $revenue_graph = $revenue_graph->select(DB::raw('sum(transaction_charge + tax_amount) as `data`'),DB::raw('YEAR(created_at) year, MONTH(created_at) month'))->groupby('year','month')->get();
+                $revenue_cost = $revenue->select(DB::raw('sum(transaction_charge + tax_amount) as data'),DB::raw('YEAR(created_at) year'))->get();
+                $revenue_graph = $revenue->select(DB::raw('sum(transaction_charge + tax_amount) as `data`'),DB::raw('YEAR(created_at) year, MONTH(created_at) month'))->groupby('year','month')->get()->toArray();
 
                 $patient_graph = User::role('patient')->select(DB::raw('count(id) as data'),DB::raw('YEAR(created_at) year, MONTH(created_at) month'))
                 ->whereYear('created_at', date('Y'))->groupby('year','month')->get()->makeHidden(['pid','did','age','accountstatus','membersince','gendername','doctorfees','userimage','providerspeciality','permanentaddress','officeaddress']);
@@ -401,7 +401,21 @@ class HomeController extends Controller
                 $patient_result = (new PatientController)->patientList($request);
                 $doctor_result = (new DoctorController)->doctorList($request);
                 $app_result = (new AppointmentController)->list($request,1);
-                
+               
+                $revenue_data = array_fill(0,12,0);
+                $patient_data = array_fill(0,12,0);
+                $doctor_data = array_fill(0,12,0);
+
+                foreach($revenue_graph as $rev){
+                    $revenue_data[$rev['month'] - 1] = $rev['data'];
+                }
+                foreach($patient_graph as $pat){
+                    $patient_data[$pat['month'] - 1] = $pat['data'];
+                }
+                foreach($doctor_graph as $doc){
+                    $doctor_data[$pat['month'] - 1] = $doc['data'];
+                }
+
                 $result = [ 
                     'doctor' => $doctor, 
                     'patient' => $patient,
@@ -409,10 +423,10 @@ class HomeController extends Controller
                     'patient_list'=>$patient_result,
                     'doctor_list'=>$doctor_result,
                     'app_list'=>$app_result,
-                    'revenue' => $revenue,
-                    'revenue_graph' => $revenue_graph,
-                    'patient_graph' => $patient_graph, 
-                    'doctor_graph' => $doctor_graph, 
+                    'revenue' => $revenue_cost,
+                    'revenue_graph' => $revenue_data,
+                    'patient_graph' => $patient_data, 
+                    'doctor_graph' => $doctor_data, 
                 ];
                 return self::send_success_response($result);
             }else{
