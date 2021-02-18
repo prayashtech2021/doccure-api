@@ -44,7 +44,6 @@ class EmailTemplateController extends Controller
 
             $template->slug = $request->slug;
             $template->subject = $request->subject;
-            //$htmlcode = htmlentities(htmlspecialchars($request->content)); 
             $template->content = $request->content;
             $template->save();
 
@@ -90,8 +89,7 @@ class EmailTemplateController extends Controller
                 'id' => $view->id,
                 'slug' => $view->slug,
                 'subject'=> $view->subject,
-                'content' => $view->content,
-               // 'content' => html_entity_decode(htmlspecialchars_decode($view->content)),
+                'content' => htmlspecialchars_decode($view->content),
             ];
             if($view){
                 return self::send_success_response($view, 'Email Template content fetched successfully');

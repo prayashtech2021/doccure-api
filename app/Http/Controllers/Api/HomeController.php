@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use Validator;
-use App\ { User,Country,Address,State,City,Appointment,Payment };
+use App\ { User,Country,Address,State,City,Appointment,Payment,EmailTemplate };
 use App\Mail\SendInvitation;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -56,12 +56,23 @@ class HomeController extends Controller
             
             $url = "https://doccure-frontend.dreamguystech.com/verifymail/".$user->id.'/'.$token;
 
-            $mail = [
-                'url' => $url,
-                'verification_code' => $verification_code,
-            ];
-            Mail::to($request->email)->send(new SendInvitation($mail));
+            $template = EmailTemplate::where('slug','registration')->first();
+            if($template){
+                $body = ($template->content); // this is template dynamic body. You may get other parameters too from database. $title = $template->title; $from = $template->from;
+            
+                $a1 = array('{{username}}','{{verification_code}}','{{link}}','{{config_app_name}}','{{custom_support_phone}}','{{custom_support_email}}');
+                $a2 = array($request->first_name,$verification_code,$url,config('app.name'),config('custom.support_phone'),config('custom.support_email'));
 
+                $response = str_replace($a1,$a2,$body); // this will replace {{username}} with $data['username']
+                
+                $mail = [
+                    'body' => html_entity_decode(htmlspecialchars_decode($response)),
+                    'subject' => $template->subject,
+                ];
+
+                $mailObject = new SendInvitation($mail); // you can make php artisan make:mail MyMail
+                Mail::to($request->email)->send($mailObject);
+            }
             $response_array = [
                 "code" => "200",
                 "message" => "Registered Successfully",
@@ -98,12 +109,23 @@ class HomeController extends Controller
 
                     $url =  "https://doccure-frontend.dreamguystech.com/verifymail/".$user->id.'/'.$token;
 
-                    $mail = [
-                        'url' => $url,
-                        'verification_code' => $verification_code,
-                    ];
-                    Mail::to($request->email)->send(new SendInvitation($mail));
+                    $template = EmailTemplate::where('slug','registration')->first();
+                    if($template){
+                        $body = ($template->content); // this is template dynamic body. You may get other parameters too from database. $title = $template->title; $from = $template->from;
+                    
+                        $a1 = array('{{username}}','{{verification_code}}','{{link}}','{{config_app_name}}','{{custom_support_phone}}','{{custom_support_email}}');
+                        $a2 = array($user->first_name,$verification_code,$url,config('app.name'),config('custom.support_phone'),config('custom.support_email'));
 
+                        $response = str_replace($a1,$a2,$body); // this will replace {{username}} with $data['username']
+                        
+                        $mail = [
+                            'body' => html_entity_decode(htmlspecialchars_decode($response)),
+                            'subject' => $template->subject,
+                        ];
+
+                        $mailObject = new SendInvitation($mail); // you can make php artisan make:mail MyMail
+                        Mail::to($request->email)->send($mailObject);
+                    }
                     DB::commit();
                     
                     return self::send_success_response([],'Resent Verification Mail Sucessfully');
@@ -437,4 +459,5 @@ class HomeController extends Controller
            return self::send_exception_response($exception->getMessage());
         }
     }
+
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Mail\PasswordReset;
 use App\User;
 use App\MultiLanguage;
+use App\EmailTemplate;
 use Hash;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -110,8 +111,23 @@ class PassportController extends Controller {
             return self::send_bad_request_response($message);
 		}
 		$url = "https://doccure-frontend.dreamguystech.com/resetpassword/".$user->id;
+		$template = EmailTemplate::where('id',2)->first();
+		if($template){
+			$body = ($template->content); // this is template dynamic body. You may get other parameters too from database. $title = $template->title; $from = $template->from;
 		
-		Mail::to($user->email)->send(new PasswordReset(['url' => $url]));
+			$a1 = array('{{username}}','{{link}}','{{config_app_name}}','{{custom_support_phone}}','{{custom_support_email}}');
+			$a2 = array($user->first_name,$url,config('app.name'),config('custom.support_phone'),config('custom.support_email'));
+
+			$response = str_replace($a1,$a2,$body); // this will replace {{username}} with $data['username']
+			
+			$mail = [
+				'body' => html_entity_decode(htmlspecialchars_decode($response)),
+				'subject' => $template->subject,
+			];
+
+			$mailObject = new PasswordReset($mail); // you can make php artisan make:mail MyMail
+			Mail::to($user->email)->send($mailObject);
+		}
 		$response_array = [
 			"code" => "200",
 			"message" => "Reset password link sent on your email id.",

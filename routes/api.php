@@ -33,7 +33,9 @@ Route::middleware(['secureApi', 'responseHeader'])->group(function () {
     Route::get('page-content/list','Api\PageContentController@getList');
 
 });
-
+Route::middleware(['CheckAuthHeader', 'auth:api', 'responseHeader'])->group(function () {
+    Route::post('email-template/save','Api\EmailTemplateController@save');
+});
 Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader'])->group(function () {
     /* common */
     Route::post('changepassword', 'Api\HomeController@changePassword');
@@ -118,7 +120,6 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
     Route::post('review/doctor-reply','Api\ReviewController@doctorReply');
 
     /*Email Template */
-    Route::post('email-template/save','Api\EmailTemplateController@save');
     Route::get('email-template/list','Api\EmailTemplateController@getList');
     Route::get('email-template/view/{id}','Api\EmailTemplateController@view');
 
@@ -132,7 +133,6 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
 
     /* Page Content */
     Route::post('page-content/save','Api\PageContentController@save');
-
 });
 
 Route::any('{path}', function () {
