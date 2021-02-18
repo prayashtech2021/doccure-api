@@ -60,6 +60,8 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
     Route::post('schedule/delete', 'Api\AppointmentController@scheduleDelete');
     Route::post('appointment/status/update', 'Api\AppointmentController@appointmentStatusUpdate');
     Route::get('appointment/calendar', 'Api\AppointmentController@calendarList');
+    Route::post('call/log/save', 'Api\AppointmentController@saveCallLog');
+    Route::post('call/log/update', 'Api\AppointmentController@updateCallLog');
 
     //invoice
     Route::get('invoice/list', 'Api\AppointmentController@invoiceList');
@@ -137,6 +139,7 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
     //chat message
     Route::get('/message/list', 'Api\ChatController@index');
     Route::post('/message/send', 'Api\ChatController@send');
+    Route::post('/message/send', 'Api\ChatController@saveCallLog');
 });
 
 Route::any('{path}', function () {

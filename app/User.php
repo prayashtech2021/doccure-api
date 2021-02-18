@@ -258,4 +258,9 @@ class User extends Authenticatable implements Wallet, WalletFloat
     {
         return $this->hasMany(Chat::class, 'sender_id');
     }
+    
+    public function callLog()
+    {
+        return $this->hasMany(CallLog::class, 'from');
+    }
 }

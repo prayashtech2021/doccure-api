@@ -13,6 +13,7 @@ use App\Setting;
 use App\Signature;
 use App\TimeZone;
 use App\User;
+use App\CallLog;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -738,6 +739,58 @@ class AppointmentController extends Controller
             });
 
             return self::send_success_response($data);
+        } catch (Exception | Throwable $exception) {
+            return self::send_exception_response($exception->getMessage());
+        }
+    }
+
+    public function saveCallLog(Request $request)
+    {
+        $rules = array(
+            'appointment_id' => 'required|exists:appointments,id',
+            'call_to' => 'required|exists:users,id',
+            'start_time' => 'required|date_format:"Y-m-d H:i:s"',
+            'type' => 'required|in:1,2',
+        );
+        $valid = self::customValidation($request, $rules);
+        if ($valid) {return $valid;}
+
+        try {
+            $user = auth()->user();
+
+            $log = $user->callLog()->create([
+            'appointment_id' => $request->appointment_id,
+            'from' => $user->id,
+            'to' => $request->call_to,
+            'type' => $request->type,
+            'start_time' => $request->start_time,
+            ]);
+
+            return self::send_success_response($log,'Log Saved Successfully');
+        } catch (Exception | Throwable $exception) {
+            return self::send_exception_response($exception->getMessage());
+        }
+    }
+
+    public function updateCallLog(Request $request)
+    {
+        $rules = array(
+            'call_log_id' => 'required|exists:call_logs,id',
+            'end_time' => 'required|date_format:"Y-m-d H:i:s"',
+        );
+        $valid = self::customValidation($request, $rules);
+        if ($valid) {return $valid;}
+
+        try {
+            $user = auth()->user();
+            
+            $log = CallLog::find($request->call_log_id);
+            $duration = Carbon::parse($request->end_time)->diffInSeconds(Carbon::parse($log->start_time));
+            $log->end_time =$request->end_time;
+            $log->duration = ($duration>0)?$duration:0;
+            $log->save();
+
+            return self::send_success_response($log,'Log updated Successfully');
         } catch (Exception | Throwable $exception) {
             return self::send_exception_response($exception->getMessage());
         }

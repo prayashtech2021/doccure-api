@@ -18,6 +18,9 @@ class ChatController extends Controller
     {
         $rules = array(
             'recipient_id' => 'required|exists:users,id',
+            'count_per_page' => 'nullable|numeric',
+            'page' => 'nullable|numeric',
+            'order_by' => 'nullable|in:desc,asc',
         );
         $valid = self::customValidation($request, $rules);
         if ($valid) {return $valid;}
