@@ -123,6 +123,11 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
     /* Favourite */
     Route::post('favourite/save','Api\PatientController@favouriteSave');
     Route::get('favourite/list','Api\PatientController@getFavouriteList');
+
+
+    //chat message
+    Route::get('/message/list', 'Api\ChatController@index');
+    Route::post('/message/send', 'Api\ChatController@send');
 });
 
 Route::any('{path}', function () {
