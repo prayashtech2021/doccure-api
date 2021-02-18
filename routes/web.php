@@ -17,3 +17,13 @@ Route::any('/', function () {
     // return abort(404);
 });
 
+Route::get('/send', function () {
+    // event(new \App\Events\SendMessage());
+    event(new \App\Events\SendMessage('score update'));
+    dd('Event Run Successfully.');
+});
+
+Route::get('/list', function () {
+return view('welcome');
+});
+

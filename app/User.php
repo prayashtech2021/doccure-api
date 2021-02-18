@@ -253,4 +253,9 @@ class User extends Authenticatable implements Wallet, WalletFloat
     public function avgRating(){
         return $this->doctorRatings()->average('rating');
     }
+
+    public function chats()
+    {
+        return $this->hasMany(Chat::class, 'sender_id');
+    }
 }

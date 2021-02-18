@@ -3,12 +3,12 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-
+        <meta name="csrf-token" content="{{ csrf_token() }}">
         <title>Laravel</title>
 
         <!-- Fonts -->
         <link href="https://fonts.googleapis.com/css?family=Nunito:200,600" rel="stylesheet">
-
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
         <!-- Styles -->
         <style>
             html, body {
@@ -96,5 +96,43 @@
                 </div>
             </div>
         </div>
+        <div class="container">
+            <h1>messages</h1>
+            <div id="messages">hi</div>
+          </div>
+          
     </body>
+    {{-- <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"> </script> --}}
+        <script src="https://cdn.socket.io/socket.io-1.3.4.js"></script>
+ <script>
+//     var socket = io.connect('http://localhost:6001');
+//     console.log(socket.connected);
+// socket.on('chatbox', function (data) {
+// console.log('hii');
+
+//     data = jQuery.parseJSON(data);
+//     console.log(data);
+//     $("#messages").html("test");
+//   });
+</script>
+  {{-- <script src="{{ asset('/js/app.js') }}"></script>
+    <script>
+        window.Echo.channel('chatbox')
+            .listen('UserEvent', e => {
+                console.log(e)
+            })
+    </script> --}}
+    <script>window.laravel_echo_port='{{env("LARAVEL_ECHO_PORT")}}';</script>
+
+ {{-- <script src="http://localhost:6001/socket.io/socket.io.js"></script> --}}
+<script src="{{ url('/js/laravel-echo-setup.js') }}" type="text/javascript"></script>
+<script type="text/javascript">
+    var i = 0;
+    window.Echo.channel('chatbox').listen('.UserEvent', (data) => {
+        console.log(data);
+        i++;
+        $("#messages").append('<div class="alert alert-success">'+i+'.'+data.title+'</div>');
+    }); 
+</script>
+
 </html>
