@@ -790,7 +790,7 @@ class AppointmentController extends Controller
             $log->duration = ($duration>0)?$duration:0;
             $log->save();
 
-            return self::send_success_response($log,'Log updated Successfully');
+            return self::send_success_response('Log updated Successfully');
         } catch (Exception | Throwable $exception) {
             return self::send_exception_response($exception->getMessage());
         }
