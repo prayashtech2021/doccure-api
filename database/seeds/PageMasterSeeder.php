@@ -21,6 +21,18 @@ class PageMasterSeeder extends Seeder
             2 => [
                 'name' => 'landing_page',
             ],
+            3 => [
+                'name' => 'doctor_search',
+            ],
+            4 => [
+                'name' => 'doctor_preview',
+            ],
+            5 => [
+                'name' => 'login',
+            ],
+            6 => [
+                'name' => 'register',
+            ],
         ];
             foreach ($datas as $id => $data) {
                 $row = PageMaster::firstOrNew([

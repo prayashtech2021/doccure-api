@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\Api\AppointmentController;
 
 use Validator;
-use App\ { User, Speciality, EducationDetail, Service,Country, State, City, Address, AddressImage, UserSpeciality, ExperienceDetail, AwardDetail, MembershipDetail, RegistrationDetail, Review, ScheduleTiming };
+use App\ { User, Speciality, EducationDetail, Service,Country, State, City, Address, AddressImage, UserSpeciality, ExperienceDetail, AwardDetail, MembershipDetail, RegistrationDetail, Review, ScheduleTiming, Setting };
 use App\Appointment;
 use Illuminate\Http\Request;
 use DB;
@@ -107,6 +107,8 @@ class DoctorController extends Controller
                 $doctor['chat'] = '';
                 $doctor['call'] = '';
                 $doctor['video_call'] = '';
+                $doctor['transaction'] = Setting::where('keyword','transaction_charge')->pluck('value');
+                $doctor['tax'] = Setting::where('keyword','tax')->pluck('value');
                 $fav = 0;
                 if($request->bearerToken()){
                     $fav = $list->userHasFav(auth('api')->user()->id);
@@ -169,11 +171,11 @@ class DoctorController extends Controller
                 }
                 
                 $contact_details->line_1 = $request->contact_address_line1;
-                $contact_details->line_2 = ($request->contact_address_line2)? $request->contact_address_line2 : NULL;
-                $contact_details->country_id = ($request->contact_country_id)? $request->contact_country_id : NULL;
-                $contact_details->state_id = ($request->contact_state_id)? $request->contact_state_id : NULL;
-                $contact_details->city_id = ($request->contact_city_id)? $request->contact_city_id : NULL ;
-                $contact_details->postal_code = ($request->contact_postal_code)? $request->contact_postal_code : NULL;
+                $contact_details->line_2 = ($request->contact_address_line2)? $request->contact_address_line2 : '';
+                $contact_details->country_id = ($request->contact_country_id)? $request->contact_country_id : '';
+                $contact_details->state_id = ($request->contact_state_id)? $request->contact_state_id : '';
+                $contact_details->city_id = ($request->contact_city_id)? $request->contact_city_id : '' ;
+                $contact_details->postal_code = ($request->contact_postal_code)? $request->contact_postal_code : '';
                 $contact_details->save();
             
                 /* Doctor Clinic Info */
@@ -191,11 +193,11 @@ class DoctorController extends Controller
                     
                     $clinic_details->name = $request->clinic_name;
                     $clinic_details->line_1 = $request->clinic_address_line1;
-                    $clinic_details->line_2 = ($request->clinic_address_line2)? $request->clinic_address_line2 : NULL;
-                    $clinic_details->country_id = ($request->clinic_country_id)? $request->clinic_country_id : NULL;
-                    $clinic_details->state_id = ($request->clinic_state_id)? $request->clinic_state_id : NULL;
-                    $clinic_details->city_id = ($request->clinic_city_id)? $request->clinic_city_id : NULL;
-                    $clinic_details->postal_code = ($request->clinic_postal_code)? $request->clinic_postal_code : NULL;
+                    $clinic_details->line_2 = ($request->clinic_address_line2)? $request->clinic_address_line2 : '';
+                    $clinic_details->country_id = ($request->clinic_country_id)? $request->clinic_country_id : '';
+                    $clinic_details->state_id = ($request->clinic_state_id)? $request->clinic_state_id : '';
+                    $clinic_details->city_id = ($request->clinic_city_id)? $request->clinic_city_id : '';
+                    $clinic_details->postal_code = ($request->clinic_postal_code)? $request->clinic_postal_code : '';
                     $clinic_details->save();
                 }
                 /* Clinic Images */
