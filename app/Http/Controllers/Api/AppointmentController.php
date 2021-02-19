@@ -186,6 +186,7 @@ class AppointmentController extends Controller
 
             $log = new AppointmentLog;
             $log->appointment_id = $appointment->id;
+            $log->appointment_type = 1;
             $log->description = config('custom.appointment_log_message.1');
             $log->status = $appointment->appointment_status;
             $log->save();
@@ -765,6 +766,18 @@ class AppointmentController extends Controller
             'type' => $request->type,
             'start_time' => $request->start_time,
             ]);
+
+            $app = Appointment::find($request->appointment_id);
+            $app->appointment_status = 3;
+            $app->call_status = 1;
+            $app->save();
+
+            $applog = new AppointmentLog;
+            $applog->appointment_id = $appointment->id;
+            $log->appointment_type = 1;
+            $log->description = config('custom.appointment_log_message.3');
+            $log->status = 3;
+            $log->save();
 
             return self::send_success_response($log,'Log Saved Successfully');
         } catch (Exception | Throwable $exception) {
