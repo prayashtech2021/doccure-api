@@ -30,8 +30,8 @@ class SendInvitation extends Mailable implements ShouldQueue
      */
     public function build()
     {
-        return $this->subject(config('app.name') . ' Verification Mail')
-            ->markdown('emails.user_verification')
+        return $this->subject($this->data['subject'])
+            ->markdown('emails.dynamic_template')
             ->with('data', $this->data);
     }
 }

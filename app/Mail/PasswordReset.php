@@ -29,8 +29,8 @@ class PasswordReset extends Mailable implements ShouldQueue
      */
     public function build()
     {
-        return $this->subject(config('app.name') . ' User Account Password Reset')
-            ->markdown('emails.send_user_password_reset')
+        return $this->subject($this->data['subject'])
+            ->markdown('emails.dynamic_template')
             ->with('data', $this->data);
     }
 }
