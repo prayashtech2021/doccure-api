@@ -86,6 +86,18 @@ class LanguageController extends Controller
                 Language::where('id', 1)->update(['is_default'=>1]);    //automatically english will be set
                 DB::commit();
             }
+
+            if(!$request->language_id){
+                $get_keyword = MultiLanguage::select('page_master_id','keyword')->where('language_id',1)->get();
+                foreach($get_keyword as $keyword){
+                    $new = MultiLanguage::create([
+                        'page_master_id' => $keyword->page_master_id,
+                        'language_id' => $language->id,
+                        'keyword' => $keyword->keyword,
+                        'created_by' => auth()->user()->id
+                    ]);
+                }
+            }
             return self::send_success_response([],'Language Updated Successfully');
         } catch (Exception | Throwable $exception) {
             DB::rollback();
