@@ -469,19 +469,4 @@ class DoctorController extends Controller
         }
     }
 
-    public function test(Request $request,$user_id){
-        if($request->bearerToken()){
-        print_r($request->bearerToken());
-        echo '<br><br><br>';
-        print_r(auth('api')->user()->id);
-        echo '<br><br><br>';
-        print_r(auth()->guard('api')->user()->id);
-        echo '<br><br><br>';
-        }
-        $list = User::role('doctor')->with('doctorService','doctorEducation','doctorExperience','doctorAwards','doctorMembership','doctorRegistration')->find($user_id);
-
-        $data =  ($request->bearerToken()) ? $list->userHasFav(auth('api')->user()->id) : 'no';
-
-        print_r($data);
-    }
 }

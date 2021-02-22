@@ -82,8 +82,7 @@ class EmailTemplateController extends Controller
 
     public function view($id){
         
-        try {
-            
+        try { 
             $view = EmailTemplate::select('id', 'slug', 'subject', 'content')->where('id', $id)->first();
             $array = [
                 'id' => $view->id,

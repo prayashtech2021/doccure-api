@@ -47,20 +47,39 @@ class ChatController extends Controller
     }
     public function send(Request $request)
     {
-        $rules = array(
-            'recipient_id' => 'required|exists:users,id',
-            'message' => 'required|string|min:1|max:255',
-        );
+        if($request->attachments){
+            $rules = array(
+                'recipient_id' => 'required|exists:users,id',
+                'attachments' => 'required|mimes:jpeg,png,jpg,pdf,doc|max:2048',
+            );
+        }else{
+            $rules = array(
+                'recipient_id' => 'required|exists:users,id',
+                'message' => 'required|string|min:1|max:255',
+            );
+        }
         $valid = self::customValidation($request, $rules);
         if ($valid) {return $valid;}
 
         try {
             $user = auth()->user();
 
-            $message = $user->chats()->create([
-                'recipient_id' => $request->input('recipient_id'),
-                'message' => $request->input('message'),
-            ]);
+            if (!empty($request->attachments)) {    //only attachments
+                $extension = $request->file('attachments')->getClientOriginalExtension();
+                $file_name = date('YmdHis') . '_' . auth()->user()->id . '.'.$extension;
+                $path = 'images/chat-attachments';
+                $store = $request->file('attachments')->storeAs($path, $file_name);
+
+                $message = $user->chats()->create([
+                    'recipient_id' => $request->input('recipient_id'),
+                    'file_path' => $file_name,
+                ]);
+            }else{  //only text message
+                $message = $user->chats()->create([
+                    'recipient_id' => $request->input('recipient_id'),
+                    'message' => $request->input('message'),
+                ]);
+            }
 
             if ($message) {
                 // event(new SendMessage($message));
