@@ -59,7 +59,7 @@ class PatientController extends Controller
 
             if(auth()->user()->hasrole('doctor')){ //doctors -> my patients who attended appointments
                 $doctor_id = auth()->user()->id;
-                $list = User::orderBy('created_at', $order_by);
+                $list = User::role('patient')->orderBy('created_at', $order_by);
 
                 $list = $list->whereHas('appointments', function ($qry) use ($doctor_id) {
                     $qry->where('appointments.doctor_id',$doctor_id);
