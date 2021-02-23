@@ -2,12 +2,16 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Appointment;
+use App\Http\Controllers\Controller;
+use App\Http\Controllers\Api\AppointmentController;
 
-use App\ExperienceDetail;use App\Http\Controllers\Api\AppointmentController;use App\Http\Controllers\Controller;
-use DB;
+use Validator;
+use App\ { User, Speciality, EducationDetail, Service,Country, State, City, Address, AddressImage, UserSpeciality, ExperienceDetail, AwardDetail, MembershipDetail, RegistrationDetail, Review, ScheduleTiming, Setting };
+use App\Appointment;
 use Illuminate\Http\Request;
+use DB;
 use Storage;
+use Illuminate\Support\Carbon;
 
 class DoctorController extends Controller
 {
