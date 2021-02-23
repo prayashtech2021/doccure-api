@@ -142,6 +142,9 @@ class User extends Authenticatable implements Wallet, WalletFloat
     public function appointments() { 
         return $this->hasMany('App\Appointment','user_id'); 
     }
+    public function providerAppointments() { 
+        return $this->hasMany('App\Appointment','doctor_id'); 
+    }
 
     public function userFav(){        
         return $this->belongsToMany('App\User', 'user_favourites', 'user_id', 'favourite_id');
