@@ -37,6 +37,12 @@ class PageMasterSeeder extends Seeder
                 'name' => 'forgot_password',
             ],
             8 => [
+                'name' => 'header',
+            ],
+            9 => [
+                'name' => 'footer',
+            ],
+            10 => [
                 'name' => 'patient_dashboard',
             ],
         ];
