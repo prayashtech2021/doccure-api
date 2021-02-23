@@ -105,15 +105,15 @@
     {{-- <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"> </script> --}}
         <script src="https://cdn.socket.io/socket.io-1.3.4.js"></script>
  <script>
-//     var socket = io.connect('http://localhost:6001');
-//     console.log(socket.connected);
-// socket.on('chatbox', function (data) {
-// console.log('hii');
+    var socket = io.connect('https://doccure-reactdemo.dreamguystech.com:6001');
+    console.log(socket.connected);
+    socket.on('chatbox', function (data) {
+    console.log('hii');
 
-//     data = jQuery.parseJSON(data);
-//     console.log(data);
-//     $("#messages").html("test");
-//   });
+    data = jQuery.parseJSON(data);
+    console.log(data);
+    $("#messages").html(data.msg);
+  });
 </script>
   {{-- <script src="{{ asset('/js/app.js') }}"></script>
     <script>
@@ -122,10 +122,10 @@
                 console.log(e)
             })
     </script> --}}
-    <script>window.laravel_echo_port='{{env("LARAVEL_ECHO_PORT")}}';</script>
+    {{-- <script>window.laravel_echo_port='{{env("LARAVEL_ECHO_PORT")}}';</script> --}}
 
  {{-- <script src="http://localhost:6001/socket.io/socket.io.js"></script> --}}
-<script src="{{ url('/js/laravel-echo-setup.js') }}" type="text/javascript"></script>
+{{-- <script src="{{ url('/js/laravel-echo-setup.js') }}" type="text/javascript"></script>
 <script type="text/javascript">
     var i = 0;
     window.Echo.channel('chatbox').listen('.UserEvent', (data) => {
@@ -133,6 +133,6 @@
         i++;
         $("#messages").append('<div class="alert alert-success">'+i+'.'+data.title+'</div>');
     }); 
-</script>
+</script> --}}
 
 </html>
