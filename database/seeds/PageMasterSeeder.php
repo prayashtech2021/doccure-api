@@ -33,6 +33,12 @@ class PageMasterSeeder extends Seeder
             6 => [
                 'name' => 'register',
             ],
+            7 => [
+                'name' => 'forgot_password',
+            ],
+            8 => [
+                'name' => 'patient_dashboard',
+            ],
         ];
             foreach ($datas as $id => $data) {
                 $row = PageMaster::firstOrNew([
