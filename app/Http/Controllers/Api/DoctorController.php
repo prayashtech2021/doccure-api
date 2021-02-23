@@ -77,6 +77,7 @@ class DoctorController extends Controller
                     $list = $list->withTrashed();
                 }
             }
+            $list = $list->groupBy('users.id');
             $data = collect();
             $list->paginate($paginate, ['*'], 'page', $pageNumber)->getCollection()->each(function ($provider) use (&$data) {
                 $data->push($provider->doctorProfile());
