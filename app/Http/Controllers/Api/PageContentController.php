@@ -85,9 +85,9 @@ class PageContentController extends Controller
                 $rules = array(
                     'language_id' => 'integer|exists:languages,id',
                 );
-            }
-            $valid = self::customValidation($request, $rules);
-            if($valid){ return $valid;}
+                $valid = self::customValidation($request, $rules);
+                if($valid){ return $valid;}
+            } 
 
             $getSettings = PageContent::get();
         

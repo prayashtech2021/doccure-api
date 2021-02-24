@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Api\AppointmentController;
-
 use Validator;
 use App\ { User, Speciality, EducationDetail, Service,Country, State, City, Address, AddressImage, UserSpeciality, ExperienceDetail, AwardDetail, MembershipDetail, RegistrationDetail, Review, ScheduleTiming, Setting };
 use App\Appointment;
@@ -95,13 +94,24 @@ class DoctorController extends Controller
     public function doctorProfile(Request $request, $user_id)
     {
         try {
+            if($request->language_id){ 
+                $rules = array(
+                    'language_id' => 'integer|exists:languages,id',
+                );
+                $valid = self::customValidation($request, $rules);
+                if($valid){ return $valid;}
+            }
 
             $list = User::role('doctor')->with('doctorService', 'doctorEducation', 'doctorExperience', 'doctorAwards', 'doctorMembership', 'doctorRegistration')->find($user_id);
             if ($list) {
+                $array = [];
+                $lang_id = ($request->language_id)? $request->language_id : defaultLang();
+                $array['header'] = getLangContent(8,$lang_id);
+                $array['lang_content'] = getLangContent(4,$lang_id);
 
-                $doctor['profile'] = $list;
-                $doctor['average_rating'] = ($list->avgRating()) ? $list->avgRating() : 0;
-                $doctor['feedback'] = ($list->doctorRatings()) ? $list->doctorRatings()->where('user_id', $user_id)->count() : 0;
+                $array['profile'] = $list;
+                $array['average_rating'] = ($list->avgRating()) ? $list->avgRating() : 0;
+                $array['feedback'] = ($list->doctorRatings()) ? $list->doctorRatings()->where('user_id', $user_id)->count() : 0;
                 $review = Review::orderBy('id', 'desc')->where('user_id', $user_id);
                 $result = collect();
                 $review->each(function ($provider) use (&$result) {
@@ -114,20 +124,18 @@ class DoctorController extends Controller
                     $data->push($schedule_timing->getData());
                 });
 
-                $doctor['business_hours'] = $data;
-                $doctor['review'] = $result;
-                $doctor['book_appointment'] = '';
-                $doctor['chat'] = '';
-                $doctor['call'] = '';
-                $doctor['video_call'] = '';
-                $doctor['transaction'] = Setting::where('keyword', 'transaction_charge')->pluck('value');
-                $doctor['tax'] = Setting::where('keyword', 'tax')->pluck('value');
+                $array['business_hours'] = $data;
+                $array['review'] = $result;
+                $array['transaction'] = Setting::where('keyword', 'transaction_charge')->pluck('value');
+                $array['tax'] = Setting::where('keyword', 'tax')->pluck('value');
                 $fav = 0;
                 if ($request->bearerToken()) {
                     $fav = $list->userHasFav(auth('api')->user()->id);
                 }
-                $doctor['favourite'] = $fav;
-                return self::send_success_response($doctor, 'Doctor Details Fetched Successfully.');
+                $array['favourite'] = $fav;
+                $array['footer'] = getLangContent(9,$lang_id);
+
+                return self::send_success_response($array, 'Doctor Details Fetched Successfully.');
             } else {
                 return self::send_bad_request_response('Incorrect User Id. Please check and try again.');
             }
@@ -390,15 +398,18 @@ class DoctorController extends Controller
             'country_id' => 'nullable|numeric|exists:countries,id',
             'state_id' => 'nullable|numeric|exists:states,id',
             'city_id' => 'nullable|numeric|exists:cities,id',
-            //'count_per_page' => 'nullable|numeric',
             'order_by' => 'nullable|in:desc,asc',
             'sort' => 'nullable|numeric',
+            'language_id' => 'integer|exists:languages,id',
         );
         $valid = self::customValidation($request, $rules);
         if ($valid) {return $valid;}
 
         try {
-            // $paginate = $request->count_per_page ? $request->count_per_page : 10;
+            $array = [];
+            $lang_id = ($request->language_id)? $request->language_id : defaultLang();
+            $array['header'] = getLangContent(8,$lang_id);
+            $array['lang_content'] = getLangContent(2,$lang_id);
 
             $doctors = User::role('doctor');
 
@@ -453,12 +464,15 @@ class DoctorController extends Controller
             $doctors->each(function ($provider) use (&$data) {
                 $data->push($provider->doctorProfile());
             });
+            $array['profile'] = $data;
+            $array['footer'] = getLangContent(9,$lang_id);
 
             if (count($data) > 0) {
-                return self::send_success_response($data, 'Doctors data fetched successfully');
+                $msg = 'Doctors data fetched successfully';
             } else {
-                return self::send_bad_request_response('No Records Found');
+                $msg = "No Records Found";
             }
+            return self::send_success_response($array, $msg );
         } catch (\Exception | \Throwable $exception) {
             return self::send_exception_response($exception->getMessage());
         }
