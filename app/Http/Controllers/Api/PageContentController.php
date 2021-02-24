@@ -86,6 +86,7 @@ class PageContentController extends Controller
             $array = [];
             
             $array['header'] = getLangContent(8);
+            $array['lang_content'] = getLangContent(2);
 
             foreach($getSettings as $result){
                 if (!empty($result->image) && Storage::exists('images/cms-images/' . $result->image)) {
