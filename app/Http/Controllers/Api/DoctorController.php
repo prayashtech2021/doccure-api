@@ -151,7 +151,7 @@ class DoctorController extends Controller
                 'price_type' => 'required|between:1,2',
                 'amount' => 'numeric',
                 'contact_address_line1' => 'required',
-                'speciality_id' => 'nullable',
+                'speciality' => 'required',
             );
 
             if ($request->clinic_name) {
@@ -241,12 +241,21 @@ class DoctorController extends Controller
                 }
 
                 /* Doctor Specialization */
-                if ($request->speciality_id) {
-                    $doctor->doctorSpecialization()->detach();
-                    $spl = explode(",", $request->speciality_id);
-                    if (count($spl) > 0) {
-                        foreach ($spl as $value) {
-                            $doctor->doctorSpecialization()->sync($value, false);
+                if ($request->speciality) {
+                    UserSpeciality::where('user_id', '=', $user_id)->forcedelete();
+                    $spl_result = json_decode($request->speciality, true);
+                    foreach ($spl_result as $spl_value) {
+                        $spl_id = (int) $spl_value['speciality_id'];
+                        $duration = $spl_value['duration'];
+                        $amount = $spl_value['amount'];
+                        if($spl_id && $duration && $amount){
+                            $speciality = new UserSpeciality();
+                            $speciality->user_id = $user_id;
+                            $speciality->speciality_id = $spl_id;
+                            $speciality->duration = $duration;
+                            $speciality->amount = $amount;
+                            $speciality->created_by = auth()->user()->id;
+                            $speciality->save();
                         }
                     }
                 }

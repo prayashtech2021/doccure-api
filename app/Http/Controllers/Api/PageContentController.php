@@ -86,7 +86,7 @@ class PageContentController extends Controller
             $array = [];
             
             $array['header'] = getLangContent(8);
-
+            $array['lang_content'] = getLangContent(2);
             foreach($getSettings as $result){
                 if (!empty($result->image) && Storage::exists('images/cms-images/' . $result->image)) {
                     $path = (config('filesystems.default') == 's3') ? Storage::temporaryUrl('app/public/images/cms-images/' . $result->image, now()->addMinutes(5)) : Storage::url('app/public/images/cms-images/' . $result->image);
@@ -101,7 +101,6 @@ class PageContentController extends Controller
                 ];
             }
             $array['footer'] = getLangContent(9);
-
             return self::send_success_response($array, 'Page Content data fetched successfully');
         } catch (Exception | Throwable $e) {
             DB::rollback();

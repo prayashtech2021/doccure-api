@@ -15,12 +15,13 @@ class UserSpeciality extends Model{
     public $timestamps = false;
 
     protected $fillable = [
-         'user_id', 'speciality_id',
+         'id','user_id', 'speciality_id', 'duration', 'amount', 'created_by',
     ];
 
 
     public function user() { 
-        return $this->belongsTo('App\User'); }
+        return $this->belongsTo('App\User'); 
+    }
     public function special() { 
         return $this->belongsTo('App\Speciality','speciality_id','id'); 
     }

@@ -34,6 +34,9 @@ class SpecialitySeeder extends Seeder
 			1 => [
                 'user_id' => 3,
                 'speciality_id' => 1,
+                'duration' => 600,
+                'amount' => 200,
+                'created_by' => 1,
             ],
             
 		];
