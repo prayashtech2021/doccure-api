@@ -774,10 +774,10 @@ class AppointmentController extends Controller
 
             $applog = new AppointmentLog;
             $applog->appointment_id = $request->appointment_id;
-            $log->appointment_type = 1;
-            $log->description = config('custom.appointment_log_message.3');
-            $log->status = 3; //completed
-            $log->save();
+            $applog->appointment_type = 1;
+            $applog->description = config('custom.appointment_log_message.3');
+            $applog->status = 3; //completed
+            $applog->save();
 
             return self::send_success_response($log,'Log Saved Successfully');
         } catch (Exception | Throwable $exception) {
