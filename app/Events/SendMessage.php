@@ -56,7 +56,7 @@ class SendMessage implements ShouldBroadcast
       */
     public function broadcastWith()
     {
-        return ['title'=>'This notification from ItSolutionStuff.com'];
+        return ['msg'=>$this->message];
     }
   
   

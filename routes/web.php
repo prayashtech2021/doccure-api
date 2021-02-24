@@ -19,7 +19,7 @@ Route::any('/', function () {
 
 Route::get('/send', function () {
     // event(new \App\Events\SendMessage());
-    event(new \App\Events\SendMessage('score update'));
+    event(new \App\Events\SendMessage('hi hello, how are u?'));
     dd('Event Run Successfully.');
 });
 

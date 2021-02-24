@@ -65,10 +65,10 @@ class DoctorController extends Controller
 
             if (auth()->user()->hasrole('patient')) { //doctors -> my patients who attended appointments
                 $patient_id = auth()->user()->id;
-                $list = User::role('doctor')->orderBy('created_at', $order_by);
+                $list = User::orderBy('created_at', $order_by);
 
-                $list = $list->whereHas('appointments', function ($qry) use ($doctor_id) {
-                    $qry->where('appointments.patient_id', $patient_id);
+                $list = $list->whereHas('providerAppointments', function ($qry) use ($patient_id) {
+                    $qry->where('appointments.user_id', $patient_id);
                 });
 
             } else {
@@ -77,6 +77,7 @@ class DoctorController extends Controller
                     $list = $list->withTrashed();
                 }
             }
+            $list = $list->groupBy('users.id');
             $data = collect();
             $list->paginate($paginate, ['*'], 'page', $pageNumber)->getCollection()->each(function ($provider) use (&$data) {
                 $data->push($provider->doctorProfile());
