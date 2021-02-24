@@ -83,7 +83,7 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
     });
     /* signature */
     Route::get('signature/{id}','Api\AppointmentController@getsignature');
-    /*Prescription */
+    /* Prescription */
     Route::post('prescription/save', 'Api\AppointmentController@savePrescription');
     Route::post('prescription/list', 'Api\AppointmentController@prescriptionList');
     Route::get('prescription/view/{pid}', 'Api\AppointmentController@prescriptionView');
