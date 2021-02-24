@@ -186,7 +186,7 @@ class AppointmentController extends Controller
 
             $log = new AppointmentLog;
             $log->appointment_id = $appointment->id;
-            $log->appointment_type = 1;
+            $log->request_type = 1;
             $log->description = config('custom.appointment_log_message.1');
             $log->status = $appointment->appointment_status;
             $log->save();
@@ -758,7 +758,7 @@ class AppointmentController extends Controller
 
         try {
             $user = auth()->user();
-
+            DB::beginTransaction();
             $log = $user->callLog()->create([
             'appointment_id' => $request->appointment_id,
             'from' => $user->id,
@@ -774,13 +774,14 @@ class AppointmentController extends Controller
 
             $applog = new AppointmentLog;
             $applog->appointment_id = $request->appointment_id;
-            $applog->appointment_type = 1;
+            $applog->request_type = 1;
             $applog->description = config('custom.appointment_log_message.3');
             $applog->status = 3; //completed
             $applog->save();
-
+            DB::commit();       
             return self::send_success_response($log,'Log Saved Successfully');
         } catch (Exception | Throwable $exception) {
+            DB::rollBack();
             return self::send_exception_response($exception->getMessage());
         }
     }
