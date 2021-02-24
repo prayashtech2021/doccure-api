@@ -81,11 +81,20 @@ class PageContentController extends Controller
 
     public function getList(Request $request){
         try {
+            if($request->language_id){ 
+                $rules = array(
+                    'language_id' => 'integer|exists:languages,id',
+                );
+            }
+            $valid = self::customValidation($request, $rules);
+            if($valid){ return $valid;}
+
             $getSettings = PageContent::get();
         
             $array = [];
-            
-            $array['header'] = getLangContent(8);
+            $lang_id = ($request->language_id)? $request->language_id : defaultLang();
+            $array['header'] = getLangContent(8,$lang_id);
+            $array['lang_content'] = getLangContent(2,$lang_id);
 
             foreach($getSettings as $result){
                 if (!empty($result->image) && Storage::exists('images/cms-images/' . $result->image)) {
@@ -100,7 +109,7 @@ class PageContentController extends Controller
                     'path'=>$path
                 ];
             }
-            $array['footer'] = getLangContent(9);
+            $array['footer'] = getLangContent(9,$lang_id);
 
             return self::send_success_response($array, 'Page Content data fetched successfully');
         } catch (Exception | Throwable $e) {
