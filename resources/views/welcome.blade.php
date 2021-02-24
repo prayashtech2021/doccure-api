@@ -107,7 +107,7 @@
  <script>
     var socket = io.connect('https://doccure-reactdemo.dreamguystech.com:6001');
     console.log(socket.connected);
-    socket.on('chatbox', function (data) {
+    socket.on('UserEvent', function (data) {
     console.log('hii');
 
     data = jQuery.parseJSON(data);
