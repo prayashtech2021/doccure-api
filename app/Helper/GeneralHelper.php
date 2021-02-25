@@ -6,6 +6,7 @@ use App\City;
 use App\State;
 use App\Language;
 use App\MultiLanguage;
+use App\Setting;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 use App\ActivityLog;
@@ -90,4 +91,25 @@ function getLangContent($page_master_id,$lang_id){
         $header[$value->keyword] = $value->value;
     }
     return $header;
+}
+function getSettingData(){
+    $result = Setting::whereIn('slug',['general_settings','social_link'])->get();
+    $setting = [];
+    foreach($result as $data){
+        if(($data->keyword=='company_logo') || ($data->keyword=='footer_logo') || ($data->keyword=='favicon') ){
+            $setting[$data->keyword] = getSettingImage($data->value);
+        }else{
+            $setting[$data->keyword] = $data->value;
+        }
+    }
+    return $setting;
+}
+
+function getSettingImage($image){
+    if (!empty($image) && Storage::exists('images/company-images/' . $image)) {
+        $path = (config('filesystems.default') == 's3') ? Storage::temporaryUrl('app/public/images/company-images/' . $image, now()->addMinutes(5)) : Storage::url('app/public/images/company-images/' . $image);
+    } else {
+        $path = url('img/logo.png');
+    }
+    return $path;
 }

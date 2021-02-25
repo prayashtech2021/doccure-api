@@ -118,12 +118,7 @@ class SettingController extends Controller
             $array = [];
             foreach($getSettings as $result){
                 if(($result->keyword=='company_logo') || ($result->keyword=='footer_logo') || ($result->keyword=='favicon') ){
-                    if (!empty($result->value) && Storage::exists('images/company-images/' . $result->value)) {
-                        $path = (config('filesystems.default') == 's3') ? Storage::temporaryUrl('app/public/images/company-images/' . $result->value, now()->addMinutes(5)) : Storage::url('app/public/images/company-images/' . $result->value);
-                    } else {
-                        $path = url('img/logo.png');
-                    }
-                    $array[$result->keyword] = $path;
+                    $array[$result->keyword] = getSettingImage($result->value);
                 }else{
                     $array[$result->keyword] = $result->value;
                 }

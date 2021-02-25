@@ -460,4 +460,8 @@ class HomeController extends Controller
         }
     }
 
+    public function getCommonData(Request $request){
+        
+    }
+
 }
