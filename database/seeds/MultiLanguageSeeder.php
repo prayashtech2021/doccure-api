@@ -354,7 +354,7 @@ class MultiLanguageSeeder extends Seeder
             ],57 => [
                 'page_master_id' => 3,
                 'language_id' => 1,
-                'keyword' => 'Book Appointment',
+                'keyword' => 'book_appointment',
                 'value' => 'Book Appointment',
                 'created_by' => 1,
             ],58 => [
