@@ -53,6 +53,7 @@ class DoctorController extends Controller
             'count_per_page' => 'nullable|numeric',
             'order_by' => 'nullable|in:desc,asc',
             'page' => 'nullable|numeric',
+            'language_id' => 'integer|exists:languages,id',
         );
         $valid = self::customValidation($request, $rules);
         if ($valid) {return $valid;}
@@ -61,6 +62,12 @@ class DoctorController extends Controller
             $paginate = $request->count_per_page ? $request->count_per_page : 10;
             $order_by = $request->order_by ? $request->order_by : 'desc';
             $pageNumber = $request->page ? $request->page : 1;
+            
+            $array = [];
+            $lang_id = ($request->language_id)? $request->language_id : defaultLang();
+            $array['header'] = getLangContent(8,$lang_id);
+            $array['setting'] = getSettingData();
+            //$array['lang_content'] = getLangContent(2,$lang_id);
 
             if (auth()->user()->hasrole('patient')) { //doctors -> my patients who attended appointments
                 $patient_id = auth()->user()->id;
@@ -81,11 +88,11 @@ class DoctorController extends Controller
             $list->paginate($paginate, ['*'], 'page', $pageNumber)->getCollection()->each(function ($provider) use (&$data) {
                 $data->push($provider->doctorProfile());
             });
-            if ($data) {
-                return self::send_success_response($data, 'Doctor Details Fetched Successfully');
-            } else {
-                return self::send_bad_request_response('No Records Found');
-            }
+
+            $array['total_count'] = count($data);
+            $array['doctor_list'] = $data;
+            $array['footer'] = getLangContent(9,$lang_id);
+            return self::send_success_response($array, 'Doctor Details Fetched Successfully');
         } catch (Exception | Throwable $exception) {
             return self::send_exception_response($exception->getMessage());
         }
@@ -107,6 +114,7 @@ class DoctorController extends Controller
                 $array = [];
                 $lang_id = ($request->language_id)? $request->language_id : defaultLang();
                 $array['header'] = getLangContent(8,$lang_id);
+                $array['setting'] = getSettingData();
                 $array['lang_content'] = getLangContent(4,$lang_id);
 
                 $array['profile'] = $list;
@@ -409,7 +417,8 @@ class DoctorController extends Controller
             $array = [];
             $lang_id = ($request->language_id)? $request->language_id : defaultLang();
             $array['header'] = getLangContent(8,$lang_id);
-            $array['lang_content'] = getLangContent(2,$lang_id);
+            $array['setting'] = getSettingData();
+            $array['lang_content'] = getLangContent(3,$lang_id);
 
             $doctors = User::role('doctor');
 

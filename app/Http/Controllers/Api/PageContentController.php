@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\ { PageContent };
+use App\ { PageContent,User,Speciality };
 use DB;
 use Illuminate\Http\Request;
 use Validator;
@@ -88,14 +88,30 @@ class PageContentController extends Controller
                 $valid = self::customValidation($request, $rules);
                 if($valid){ return $valid;}
             } 
-
+            
             $getSettings = PageContent::get();
         
             $array = [];
             $lang_id = ($request->language_id)? $request->language_id : defaultLang();
             $array['header'] = getLangContent(8,$lang_id);
+            $array['setting'] = getSettingData();
             $array['lang_content'] = getLangContent(2,$lang_id);
+            if($request->type == 1){
+                $provider_list = User::role('doctor')->orderBy('id','asc');
+                $doc_array = collect();
+                $provider_list->each(function ($provider) use (&$doc_array) {
+                    $doc_array->push($provider->basicProfile());
+                });
+                $array['doctors'] = $doc_array;
 
+                $speciality = Speciality::orderBy('id','asc');
+                $spl_array = collect();
+                $speciality->each(function ($data) use (&$spl_array) {
+                    $spl_array->push($data->getData());
+                });
+
+                $array['speciality'] = $spl_array;
+            }
             foreach($getSettings as $result){
                 if (!empty($result->image) && Storage::exists('images/cms-images/' . $result->image)) {
                     $path = (config('filesystems.default') == 's3') ? Storage::temporaryUrl('app/public/images/cms-images/' . $result->image, now()->addMinutes(5)) : Storage::url('app/public/images/cms-images/' . $result->image);

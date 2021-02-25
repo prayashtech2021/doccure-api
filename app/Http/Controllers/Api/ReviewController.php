@@ -69,6 +69,7 @@ class ReviewController extends Controller
         $rules = array(
             'count_per_page' => 'nullable|numeric',
             'order_by' => 'nullable|in:desc,asc',
+            'language_id' => 'integer|exists:languages,id',
         );
         $valid = self::customValidation($request, $rules);
         if ($valid) {return $valid;}
@@ -78,6 +79,12 @@ class ReviewController extends Controller
             $order_by = $request->order_by ? $request->order_by : 'desc';
             $pageNumber = $request->page ? $request->page : 1;
 
+            $array = [];
+            $lang_id = ($request->language_id)? $request->language_id : defaultLang();
+            //$array['header'] = getLangContent(8,$lang_id);
+            //$array['setting'] = getSettingData();
+            //$array['lang_content'] = getLangContent(2,$lang_id);
+            
             $list = Review::orderBy('id', $order_by);
             if(auth()->user()->hasRole('doctor')){
                 $list = $list->whereUserId(auth()->user()->id);
@@ -86,8 +93,11 @@ class ReviewController extends Controller
             $list->paginate($paginate, ['*'], 'page', $pageNumber)->getCollection()->each(function ($provider) use (&$data) {
                 $data->push($provider->getData());
             });
+            $array['total_count'] = count($data);
+            $array['review_list'] = $data;
+            //$array['footer'] = getLangContent(9,$lang_id);
 
-            return self::send_success_response($data, 'Review content fetched successfully');
+            return self::send_success_response($array, 'Review content fetched successfully');
         } catch (Exception | Throwable $e) {
             DB::rollback();
             return self::send_exception_response($exception->getMessage());

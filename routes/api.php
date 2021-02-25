@@ -30,8 +30,8 @@ Route::middleware(['secureApi', 'responseHeader'])->group(function () {
     Route::get('speacility/list', 'Api\SpecialityController@getList');
     Route::post('doctors-search', 'Api\DoctorController@doctorSearchList');
     Route::get('doctor/profile/{id}', 'Api\DoctorController@doctorProfile');
-    Route::get('page-content/list','Api\PageContentController@getList');
-
+    Route::get('landing-page','Api\PageContentController@getList');
+    Route::get('common-page','Api\HomeController@getCommonData');
 });
 Route::middleware(['CheckAuthHeader', 'auth:api', 'responseHeader'])->group(function () {
     Route::post('email-template/save','Api\EmailTemplateController@save');
@@ -135,6 +135,7 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
 
     /* Page Content */
     Route::post('page-content/save','Api\PageContentController@save');
+    Route::get('page-content/list','Api\PageContentController@getList');
 
     //chat message
     Route::get('/message/list', 'Api\ChatController@index');

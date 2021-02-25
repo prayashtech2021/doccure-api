@@ -726,8 +726,8 @@ class MultiLanguageSeeder extends Seeder
             ],119 => [
                 'page_master_id' => 8,
                 'language_id' => 1,
-                'keyword' => 'login',
-                'value' => 'Login',
+                'keyword' => 'sign_in',
+                'value' => 'SIGNIN',
                 'created_by' => 1,
             ],120 => [
                 'page_master_id' => 8,
