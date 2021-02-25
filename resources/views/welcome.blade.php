@@ -105,7 +105,7 @@
     {{-- <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"> </script> --}}
         <script src="https://cdn.socket.io/socket.io-1.3.4.js"></script>
  <script>
-    var socket = io.connect('https://doccure-reactdemo.dreamguystech.com:6001');
+    var socket = io.connect('wss://doccure-reactdemo.dreamguystech.com:6001');
     console.log(socket.connected);
     socket.on('chatbox', function (data) {
     console.log('hii');
