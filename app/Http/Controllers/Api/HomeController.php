@@ -475,6 +475,7 @@ class HomeController extends Controller
             $lang_id = ($request->language_id)? $request->language_id : defaultLang();
             $array['header'] = getLangContent(8,$lang_id);
             $array['setting'] = getSettingData();
+            $array['page_content'] = PageContent::where('slug','login')->first();
             $array['lang_content'] = getLangContent($request->page_master_id,$lang_id);
             $array['footer'] = getLangContent(9,$lang_id);
 

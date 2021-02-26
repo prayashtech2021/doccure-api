@@ -945,7 +945,37 @@ class MultiLanguageSeeder extends Seeder
                 'keyword' => 'submit',
                 'value' => 'Submit',
                 'created_by' => 1,
-            ],
+            ],156 => [
+                'page_master_id' => 5,
+                'language_id' => 1,
+                'keyword' => 'register',
+                'value' => "Register" ,
+                'created_by' => 1,
+            ],157 => [
+                'page_master_id' => 5,
+                'language_id' => 1,
+                'keyword' => 'password_should_be_minimum_6_characters_long',
+                'value' => "Password should be minimum 6 characters long" ,
+                'created_by' => 1,
+            ],158 => [
+                'page_master_id' => 5,
+                'language_id' => 1,
+                'keyword' => 'password_should_be_minimum_characters_numbers_and_special_characters',
+                'value' => "Password should contain characters, numbers and  special characters" ,
+                'created_by' => 1,
+            ],159 => [
+                'page_master_id' => 5,
+                'language_id' => 1,
+                'keyword' => 'logged_successfully',
+                'value' => "Logged Successfully" ,
+                'created_by' => 1,
+            ],160 => [
+                'page_master_id' => 5,
+                'language_id' => 1,
+                'keyword' => 'please_enter_valid_email',
+                'value' => "Please enter valid email" ,
+                'created_by' => 1,
+            ]
             // for menu page end
         ];
         foreach ($datas as $id => $data) {

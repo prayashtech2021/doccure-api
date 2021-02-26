@@ -77,6 +77,7 @@ class User extends Authenticatable implements Wallet, WalletFloat
             'doctor_earned' => ($this->providerPayment())?$this->providerPayment()->sum(DB::raw('total_amount-(transaction_charge + tax_amount)')):'',
             'doctorRating' => ($this->avgRating())? $this->avgRating() : 0,
             'feedback_count' => ($this->doctorRatings())? $this->doctorRatings()->where('user_id',$this->id)->count() : 0,
+            'total_unread_chat' => ($this->chat_inbox())? $this->chat_inbox()->where('read_status',0)->count() : 0,
         ];
     }
 
@@ -100,6 +101,7 @@ class User extends Authenticatable implements Wallet, WalletFloat
             'accountstatus' => $this->getAccountStatusAttribute(),
             'last_visit' => ($this->appointments()->first())?$this->appointments()->orderby('id','desc')->first()->appointment_date:'',
             'patient_paid' => ($this->payment())?$this->payment()->sum('total_amount'):'',
+            'total_unread_chat' => ($this->chat_inbox())? $this->chat_inbox()->where('read_status',0)->count() : 0,
         ];
     }
 
@@ -261,6 +263,10 @@ class User extends Authenticatable implements Wallet, WalletFloat
     public function chats()
     {
         return $this->hasMany(Chat::class, 'sender_id');
+    }
+
+    public function chat_inbox(){
+        return $this->hasMany(Chat::class, 'recipient_id');
     }
     
     public function callLog()
