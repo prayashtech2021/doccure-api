@@ -52,7 +52,11 @@ class SendMessage implements ShouldBroadcast
     // {
     //     return ['msg'=>$this->message];
     // }
-  
+    
+    public function broadcastAs()
+{
+    return 'sendMessage';
+} 
   
 
     

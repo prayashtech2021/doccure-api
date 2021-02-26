@@ -98,62 +98,10 @@
         </div>
         <div class="container">
             <h1>messages</h1>
-            <div id="messages">hi</div>
+            <div id="messages">hiii</div>
           </div>
           
-    </body>
-    {{-- <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"> </script> --}}
-        <script src="https://cdn.socket.io/socket.io-1.3.4.js"></script>
- <script>
-//     var socket = io.connect('wss://doccure-reactdemo.dreamguystech.com:6001');
-//     console.log(socket.connected);
-//     socket.on('chatbox', function (data) {
-//     console.log('hii');
-
-//     data = jQuery.parseJSON(data);
-//     console.log(data);
-//     $("#messages").html(data.msg);
-//   });
-</script>
-<script>
-    // var ws = new WebSocket("wss://doccure-reactdemo.dreamguystech.com:6001");
-    // console.log('s');
-    //     ws.onopen = function() {
-    //         console.log("Websocket "+'connected')
-    //         try {
-    //           let msg = {command: 'subscribe',identifier: JSON.stringify({"channel":"chatbox"})}
-    //           ws.send(JSON.stringify(msg))
-    //         } catch (error) {
-    //             console.log(error) // catch error
-    //         }
-    //       }
-    //       ws.onmessage = evt => {
-    //          const message = evt   
-    //          console.log(JSON.stringify(message))
-              
-    //       }
-    //       ws.onclose = () => {
-    //         console.log("Websocket "+'disconnected')
-    //       } 
-</script>
-  {{-- <script src="{{ asset('/js/app.js') }}"></script>
-    <script>
-        window.Echo.channel('chatbox')
-            .listen('UserEvent', e => {
-                console.log(e)
-            })
-    </script> --}}
-    {{-- <script>window.laravel_echo_port='{{env("LARAVEL_ECHO_PORT")}}';</script> --}}
-
- {{-- <script src="http://localhost:6001/socket.io/socket.io.js"></script> --}}
-{{-- <script src="{{ url('/js/laravel-echo-setup.js') }}" type="text/javascript"></script>
-<script type="text/javascript">
-    var i = 0;
-    window.Echo.channel('chatbox').listen('.UserEvent', (data) => {
-        console.log(data);
-        i++;
-        $("#messages").append('<div class="alert alert-success">'+i+'.'+data.title+'</div>');
-    }); 
-</script> --}}
-
+ <script src="//{{ Request::getHost() }}:6001/socket.io/socket.io.js"></script>`  
+  <script src="{{ asset('/js/app.js?v=125') }}"></script>
+</body>
 </html>

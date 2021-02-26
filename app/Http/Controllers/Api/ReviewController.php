@@ -93,7 +93,7 @@ class ReviewController extends Controller
             $list->paginate($paginate, ['*'], 'page', $pageNumber)->getCollection()->each(function ($provider) use (&$data) {
                 $data->push($provider->getData());
             });
-            $array['total_count'] = count($data);
+            $array['total_count'] = $list->count();
             $array['review_list'] = $data;
             //$array['footer'] = getLangContent(9,$lang_id);
 
