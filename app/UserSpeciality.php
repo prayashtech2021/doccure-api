@@ -22,6 +22,7 @@ class UserSpeciality extends Model{
     public function getData(){
         return [
             'id' => $this->id,
+            'speciality_id' => $this->speciality_id,
             'name' => $this->special()->first(),
             'duration' => $this->duration,
             'amount' => $this->amount,
