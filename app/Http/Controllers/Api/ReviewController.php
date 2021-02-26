@@ -89,11 +89,12 @@ class ReviewController extends Controller
             if(auth()->user()->hasRole('doctor')){
                 $list = $list->whereUserId(auth()->user()->id);
             }
+            $paginatedata = $list->paginate($paginate, ['*'], 'page', $pageNumber);
             $data = collect();
             $list->paginate($paginate, ['*'], 'page', $pageNumber)->getCollection()->each(function ($provider) use (&$data) {
                 $data->push($provider->getData());
             });
-            $array['total_count'] = $list->count();
+            $array['total_count'] = $paginatedata->total();
             $array['review_list'] = $data;
             //$array['footer'] = getLangContent(9,$lang_id);
 
