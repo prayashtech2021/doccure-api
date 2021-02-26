@@ -45,6 +45,9 @@ class PageMasterSeeder extends Seeder
             10 => [
                 'name' => 'patient_dashboard',
             ],
+            11 => [
+                'name' => 'email_verification'
+            ],
         ];
             foreach ($datas as $id => $data) {
                 $row = PageMaster::firstOrNew([

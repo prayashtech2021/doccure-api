@@ -14,6 +14,7 @@ use App\Signature;
 use App\TimeZone;
 use App\User;
 use App\CallLog;
+use App\UserSpeciality;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -204,7 +205,7 @@ class AppointmentController extends Controller
                 $getSettings = new Setting;
                 $getSettings = $getSettings->getAmount();
 
-                $speciality = Speciality::find($request->speciality_id);
+                $speciality = UserSpeciality::find($request->speciality_id);
                 $speciality_amt = ($speciality)?$speciality->amount:0;
                 $amount = $speciality_amt * $request->selected_slots;
                 $transaction_charge = ($amount * ($getSettings['trans_percent'] / 100));

@@ -19,10 +19,20 @@ class UserSpeciality extends Model{
     ];
 
 
+    public function getData(){
+        return [
+            'id' => $this->id,
+            'name' => $this->special()->first(),
+            'duration' => $this->duration,
+            'amount' => $this->amount,
+        ];
+    }
+
     public function user() { 
         return $this->belongsTo('App\User'); 
     }
     public function special() { 
-        return $this->belongsTo('App\Speciality','speciality_id','id'); 
+        return $this->belongsTo('App\Speciality','speciality_id')->pluck('name'); 
     }
+    
 }

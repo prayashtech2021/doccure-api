@@ -18,7 +18,7 @@ class CreateUserFavourites extends Migration
             $table->unsignedBigInteger('favourite_id');
 
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
-            $table->foreign('favourite_id')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');;
+            $table->foreign('favourite_id')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
         });
     }
 

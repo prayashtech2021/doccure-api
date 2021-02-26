@@ -915,7 +915,37 @@ class MultiLanguageSeeder extends Seeder
                 'keyword' => 'No Records Found',
                 'value' => 'no_records_found',
                 'created_by' => 1,
-            ]
+            ],151 => [
+                'page_master_id' => 11,
+                'language_id' => 1,
+                'keyword' => 'register_email_verification',
+                'value' => 'Register Email Verification',
+                'created_by' => 1,
+            ],152 => [
+                'page_master_id' => 11,
+                'language_id' => 1,
+                'keyword' => 'enter_the_verification_code_that_will_be_sent_your_mail',
+                'value' => 'Enter the Verification Code, that will be sent your mail',
+                'created_by' => 1,
+            ],153 => [
+                'page_master_id' => 11,
+                'language_id' => 1,
+                'keyword' => 'verification_code',
+                'value' => 'Verification Code',
+                'created_by' => 1,
+            ],154 => [
+                'page_master_id' => 11,
+                'language_id' => 1,
+                'keyword' => 'please_enter_verification_code',
+                'value' => 'Please Enter Verification Code',
+                'created_by' => 1,
+            ],155 => [
+                'page_master_id' => 11,
+                'language_id' => 1,
+                'keyword' => 'submit',
+                'value' => 'Submit',
+                'created_by' => 1,
+            ],
             // for menu page end
         ];
         foreach ($datas as $id => $data) {

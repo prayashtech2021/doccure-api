@@ -12,6 +12,7 @@ use DB;
 use Storage;
 use Illuminate\Support\Carbon;
 
+
 class DoctorController extends Controller
 {
     /**
@@ -262,17 +263,38 @@ class DoctorController extends Controller
                     UserSpeciality::where('user_id', '=', $user_id)->forcedelete();
                     $spl_result = json_decode($request->speciality, true);
                     foreach ($spl_result as $spl_value) {
-                        $spl_id = (int) $spl_value['speciality_id'];
-                        $duration = $spl_value['duration'];
-                        $amount = $spl_value['amount'];
-                        if($spl_id && $duration && $amount){
+                        $myRequest = new Request(['speciality_id' => $spl_value['speciality_id'],'duration'=>$spl_value['duration'],'amount'=>$spl_value['amount']]);
+                        /*$custom_rules = array(
+                            'speciality_id' => 'required|numeric|exists:specialities,id',
+                            'duration' => 'required|date_format:"H:i:s',
+                            'amount' => 'required|numeric',
+                        );
+                        $validator = Validator::make($myRequest, $custom_rules);
+                        if ($validator->fails()) {
+                            return self::send_bad_request_response($validator->errors()->first());
+                        }*/
+
+                        $check = UserSpeciality::where('speciality_id',$spl_value['speciality_id'])->where('user_id',$user_id)->count();
+                        if($check > 0){
+                            DB::rollback();
+                            return self::send_bad_request_response('Speciality is repeated again. Please check and try again.');
+                        }
+                        $minutes = Carbon::parse('00:00:00')->diffInSeconds(Carbon::parse($spl_value['duration']));
+                        $duration = (int) $minutes;
+                        if($spl_value['speciality_id'] && $duration && $spl_value['amount']){
                             $speciality = new UserSpeciality();
                             $speciality->user_id = $user_id;
-                            $speciality->speciality_id = $spl_id;
+                            $speciality->speciality_id = $spl_value['speciality_id'];
                             $speciality->duration = $duration;
-                            $speciality->amount = $amount;
+                            $speciality->amount = $spl_value['amount'];
                             $speciality->created_by = auth()->user()->id;
                             $speciality->save();
+
+                            $doctor->status = 1;
+                            $doctor->save();
+                        }else{
+                            DB::rollback();
+                            return self::send_bad_request_response('Something went wrong. Please check and try again.');
                         }
                     }
                 }

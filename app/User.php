@@ -223,11 +223,12 @@ class User extends Authenticatable implements Wallet, WalletFloat
     }
 
     public function getProviderSpecialityAttribute(){
-        $speciality = Speciality::whereHas('speciality', function ($a) {
-                    $a->where('user_speciality.user_id',$this->id);
-                })->get();
-        removeMetaColumn($speciality);
-        return $speciality;
+        $list =  UserSpeciality::where('user_id',$this->id);
+        $data = collect();
+            $list->each(function ($provider) use (&$data) {
+                $data->push($provider->getData());
+            });
+         return $data;
     }
 
     public function getPermanentAddressAttribute(){
