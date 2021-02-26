@@ -105,15 +105,36 @@
     {{-- <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"> </script> --}}
         <script src="https://cdn.socket.io/socket.io-1.3.4.js"></script>
  <script>
-    var socket = io.connect('wss://doccure-reactdemo.dreamguystech.com:6001');
-    console.log(socket.connected);
-    socket.on('chatbox', function (data) {
-    console.log('hii');
+//     var socket = io.connect('wss://doccure-reactdemo.dreamguystech.com:6001');
+//     console.log(socket.connected);
+//     socket.on('chatbox', function (data) {
+//     console.log('hii');
 
-    data = jQuery.parseJSON(data);
-    console.log(data);
-    $("#messages").html(data.msg);
-  });
+//     data = jQuery.parseJSON(data);
+//     console.log(data);
+//     $("#messages").html(data.msg);
+//   });
+</script>
+<script>
+    // var ws = new WebSocket("wss://doccure-reactdemo.dreamguystech.com:6001");
+    // console.log('s');
+    //     ws.onopen = function() {
+    //         console.log("Websocket "+'connected')
+    //         try {
+    //           let msg = {command: 'subscribe',identifier: JSON.stringify({"channel":"chatbox"})}
+    //           ws.send(JSON.stringify(msg))
+    //         } catch (error) {
+    //             console.log(error) // catch error
+    //         }
+    //       }
+    //       ws.onmessage = evt => {
+    //          const message = evt   
+    //          console.log(JSON.stringify(message))
+              
+    //       }
+    //       ws.onclose = () => {
+    //         console.log("Websocket "+'disconnected')
+    //       } 
 </script>
   {{-- <script src="{{ asset('/js/app.js') }}"></script>
     <script>
