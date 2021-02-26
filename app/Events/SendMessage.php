@@ -40,13 +40,7 @@ class SendMessage implements ShouldBroadcast
     {
         return new Channel('chatbox');
     }
-    public function broadcastAs()
-
-    {
-
-        return 'UserEvent';
-
-    }
+    
     /**
       * Get the data to broadcast.
       *
@@ -54,11 +48,15 @@ class SendMessage implements ShouldBroadcast
       *
       * @return array
       */
-    public function broadcastWith()
-    {
-        return ['title'=>'This notification from ItSolutionStuff.com'];
-    }
-  
+    // public function broadcastWith()
+    // {
+    //     return ['msg'=>$this->message];
+    // }
+    
+    public function broadcastAs()
+{
+    return 'sendMessage';
+} 
   
 
     

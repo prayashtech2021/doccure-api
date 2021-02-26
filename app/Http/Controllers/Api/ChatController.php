@@ -82,7 +82,7 @@ class ChatController extends Controller
             }
 
             if ($message) {
-                // event(new SendMessage($message));
+                event(new SendMessage($message));
             }
             return self::send_success_response('Message Sent Successfully');
         } catch (Exception | Throwable $exception) {

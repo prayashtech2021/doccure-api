@@ -54,14 +54,14 @@ class PassportController extends Controller {
 			removeMetaColumn($user);
 			
 
-			$menuList = $this->getAppMenu();
+			//$menuList = $this->getAppMenu();
 			// dd($menuList);
 			$response_array = [
 				"code" => "200",
 				"message" => "Logged Successfully",
 				"token" => $token,
 				"data" => $user,
-				"menu_list" => $menuList,
+				//"menu_list" => $menuList,
 			];
 			unset($user->tokens);
 			unset($user->roles);

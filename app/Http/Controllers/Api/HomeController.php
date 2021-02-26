@@ -460,4 +460,29 @@ class HomeController extends Controller
         }
     }
 
+    public function getCommonData(Request $request){
+        try {
+
+            if($request->language_id){ 
+                $rules = array(
+                    'page_master_id' => 'required|integer|exists:page_masters,id', 
+                    'language_id' => 'integer|exists:languages,id',
+                );
+                $valid = self::customValidation($request, $rules);
+                if($valid){ return $valid;}
+            } 
+            $array = [];
+            $lang_id = ($request->language_id)? $request->language_id : defaultLang();
+            $array['header'] = getLangContent(8,$lang_id);
+            $array['setting'] = getSettingData();
+            $array['lang_content'] = getLangContent($request->page_master_id,$lang_id);
+            $array['footer'] = getLangContent(9,$lang_id);
+
+            return self::send_success_response($array, 'Content fetched successfully');
+        } catch (Exception | Throwable $e) {
+            DB::rollback();
+            return self::send_exception_response($exception->getMessage());
+        }
+    }
+
 }
