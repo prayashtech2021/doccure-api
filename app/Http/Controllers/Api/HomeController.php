@@ -14,6 +14,7 @@ use Storage;
 use App\Http\Controllers\Api\PatientController;
 use App\Http\Controllers\Api\DoctorController;
 use App\Http\Controllers\Api\AppointmentController;
+use App\PageContent;
 
 
 class HomeController extends Controller
