@@ -25,6 +25,8 @@ class DoctorController extends Controller
     {
         try {
             $user_id = auth()->user()->id;
+            $user = auth()->user();
+            updateLastSeen($user);
             if ($user_id) {
                 $patient = Appointment::where('doctor_id', $user_id)->groupby('user_id')->get()->count();
                 $total_patient = Appointment::where('doctor_id', $user_id)->whereDate('appointment_date', date('Y-m-d'))->count();
@@ -60,6 +62,9 @@ class DoctorController extends Controller
         if ($valid) {return $valid;}
 
         try {
+            $user = auth()->user();
+            updateLastSeen($user);
+            
             $paginate = $request->count_per_page ? $request->count_per_page : 10;
             $order_by = $request->order_by ? $request->order_by : 'desc';
             $pageNumber = $request->page ? $request->page : 1;

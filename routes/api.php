@@ -140,6 +140,9 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
     //chat message
     Route::get('/message/list', 'Api\ChatController@index');
     Route::post('/message/send', 'Api\ChatController@send');
+
+    Route::get('notification/list', 'NotificationController@notificationList');
+    Route::get('notification/read-all', 'NotificationController@markNotificationsAsRead');
 });
 
 Route::any('{path}', function () {

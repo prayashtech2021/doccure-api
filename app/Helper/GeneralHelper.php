@@ -113,3 +113,13 @@ function getSettingImage($image){
     }
     return $path;
 }
+
+function updateLastSeen($user){
+    try{
+        $user->last_seen_time=Carbon::now();
+        $user->save();
+        return true;
+    } catch (\Exception | \Throwable $exception) {
+        return false;
+    }
+}
