@@ -51,7 +51,7 @@ class User extends Authenticatable implements Wallet, WalletFloat
         return $this->hasMany('App\OauthAccessToken');
     }
 
-    public function doctorProfile(){
+    public function doctorProfile($id = NULL){
         return [
             'id' => $this->id,
             'did' => $this->getDidAttribute(),
@@ -78,12 +78,12 @@ class User extends Authenticatable implements Wallet, WalletFloat
             'doctorRating' => ($this->avgRating())? $this->avgRating() : 0,
             'feedback_count' => ($this->doctorRatings())? $this->doctorRatings()->where('user_id',$this->id)->count() : 0,
             'total_unread_chat' => ($this->chat_inbox())? $this->chat_inbox()->where('read_status',0)->count() : 0,
-            //'last_message' => $this->last_chat(),//($this->chat_inbox()) ? $this->chat_inbox()->select('message')->orderBy('id','desc')->first() : '',
+            'last_message' => ($id)? $this->lastChat($id) : '',
             'status' => $this->status,
         ];
     }
 
-    public function patientProfile(){
+    public function patientProfile($id = NULL){
         return [
             'id' => $this->id,
             'pid' => $this->getPidAttribute(),
@@ -104,7 +104,7 @@ class User extends Authenticatable implements Wallet, WalletFloat
             'last_visit' => ($this->appointments()->first())?$this->appointments()->orderby('id','desc')->first()->appointment_date:'',
             'patient_paid' => ($this->payment())?$this->payment()->sum('total_amount'):'',
             'total_unread_chat' => ($this->chat_inbox())? $this->chat_inbox()->where('read_status',0)->count() : 0,
-           // 'last_message' => $this->last_chat(), //($this->chat_inbox()) ? $this->chat_inbox()->select('message')->orderBy('id','desc')->first() : '',
+            'last_message' => ($id)? $this->lastChat($id) : '',
         ];
     }
 
@@ -272,11 +272,11 @@ class User extends Authenticatable implements Wallet, WalletFloat
         return $this->hasMany(Chat::class, 'recipient_id');
     }
 
-    public function last_chat(){
+    public function lastChat($id){
         $recipient_id = $this->id;
-        $chat = Chat::select('message','created_at')->where(function($qry) use ($recipient_id){
-            $qry->where(['sender_id'=>auth()->user()->id, 'recipient_id'=>$recipient_id])
-            ->orWhere(['sender_id'=>$recipient_id, 'recipient_id'=>auth()->user()->id]);
+        $chat = Chat::select('message','created_at')->where(function($qry) use ($recipient_id,$id){
+            $qry->where(['sender_id'=>$id, 'recipient_id'=>$recipient_id])
+            ->orWhere(['sender_id'=>$recipient_id, 'recipient_id'=>$id]);
         });
         $list = $chat->orderBy('id','desc')->first();
         $count = $chat->where('read_status',1)->count();
@@ -286,7 +286,6 @@ class User extends Authenticatable implements Wallet, WalletFloat
             'created_at' => ($list)? $list->created_at->diffForHumans() : '',
             'unread' => ($list)? $count : 0,
         ];
-        //return Chat::where('sender_id',auth()->user()->id)->Where('recipient_id',$this->id)->orWhere('sender_id',$this->id)->orWhere('recipient_id',auth()->user()->id)->orderBy('id','desc')->first();
     }
     public function latestMessage() 
     {

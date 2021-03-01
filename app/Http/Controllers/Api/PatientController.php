@@ -75,12 +75,12 @@ class PatientController extends Controller
             }
             $list = $list->groupBy('users.id');
             $data = collect();
-            $list->paginate($paginate, ['*'], 'page', $pageNumber)->getCollection()->each(function ($provider) use (&$data,$request) {
-                $data->push($provider->patientProfile());
-                if ($request->bearerToken()) {
-                $data->push(['chat'=>$provider->last_chat()]);
-                }
-
+            $id = 0;
+            if ($request->bearerToken()) {
+                $id = auth('api')->user()->id;
+            }
+            $list->paginate($paginate, ['*'], 'page', $pageNumber)->getCollection()->each(function ($provider) use (&$data,$id) {
+                $data->push($provider->patientProfile($id));
             });
 
             if($data){

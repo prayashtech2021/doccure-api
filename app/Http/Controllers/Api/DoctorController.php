@@ -90,12 +90,13 @@ class DoctorController extends Controller
                 }
             }
             $list = $list->groupBy('users.id');
+            $id = 0;
+            if ($request->bearerToken()) {
+                $id = auth('api')->user()->id;
+            }
             $data = collect();
-            $list->paginate($paginate, ['*'], 'page', $pageNumber)->getCollection()->each(function ($provider) use (&$data,$request) {
-                $data->push($provider->doctorProfile());
-                if ($request->bearerToken()) {
-                $data->push(['chat'=>$provider->last_chat()]);
-                }
+            $list->paginate($paginate, ['*'], 'page', $pageNumber)->getCollection()->each(function ($provider) use (&$data,$id) {
+                $data->push($provider->doctorProfile($id));
             });
 
             //$array['total_count'] = count($data);
