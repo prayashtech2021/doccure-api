@@ -61,7 +61,10 @@ class AppointmentController extends Controller
             $valid = self::customValidation($request, $rules);
             if ($valid) {return $valid;}
 
+            $user = auth()->user();
             updateLastSeen(auth()->user());
+            $update = Appointment::whereIn('appointment_status',[1,2])->whereDate('created_at','<',convertToUTC(now()))->update(['appointment_status'=>7]);
+            
             $paginate = $request->count_per_page ? $request->count_per_page : 10;
             $pageNumber = $request->page ? $request->page : 1;
 
@@ -133,7 +136,6 @@ class AppointmentController extends Controller
             }
 
         } catch (Exception | Throwable $exception) {
-            dd($exception);
             return self::send_exception_response($exception->getMessage());
         }
     }
