@@ -60,9 +60,8 @@ class AppointmentController extends Controller
             );
             $valid = self::customValidation($request, $rules);
             if ($valid) {return $valid;}
-
             updateLastSeen(auth()->user());
-            Appointment::whereIn('appointment_status',[1,2])->whereDate('created_at','>',Carbon::now()->toDateString())->update('appointment_status',7);
+            $update = Appointment::whereIn('appointment_status',[1,2])->whereDate('created_at','>',convertToUTC(now()))->update(['appointment_status'=>7]);
             
             $paginate = $request->count_per_page ? $request->count_per_page : 10;
             $pageNumber = $request->page ? $request->page : 1;
