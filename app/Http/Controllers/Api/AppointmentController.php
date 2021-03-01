@@ -62,10 +62,12 @@ class AppointmentController extends Controller
             if ($valid) {return $valid;}
 
             updateLastSeen(auth()->user());
-            $chk = Appointment::whereIn('appointment_status',[1,2])->whereDate('created_at','>',Carbon::now()->toDateString())->get();
-            if($chk){
-                $chk->appointment_status=7;
+            $chk_appointments = Appointment::whereIn('appointment_status',[1,2])->whereDate('created_at','>',Carbon::now()->toDateString())->get();
+            if($chk_appointments){
+                foreach($chk_appointments as $chk_appointment){
+                $chk_appointments->appointment_status=7;
                 $chk->save();
+                }
             }
             $paginate = $request->count_per_page ? $request->count_per_page : 10;
             $pageNumber = $request->page ? $request->page : 1;
