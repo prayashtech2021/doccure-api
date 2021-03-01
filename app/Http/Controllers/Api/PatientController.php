@@ -53,6 +53,8 @@ class PatientController extends Controller
         if ($valid) {return $valid;}
 
         try {
+            updateLastSeen(auth()->user());
+
             $paginate = $request->count_per_page ? $request->count_per_page : 10;
             $order_by = $request->order_by ? $request->order_by : 'desc';
             $pageNumber = $request->page ? $request->page : 1;
@@ -227,6 +229,8 @@ class PatientController extends Controller
 
         try {
             $user_id = auth()->user()->id;
+            $user = auth()->user();
+            updateLastSeen($user);
             if($user_id){
                 
                 $appointment_result = (new AppointmentController)->list($request,1);

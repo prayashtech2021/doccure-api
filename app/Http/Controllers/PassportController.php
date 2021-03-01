@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Validator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Carbon;
 
 class PassportController extends Controller {
 
@@ -44,6 +45,8 @@ class PassportController extends Controller {
 			// 		$token->revoke();
 			// 	}
 			// }
+			$user->last_seen_time=Carbon::now();
+			$user->save();
 			$token = auth()->user()->createToken('APIAUTH')->accessToken;
 			$tmp = $user->roles()->select('id', 'name')->get()->toArray();
 			foreach ($tmp as $key => $row) {

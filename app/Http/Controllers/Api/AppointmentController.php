@@ -61,7 +61,7 @@ class AppointmentController extends Controller
             $valid = self::customValidation($request, $rules);
             if ($valid) {return $valid;}
 
-            $user = $request->user();
+            updateLastSeen(auth()->user());
             $paginate = $request->count_per_page ? $request->count_per_page : 10;
             $pageNumber = $request->page ? $request->page : 1;
 
@@ -503,6 +503,7 @@ class AppointmentController extends Controller
         try {
             $data = collect();
             if (auth()->user()) {
+                updateLastSeen(auth()->user());
                 $result['provider_details'] = $user = User::find($request->provider_id);
                 $list = ScheduleTiming::where('provider_id', $request->provider_id)->get();
                 // dd(json_decode($list->working_hours));
@@ -667,6 +668,7 @@ class AppointmentController extends Controller
         try {
             $invoice_list = collect();
             $user = $request->user();
+            updateLastSeen(auth()->user());
             if ($user->hasRole(['patient', 'doctor'])) {
                 $payments = $user->payment()->get();
 

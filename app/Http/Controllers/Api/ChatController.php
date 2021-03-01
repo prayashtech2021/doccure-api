@@ -26,6 +26,7 @@ class ChatController extends Controller
         if ($valid) {return $valid;}
 
         try {
+            updateLastSeen(auth()->user());
             $paginate = $request->count_per_page ? $request->count_per_page : 10;
             $pageNumber = $request->page ? $request->page : 1;
             $order_by = $request->order_by ? $request->order_by : 'desc';
@@ -63,7 +64,7 @@ class ChatController extends Controller
 
         try {
             $user = auth()->user();
-
+            updateLastSeen(auth()->user());
             if (!empty($request->attachments)) {    //only attachments
                 $extension = $request->file('attachments')->getClientOriginalExtension();
                 $file_name = date('YmdHis') . '_' . auth()->user()->id . '.'.$extension;
