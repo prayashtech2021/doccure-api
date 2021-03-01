@@ -148,7 +148,7 @@ class AppointmentController extends Controller
             'start_time' => 'required|date_format:"H:i:s"',
             'end_time' => 'required|date_format:"H:i:s"|after:start_time',
             'selected_slots' => 'required|numeric',
-            'speciality_id' => 'required|exists:specialities,id',
+            'speciality_id' => 'required|exists:user_speciality,id',
         ]);
 
         if ($validator->fails()) {

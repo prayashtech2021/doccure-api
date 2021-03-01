@@ -975,7 +975,43 @@ class MultiLanguageSeeder extends Seeder
                 'keyword' => 'please_enter_valid_email',
                 'value' => "Please enter valid email" ,
                 'created_by' => 1,
-            ]
+            ],161 => [
+                'page_master_id' => 5,
+                'language_id' => 1,
+                'keyword' => 'logged_successfully',
+                'value' => "Logged Successfully" ,
+                'created_by' => 1,
+            ],162 => [
+                'page_master_id' => 5,
+                'language_id' => 1,
+                'keyword' => 'login_image',
+                'value' => "login image" ,
+                'created_by' => 1,
+            ],163 => [
+                'page_master_id' => 7,
+                'language_id' => 1,
+                'keyword' => 'reset_password_link_sent_on_your_email_id.',
+                'value' => "Reset password link sent on your email id." ,
+                'created_by' => 1,
+            ],164 => [
+                'page_master_id' => 7,
+                'language_id' => 1,
+                'keyword' => 'please_enter_email',
+                'value' => "Please Enter Email" ,
+                'created_by' => 1,
+            ],165 => [
+                'page_master_id' => 7,
+                'language_id' => 1,
+                'keyword' => 'login_image',
+                'value' => "login image" ,
+                'created_by' => 1,
+            ],166 => [
+                'page_master_id' => 6,
+                'language_id' => 1,
+                'keyword' => 'first_name_should_be_characters_only',
+                'value' => "First Name Should be characters only" ,
+                'created_by' => 1,
+            ],
             // for menu page end
         ];
         foreach ($datas as $id => $data) {
