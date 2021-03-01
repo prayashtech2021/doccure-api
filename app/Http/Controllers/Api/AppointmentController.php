@@ -60,6 +60,8 @@ class AppointmentController extends Controller
             );
             $valid = self::customValidation($request, $rules);
             if ($valid) {return $valid;}
+
+            $user = auth()->user();
             updateLastSeen(auth()->user());
             $update = Appointment::whereIn('appointment_status',[1,2])->whereDate('created_at','>',convertToUTC(now()))->update(['appointment_status'=>7]);
             
