@@ -28,6 +28,7 @@ Route::middleware(['secureApi', 'responseHeader'])->group(function () {
     Route::post('check-email', 'Api\HomeController@checkEmail')->name('checkEmail');
     Route::get('language/list', 'Api\LanguageController@list');
     Route::get('speacility/list', 'Api\SpecialityController@getList');
+    Route::get('features/list', 'Api\FeatureController@getList');
     Route::post('doctors-search', 'Api\DoctorController@doctorSearchList');
     Route::get('doctor/profile/{id}', 'Api\DoctorController@doctorProfile');
     Route::get('landing-page','Api\PageContentController@getList');
@@ -140,6 +141,10 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
     //chat message
     Route::get('/message/list', 'Api\ChatController@index');
     Route::post('/message/send', 'Api\ChatController@send');
+
+    /* Features */
+    Route::post('features/save', 'Api\FeatureController@save');
+    Route::get('features/delete/{id}', 'Api\FeatureController@destroy');
 });
 
 Route::any('{path}', function () {

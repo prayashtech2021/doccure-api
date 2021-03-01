@@ -86,12 +86,16 @@ class DoctorController extends Controller
             }
             $list = $list->groupBy('users.id');
             $data = collect();
-            $list->paginate($paginate, ['*'], 'page', $pageNumber)->getCollection()->each(function ($provider) use (&$data) {
+            $list->paginate($paginate, ['*'], 'page', $pageNumber)->getCollection()->each(function ($provider) use (&$data,$request) {
                 $data->push($provider->doctorProfile());
+                if ($request->bearerToken()) {
+                $data->push(['chat'=>$provider->last_chat()]);
+                }
             });
 
-            $array['total_count'] = count($data);
+            //$array['total_count'] = count($data);
             $array['doctor_list'] = $data;
+           // $array['chat'] = $list->last_chat();
             $array['footer'] = getLangContent(9,$lang_id);
             return self::send_success_response($array, 'Doctor Details Fetched Successfully');
         } catch (Exception | Throwable $exception) {
@@ -440,6 +444,8 @@ class DoctorController extends Controller
             'order_by' => 'nullable|in:desc,asc',
             'sort' => 'nullable|numeric',
             'language_id' => 'integer|exists:languages,id',
+            'state_name' => 'nullable',
+            'city_name' => 'nullable',
         );
         $valid = self::customValidation($request, $rules);
         if ($valid) {return $valid;}
@@ -467,6 +473,12 @@ class DoctorController extends Controller
                     $category->whereIn('user_speciality.speciality_id', [$request->speciality]);
                 });
             }
+            if ($request->speciality_name) {
+                $speciality_name = $request->speciality_name;
+                $doctors = $doctors->whereHas('doctorSpecialization', function ($category) use ($speciality_name) {
+                    $category->where('specialities.name', 'like', '%' . $speciality_name . '%');
+                });
+            }
 
             if ($request->country_id) {
                 $country_id = $request->country_id;
@@ -479,6 +491,20 @@ class DoctorController extends Controller
                 $state_id = $request->state_id;
                 $doctors = $doctors->whereHas('homeAddress', function ($category) use ($state_id) {
                     $category->where('addresses.state_id', $state_id);
+                });
+            }
+
+            if ($request->state_name) {
+                $state_name =  $request->state_name;
+                $doctors = $doctors->whereHas('homeAddress.state', function ($category) use ($state_name) {
+                    $category->where('name', $state_name);
+                });
+            }
+
+            if ($request->city_name) {
+                $city_name =  $request->city_name;
+                $doctors = $doctors->orWhereHas('homeAddress.city', function ($category) use ($city_name) {
+                    $category->where('name', $city_name);
                 });
             }
 

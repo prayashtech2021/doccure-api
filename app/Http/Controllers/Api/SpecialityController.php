@@ -8,6 +8,7 @@ use DB;
 use Illuminate\Http\Request;
 use Validator;
 use Illuminate\Support\Carbon;
+use Storage;
 
 class SpecialityController extends Controller
 {
@@ -57,6 +58,12 @@ class SpecialityController extends Controller
             $speciality->duration = $seconds;
             $speciality->amount = $request->amount;
             $speciality->save();
+
+            if(!empty($speciality->image)){
+                if (Storage::exists('images/speciality/' . $speciality->image)) {
+                    Storage::delete('images/speciality/' . $speciality->image);
+                }
+            }
 
             if (!empty($request->image)) {
                 $extension = $request->file('image')->getClientOriginalExtension();

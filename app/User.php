@@ -78,6 +78,8 @@ class User extends Authenticatable implements Wallet, WalletFloat
             'doctorRating' => ($this->avgRating())? $this->avgRating() : 0,
             'feedback_count' => ($this->doctorRatings())? $this->doctorRatings()->where('user_id',$this->id)->count() : 0,
             'total_unread_chat' => ($this->chat_inbox())? $this->chat_inbox()->where('read_status',0)->count() : 0,
+            //'last_message' => $this->last_chat(),//($this->chat_inbox()) ? $this->chat_inbox()->select('message')->orderBy('id','desc')->first() : '',
+            'status' => $this->status,
         ];
     }
 
@@ -102,6 +104,7 @@ class User extends Authenticatable implements Wallet, WalletFloat
             'last_visit' => ($this->appointments()->first())?$this->appointments()->orderby('id','desc')->first()->appointment_date:'',
             'patient_paid' => ($this->payment())?$this->payment()->sum('total_amount'):'',
             'total_unread_chat' => ($this->chat_inbox())? $this->chat_inbox()->where('read_status',0)->count() : 0,
+           // 'last_message' => $this->last_chat(), //($this->chat_inbox()) ? $this->chat_inbox()->select('message')->orderBy('id','desc')->first() : '',
         ];
     }
 
@@ -267,6 +270,27 @@ class User extends Authenticatable implements Wallet, WalletFloat
 
     public function chat_inbox(){
         return $this->hasMany(Chat::class, 'recipient_id');
+    }
+
+    public function last_chat(){
+        $recipient_id = $this->id;
+        $chat = Chat::select('message','created_at')->where(function($qry) use ($recipient_id){
+            $qry->where(['sender_id'=>auth()->user()->id, 'recipient_id'=>$recipient_id])
+            ->orWhere(['sender_id'=>$recipient_id, 'recipient_id'=>auth()->user()->id]);
+        });
+        $list = $chat->orderBy('id','desc')->first();
+        $count = $chat->where('read_status',1)->count();
+
+        return [
+            'message' => ($list)? $list->message : '',
+            'created_at' => ($list)? $list->created_at->diffForHumans() : '',
+            'unread' => ($list)? $count : 0,
+        ];
+        //return Chat::where('sender_id',auth()->user()->id)->Where('recipient_id',$this->id)->orWhere('sender_id',$this->id)->orWhere('recipient_id',auth()->user()->id)->orderBy('id','desc')->first();
+    }
+    public function latestMessage() 
+    {
+        return $this->hasMany(Chat::class, 'recipient_id')->latest();
     }
     
     public function callLog()
