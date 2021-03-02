@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\ { PageContent,User,Speciality };
+use App\ { PageContent,User,Speciality,Feature };
 use DB;
 use Illuminate\Http\Request;
 use Validator;
@@ -111,6 +111,15 @@ class PageContentController extends Controller
                 });
 
                 $array['speciality'] = $spl_array;
+
+                $feature = Feature::orderBy('id', 'desc');
+                
+                $list = collect();
+                $feature->each(function ($feature) use (&$list) {
+                    $list->push($feature->getData());
+                });
+                $array['features_list'] = $list;
+
             }
             foreach($getSettings as $result){
                 if (!empty($result->image) && Storage::exists('images/cms-images/' . $result->image)) {
