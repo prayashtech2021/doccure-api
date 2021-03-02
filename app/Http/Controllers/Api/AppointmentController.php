@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 use App\Appointment;
 use App\AppointmentLog;
 use App\Http\Controllers\Controller;
+use App\Notifications\AppointmentNoty;
 use App\Payment;
 use App\Prescription;
 use App\PrescriptionDetail;
@@ -194,6 +195,9 @@ class AppointmentController extends Controller
             $log->status = $appointment->appointment_status;
             $log->save();
 
+            $doctor = User::find($request->doctor_id); 
+            $doctor->notify(new AppointmentNoty($appointment));
+            
             /**
              * Payment
              */
