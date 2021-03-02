@@ -544,7 +544,12 @@ class AppointmentController extends Controller
 
                     // if ($schedule->duration == $seconds) { //update working hrs
                         $array = json_decode($schedule->working_hours, true);
-                        $array[config('custom.days.' . $request->day)] = explode(',', $request->working_hours);
+                        $day_array = $array[config('custom.days.' . $request->day)];
+                        $incoming = explode(',', $request->working_hours);
+                        foreach($incoming as $item){
+                            array_push($day_array, $item);
+                        }
+                        $array[config('custom.days.' . $request->day)] = $day_array;
                         $schedule->working_hours = json_encode($array);
                         $schedule->save();
                     // } else { // update duration and working hrs
