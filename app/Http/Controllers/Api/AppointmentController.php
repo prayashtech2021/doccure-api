@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 use App\Appointment;
 use App\AppointmentLog;
 use App\Http\Controllers\Controller;
+use App\Notifications\AppointmentNoty;
 use App\Payment;
 use App\Prescription;
 use App\PrescriptionDetail;
@@ -176,7 +177,7 @@ class AppointmentController extends Controller
             $appointment = new Appointment();
             $last_id = $appointment->latest()->first() ? $appointment->latest()->first()->id : 0;
             $appointment->appointment_reference = generateReference($user->id, $last_id, 'APT');
-            $appointment->user_id = 4;
+            $appointment->user_id = auth()->user()->id;
             $appointment->doctor_id = $request->doctor_id;
             $appointment->appointment_type = $request->appointment_type; //1=online, 2=clinic
             $appointment->appointment_date = $appointment_date;
@@ -194,6 +195,10 @@ class AppointmentController extends Controller
             $log->status = $appointment->appointment_status;
             $log->save();
 
+            auth()->user()->notify(new AppointmentNoty($appointment));
+            $doctor = User::find($request->doctor_id); 
+            $doctor->notify(new AppointmentNoty($appointment));
+            
             /**
              * Payment
              */
@@ -488,6 +493,10 @@ class AppointmentController extends Controller
                 $user->depositFloat($requested_amount);
             }
 
+            auth()->user()->notify(new AppointmentNoty($appointment));
+            $doctor = User::find($appointment->doctor_id); 
+            $doctor->notify(new AppointmentNoty($appointment));
+            
             return self::send_success_response([], 'Status updated sucessfully');
         } catch (Exception | Throwable $exception) {
             return self::send_exception_response($exception->getMessage());
@@ -788,6 +797,11 @@ class AppointmentController extends Controller
             $applog->description = config('custom.appointment_log_message.3');
             $applog->status = 3; //completed
             $applog->save();
+
+            auth()->user()->notify(new AppointmentNoty($app));
+            $doctor = User::find($app->doctor_id); 
+            $doctor->notify(new AppointmentNoty($app));
+
             DB::commit();       
             return self::send_success_response($log,'Log Saved Successfully');
         } catch (Exception | Throwable $exception) {

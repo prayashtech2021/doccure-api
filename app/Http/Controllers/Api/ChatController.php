@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Events\SendMessage;
 use Illuminate\Http\Request;
 use App\Chat;
+use App\User;
+use App\Notifications\ChatNoty;
 
 class ChatController extends Controller
 {
@@ -83,6 +85,9 @@ class ChatController extends Controller
             }
 
             if ($message) {
+                $doctor = User::find($request->input('recipient_id')); 
+                $doctor->notify(new ChatNoty());
+            
                 event(new SendMessage($message));
             }
             return self::send_success_response('Message Sent Successfully');

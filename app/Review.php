@@ -18,6 +18,7 @@ class Review extends Model
     ];
 
     public function getData(){
+        $a =  convertToLocal(Carbon::parse($this->created_at),'','d-m-Y h:i A');
         return [
             'id' => $this->id,
             'appointment_id' => $this->appointment_id,
@@ -26,7 +27,7 @@ class Review extends Model
             'rating' => $this->rating,
             'description' => $this->description,
             'reply' => $this->reply,
-            'created' => $this->created_at->diffForHumans(), //Carbon::parse($this->created_at)->format('d/m/Y h:i A'),
+            'created' => $this->created_at->diffForHumans(), //convertToLocal(Carbon::parse($this-> created_at   ),'','d/m/Y')->diffForHumans(),
         ];
     }
 

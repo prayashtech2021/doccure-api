@@ -38,8 +38,8 @@ class Appointment extends Model
             'doctor' => $this->doctor()->first()->basicProfile(),
             'patient' => $this->patient()->first()->basicProfile(),
             'date' => convertToLocal(Carbon::parse($this->appointment_date),'','d/m/Y'),
-            'start_time' => $this->start_time,
-            'end_time' => $this->end_time,
+            'start_time' => Carbon::parse($this->start_time)->format('h:i A'),
+            'end_time' => Carbon::parse($this->end_time)->format('h:i A'),
             'amount' => $this->payment()->select('currency_code','total_amount')->first(),
         ];
     }

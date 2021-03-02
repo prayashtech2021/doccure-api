@@ -101,7 +101,6 @@ class DoctorController extends Controller
 
             //$array['total_count'] = count($data);
             $array['doctor_list'] = $data;
-           // $array['chat'] = $list->last_chat();
             $array['footer'] = getLangContent(9,$lang_id);
             return self::send_success_response($array, 'Doctor Details Fetched Successfully');
         } catch (Exception | Throwable $exception) {
