@@ -21,7 +21,7 @@ class AppointmentNoty extends Notification implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(PaymentRequest $request)
+    public function __construct(AppointmentNoty $request)
     {
         $this->request = $request;
         //
