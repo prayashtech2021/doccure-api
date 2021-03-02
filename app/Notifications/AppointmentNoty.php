@@ -7,8 +7,10 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\BroadcastMessage;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
-use App\PaymentRequest;
+use App\Appointment;
 use App\User;
+use Illuminate\Support\Carbon;
+
 
 class AppointmentNoty extends Notification implements ShouldQueue
 {
@@ -21,10 +23,9 @@ class AppointmentNoty extends Notification implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(AppointmentNoty $request)
+    public function __construct(Appointment $request)
     {
         $this->request = $request;
-        //
     }
 
     /**
@@ -60,12 +61,15 @@ class AppointmentNoty extends Notification implements ShouldQueue
      */
     public function toArray($notifiable)
     {
+        if($this->request->appointment_status==1){
+            $message = 'Appointment is Scheduled on '.convertToLocal(Carbon::parse($this->request->appointment_date),'','d/m/Y').' at '.Carbon::parse($this->request->start_time)->format('h:i A').' to '.Carbon::parse($this->request->start_time)->format('h:i A').' reference #' . $this->request->appointment_reference . '!';
+        }else{
+            $message = config('custom.appointment_log_message.'.$this->request->appointment_status).' with reference to #' . $this->request->appointment_reference . '!';
+        }
         return [
-            'noty_type' => 'appointment-scheduled',
-            //'request_id' => $this->request->id,
+            'noty_type' => config('custom.appointment_log_message.'.$this->request->appointment_status),
             'reference' => $this->request->appointment_reference,
-            'message' => 'Appointment is Scheduled with reference #' . $this->request->appointment_reference . '!',
-            // 'open_link' => route('paymentRequestView',['id'=>$this->request->id])
+            'message' => $message,
         ];
     }
 
@@ -77,12 +81,15 @@ class AppointmentNoty extends Notification implements ShouldQueue
      */
     public function toBroadcast($notifiable)
     {
+        if($this->request->appointment_status==1){
+            $message = 'Appointment is Scheduled on '.convertToLocal(Carbon::parse($this->request->appointment_date),'','d/m/Y').' at '.Carbon::parse($this->request->start_time)->format('h:i A').' to '.Carbon::parse($this->request->start_time)->format('h:i A').' reference #' . $this->request->appointment_reference . '!';
+        }else{
+            $message = config('custom.appointment_log_message.'.$this->request->appointment_status).' with reference to #' . $this->request->appointment_reference . '!';
+        }
         return new BroadcastMessage([
-            'noty_type' => 'appointment-scheduled',
-            //'request_id' => $this->request->id,
+            'noty_type' => config('custom.appointment_log_message.'.$this->request->appointment_status),
             'reference' => $this->request->appointment_reference,
-            'message' => 'Appointment is Scheduled with reference #' . $this->request->appointment_reference . '!',
-            // 'open_link' => route('paymentRequestView',['id'=>$this->request->id])
+            'message' => $message,
         ]);
     }
 }

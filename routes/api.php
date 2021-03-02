@@ -146,8 +146,8 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
     Route::post('features/save', 'Api\FeatureController@save');
     Route::get('features/delete/{id}', 'Api\FeatureController@destroy');
     /* Notification */
-    Route::get('notification/list', 'NotificationController@notificationList');
-    Route::get('notification/read-all', 'NotificationController@markNotificationsAsRead');
+    Route::get('notification/list', 'Api\NotificationController@notificationList');
+    Route::get('notification/read-all', 'Api\NotificationController@markNotificationsAsRead');
 });
 
 Route::any('{path}', function () {

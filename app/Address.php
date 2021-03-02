@@ -30,25 +30,6 @@ class Address extends Model
         return $this->hasMany(AddressImage::class);
     }
 
-    public function contactAddress() {
-        return $address = [
-            'line_1' => ucfirst($this->line_1),
-            'line_2' => ucfirst($this->line2),
-            'country' => ucfirst(optional($this->country)->name),
-            'state' => ucfirst(optional($this->state)->name),
-            'city' => ucfirst(optional($this->city)->name),
-        ];
-    }
-
-    public function clinicAddress() {
-        return $address = [
-            'name' => ucfirst($this->name),
-            'line_1' => ucfirst($this->line_1),
-            'line_2' => ucfirst($this->line2),
-            'country' => ucfirst(optional($this->country)->name),
-            'state' => ucfirst(optional($this->state)->name),
-            'city' => ucfirst(optional($this->city)->name),
-        ];
-    }
+    
 
 }
