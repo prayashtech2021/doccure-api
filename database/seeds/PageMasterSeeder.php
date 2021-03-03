@@ -48,6 +48,12 @@ class PageMasterSeeder extends Seeder
             11 => [
                 'name' => 'email_verification'
             ],
+            12 => [
+                'name' => 'appointments'
+            ],
+            13 => [
+                'name' => 'calender'
+            ],
         ];
             foreach ($datas as $id => $data) {
                 $row = PageMaster::firstOrNew([
