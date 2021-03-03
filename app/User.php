@@ -80,6 +80,7 @@ class User extends Authenticatable implements Wallet, WalletFloat
             'total_unread_chat' => ($this->chat_inbox())? $this->chat_inbox()->where('read_status',0)->count() : 0,
             'last_message' => ($id)? $this->lastChat($id) : '',
             'status' => $this->status,
+            'online_status' => $this->onlineStatus(),
         ];
     }
 
@@ -105,6 +106,7 @@ class User extends Authenticatable implements Wallet, WalletFloat
             'patient_paid' => ($this->payment())?$this->payment()->sum('total_amount'):'',
             'total_unread_chat' => ($this->chat_inbox())? $this->chat_inbox()->where('read_status',0)->count() : 0,
             'last_message' => ($id)? $this->lastChat($id) : '',
+            'online_status' => $this->onlineStatus(),
         ];
     }
 
@@ -288,13 +290,22 @@ class User extends Authenticatable implements Wallet, WalletFloat
             'unread' => ($list)? $count : 0,
         ];
     }
-    public function latestMessage() 
-    {
-        return $this->hasMany(Chat::class, 'recipient_id')->latest();
-    }
     
     public function callLog()
     {
         return $this->hasMany(CallLog::class, 'from');
+    }
+
+    public function onlineStatus(){
+        $this->last_seen_time;
+        $current = Carbon::now();
+        $from = Carbon::parse($this->last_seen_time);
+
+        $diff_in_minutes = $current->diffInMinutes($from);
+        if($diff_in_minutes > 10){
+            return 0;
+        }else{
+            return 1;
+        }
     }
 }

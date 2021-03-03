@@ -8,6 +8,7 @@ use App\Language;
 use App\MultiLanguage;
 use App\PageMaster;
 use DB;
+use App\Chat;
 
 class LanguageController extends Controller
 {
@@ -120,6 +121,8 @@ class LanguageController extends Controller
             $data['page_master'] = PageMaster::get();
             $data['language'] = Language::select('id','name','code')->get();
         }
+        $data['unread_noty_count'] = auth()->user()->unreadNotifications()->count();
+        $data['unread_chat_count'] = Chat::where('recipient_id',auth()->user()->id)->where('read_status',0)->count();
         
         return self::send_success_response($data,'List Fetched Successfully');
     }
