@@ -64,7 +64,7 @@ class AppointmentController extends Controller
 
             $user = auth()->user();
             updateLastSeen(auth()->user());
-            $update = Appointment::whereIn('appointment_status',[1,2])->whereDate('appointment_date','<',now())->update(['appointment_status'=>7]);
+            $update = Appointment::whereIn('appointment_status',[1,2])->whereDate('appointment_date','<',convertToUTC(now()))->update(['appointment_status'=>7]);
             
             $paginate = $request->count_per_page ? $request->count_per_page : 10;
             $pageNumber = $request->page ? $request->page : 1;
@@ -79,10 +79,10 @@ class AppointmentController extends Controller
                         $list = $list->whereIn('appointment_status', [1,2])->whereDate('appointment_date', '>=', convertToUTC(now()));
                         break;
                     case 2: //missed
-                        $list = $list->whereIn('appointment_status', [1,2])->whereDate('appointment_date', '<=', convertToUTC(now()));
+                        $list = $list->whereIn('appointment_status', [1,2])->whereDate('appointment_date', '<', convertToUTC(now()));
                         break;
                     case 3: //completed/approved
-                        $list = $list->where('appointment_status', 3)->whereDate('appointment_date', '<', convertToUTC(now()));
+                        $list = $list->where('appointment_status', 3);
                         break;
                     default:
                         break;
