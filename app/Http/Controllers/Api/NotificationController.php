@@ -19,12 +19,13 @@ class NotificationController extends Controller {
 					'read_status' => ($notification->read_at != '')? 0 : 1, 
 				];
 			}
+			$count = auth()->user()->unreadNotifications()->count();
+			$data = ['list'=>$array,'unread_count'=>$count];
+			
 			if ($array) {
-				$count = auth()->user()->unreadNotifications()->count();
-				$array['unread_count'] = $count;
-				return self::send_success_response($array, 'Notification list fetched successfully');
+				return self::send_success_response($data, 'Notification list fetched successfully');
 			} else {
-				return self::send_success_response($array, 'No Records Found');
+				return self::send_success_response($data, 'No Records Found');
 			}
 		} catch (Exception | Throwable $e) {
             return self::send_exception_response($exception->getMessage());

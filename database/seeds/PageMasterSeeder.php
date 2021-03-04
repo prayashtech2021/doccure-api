@@ -60,6 +60,9 @@ class PageMasterSeeder extends Seeder
             15 => [
                 'name' => 'invoice_view'
             ],
+            16 => [
+                'name' => 'chat'
+            ],
         ];
             foreach ($datas as $id => $data) {
                 $row = PageMaster::firstOrNew([
