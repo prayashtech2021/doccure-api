@@ -54,6 +54,12 @@ class PageMasterSeeder extends Seeder
             13 => [
                 'name' => 'calender'
             ],
+            14 => [
+                'name' => 'invoice'
+            ],
+            15 => [
+                'name' => 'invoice_view'
+            ],
         ];
             foreach ($datas as $id => $data) {
                 $row = PageMaster::firstOrNew([

@@ -65,11 +65,12 @@ class Controller extends BaseController {
 	 * @return \Illuminate\Http\JsonResponse
 	 */
 
-	public static function send_success_response($data, $message = 'OK') {
+	public static function send_success_response($data, $message = 'OK',$common = NULL) {
 		$response_array = [
 			"code" => "200",
 			"message" => $message,
 			"data" => $data,
+			"common" => ($common)? $common : '',
 		];
 
 		return response()->json(self::convertNullsAsEmpty($response_array), 200);
@@ -115,7 +116,7 @@ class Controller extends BaseController {
 	 * @param $error
 	 * @return \Illuminate\Http\JsonResponse
 	 */
-	public static function send_exception_response($error_message) {
+	public static function send_exception_response($error_message,$common = NULL) {
 		$response_array = [
 			"code" => 500,
 			"message" => 'Something went wrong! Please try again later.',
@@ -126,8 +127,8 @@ class Controller extends BaseController {
 					'code' => '1003',
 				],
 			],
+			'common' => ($common)? $common : '',
 		];
-
 		return response()->json(self::convertNullsAsEmpty($response_array), 500);
 	}
 
