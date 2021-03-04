@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use Validator;
-use App\ { User,Address,Appointment,Prescription,PrescriptionDetails,Country,UserFavourite };
+use App\ { User,Address,Appointment,Prescription,PrescriptionDetails,Country,UserFavourite,PageContent };
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use DB;
@@ -218,6 +218,14 @@ class PatientController extends Controller
     }
 
     public function patientDashboard(Request $request){
+        $array = [];
+            $lang_id = ($request->language_id)? $request->language_id : defaultLang();
+            $array['header'] = getLangContent(8,$lang_id);
+            $array['setting'] = getSettingData();
+            $array['menu'] = getAppMenu();
+            $array['lang_content'] = getLangContent(10,$lang_id);
+            $array['footer'] = getLangContent(9,$lang_id);
+
         $rules = array(
             'consumer_id' => 'required|numeric|exists:users,id',
             'count_per_page' => 'nullable|numeric',
@@ -226,7 +234,7 @@ class PatientController extends Controller
         );
         $valid = self::customValidation($request, $rules);
         if ($valid) {return $valid;}
-
+            
         try {
             $user_id = auth()->user()->id;
             $user = auth()->user();
@@ -242,13 +250,14 @@ class PatientController extends Controller
                     'prescription_list' => $prescription_result,
                     'medical_record_list'=> $medical_record_result,
                 ];
-                return self::send_success_response($result);
+                
+                return self::send_success_response($result,$common);
             }else{
                 $message = "Unauthorised request.";
                 return self::send_unauthorised_request_response($message);
             }
         } catch (\Exception | \Throwable $exception) {
-           return self::send_exception_response($exception->getMessage());
+           return self::send_exception_response($exception->getMessage(),$array);
         }
     }
 

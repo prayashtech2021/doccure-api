@@ -10,34 +10,34 @@ class NotificationController extends Controller {
 	public function notificationList(Request $request) {
 		try {
 			$notifications = auth()->user()->notifications;
-			$arr = [];
+			
 			foreach ($notifications as $key => $notification) {
-				$arr[$key]['message'] = $notification->data['message'];
-				$arr[$key]['created_at'] = $notification->created_at;
-				$arr[$key]['date_diff'] = $notification->created_at->diffForHumans();
+				$array[] = [
+					'message' => $notification->data['message'],
+					'created_at' => $notification->created_at,
+					'date_diff' => $notification->created_at->diffForHumans(),
+					'read_status' => ($notification->read_at != '')? 0 : 1, 
+				];
 			}
-			if ($arr) {
+			if ($array) {
 				$count = auth()->user()->unreadNotifications()->count();
-				return response()->json(['success' => true, 'code' => 200, 'total' => $count, 'data' => $arr]);
+				$array['unread_count'] = $count;
+				return self::send_success_response($array, 'Notification list fetched successfully');
 			} else {
-				return response()->json(['success' => true, 'code' => 200, 'data' => []]);
+				return self::send_success_response($array, 'No Records Found');
 			}
-		} catch (\Exception | \Throwable $e) {
-			return response()->json(['success' => false, 'code' => 500, 'error' => $e->getMessage()]);
-		}
-	}
-	public function notificationCount(Request $request) {
-		$count = auth()->user()->unreadNotifications()->count();
-		return response()->json(['success' => true, 'code' => 200, 'total' => $count]);
+		} catch (Exception | Throwable $e) {
+            return self::send_exception_response($exception->getMessage());
+        }
 	}
 
 	public function markNotificationsAsRead(Request $request) {
 		try {
 			$user = auth()->user();
 			$user->unreadNotifications->markAsRead();
-			return response()->json(['status' => true, 'code' => 200, 'message' => 'Marked as read']);
-		} catch (\Exception | \Throwable $exception) {
-			return response()->json(['status' => false, 'message' => 'Something went wrong. Please try again later.', 'error' => $exception->getMessage()]);
-		}
+			return self::send_success_response([], 'Marked as read');
+		} catch (Exception | Throwable $e) {
+            return self::send_exception_response($exception->getMessage());
+        }
 	}
 }
