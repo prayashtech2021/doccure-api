@@ -254,7 +254,7 @@ class PatientController extends Controller
                     'medical_record_list'=> $medical_record_result,
                 ];
                 
-                return self::send_success_response($result,$common);
+                return self::send_success_response($result,'Data Fetched Successfully',$common);
             }else{
                 $message = "Unauthorised request.";
                 return self::send_unauthorised_request_response($message,$common);

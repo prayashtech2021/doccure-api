@@ -63,6 +63,18 @@ class PageMasterSeeder extends Seeder
             16 => [
                 'name' => 'chat'
             ],
+            17 => [
+                'name' => 'favourites'
+            ],
+            18 => [
+                'name' => 'Accounts'
+            ],
+            19 => [
+                'name' => 'Profile_setting'
+            ],
+            20 => [
+                'name' => 'change_password'
+            ],
         ];
             foreach ($datas as $id => $data) {
                 $row = PageMaster::firstOrNew([
