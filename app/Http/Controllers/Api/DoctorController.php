@@ -110,23 +110,24 @@ class DoctorController extends Controller
 
     public function doctorProfile(Request $request, $user_id)
     {
+        $lang_id = ($request->language_id)? getLang($request->language_id) : defaultLang();
+        $common['header'] = getLangContent(8,$lang_id);
+        $common['setting'] = getSettingData();
+        $common['lang_content'] = getLangContent(4,$lang_id);
+        $common['footer'] = getLangContent(9,$lang_id);
+
         try {
             if($request->language_id){ 
                 $rules = array(
                     'language_id' => 'integer|exists:languages,id',
                 );
-                $valid = self::customValidation($request, $rules);
+                $valid = self::customValidation($request, $rules, $common);
                 if($valid){ return $valid;}
             }
 
             $list = User::role('doctor')->with('doctorService', 'doctorEducation', 'doctorExperience', 'doctorAwards', 'doctorMembership', 'doctorRegistration')->find($user_id);
             if ($list) {
-                $array = [];
-                $lang_id = ($request->language_id)? $request->language_id : defaultLang();
-                $array['header'] = getLangContent(8,$lang_id);
-                $array['setting'] = getSettingData();
-                $array['lang_content'] = getLangContent(4,$lang_id);
-
+                
                 $array['profile'] = $list;
                 $array['average_rating'] = ($list->avgRating()) ? $list->avgRating() : 0;
                 $array['feedback'] = ($list->doctorRatings()) ? $list->doctorRatings()->where('user_id', $user_id)->count() : 0;
@@ -151,14 +152,13 @@ class DoctorController extends Controller
                     $fav = $list->userHasFav(auth('api')->user()->id);
                 }
                 $array['favourite'] = $fav;
-                $array['footer'] = getLangContent(9,$lang_id);
 
-                return self::send_success_response($array, 'Doctor Details Fetched Successfully.');
+                return self::send_success_response($array, 'Doctor Details Fetched Successfully.',$common);
             } else {
-                return self::send_bad_request_response('Incorrect User Id. Please check and try again.');
+                return self::send_bad_request_response('Incorrect User Id. Please check and try again.',$common);
             }
         } catch (\Exception | \Throwable $exception) {
-            return self::send_exception_response($exception->getMessage());
+            return self::send_exception_response($exception->getMessage(),$common);
         }
     }
 
@@ -439,6 +439,12 @@ class DoctorController extends Controller
 
     public function doctorSearchList(Request $request)
     {
+        $lang_id = ($request->language_id)? getLang($request->language_id) : defaultLang();
+        $common['header'] = getLangContent(8,$lang_id);
+        $common['setting'] = getSettingData();
+        $common['lang_content'] = getLangContent(3,$lang_id);
+        $common['footer'] = getLangContent(9,$lang_id);
+
         $rules = array(
             'keywords' => 'nullable|string',
             'gender' => 'nullable|string',
@@ -452,16 +458,11 @@ class DoctorController extends Controller
             'state_name' => 'nullable',
             'city_name' => 'nullable',
         );
-        $valid = self::customValidation($request, $rules);
+        $valid = self::customValidation($request, $rules, $common);
         if ($valid) {return $valid;}
 
         try {
-            $array = [];
-            $lang_id = ($request->language_id)? $request->language_id : defaultLang();
-            $array['header'] = getLangContent(8,$lang_id);
-            $array['setting'] = getSettingData();
-            $array['lang_content'] = getLangContent(3,$lang_id);
-
+            
             $doctors = User::role('doctor');
 
             if ($request->keywords) {
@@ -536,16 +537,15 @@ class DoctorController extends Controller
                 $data->push($provider->doctorProfile());
             });
             $array['profile'] = $data;
-            $array['footer'] = getLangContent(9,$lang_id);
 
             if (count($data) > 0) {
                 $msg = 'Doctors data fetched successfully';
             } else {
                 $msg = "No Records Found";
             }
-            return self::send_success_response($array, $msg );
+            return self::send_success_response($array, $msg, $common);
         } catch (\Exception | \Throwable $exception) {
-            return self::send_exception_response($exception->getMessage());
+            return self::send_exception_response($exception->getMessage(), $common);
         }
     }
 

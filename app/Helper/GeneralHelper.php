@@ -80,17 +80,23 @@ function generateReference($user_id, $last_id, $prefix = '#', $length = 8)
     $pad_length = $length - strlen($prefix);
     return $prefix . str_pad($user_id . '0' . $next, $pad_length, "0", STR_PAD_LEFT);
 }
+
+function getLang($lang_id){
+    $id = Language::find($lang_id);
+    return ($id)? $lang_id : defaultLang();
+}
+
 function defaultLang(){
     $default_lang = Language::select('id')->get('is_default',1)->first();
     return $default_lang->id;
 }
 function getLangContent($page_master_id,$lang_id){
     $get = MultiLanguage::where('page_master_id',$page_master_id)->where('language_id',$lang_id)->get();
-    $header = [];
+    $data = [];
     foreach($get as $value){
-        $header[$value->keyword] = $value->value;
+        $data[$value->keyword] = $value->value;
     }
-    return $header;
+    return $data;
 }
 function getSettingData(){
     $result = Setting::whereIn('slug',['general_settings','social_link'])->get();

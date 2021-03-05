@@ -462,28 +462,27 @@ class HomeController extends Controller
     }
 
     public function getCommonData(Request $request){
+        
+            $common = [];
+            $lang_id = ($request->language_id)? getLang($request->language_id) : defaultLang();
+            $common['header'] = getLangContent(8,$lang_id);
+            $common['setting'] = getSettingData();
+            $common['page_content'] = PageContent::where('slug','login')->first();
+            $common['lang_content'] = getLangContent($request->page_master_id,$lang_id);
+            $common['footer'] = getLangContent(9,$lang_id);
         try {
-
-            if($request->language_id){ 
-                $rules = array(
-                    'page_master_id' => 'required|integer|exists:page_masters,id', 
-                    'language_id' => 'integer|exists:languages,id',
-                );
-                $valid = self::customValidation($request, $rules);
-                if($valid){ return $valid;}
-            } 
-            $array = [];
-            $lang_id = ($request->language_id)? $request->language_id : defaultLang();
-            $array['header'] = getLangContent(8,$lang_id);
-            $array['setting'] = getSettingData();
-            $array['page_content'] = PageContent::where('slug','login')->first();
-            $array['lang_content'] = getLangContent($request->page_master_id,$lang_id);
-            $array['footer'] = getLangContent(9,$lang_id);
-
-            return self::send_success_response($array, 'Content fetched successfully');
+            $rules = array(
+                'page_master_id' => 'required|integer|exists:page_masters,id', 
+            );
+            if ($request->language_id) {
+                $rules['language_id'] = 'integer|exists:languages,id';
+            }
+            $valid = self::customValidation($request, $rules,$common);
+            if($valid){ return $valid;}
+            
+            return self::send_success_response([], 'Content fetched successfully',$common);
         } catch (Exception | Throwable $e) {
-            DB::rollback();
-            return self::send_exception_response($exception->getMessage());
+            return self::send_exception_response($exception->getMessage(),$common);
         }
     }
 

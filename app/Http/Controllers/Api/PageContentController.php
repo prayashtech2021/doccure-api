@@ -80,22 +80,24 @@ class PageContentController extends Controller
     }
 
     public function getList(Request $request){
+
+        $lang_id = ($request->language_id)? getLang($request->language_id) : defaultLang();
+        $common['header'] = getLangContent(8,$lang_id);
+        $common['setting'] = getSettingData();
+        $common['lang_content'] = getLangContent(2,$lang_id);
+        $common['footer'] = getLangContent(9,$lang_id);
+
         try {
             if($request->language_id){ 
                 $rules = array(
                     'language_id' => 'integer|exists:languages,id',
                 );
-                $valid = self::customValidation($request, $rules);
+                $valid = self::customValidation($request, $rules,$common);
                 if($valid){ return $valid;}
             } 
-            
+        
             $getSettings = PageContent::get();
         
-            $array = [];
-            $lang_id = ($request->language_id)? $request->language_id : defaultLang();
-            $array['header'] = getLangContent(8,$lang_id);
-            $array['setting'] = getSettingData();
-            $array['lang_content'] = getLangContent(2,$lang_id);
             if($request->type == 1){
                 $provider_list = User::role('doctor')->orderBy('id','asc');
                 $doc_array = collect();
@@ -134,12 +136,10 @@ class PageContentController extends Controller
                     'path'=>$path
                 ];
             }
-            $array['footer'] = getLangContent(9,$lang_id);
 
-            return self::send_success_response($array, 'Page Content data fetched successfully');
+            return self::send_success_response($array, 'Page Content data fetched successfully',$common);
         } catch (Exception | Throwable $e) {
-            DB::rollback();
-            return self::send_exception_response($exception->getMessage());
+            return self::send_exception_response($exception->getMessage(),$common);
         }
     }
 

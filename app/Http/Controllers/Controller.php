@@ -16,10 +16,11 @@ class Controller extends BaseController {
 
 	}
 
-	public static function customValidation($request,$rules) {
+	public static function customValidation($request,$rules,$common=NULL) {
 		$validator = Validator::make($request->all(), $rules);
 		if ($validator->fails()) {
-			return self::send_bad_request_response($validator->errors()->first());
+			$common_data = ($common)? $common : '';
+			return self::send_bad_request_response($validator->errors()->first(),$common_data);
 			// return response()->json(['success' => false, 'code' => 400, 'error' => $validator->errors()->first(), 'error_details' => $validator->errors()]);
 		}
 	}
@@ -76,7 +77,7 @@ class Controller extends BaseController {
 		return response()->json(self::convertNullsAsEmpty($response_array), 200);
 	}
 
-	public static function send_unauthorised_request_response($error_message) {
+	public static function send_unauthorised_request_response($error_message,$common = NULL) {
 		$response_array = [
 			"code" => 401,
 			"message" => 'Unauthorized request',
@@ -87,6 +88,7 @@ class Controller extends BaseController {
 					'code' => '1001',
 				],
 			],
+			"common" => ($common)? $common : '',
 		];
 
 		return response()->json(self::convertNullsAsEmpty($response_array), 401);
@@ -96,7 +98,7 @@ class Controller extends BaseController {
 	 * @param $validation_error_message
 	 * @return \Illuminate\Http\JsonResponse
 	 */
-	public static function send_bad_request_response($error_message) {
+	public static function send_bad_request_response($error_message,$common = NULL) {
 		$response_array = [
 			"code" => 400,
 			"message" => $error_message,
@@ -107,6 +109,7 @@ class Controller extends BaseController {
 					'code' => '1002',
 				],
 			],
+			"common" => ($common)? $common : '',
 		];
 
 		return response()->json(self::convertNullsAsEmpty($response_array), 400);
@@ -136,7 +139,7 @@ class Controller extends BaseController {
 	 * @param $error_message
 	 * @return \Illuminate\Http\JsonResponse
 	 */
-	public static function send_access_forbidden_response($error_message) {
+	public static function send_access_forbidden_response($error_message,$common = NULL) {
 		$response_array = [
 			"code" => 403,
 			"message" => 'Forbidden',
@@ -147,12 +150,13 @@ class Controller extends BaseController {
 					'code' => '1004',
 				],
 			],
+			'common' => ($common)? $common : '',
 		];
 
 		return response()->json(self::convertNullsAsEmpty($response_array), 403);
 	}
 
-	public static function send_request_not_found_response() {
+	public static function send_request_not_found_response($common = NULL) {
 		$response_array = [
 			"code" => 404,
 			"message" => 'Requested url is not found',
@@ -163,6 +167,7 @@ class Controller extends BaseController {
 					'code' => '1005',
 				],
 			],
+			'common' => ($common)? $common : '',
 		];
 
 		return response()->json(self::convertNullsAsEmpty($response_array), 404);

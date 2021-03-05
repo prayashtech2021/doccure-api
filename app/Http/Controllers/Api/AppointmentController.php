@@ -56,6 +56,7 @@ class AppointmentController extends Controller
                 'page' => 'nullable|numeric',
                 'order_by' => 'nullable|in:desc,asc',
                 'appointment_status' => 'nullable|numeric',
+                'status' => 'nullable|numeric',
                 'request_type' => 'nullable|numeric|in:1,2',
                 'appointment_date' => 'nullable|date_format:d/m/Y',
             );
@@ -87,6 +88,10 @@ class AppointmentController extends Controller
                     default:
                         break;
                 }
+            }
+
+            if($request->status){
+                $list = $list->where('appointment_status', $request->status);
             }
 
             $appointment_date = $request->appointment_date ? Carbon::createFromFormat('d/m/Y', $request->appointment_date) : null;
