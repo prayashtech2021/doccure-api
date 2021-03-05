@@ -134,10 +134,17 @@ class AppointmentController extends Controller
                 });
                 return $data;
             }else{
+                $paginatedata = $list->paginate($paginate, ['*'], 'page', $pageNumber);
+
                 $list->paginate($paginate, ['*'], 'page', $pageNumber)->getCollection()->each(function ($appointment) use (&$data) {
                     $data->push($appointment->getData());
                 });
+                
                 $result['list'] = $data;
+                $result['total_count'] = $paginatedata->total();
+                $result['last_page'] = $paginatedata->lastPage();
+                $result['current_page'] = $paginatedata->currentPage();
+                
                 return self::send_success_response($result);
             }
 
