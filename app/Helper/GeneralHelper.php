@@ -185,5 +185,13 @@ function getAppMenu() {
         return $menus;
     }
     return [];
+}
     
+function getPostImage($image){
+    if (!empty($image) && Storage::exists('images/blogs/' . $image)) {
+        $path = (config('filesystems.default') == 's3') ? Storage::temporaryUrl('app/public/images/blogs/' . $image, now()->addMinutes(5)) : Storage::url('app/public/images/blogs/' . $image);
+    } else {
+        $path = url('img/default_blog.png');
+    }
+    return $path;
 }
