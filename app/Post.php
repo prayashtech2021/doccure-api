@@ -17,7 +17,7 @@ class Post extends Model
             'title' => $this->title,
             'thumbnail_image' => getPostImage($this->thumbnail_image),
             'banner_image' => getPostImage($this->banner_image),
-            'author' => $this->author()->select(DB::raw("CONCAT(first_name,' ', last_name) as author_name"))->first()->author_name,
+            'author' => $this->author->basicProfile(),
             'is_verified' => $this->is_verified,
             'is_viewable' => $this->is_viewable,
             'meta_description' => $this->meta_description,
