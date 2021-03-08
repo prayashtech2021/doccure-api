@@ -39,6 +39,7 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'responseHeader'])->group(func
 });
 Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader'])->group(function () {
     /* common */
+    Route::get('auth-common-page','Api\HomeController@getCommonData');
     Route::post('changepassword', 'Api\HomeController@changePassword');
     Route::post('reset-password', 'Api\HomeController@resetPassword');
     Route::get('user/delete/{id}', 'Api\HomeController@destroy');

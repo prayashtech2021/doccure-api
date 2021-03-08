@@ -113,7 +113,11 @@ class DoctorController extends Controller
         $lang_id = ($request->language_id)? getLang($request->language_id) : defaultLang();
         $common['header'] = getLangContent(8,$lang_id);
         $common['setting'] = getSettingData();
-        $common['lang_content'] = getLangContent(4,$lang_id);
+        if($request->is_bookingpage){ //only for booking page
+            $common['lang_content'] = getLangContent(22,$lang_id);
+        }else{
+            $common['lang_content'] = getLangContent(4,$lang_id);
+        }
         $common['footer'] = getLangContent(9,$lang_id);
 
         try {

@@ -467,7 +467,11 @@ class HomeController extends Controller
             $lang_id = ($request->language_id)? getLang($request->language_id) : defaultLang();
             $common['header'] = getLangContent(8,$lang_id);
             $common['setting'] = getSettingData();
-            $common['page_content'] = PageContent::where('slug','login')->first();
+            if (auth()->check()) {
+                $common['menu'] = getAppMenu();
+            }else{
+                $common['page_content'] = PageContent::where('slug','login')->first();
+            }
             $common['lang_content'] = getLangContent($request->page_master_id,$lang_id);
             $common['footer'] = getLangContent(9,$lang_id);
         try {
