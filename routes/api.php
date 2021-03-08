@@ -33,6 +33,9 @@ Route::middleware(['secureApi', 'responseHeader'])->group(function () {
     Route::get('doctor/profile/{id}', 'Api\DoctorController@doctorProfile');
     Route::get('landing-page','Api\PageContentController@getList');
     Route::get('common-page','Api\HomeController@getCommonData');
+
+    // for blogs
+    Route::get('post', 'Api\PostController@index');
 });
 Route::middleware(['CheckAuthHeader', 'auth:api', 'responseHeader'])->group(function () {
     Route::post('email-template/save','Api\EmailTemplateController@save');
@@ -149,6 +152,8 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
     /* Notification */
     Route::get('notification/list', 'Api\NotificationController@notificationList');
     Route::get('notification/read-all', 'Api\NotificationController@markNotificationsAsRead');
+    
+    
 });
 
 Route::any('{path}', function () {
