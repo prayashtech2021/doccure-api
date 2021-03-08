@@ -138,6 +138,7 @@ function getAppMenu() {
             $menus = [
                 'dashboard' => ucwords($lang->first(function($item) {return $item->keyword == 'dashboard';})->value),
                 'appointments' => ucwords($lang->first(function($item) {return $item->keyword == 'appointments';})->value),
+                'all_appointments' => ucwords($lang->first(function($item) {return $item->keyword == 'all_appointments';})->value),
                 'specialization' => ucwords($lang->first(function($item) {return $item->keyword == 'specialization';})->value),
                 'doctors' => ucwords($lang->first(function($item) {return $item->keyword == 'doctors';})->value),
                 'patients' => ucwords($lang->first(function($item) {return $item->keyword == 'patients';})->value),
@@ -154,6 +155,7 @@ function getAppMenu() {
             $menus = [
                 'dashboard' => ucwords($lang->first(function($item) {return $item->keyword == 'dashboard';})->value),
                 'appointments' => ucwords($lang->first(function($item) {return $item->keyword == 'appointments';})->value),
+                'all_appointments' => ucwords($lang->first(function($item) {return $item->keyword == 'all_appointments';})->value),
                 'my_patients' => ucwords($lang->first(function($item) {return $item->keyword == 'my_patients';})->value),
                 'schedule_timings' => ucwords($lang->first(function($item) {return $item->keyword == 'schedule_timings';})->value),
                 'calendar' => ucwords($lang->first(function($item) {return $item->keyword == 'calendar';})->value),
@@ -171,6 +173,7 @@ function getAppMenu() {
             $menus = [
                 'dashboard' => ucwords($lang->first(function($item) {return $item->keyword == 'dashboard';})->value),
                 'appointments' => ucwords($lang->first(function($item) {return $item->keyword == 'appointments';})->value),
+                'all_appointments' => ucwords($lang->first(function($item) {return $item->keyword == 'all_appointments';})->value),
                 'calendar' => ucwords($lang->first(function($item) {return $item->keyword == 'calendar';})->value),
                 'invoice' => ucwords($lang->first(function($item) {return $item->keyword == 'invoice';})->value),
                 'accounts' => ucwords($lang->first(function($item) {return $item->keyword == 'accounts';})->value),

@@ -26,20 +26,34 @@ class PatientController extends Controller
      */
 
     
-    public function profile_details($id){
+    public function profile_details(Request $request, $id){
+        $common = [];
+        $lang_id = ($request->language_id)? getLang($request->language_id) : defaultLang();
+        $common['header'] = getLangContent(8,$lang_id);
+        $common['setting'] = getSettingData();
+        $common['menu'] = getAppMenu();
+        $common['lang_content'] = getLangContent(19,$lang_id);
+        $common['footer'] = getLangContent(9,$lang_id);
+        
         try {
+            if ($request->language_id) {
+                $rules['language_id'] = 'integer|exists:languages,id';
+            
+                $valid = self::customValidation($request, $rules,$common);
+                if ($valid) {return $valid;}
+            }
             $user = User::find($id);
             $user->profile_image=getUserProfileImage($user->id);
             unset($user->roles);
             removeMetaColumn($user);
         
             if($user){
-                return self::send_success_response($user,'Patient Profile Detail Fetched Successfully');
+                return self::send_success_response($user,'Patient Profile Detail Fetched Successfully',$common);
             }else{
-                return self::send_bad_request_response('No Records Found');
+                return self::send_bad_request_response('No Records Found',$common);
             }
         } catch (Exception | Throwable $exception) {
-            return self::send_exception_response($exception->getMessage());
+            return self::send_exception_response($exception->getMessage(),$common);
         }  
     }
 
@@ -113,6 +127,8 @@ class PatientController extends Controller
             if ($validator->fails()) {
                 return self::send_bad_request_response($validator->errors()->first());
             }
+            DB::beginTransaction();
+
             //Save patient profile
             $patient = User::find($user_id);
             if($patient){
@@ -140,12 +156,14 @@ class PatientController extends Controller
             $contact_details->city_id = ($request->contact_city_id)? $request->contact_city_id : NULL;
             $contact_details->postal_code = ($request->contact_postal_code) ? $request->contact_postal_code : NULL;
             $contact_details->save();
-            
+            DB::commit();
+
                 return self::send_success_response([],'Patient Profile Updated Successfully');
             }else{
                 return self::send_unauthorised_request_response('Incorrect User Id, Kindly check and try again.');
             }
         } catch (Exception | Throwable $exception) {
+            DB::rollback();
             return self::send_exception_response($exception->getMessage());
         }
     }
@@ -299,8 +317,22 @@ class PatientController extends Controller
         }
     }
 
-    public function getFavouriteList(){
+    public function getFavouriteList(Request $request){
+        $common = [];
+        $lang_id = ($request->language_id)? getLang($request->language_id) : defaultLang();
+        $common['header'] = getLangContent(8,$lang_id);
+        $common['setting'] = getSettingData();
+        $common['menu'] = getAppMenu();
+        $common['lang_content'] = getLangContent(17,$lang_id);
+        $common['footer'] = getLangContent(9,$lang_id);
+        
         try{    
+            if ($request->language_id) {
+                $rules['language_id'] = 'integer|exists:languages,id';
+            
+                $valid = self::customValidation($request, $rules,$common);
+                if ($valid) {return $valid;}
+            }            
             $user = auth()->user();
             if($user->hasrole('patient')){
                 $list =  auth()->user()->userFav;
@@ -310,14 +342,12 @@ class PatientController extends Controller
                     $data->push($provider->basicProfile());
                 });
 
-                return self::send_success_response($data,'Patient Favourite List');
+                return self::send_success_response($data,'Patient Favourite List',$common);
             }else{
-                $message = "Unauthorised request.";
-                return self::send_unauthorised_request_response($message);
+                return self::send_unauthorised_request_response("Unauthorised request",$common);
             }
         } catch (Exception | Throwable $exception) {
-            DB::rollback();
-            return self::send_exception_response($exception->getMessage());
+            return self::send_exception_response($exception->getMessage(),$common);
         }
     }
 

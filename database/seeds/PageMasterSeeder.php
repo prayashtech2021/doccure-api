@@ -70,10 +70,28 @@ class PageMasterSeeder extends Seeder
                 'name' => 'Accounts'
             ],
             19 => [
-                'name' => 'Profile_setting'
+                'name' => 'profile_setting'
             ],
             20 => [
                 'name' => 'change_password'
+            ],
+            21 => [
+                'name' => 'notifications'
+            ],
+            22 => [
+                'name' => 'booking'
+            ],
+            23 => [
+                'name' => 'checkout'
+            ],
+            24 => [
+                'name' => 'booking_success'
+            ],
+            25 => [
+                'name' => 'get_direction'
+            ],
+            26 => [
+                'name' => 'doctor_dashboard'
             ],
         ];
             foreach ($datas as $id => $data) {
