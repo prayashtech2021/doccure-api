@@ -225,20 +225,21 @@ class PatientController extends Controller
         $common['menu'] = getAppMenu();
         $common['lang_content'] = getLangContent(10,$lang_id);
         $common['footer'] = getLangContent(9,$lang_id);
-
-        $rules = array(
+        
+        try {
+        
+            $rules = array(
             'consumer_id' => 'required|numeric|exists:users,id',
             'count_per_page' => 'nullable|numeric',
             'order_by' => 'nullable|in:desc,asc',
             'page' => 'nullable|numeric',
-        );
-        if ($request->language_id) {
-            $rules['language_id'] = 'integer|exists:languages,id';
-        }
-        $valid = self::customValidation($request, $rules,$common);
-        if ($valid) {return $valid;}
+            );
+            if ($request->language_id) {
+                $rules['language_id'] = 'integer|exists:languages,id';
+            }
+            $valid = self::customValidation($request, $rules,$common);
+            if ($valid) {return $valid;}
             
-        try {
             $user_id = auth()->user()->id;
             $user = auth()->user();
             updateLastSeen($user);

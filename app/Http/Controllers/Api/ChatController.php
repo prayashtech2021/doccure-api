@@ -18,13 +18,24 @@ class ChatController extends Controller
 
     public function index(Request $request)
     {
+        $common = [];
+        $lang_id = ($request->language_id)? getLang($request->language_id) : defaultLang();
+        $common['header'] = getLangContent(8,$lang_id);
+        $common['setting'] = getSettingData();
+        $common['menu'] = getAppMenu();
+        $common['lang_content'] = getLangContent(16,$lang_id);
+        $common['footer'] = getLangContent(9,$lang_id);
+
         $rules = array(
             'recipient_id' => 'required|exists:users,id',
             'count_per_page' => 'nullable|numeric',
             'page' => 'nullable|numeric',
             'order_by' => 'nullable|in:desc,asc',
         );
-        $valid = self::customValidation($request, $rules);
+        if ($request->language_id) {
+            $rules['language_id'] = 'integer|exists:languages,id';
+        }
+        $valid = self::customValidation($request, $rules,$common);
         if ($valid) {return $valid;}
 
         try {
@@ -49,9 +60,9 @@ class ChatController extends Controller
             $array['last_page'] = $paginatedata->lastPage();
             $array['current_page'] = $paginatedata->currentPage();
 
-            return self::send_success_response($array,'Chat List Fetched Successfully');
+            return self::send_success_response($array,'Chat List Fetched Successfully',$common);
         } catch (Exception | Throwable $exception) {
-            return self::send_exception_response($exception->getMessage());
+            return self::send_exception_response($exception->getMessage(),$common);
         }
     }
     public function send(Request $request)
