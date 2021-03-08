@@ -35,7 +35,7 @@ class PostSeeder extends Seeder
 			1 => [
                 'post_category_id' => 1,
                 'title' => '5 Great reasons to use an Online Doctor',
-                'slug' => '5_Great_reasons_to_use_an_Online_Doctor',
+                'slug' => '5-great-reasons-to-use-an-online-doctor',
                 'banner_image' => '308x206_1607071292.png',
                 'thumbnail_image' => '308x206_1607071292.png',
                 'content' => 'Lorem ipsum dolor sit amet, consectetur em adipiscing elit, sed do eiusmod tempor.Lorem ipsum dolor sit amet, consectetur em adipiscing elit, sed do eiusmod tempor.',
