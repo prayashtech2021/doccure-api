@@ -46,4 +46,8 @@ class Post extends Model
     public function tags(){
         return $this->hasMany(PostTag::class,'post_id');
     }
+    public function comments(){
+        return $this->hasMany(PostComment::class,'post_id','id')->whereNull('parent_id');
+    }
+    
 }

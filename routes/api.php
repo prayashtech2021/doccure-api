@@ -157,6 +157,7 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
     
     //blogs
     Route::get('post/delete/{id}', 'Api\PostController@destroy');
+    Route::post('post/save/{id}', 'Api\PostController@save');
 });
 
 Route::any('{path}', function () {
