@@ -56,7 +56,15 @@ class PostController extends Controller
             }
 
             if(isset($request->viewable) && $request->viewable==1){
-                $list = $list->where('is_verified',1)->where('is_viewable',1);
+                if ($request->bearerToken()) {
+                    if (auth('api')->user()->hasRole('company_admin')) {
+                    $list = $list->where('is_verified',1);
+                    }else{
+                        $list = $list->where('is_verified',1)->where('is_viewable',1);
+                    }
+                }else{
+                    $list = $list->where('is_verified',1)->where('is_viewable',1);
+                }
             }elseif(isset($request->viewable) && $request->viewable==0){
                 $list = $list->where(function($qry){
                     $qry->where('is_verified',0)->orWhere('is_viewable',0); 
