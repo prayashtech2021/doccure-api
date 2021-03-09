@@ -36,6 +36,8 @@ Route::middleware(['secureApi', 'responseHeader'])->group(function () {
 
     // for blogs
     Route::get('post', 'Api\PostController@index');
+    Route::get('post/view/{id}', 'Api\PostController@view');
+    
 });
 Route::middleware(['CheckAuthHeader', 'auth:api', 'responseHeader'])->group(function () {
     Route::post('email-template/save','Api\EmailTemplateController@save');
@@ -153,7 +155,9 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
     Route::get('notification/list', 'Api\NotificationController@notificationList');
     Route::get('notification/read-all', 'Api\NotificationController@markNotificationsAsRead');
     
-    
+    //blogs
+    Route::get('post/delete/{id}', 'Api\PostController@destroy');
+    Route::post('post/save/{id}', 'Api\PostController@save');
 });
 
 Route::any('{path}', function () {
