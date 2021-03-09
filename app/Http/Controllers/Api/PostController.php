@@ -10,6 +10,9 @@ use App\PostSubCategory;
 use App\PostTag;
 use App\PostComment;
 use Illuminate\Support\Carbon;
+use DB;
+use Storage;
+use Image;
 
 class PostController extends Controller
 {
@@ -19,6 +22,8 @@ class PostController extends Controller
             'count_per_page' => 'nullable|numeric',
             'order_by' => 'nullable|in:desc,asc',
             'page' => 'nullable|numeric',
+            'category_id' => 'nullable|numeric|exists:post_categories,id',
+            'tag_name' => 'nullable|string|exists:post_tags,name',
         );
         $valid = self::customValidation($request, $rules);
         if ($valid) {return $valid;}
@@ -32,9 +37,19 @@ class PostController extends Controller
             if ($request->bearerToken()) {
                 if (auth('api')->user()->hasRole('company_admin')) {
                     $list = Post::withTrashed()->orderBy('created_at', $order_by);
+                }elseif (auth('api')->user()->hasRole('doctor')) {
+                    $list = Post::orderBy('created_at', $order_by)->where('created_by',auth('api')->user()->id);
                 }
             }else{
                 $list = Post::orderBy('created_at', $order_by);
+                if(isset($request->category_id) && !empty($request->category_id)){
+                $list = $list->where('post_category_id',$request->category_id);
+                }
+                if(isset($request->tag_id) && !empty($request->tag_id)){
+                $list = $list->whereHas(['tags'=>function($qry){
+                    $qry->where('name',$request->tag_name);
+                }]);
+                }
                 $result['categories'] = PostCategory::withCount('post')->orderBy('name')->get();
                 $result['tags'] = PostTag::orderBy('name')->get();
             }
@@ -102,6 +117,108 @@ class PostController extends Controller
         }
     }
 
+    public function save(Request $request)
+    {
+        if ($request->post_id) { //edit
+            $rules = array(
+                'post_id' => 'integer|exists:posts,id',
+                'title' => 'required|unique:posts,id,' . $request->post_id,
+                'slug' => 'nullable|unique:posts,id,' . $request->post_id,
+                'content' => 'required',
+                'meta_description' => 'nullable',
+                'meta_keywords' => 'nullable',
+                'url' => 'nullable|url',
+                'category_id' => 'required|exists:post_categories,id',
+                'sub_category_id' => 'nullable|exists:post_sub_categories,id',
+                'tags' => 'nullable',
+                'image' => 'required|image|mimes:jpeg,png,jpg|max:2048|dimensions:min_width=680,min_height=454',
+            );
+        } else {
+            $rules = array(
+                'title' => 'required|unique:posts',
+                'slug' => 'nullable|unique:posts',
+                'content' => 'required',
+                'meta_description' => 'nullable',
+                'meta_keywords' => 'nullable',
+                'url' => 'nullable|url',
+                'category_id' => 'required|exists:post_categories,id',
+                'sub_category_id' => 'nullable|exists:post_sub_categories,id',
+                'tags' => 'nullable',
+                'image' => 'required|image|mimes:jpeg,png,jpg|max:2048|dimensions:min_width=680,min_height=454',
+            );
+        }
+        $valid = self::customValidation($request, $rules);
+        if($valid){ return $valid;}
+
+        try {
+            DB::beginTransaction();
+            if ($request->post_id) {
+                $post = Post::find($request->post_id);
+                if (!$post) {
+                    return self::send_bad_request_response('Incorrect post id. Please check and try again!');
+                }
+                $post->updated_by = auth()->user()->id;
+            } else {
+                $post = new Post();
+                $post->created_by = auth()->user()->id;
+            }
+            $post->post_category_id = $request->category_id;
+            $post->post_sub_category_id = (!empty($request->sub_category_id) && ($request->sub_category_id>0))?$request->sub_category_id:null;
+            $post->title = $request->title;
+            if($request->slug){
+                $slug=strtolower($request->slug);
+                $str = str_replace(" ", "-", $slug);
+            }else{
+                $slug=strtolower($post->title);
+                $str = str_replace(" ", "-", $slug);
+            }
+            $post->slug = $str;
+            $post->meta_description = $request->meta_description;
+            $post->meta_keywords = $request->meta_keywords;
+            $post->url = $request->url;
+            $content = preg_replace('#<script(.*?)>(.*?)</script>#is', '', $request->content);
+            $post->content = $content;
+            $post->save();
+            if (!empty($request->image)) {
+                if (Storage::exists('images/blogs/' . $post->banner_image)) {
+                    Storage::delete('images/blogs/' . $post->banner_image);
+                }
+                if (Storage::exists('images/blogs/' . $post->thumbnail_image)) {
+                    Storage::delete('images/blogs/' . $post->thumbnail_image);
+                }
+                
+                $originalImage = $request->file('image');
+                $extension = $request->file('image')->getClientOriginalExtension();
+                $file_name = '308x206_'.date('YmdHis'). '.png';
+                $banner_file_name = '680x454_'.date('YmdHis').$post->id. '.png';
+                $path = 'images/blogs';
+                $store = $request->file('image')->storeAs($path, $banner_file_name);
+                $img = imageResize($originalImage,$file_name, $path,308, 206);
+                $post->banner_image = $banner_file_name;
+                $post->thumbnail_image = $file_name;
+                $post->save();
+                
+            }
+
+            if($request->tags){
+                $tagArray=explode(',',$request->tags);
+                $tags = PostTag::where('post_id',$post->id)->first();
+                    if($tags){
+                        PostTag::where('post_id',$post->id)->forceDelete();
+                    }
+                foreach($tagArray as $tag){
+                    PostTag::create(['post_id'=>$post->id, 'name'=>$tag]);
+                }
+            }
+
+            DB::commit();
+            return self::send_success_response([], 'Post Saved Sucessfully');
+
+        } catch (Exception | Throwable $e) {
+            DB::rollback();
+            return self::send_exception_response($exception->getMessage());
+        }
+    }
     public function destroy(Request $request)
     {
         return self::customDelete('\App\Post', $request->id);

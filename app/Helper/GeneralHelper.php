@@ -198,3 +198,21 @@ function getPostImage($image){
     }
     return $path;
 }
+
+function imageResize($originalImage, $file_name, $path, $width = '', $height = '')
+{
+    try {
+        // Image resize and upload using Intervention
+        $thumbnailImage = Image::make($originalImage);
+
+        $width = (!empty($width)) ? $width : 80;
+        $height = (!empty($height)) ? $height : 80;
+
+        $thumbnailImage->resize($width, $height);
+        Storage::put($path . '/' . $file_name, $thumbnailImage->stream()->__toString());
+
+        return true;
+    } catch (\Exception | \Throwable $e) {
+        return $e->getMessage();
+    }
+}

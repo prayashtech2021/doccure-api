@@ -41,6 +41,7 @@ Route::middleware(['secureApi', 'responseHeader'])->group(function () {
 });
 Route::middleware(['CheckAuthHeader', 'auth:api', 'responseHeader'])->group(function () {
     Route::post('email-template/save','Api\EmailTemplateController@save');
+    Route::post('post/save', 'Api\PostController@save');
 });
 Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader'])->group(function () {
     /* common */
@@ -157,7 +158,7 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
     
     //blogs
     Route::get('post/delete/{id}', 'Api\PostController@destroy');
-    Route::post('post/save/{id}', 'Api\PostController@save');
+    
 });
 
 Route::any('{path}', function () {
