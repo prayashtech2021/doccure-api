@@ -158,7 +158,16 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
     
     //blogs
     Route::get('post/delete/{id}', 'Api\PostController@destroy');
-    
+
+    /*post category */
+    Route::post('category/save', 'Api\PostCategoryController@save');
+    Route::get('category/list', 'Api\PostCategoryController@getList');
+    Route::get('category/delete/{id}', 'Api\PostCategoryController@destroy');
+
+    /*post sub category */
+    Route::post('sub-category/save', 'Api\PostSubCategoryController@save');
+    Route::get('sub-category/list', 'Api\PostSubCategoryController@getList');
+    Route::get('sub-category/delete/{id}', 'Api\PostSubCategoryController@destroy');
 });
 
 Route::any('{path}', function () {

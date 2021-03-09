@@ -24,6 +24,7 @@ class PostController extends Controller
             'page' => 'nullable|numeric',
             'category_id' => 'nullable|numeric|exists:post_categories,id',
             'tag_name' => 'nullable|string|exists:post_tags,name',
+            'viewable' => 'nullable|numeric|in:0,1',
         );
         $valid = self::customValidation($request, $rules);
         if ($valid) {return $valid;}
@@ -45,13 +46,21 @@ class PostController extends Controller
                 if(isset($request->category_id) && !empty($request->category_id)){
                 $list = $list->where('post_category_id',$request->category_id);
                 }
-                if(isset($request->tag_id) && !empty($request->tag_id)){
+                if(isset($request->tag_name) && !empty($request->tag_name)){
                 $list = $list->whereHas(['tags'=>function($qry){
                     $qry->where('name',$request->tag_name);
                 }]);
                 }
                 $result['categories'] = PostCategory::withCount('post')->orderBy('name')->get();
                 $result['tags'] = PostTag::orderBy('name')->get();
+            }
+
+            if(isset($request->viewable) && $request->viewable==1){
+                $list = $list->where('is_verified',1)->where('is_viewable',1);
+            }elseif(isset($request->viewable) && $request->viewable==0){
+                $list = $list->where(function($qry){
+                    $qry->where('is_verified',0)->orWhere('is_viewable',0); 
+                }); 
             }
 
             $data = collect();

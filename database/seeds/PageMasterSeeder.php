@@ -93,6 +93,21 @@ class PageMasterSeeder extends Seeder
             26 => [
                 'name' => 'doctor_dashboard'
             ],
+            27 => [
+                'name' => 'my_patients'
+            ],
+            28 => [
+                'name' => 'patient_search'
+            ],
+            29 => [
+                'name' => 'schedule_timing'
+            ],
+            30 => [
+                'name' => 'reviews'
+            ],
+            31 => [
+                'name' => 'doctor_profile_settings'
+            ],
         ];
             foreach ($datas as $id => $data) {
                 $row = PageMaster::firstOrNew([
