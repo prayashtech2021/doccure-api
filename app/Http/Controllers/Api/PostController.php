@@ -30,7 +30,7 @@ class PostController extends Controller
             $pageNumber = $request->page ? $request->page : 1;
 
             if ($request->bearerToken()) {
-                if (auth()->user()->hasrole('company_admin')) {
+                if (auth('api')->user()->hasRole('company_admin')) {
                     $list = Post::withTrashed()->orderBy('created_at', $order_by);
                 }
             }else{
@@ -67,7 +67,14 @@ class PostController extends Controller
             $result['sub_categories'] = PostSubCategory::orderBy('name','ASC')->get();
             if (!$request->bearerToken()) {
                 $result['tags'] = PostTag::orderBy('name')->get();
-                $result['latest'] = Post::latest()->limit(5)->get();
+                $latest = Post::latest()->limit(5)->get();
+
+                $latest->each(function($item, $key){
+                    $item->thumbnail_image = getPostImage($item->thumbnail_image);
+                    $item->banner_image = getPostImage($item->banner_image);
+                });
+
+                $result['latest']=$latest;
                 
             //for comments
             $getcom = collect();
