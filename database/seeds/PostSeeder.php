@@ -5,7 +5,6 @@ use App\PostCategory;
 use App\Post;
 use App\PostTag;
 use App\PostComment;
-use App\PostReply;
 
 class PostSeeder extends Seeder
 {
@@ -85,21 +84,6 @@ class PostSeeder extends Seeder
             $row->save();
         }
 
-        $data = [
-			1 => [
-                'comment_id' => 1,
-                'user_id' => '3',
-                'reply' => 'Thanks for the feedback',
-                'created_by' => 1,
-            ],
-            
-		];
-		foreach ($data as $id => $item) {
-			$row = PostReply::firstOrNew([
-				'id' => $id,
-			]);
-			$row->fill($item);
-            $row->save();
-        }
+        
     }
 }
