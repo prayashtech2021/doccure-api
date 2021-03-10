@@ -106,7 +106,7 @@ class PageMasterSeeder extends Seeder
                 'name' => 'reviews'
             ],
             31 => [
-                'name' => 'doctor_profile_settings'
+                'name' => 'social_media'
             ],
         ];
             foreach ($datas as $id => $data) {

@@ -66,14 +66,25 @@ class ReviewController extends Controller
 
     public function getList(Request $request)
     {
+        $lang_id = ($request->language_id)? getLang($request->language_id) : defaultLang();
+        $common['header'] = getLangContent(8,$lang_id);
+        $common['setting'] = getSettingData();
+        $common['lang_content'] = getLangContent(30,$lang_id);
+        $common['footer'] = getLangContent(9,$lang_id);
+
         $rules = array(
             'count_per_page' => 'nullable|numeric',
             'order_by' => 'nullable|in:desc,asc',
         );
-        $valid = self::customValidation($request, $rules);
-        if ($valid) {return $valid;}
-
+        
         try {
+
+            if ($request->language_id) {
+                $rules['language_id'] = 'integer|exists:languages,id';
+            }
+            $valid = self::customValidation($request, $rules,$common);
+            if ($valid) {return $valid;}
+    
             $paginate = $request->count_per_page ? $request->count_per_page : 10;
             $order_by = $request->order_by ? $request->order_by : 'desc';
             $pageNumber = $request->page ? $request->page : 1;
@@ -93,9 +104,9 @@ class ReviewController extends Controller
             $result['last_page'] = $paginatedata->lastPage();
             $result['current_page'] = $paginatedata->currentPage();
             
-            return self::send_success_response($result, 'Review content fetched successfully');
+            return self::send_success_response($result, 'Review content fetched successfully',$common);
         } catch (Exception | Throwable $e) {
-            return self::send_exception_response($exception->getMessage());
+            return self::send_exception_response($exception->getMessage(),$common);
         }
     }
 

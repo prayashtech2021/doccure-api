@@ -28,7 +28,7 @@ class DoctorController extends Controller
         $common['header'] = getLangContent(8,$lang_id);
         $common['setting'] = getSettingData();
         $common['menu'] = getAppMenu();
-        $common['lang_content'] = getLangContent(19,$lang_id);
+        $common['lang_content'] = getLangContent(26,$lang_id);
         $common['footer'] = getLangContent(9,$lang_id);
 
         try {
@@ -126,8 +126,8 @@ class DoctorController extends Controller
         $lang_id = ($request->language_id)? getLang($request->language_id) : defaultLang();
         $common['header'] = getLangContent(8,$lang_id);
         $common['setting'] = getSettingData();
-        if($request->is_bookingpage){ //only for booking page
-            $common['lang_content'] = getLangContent(22,$lang_id);
+        if($request->is_profile_setting){
+            $common['lang_content'] = getLangContent(19,$lang_id);
         }else{
             $common['lang_content'] = getLangContent(4,$lang_id);
         }
@@ -471,10 +471,12 @@ class DoctorController extends Controller
             'city_id' => 'nullable|numeric|exists:cities,id',
             'order_by' => 'nullable|in:desc,asc',
             'sort' => 'nullable|numeric',
-            'language_id' => 'integer|exists:languages,id',
             'state_name' => 'nullable',
             'city_name' => 'nullable',
         );
+        if ($request->language_id) {
+            $rules['language_id'] = 'integer|exists:languages,id';
+        }
         $valid = self::customValidation($request, $rules, $common);
         if ($valid) {return $valid;}
 

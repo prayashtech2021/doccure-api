@@ -27,8 +27,8 @@ class Review extends Model
             'rating' => $this->rating,
             'description' => $this->description,
             'reply' => $this->reply,
-            'created' => $this->created_at->diffForHumans(), 
-            'updated' => $this->updated_at->diffForHumans(), 
+            'created' => Carbon::parse($this->created_at)->diffForHumans(),//$this->created_at->diffForHumans(), 
+            'updated' => Carbon::parse($this->updated_at)->diffForHumans(), //$this->updated_at->diffForHumans(), 
         ];
     }
 
