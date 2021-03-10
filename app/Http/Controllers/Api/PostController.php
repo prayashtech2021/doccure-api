@@ -25,6 +25,7 @@ class PostController extends Controller
             'category_id' => 'nullable|numeric|exists:post_categories,id',
             'tag_name' => 'nullable|string|exists:post_tags,name',
             'viewable' => 'nullable|numeric|in:0,1',
+            'search_keyword' => 'nullable|string|min:1|max:50',
         );
         $valid = self::customValidation($request, $rules);
         if ($valid) {return $valid;}
@@ -44,15 +45,26 @@ class PostController extends Controller
             }else{
                 $list = Post::orderBy('created_at', $order_by);
                 if(isset($request->category_id) && !empty($request->category_id)){
-                $list = $list->where('post_category_id',$request->category_id);
-                }
-                if(isset($request->tag_name) && !empty($request->tag_name)){
-                $list = $list->whereHas(['tags'=>function($qry){
+                    $list = $list->where('post_category_id',$request->category_id);
+                }elseif(isset($request->tag_name) && !empty($request->tag_name)){
+                    $list = $list->whereHas(['tags'=>function($qry){
                     $qry->where('name',$request->tag_name);
                 }]);
+                }elseif(!empty($request->search_keyword)){
+                    $list = $list->where(function($qry)use($request){
+                        $qry->where('title','like','%'.$request->search_keyword.'%')
+                        ->orWhere('content','like','%'.$request->search_keyword.'%');
+                    }); 
                 }
                 $result['categories'] = PostCategory::withCount('post')->orderBy('name')->get();
                 $result['tags'] = PostTag::orderBy('name')->get();
+
+                $latest = Post::latest()->limit(5)->get();
+                $latest->each(function($item, $key){
+                    $item->thumbnail_image = getPostImage($item->thumbnail_image);
+                    $item->banner_image = getPostImage($item->banner_image);
+                });
+                $result['latest']=$latest;
             }
 
             if(isset($request->viewable) && $request->viewable==1){
@@ -239,5 +251,45 @@ class PostController extends Controller
     public function destroy(Request $request)
     {
         return self::customDelete('\App\Post', $request->id);
+    }
+
+    public function verifyPost(Request $request)
+    {
+        $rules = array(
+            'post_id' => 'required|numeric|exists:posts,id',
+            'verified' => 'required_if:veiwable,""|in:0,1',
+            'veiwable' => 'required_if:verified,""|in:0,1',
+        );
+        $valid = self::customValidation($request, $rules);
+        if ($valid) {return $valid;}
+
+        try{
+            $post = Post::find($request->post_id);
+            if($request->verified==1){
+                if($post->is_verified==1){
+                    return self::send_bad_request_response('The post has already verified!');
+                }
+                $post->is_verified=1;
+                $post->save();
+            }elseif($request->viewable==1){
+                if($post->is_verified==0){
+                    return self::send_bad_request_response('Please verify the Post first!');
+                }elseif($post->viewable==1){
+                    return self::send_bad_request_response('The Post is already viewable!');
+                }
+                $post->is_viewable=1;
+                $post->save();
+            }elseif($request->viewable==0){
+                if($post->is_verified==0){
+                    return self::send_bad_request_response('Please verify the Post first!');
+                }
+                $post->is_viewable=0;
+                $post->save();
+            }
+
+        return self::send_success_response([], 'Post status updated Sucessfully');
+        } catch (Exception | Throwable $e) {
+            return self::send_exception_response($exception->getMessage());
+        }
     }
 }

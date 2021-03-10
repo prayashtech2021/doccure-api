@@ -158,6 +158,7 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
     
     //blogs
     Route::get('post/delete/{id}', 'Api\PostController@destroy');
+    Route::post('post/verify', 'Api\PostController@verifyPost');
 
     /*post category */
     Route::post('category/save', 'Api\PostCategoryController@save');

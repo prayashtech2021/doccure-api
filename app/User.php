@@ -175,6 +175,7 @@ class User extends Authenticatable implements Wallet, WalletFloat
            'doctorRating' => ($this->avgRating())? $this->avgRating() : 0,
            'feedback_count' => ($this->doctorRatings())? $this->doctorRatings()->where('user_id',$this->id)->count() : 0,
            'status' => $this->status,
+           'role' => $this->roles()->first()->name,
         ];
     }
 
