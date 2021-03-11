@@ -83,12 +83,16 @@ class PostController extends Controller
                 }); 
             }
 
+            $paginatedata = $list->paginate($paginate, ['*'], 'page', $pageNumber);
+
             $data = collect();
             $list->paginate($paginate, ['*'], 'page', $pageNumber)->getCollection()->each(function ($post) use (&$data) {
                 $data->push($post->getData());
             });
             $result['list'] = $data;
-            
+            $result['total_count'] = $paginatedata->total();
+            $result['last_page'] = $paginatedata->lastPage();
+            $result['current_page'] = $paginatedata->currentPage();            
 
             return self::send_success_response($result, 'Post Details Fetched Successfully');
 
