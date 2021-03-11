@@ -56,9 +56,9 @@ class PostController extends Controller
                         ->orWhere('content','like','%'.$request->search_keyword.'%');
                     }); 
                 }
-                $result['categories'] = PostCategory::whereHas('post',function($qry){
+                $result['categories'] = PostCategory::withCount(['post','post' => function($qry){
                     $qry->where('is_viewable',1);
-                })->withCount('post')->orderBy('name')->get();
+                }])->orderBy('name')->get();
                 $result['tags'] = PostTag::whereHas('post',function($qry){
                     $qry->where('is_viewable',1);
                 })->orderBy('name')->groupBy('name')->get();
@@ -115,12 +115,12 @@ class PostController extends Controller
             $list = $list->getData();
             
             $result['list'] = $list;
-            $result['categories'] = PostCategory::withCount('post')->orderBy('name','ASC')->get();
+            $result['categories'] = PostCategory::orderBy('name','ASC')->get();
             $result['sub_categories'] = PostSubCategory::orderBy('name','ASC')->get();
             if (!$request->bearerToken()) {
-                $result['categories'] = PostCategory::whereHas('post',function($qry){
+                $result['categories'] = PostCategory::withCount(['post','post' => function($qry){
                     $qry->where('is_viewable',1);
-                })->withCount('post')->orderBy('name','ASC')->get();
+                }])->orderBy('name','ASC')->get();
                 $result['tags'] = PostTag::whereHas('post',function($qry){
                     $qry->where('is_viewable',1);
                 })->orderBy('name')->groupBy('name')->get();
@@ -173,7 +173,7 @@ class PostController extends Controller
                 'category_id' => 'required|exists:post_categories,id',
                 'sub_category_id' => 'nullable|exists:post_sub_categories,id',
                 'tags' => 'nullable',
-                'image' => 'required|image|mimes:jpeg,png,jpg|max:2048|dimensions:min_width=680,min_height=454',
+                'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048|dimensions:min_width=680,min_height=454',
             );
         } else {
             $rules = array(
