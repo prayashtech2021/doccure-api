@@ -56,7 +56,9 @@ class PostController extends Controller
                         ->orWhere('content','like','%'.$request->search_keyword.'%');
                     }); 
                 }
-                $result['categories'] = PostCategory::withCount(['post','post' => function($qry){
+                $result['categories'] = PostCategory::whereHas('post',function($qry){
+                    $qry->where('is_viewable',1);
+                })->withCount(['post','post' => function($qry){
                     $qry->where('is_viewable',1);
                 }])->orderBy('name')->get();
                 $result['tags'] = PostTag::whereHas('post',function($qry){
@@ -118,7 +120,9 @@ class PostController extends Controller
             $result['categories'] = PostCategory::orderBy('name','ASC')->get();
             $result['sub_categories'] = PostSubCategory::orderBy('name','ASC')->get();
             if (!$request->bearerToken()) {
-                $result['categories'] = PostCategory::withCount(['post','post' => function($qry){
+                $result['categories'] = PostCategory::whereHas('post',function($qry){
+                    $qry->where('is_viewable',1);
+                })->withCount(['post','post' => function($qry){
                     $qry->where('is_viewable',1);
                 }])->orderBy('name','ASC')->get();
                 $result['tags'] = PostTag::whereHas('post',function($qry){
