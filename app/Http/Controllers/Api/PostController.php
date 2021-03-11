@@ -234,7 +234,7 @@ class PostController extends Controller
                 }
                 
                 $originalImage = $request->file('image');
-                $extension = $request->file('image')->getClientOriginalExtension();
+                $exceptionxtension = $request->file('image')->getClientOriginalExtension();
                 $file_name = '308x206_'.date('YmdHis'). '.png';
                 $banner_file_name = '680x454_'.date('YmdHis').$post->id. '.png';
                 $path = 'images/blogs';
@@ -265,7 +265,7 @@ class PostController extends Controller
             DB::commit();
             return self::send_success_response([], 'Post Saved Sucessfully');
 
-        } catch (Exception | Throwable $e) {
+        } catch (Exception | Throwable $exception) {
             DB::rollback();
             return self::send_exception_response($exception->getMessage());
         }
@@ -310,7 +310,7 @@ class PostController extends Controller
             }
 
         return self::send_success_response([], 'Post status updated Sucessfully');
-        } catch (Exception | Throwable $e) {
+        } catch (Exception | Throwable $exception) {
             return self::send_exception_response($exception->getMessage());
         }
     }
@@ -345,7 +345,7 @@ class PostController extends Controller
             
 
             return self::send_success_response([], 'Comment updated Sucessfully');
-        } catch (Exception | Throwable $e) {
+        } catch (Exception | Throwable $exception) {
             return self::send_exception_response($exception->getMessage());
         }
     }
@@ -362,7 +362,7 @@ class PostController extends Controller
             $data = PostSubCategory::where('post_category_id', $request->category_id)->orderBy('name')->select('id','name')->get();
 
         return self::send_success_response($data, 'List fetched Sucessfully');
-        } catch (Exception | Throwable $e) {
+        } catch (Exception | Throwable $exception) {
             return self::send_exception_response($exception->getMessage());
         }
     }
@@ -381,7 +381,7 @@ class PostController extends Controller
             }
 
         return self::send_success_response($data, 'Comment Deleted Sucessfully');
-        } catch (Exception | Throwable $e) {
+        } catch (Exception | Throwable $exception) {
             return self::send_exception_response($exception->getMessage());
         }
     }
