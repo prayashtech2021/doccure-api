@@ -251,12 +251,13 @@ class PostController extends Controller
                 
                 foreach($tagArray as $tag){
                     $tags = PostTag::where('post_id',$post->id)->where('name',$tag)->first();
-                    if(!$tags){
                     PostTag::create(['post_id'=>$post->id, 'name'=>$tag]);
-                    }
                 }
+                $tags = PostTag::where('post_id',$post->id)->whereNotIn('name','('.$request->tags.')')->first();
+                    if($tags){
+                        PostTag::where('post_id',$post->id)->whereNotIn('name','('.$request->tags.')')->forceDelete();
+                    }
 
-                PostTag::where('post_id',$post->id)->whereNotIn('name',[$request->tags])->forceDelete();
             }
 
             DB::commit();
