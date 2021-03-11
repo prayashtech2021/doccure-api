@@ -536,7 +536,11 @@ class AppointmentController extends Controller
         $common['header'] = getLangContent(8,$lang_id);
         $common['setting'] = getSettingData();
         $common['menu'] = getAppMenu();
-        $common['lang_content'] = getLangContent(22,$lang_id);
+        if($request->is_schedule_timing){
+            $common['lang_content'] = getLangContent(29,$lang_id);
+        }else{
+            $common['lang_content'] = getLangContent(22,$lang_id);
+        }
         $common['footer'] = getLangContent(9,$lang_id);
         
         $rules = array(
