@@ -47,7 +47,7 @@ class PostController extends Controller
                 if(isset($request->category_id) && !empty($request->category_id)){
                     $list = $list->where('post_category_id',$request->category_id);
                 }elseif(isset($request->tag_name) && !empty($request->tag_name)){
-                    $list = $list->whereHas(['tags'=>function($qry){
+                    $list = $list->whereHas(['tags'=>function($qry)use($request){
                     $qry->where('name',$request->tag_name);
                 }]);
                 }elseif(!empty($request->search_keyword)){
@@ -57,7 +57,7 @@ class PostController extends Controller
                     }); 
                 }
                 $result['categories'] = PostCategory::withCount('post')->orderBy('name')->get();
-                $result['tags'] = PostTag::orderBy('name')->get();
+                $result['tags'] = PostTag::orderBy('name')->groupBy('name')->get();
 
                 $latest = Post::latest()->limit(5)->get();
                 $latest->each(function($item, $key){
@@ -261,8 +261,8 @@ class PostController extends Controller
     {
         $rules = array(
             'post_id' => 'required|numeric|exists:posts,id',
-            'verified' => 'required_if:veiwable,""|in:0,1',
-            'veiwable' => 'required_if:verified,""|in:0,1',
+            'verified' => 'nullable|in:0,1',
+            'viewable' => 'nullable|in:0,1',
         );
         $valid = self::customValidation($request, $rules);
         if ($valid) {return $valid;}
@@ -278,7 +278,7 @@ class PostController extends Controller
             }elseif($request->viewable==1){
                 if($post->is_verified==0){
                     return self::send_bad_request_response('Please verify the Post first!');
-                }elseif($post->viewable==1){
+                }elseif($post->is_viewable==1){
                     return self::send_bad_request_response('The Post is already viewable!');
                 }
                 $post->is_viewable=1;
@@ -292,6 +292,77 @@ class PostController extends Controller
             }
 
         return self::send_success_response([], 'Post status updated Sucessfully');
+        } catch (Exception | Throwable $e) {
+            return self::send_exception_response($exception->getMessage());
+        }
+    }
+
+    public function addComment(Request $request)
+    {
+        $rules = array(
+            'post_id' => 'required|numeric|exists:posts,id',
+            'type' => 'required|in:1,2', //1-comment,2-reply
+            'comment_id' => 'nullable|numeric|exists:post_comments,id',
+            'comment' => 'required|string',
+        );
+        $valid = self::customValidation($request, $rules);
+        if ($valid) {return $valid;}
+
+        try{
+            if($request->type==2){
+                if(empty($request->comment_id)){
+                    return self::send_bad_request_response('Please provide the comment_id!');
+                }
+            }
+            $user = auth()->user();
+            $comment = new PostComment;
+            if($request->type==2){
+                $comment->parent_id=$request->comment_id;
+            }
+            $comment->post_id=$request->post_id;
+            $comment->user_id=$user->id;
+            $comment->comments=$request->comment;
+            $comment->created_by=$user->id;
+            $comment->save();
+            
+
+            return self::send_success_response([], 'Comment updated Sucessfully');
+        } catch (Exception | Throwable $e) {
+            return self::send_exception_response($exception->getMessage());
+        }
+    }
+
+    public function getSubCategory(Request $request)
+    {
+        $rules = array(
+            'category_id' => 'required|numeric|exists:post_categories,id',
+        );
+        $valid = self::customValidation($request, $rules);
+        if ($valid) {return $valid;}
+
+        try{
+            $data = PostSubCategory::where('post_category_id', $request->category_id)->orderBy('name')->select('id','name')->get();
+
+        return self::send_success_response($data, 'List fetched Sucessfully');
+        } catch (Exception | Throwable $e) {
+            return self::send_exception_response($exception->getMessage());
+        }
+    }
+
+    public function deleteComment(Request $request)
+    {
+        try{
+            $data = PostComment::find($request->id);
+            if(!$data){
+                return self::send_bad_request_response('Not a valid comment id!');
+            }
+            if($data->user_id==auth()->user()->id){
+                $data->delete();
+            }else{
+                return self::send_bad_request_response('Not a valid user!');
+            }
+
+        return self::send_success_response($data, 'Comment Deleted Sucessfully');
         } catch (Exception | Throwable $e) {
             return self::send_exception_response($exception->getMessage());
         }
