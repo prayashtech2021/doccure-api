@@ -750,9 +750,14 @@ class AppointmentController extends Controller
             $invoice_list = collect();
             $user = $request->user();
             updateLastSeen(auth()->user());
-            if ($user->hasRole(['patient', 'doctor'])) {
+            $payments =[];
+            if ($user->hasRole(['patient'])) {
                 $payments = $user->payment()->get();
-
+            }
+            if ($user->hasRole(['doctor'])) {
+                $payments = $user->providerPayment()->get();
+            }
+            if(!empty($payments)){
                 foreach ($payments as $payment) {
                     $appointment = $payment->appointment()->first();
                     $invoice_list->push([

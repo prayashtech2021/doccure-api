@@ -344,4 +344,23 @@ class PostController extends Controller
             return self::send_exception_response($exception->getMessage());
         }
     }
+
+    public function deleteComment(Request $request)
+    {
+        try{
+            $data = PostComment::find($request->id);
+            if(!$data){
+                return self::send_bad_request_response('Not a valid comment id!');
+            }
+            if($data->user_id==auth()->user()->id){
+                $data->delete();
+            }else{
+                return self::send_bad_request_response('Not a valid user!');
+            }
+
+        return self::send_success_response($data, 'Comment Deleted Sucessfully');
+        } catch (Exception | Throwable $e) {
+            return self::send_exception_response($exception->getMessage());
+        }
+    }
 }
