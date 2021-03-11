@@ -47,7 +47,7 @@ class PostController extends Controller
                 if(isset($request->category_id) && !empty($request->category_id)){
                     $list = $list->where('post_category_id',$request->category_id);
                 }elseif(isset($request->tag_name) && !empty($request->tag_name)){
-                    $list = $list->whereHas(['tags'=>function($qry){
+                    $list = $list->whereHas(['tags'=>function($qry)use($request){
                     $qry->where('name',$request->tag_name);
                 }]);
                 }elseif(!empty($request->search_keyword)){
@@ -57,7 +57,7 @@ class PostController extends Controller
                     }); 
                 }
                 $result['categories'] = PostCategory::withCount('post')->orderBy('name')->get();
-                $result['tags'] = PostTag::orderBy('name')->get();
+                $result['tags'] = PostTag::orderBy('name')->groupBy('name')->get();
 
                 $latest = Post::latest()->limit(5)->get();
                 $latest->each(function($item, $key){
