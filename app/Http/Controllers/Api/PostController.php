@@ -56,8 +56,12 @@ class PostController extends Controller
                         ->orWhere('content','like','%'.$request->search_keyword.'%');
                     }); 
                 }
-                $result['categories'] = PostCategory::withCount('post')->orderBy('name')->get();
-                $result['tags'] = PostTag::orderBy('name')->groupBy('name')->get();
+                $result['categories'] = PostCategory::whereHas('post',function($qry){
+                    $qry->where('is_viewable',1);
+                })->withCount('post')->orderBy('name')->get();
+                $result['tags'] = PostTag::whereHas('post',function($qry){
+                    $qry->where('is_viewable',1);
+                })->orderBy('name')->groupBy('name')->get();
 
                 $latest = Post::latest()->limit(5)->get();
                 $latest->each(function($item, $key){
@@ -114,7 +118,12 @@ class PostController extends Controller
             $result['categories'] = PostCategory::withCount('post')->orderBy('name','ASC')->get();
             $result['sub_categories'] = PostSubCategory::orderBy('name','ASC')->get();
             if (!$request->bearerToken()) {
-                $result['tags'] = PostTag::orderBy('name')->get();
+                $result['categories'] = PostCategory::whereHas('post',function($qry){
+                    $qry->where('is_viewable',1);
+                })->withCount('post')->orderBy('name','ASC')->get();
+                $result['tags'] = PostTag::whereHas('post',function($qry){
+                    $qry->where('is_viewable',1);
+                })->orderBy('name')->groupBy('name')->get();
                 $latest = Post::latest()->limit(5)->get();
 
                 $latest->each(function($item, $key){
