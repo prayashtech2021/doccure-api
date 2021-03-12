@@ -3963,6 +3963,36 @@ class MultiLanguageSeeder extends Seeder
                 'keyword' => 'notifications',
                 'value' => 'notifications',
                 'created_by' => 1, 
+            ],657 => [
+                'page_master_id' => 1,
+                'language_id' => 1,
+                'keyword' => 'favourites',
+                'value' => 'favourites',
+                'created_by' => 1, 
+            ],658 => [
+                'page_master_id' => 1,
+                'language_id' => 1,
+                'keyword' => 'reviews',
+                'value' => 'reviews',
+                'created_by' => 1, 
+            ],659 => [
+                'page_master_id' => 1,
+                'language_id' => 1,
+                'keyword' => 'features',
+                'value' => 'features',
+                'created_by' => 1, 
+            ],660 => [
+                'page_master_id' => 1,
+                'language_id' => 1,
+                'keyword' => 'categories',
+                'value' => 'categories',
+                'created_by' => 1, 
+            ],661 => [
+                'page_master_id' => 1,
+                'language_id' => 1,
+                'keyword' => 'post',
+                'value' => 'post',
+                'created_by' => 1, 
             ],
             
             // for menu page end
