@@ -375,6 +375,7 @@ class PostController extends Controller
                 return self::send_bad_request_response('Not a valid comment id!');
             }
             if($data->user_id==auth()->user()->id){
+                $data = PostComment::where('parent_id',$request->id)->delete();
                 $data->delete();
             }else{
                 return self::send_bad_request_response('Not a valid user!');
