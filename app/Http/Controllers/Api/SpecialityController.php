@@ -96,17 +96,25 @@ class SpecialityController extends Controller
     try {
         $paginate = $request->count_per_page ? $request->count_per_page : 10;
         $order_by = $request->order_by ? $request->order_by : 'desc';
+        $pageNumber = $request->page ? $request->page : 1;
 
             $spl = Speciality::orderBy('name', $order_by);
             if($request->withtrash){
                 $spl = $spl->withTrashed();
             }
+            $paginatedata = $spl->paginate($paginate, ['*'], 'page', $pageNumber);
+            
             $list = collect();
-            $spl->each(function ($speciality) use (&$list) {
+            $paginatedata->getCollection()->each(function ($speciality) use (&$list) {
                 $list->push($speciality->getData());
             });
-            
-            return self::send_success_response($list, 'Speciality content fetched successfully');
+
+            $result['list'] = $list;
+            $result['total_count'] = $paginatedata->total();
+            $result['last_page'] = $paginatedata->lastPage();
+            $result['current_page'] = $paginatedata->currentPage();
+
+            return self::send_success_response($result, 'Speciality content fetched successfully');
         } catch (Exception | Throwable $e) {
             DB::rollback();
             return self::send_exception_response($exception->getMessage());

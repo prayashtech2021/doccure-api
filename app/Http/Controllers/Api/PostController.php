@@ -18,6 +18,16 @@ class PostController extends Controller
 {
     public function index(Request $request)
     {
+        $lang_id = ($request->language_id)? getLang($request->language_id) : defaultLang();
+        $common['header'] = getLangContent(8,$lang_id);
+        $common['setting'] = getSettingData();
+        if($request->is_doctor){ //doctor login content
+            $common['lang_content'] = getLangContent(33,$lang_id);
+        }else{ //front end
+            $common['lang_content'] = getLangContent(32,$lang_id);
+        }
+        $common['footer'] = getLangContent(9,$lang_id);
+
         $rules = array(
             'count_per_page' => 'nullable|numeric',
             'order_by' => 'nullable|in:desc,asc',
@@ -27,7 +37,10 @@ class PostController extends Controller
             'viewable' => 'nullable|numeric|in:0,1',
             'search_keyword' => 'nullable|string|min:1|max:50',
         );
-        $valid = self::customValidation($request, $rules);
+        if ($request->language_id) {
+            $rules['language_id'] = 'integer|exists:languages,id';
+        }
+        $valid = self::customValidation($request, $rules,$common);
         if ($valid) {return $valid;}
 
         try{
@@ -86,7 +99,7 @@ class PostController extends Controller
             $paginatedata = $list->paginate($paginate, ['*'], 'page', $pageNumber);
 
             $data = collect();
-            $list->paginate($paginate, ['*'], 'page', $pageNumber)->getCollection()->each(function ($post) use (&$data) {
+            $paginatedata->getCollection()->each(function ($post) use (&$data) {
                 $data->push($post->getData());
             });
             $result['list'] = $data;
@@ -94,15 +107,25 @@ class PostController extends Controller
             $result['last_page'] = $paginatedata->lastPage();
             $result['current_page'] = $paginatedata->currentPage();            
 
-            return self::send_success_response($result, 'Post Details Fetched Successfully');
+            return self::send_success_response($result, 'Post Details Fetched Successfully',$common);
 
         } catch (Exception | Throwable $exception) {
-            return self::send_exception_response($exception->getMessage());
+            return self::send_exception_response($exception->getMessage(),$common);
         }
     }
 
     public function view(Request $request)
     {
+        $lang_id = ($request->language_id)? getLang($request->language_id) : defaultLang();
+        $common['header'] = getLangContent(8,$lang_id);
+        $common['setting'] = getSettingData();
+        if($request->is_doctor){ //doctor login content
+            $common['lang_content'] = getLangContent(34,$lang_id);
+        }else{ //front end
+            $common['lang_content'] = getLangContent(32,$lang_id);
+        }
+        $common['footer'] = getLangContent(9,$lang_id);
+
         try{
             $list = $post = Post::find($request->id);
             if(!$list){

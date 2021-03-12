@@ -70,6 +70,7 @@ class EmailTemplateController extends Controller
             $order_by = $request->order_by ? $request->order_by : 'desc';
 
             $list = EmailTemplate::select('id', 'slug', 'subject')->orderBy('slug', $order_by)->get();
+            
             if($list){
                 return self::send_success_response($list, 'Email Template content fetched successfully');
             }else{

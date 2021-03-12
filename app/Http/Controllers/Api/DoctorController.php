@@ -82,12 +82,7 @@ class DoctorController extends Controller
             $order_by = $request->order_by ? $request->order_by : 'desc';
             $pageNumber = $request->page ? $request->page : 1;
             
-            $array = [];
-            $lang_id = ($request->language_id)? $request->language_id : defaultLang();
-            $array['header'] = getLangContent(8,$lang_id);
-            $array['setting'] = getSettingData();
-            //$array['lang_content'] = getLangContent(2,$lang_id);
-
+           
             if (auth()->user()->hasrole('patient')) { //doctors -> my patients who attended appointments
                 $patient_id = auth()->user()->id;
                 $list = User::orderBy('created_at', $order_by);
@@ -107,15 +102,18 @@ class DoctorController extends Controller
             if ($request->bearerToken()) {
                 $id = auth('api')->user()->id;
             }
+            $paginatedata = $list->paginate($paginate, ['*'], 'page', $pageNumber);
+
             $data = collect();
-            $list->paginate($paginate, ['*'], 'page', $pageNumber)->getCollection()->each(function ($provider) use (&$data,$id) {
+            $paginatedata->getCollection()->each(function ($provider) use (&$data,$id) {
                 $data->push($provider->doctorProfile($id));
             });
-
-            //$array['total_count'] = count($data);
-            $array['doctor_list'] = $data;
-            $array['footer'] = getLangContent(9,$lang_id);
-            return self::send_success_response($array, 'Doctor Details Fetched Successfully');
+            $result['doctor_list'] = $data;
+            $result['total_count'] = $paginatedata->total();
+            $result['last_page'] = $paginatedata->lastPage();
+            $result['current_page'] = $paginatedata->currentPage();
+            
+            return self::send_success_response($result, 'Doctor Details Fetched Successfully');
         } catch (Exception | Throwable $exception) {
             return self::send_exception_response($exception->getMessage());
         }

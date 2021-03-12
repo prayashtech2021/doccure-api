@@ -26,8 +26,7 @@ class ScheduleTimingSeeder extends Seeder
                 // 'duration' => '600',
                 'working_hours' => '{"sunday":[],"monday":["11:00-11:10","18:00-18:10"],"tuesday":["11:00-11:10","18:00-18:10"],"wednesday":["11:00-11:10","18:00-18:10"],"thursday":["11:00-11:10","18:00-18:10"],"friday":["11:00-11:10:10","18:00-18:10"],"saturday":["11:00-11:10"]}',
             ],
-            
-		];
+        ];
 		foreach ($datas as $id => $data) {
 			$row = ScheduleTiming::firstOrNew([
 				'id' => $id,
