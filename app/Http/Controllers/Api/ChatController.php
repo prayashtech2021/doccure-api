@@ -52,7 +52,7 @@ class ChatController extends Controller
             $paginatedata = $list->paginate($paginate, ['*'], 'page', $pageNumber);
 
             $data = collect();
-            $list->paginate($paginate, ['*'], 'page', $pageNumber)->getCollection()->each(function ($chat) use (&$data) {
+            $paginatedata->getCollection()->each(function ($chat) use (&$data) {
                 $data->push($chat->getData());
             });
             $array['list'] = $data;

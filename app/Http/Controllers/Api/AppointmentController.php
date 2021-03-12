@@ -151,7 +151,7 @@ class AppointmentController extends Controller
             }else{
                 $paginatedata = $list->paginate($paginate, ['*'], 'page', $pageNumber);
 
-                $list->paginate($paginate, ['*'], 'page', $pageNumber)->getCollection()->each(function ($appointment) use (&$data) {
+                $paginatedata->getCollection()->each(function ($appointment) use (&$data) {
                     $data->push($appointment->getData());
                 });
                 
@@ -451,12 +451,18 @@ class AppointmentController extends Controller
 
             $data = collect();
 
-            $list->paginate($paginate, ['*'], 'page', $pageNumber)->getCollection()->each(function ($prescription) use (&$data) {
+            $paginatedata = $list->paginate($paginate, ['*'], 'page', $pageNumber);
+
+            $paginatedata->getCollection()->each(function ($prescription) use (&$data) {
                 $data->push($prescription->getData());
             });
+            $result['list'] = $data;
+            $result['total_count'] = $paginatedata->total();
+            $result['last_page'] = $paginatedata->lastPage();
+            $result['current_page'] = $paginatedata->currentPage();
 
             if($data){
-                return self::send_success_response($data,'Prescription Details Fetched Successfully');
+                return self::send_success_response($result,'Prescription Details Fetched Successfully');
             }else{
                 return self::send_bad_request_response('No Records Found');
             }

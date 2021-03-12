@@ -200,11 +200,10 @@ class PatientController extends Controller
         if ($request->language_id) {
             $rules['language_id'] = 'integer|exists:languages,id';
         }
-        $valid = self::customValidation($request, $rules);
+        $valid = self::customValidation($request, $rules,$common);
         if ($valid) {return $valid;}
 
         try{
-           // $paginate = $request->count_per_page ? $request->count_per_page : 10;
 
             $data = User::role('patient');
 
@@ -247,12 +246,12 @@ class PatientController extends Controller
             });
             
             if(count($list)>0){
-                return self::send_success_response($list,'Patient data fetched successfully');
+                return self::send_success_response($list,'Patient data fetched successfully',$common);
             }else{
-                return self::send_bad_request_response('No Records Found');
+                return self::send_bad_request_response('No Records Found',$common);
             }
         } catch (\Exception | \Throwable $exception) {
-            return self::send_exception_response($exception->getMessage());
+            return self::send_exception_response($exception->getMessage(),$common);
         }
     }
 
