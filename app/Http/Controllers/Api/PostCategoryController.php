@@ -70,9 +70,15 @@ class PostCategoryController extends Controller
             $paginatedata = $data->paginate($paginate, ['*'], 'page', $pageNumber);
             
             $list = collect();
-            $data->each(function ($category) use (&$list) {
-                $list->push($category->getData());
-            });
+            if($request->withtrash){
+                $paginatedata->getCollection()->each(function ($category) use (&$list) {
+                    $list->push($category->getData());
+                });    
+            }else{
+                $data->each(function ($category) use (&$list) {
+                    $list->push($category->getData());
+                });
+            }
 
             $result['list'] = $list;
             $result['total_count'] = $paginatedata->total();

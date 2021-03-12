@@ -95,14 +95,19 @@ class MedicalRecordController extends Controller
                 $list = $list->where('consumer_id',$request->consumer_id);
             }
             $list = $list->orderBy('id', $order_by);
+            $paginatedata = $list->paginate($paginate, ['*'], 'page', $pageNumber);
 
             $data = collect();
-            $list->paginate($paginate, ['*'], 'page', $pageNumber)->getCollection()->each(function ($result) use (&$data) {
+            $paginatedata->getCollection()->each(function ($result) use (&$data) {
                 $data->push($result->getData());
             });
 
             if($data){
-                return self::send_success_response($data, 'Medical Record content fetched successfully');
+                $result['list'] = $data;
+                $result['total_count'] = $paginatedata->total();
+                $result['last_page'] = $paginatedata->lastPage();
+                $result['current_page'] = $paginatedata->currentPage();
+                return self::send_success_response($result, 'Medical Record content fetched successfully');
             }else{
                 return self::send_bad_request_response('No Records Found');
             }

@@ -95,7 +95,7 @@ class ReviewController extends Controller
             }
             $paginatedata = $list->paginate($paginate, ['*'], 'page', $pageNumber);
             $data = collect();
-            $list->paginate($paginate, ['*'], 'page', $pageNumber)->getCollection()->each(function ($provider) use (&$data) {
+            $paginatedata->getCollection()->each(function ($provider) use (&$data) {
                 $data->push($provider->getData());
             });
             

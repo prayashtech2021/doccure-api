@@ -73,10 +73,11 @@ class PostSubCategoryController extends Controller
             $paginatedata = $data->paginate($paginate, ['*'], 'page', $pageNumber);
             
             $list = collect();
-            $data->each(function ($category) use (&$list) {
+            
+            $paginatedata->getCollection()->each(function ($category) use (&$list) {
                 $list->push($category->getData());
             });
-
+            
             $result['list'] = $list;
             $result['total_count'] = $paginatedata->total();
             $result['last_page'] = $paginatedata->lastPage();

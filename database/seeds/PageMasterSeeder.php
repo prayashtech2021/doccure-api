@@ -108,6 +108,15 @@ class PageMasterSeeder extends Seeder
             31 => [
                 'name' => 'social_media'
             ],
+            32 => [
+                'name' => 'blogs'
+            ],
+            33 => [
+                'name' => 'blog_list'
+            ],
+            34 => [
+                'name' => 'post'
+            ],
         ];
             foreach ($datas as $id => $data) {
                 $row = PageMaster::firstOrNew([

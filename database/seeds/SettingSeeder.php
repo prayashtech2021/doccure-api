@@ -161,13 +161,13 @@ class SettingSeeder extends Seeder
             25 => [
                 'slug' => 'payment_gateway',
                 'keyword' => 'stripe_sandbox_api_key',
-                'value' => '',
+                'value' => 'pk_test_51I7I3VJU1C4Pq9PuhPtMFsBPQ9BVez0j9fxJIVtniujXDQjKfc7YEof1TAM0ACdaw6Y7T7DlmOQUTOQUBUwwkFA600EMj5SEjx',
                 'created_by' => 1,
             ],
             26 => [
                 'slug' => 'payment_gateway',
                 'keyword' => 'stripe_sandbox_rest_key',
-                'value' => '',
+                'value' => 'sk_test_51I7I3VJU1C4Pq9PuDaOJuo6UWDIlc4qVCpEZSaXdl9rFUTLLKN1qYOZgUXhoa7sVygh23pTzDmKVPwCEMdsmw8wn00oq87z4vK',
                 'created_by' => 1,
             ],
             27 => [
