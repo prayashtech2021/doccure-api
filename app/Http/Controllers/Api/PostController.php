@@ -133,9 +133,15 @@ class PostController extends Controller
         $common['footer'] = getLangContent(9,$lang_id);
 
         try{
+            if ($request->language_id) {
+                $rules['language_id'] = 'integer|exists:languages,id';
+                $valid = self::customValidation($request, $rules,$common);
+                if ($valid) {return $valid;}
+            }
+
             $list = $post = Post::find($request->id);
             if(!$list){
-                return self::send_bad_request_response('Incorrect Id. Please check and try again.');
+                return self::send_bad_request_response('Incorrect Id. Please check and try again.',$common);
             }
             $list = $list->getData();
             
@@ -179,10 +185,10 @@ class PostController extends Controller
             }
 
 
-            return self::send_success_response($result, 'Post Details Fetched Successfully');
+            return self::send_success_response($result, 'Post Details Fetched Successfully',$common);
 
         } catch (Exception | Throwable $exception) {
-            return self::send_exception_response($exception->getMessage());
+            return self::send_exception_response($exception->getMessage(),$common);
         }
     }
 

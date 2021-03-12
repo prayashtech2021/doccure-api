@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\ { PageContent,User,Speciality,Feature };
+use App\ { PageContent,User,Speciality,Feature,Post };
 use DB;
 use Illuminate\Http\Request;
 use Validator;
@@ -98,7 +98,7 @@ class PageContentController extends Controller
         
             $getSettings = PageContent::get();
         
-            if($request->type == 1){
+            if($request->type == 1){ // 1 only for lang page content 
                 $provider_list = User::role('doctor')->orderBy('id','asc');
                 $doc_array = collect();
                 $provider_list->each(function ($provider) use (&$doc_array) {
@@ -121,6 +121,14 @@ class PageContentController extends Controller
                     $list->push($feature->getData());
                 });
                 $array['features_list'] = $list;
+
+                $blog_list = Post::where('is_verified',1)->where('is_viewable',1);
+
+                $blog_data = collect();
+                $blog_list->paginate(4)->getCollection()->each(function ($post) use (&$blog_data) {
+                    $blog_data->push($post->getData());
+                });
+                $array['blog_list'] = $blog_data;
 
             }
             foreach($getSettings as $result){
