@@ -42,15 +42,15 @@ class DoctorController extends Controller
             $user = auth()->user();
             updateLastSeen($user);
             if ($user_id) {
-                $patient = Appointment::where('doctor_id', $user_id)->groupby('user_id')->get()->count();
-                $total_patient = Appointment::where('doctor_id', $user_id)->whereDate('appointment_date', date('Y-m-d'))->count();
+                $total_patient = Appointment::where('doctor_id', $user_id)->groupby('user_id')->get()->count();
+                $today_patient = Appointment::where('doctor_id', $user_id)->whereDate('appointment_date', date('Y-m-d'))->groupBy('user_id')->count();
                 $appointment = Appointment::where('doctor_id', $user_id)->count();
 
                 $appointment_result = (new AppointmentController)->list($request, 1);
 
                 $result = [
-                    'total_patient' => $patient,
-                    'today_patient' => $total_patient,
+                    'total_patient' => $total_patient,
+                    'today_patient' => $today_patient,
                     'appointments' => $appointment,
                     'patient_appointment' => $appointment_result,
                 ];

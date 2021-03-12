@@ -283,12 +283,13 @@ class User extends Authenticatable implements Wallet, WalletFloat
             ->orWhere(['sender_id'=>$recipient_id, 'recipient_id'=>$id]);
         });
         $list = $chat->orderBy('id','desc')->first();
-        $count = $chat->where('read_status',1)->count();
+        //$count = $chat->where('read_status',1)->count();
+        (empty($list->message))? $msg = $list->file_path : $msg = $list->message; 
 
         return [
-            'message' => ($list)? $list->message : '',
-            'created_at' => ($list)? $list->created_at->diffForHumans() : '',
-            'unread' => ($list)? $count : 0,
+            'message' => $msg,
+            'created_at' => $list->created_at->diffForHumans(),
+           // 'unread' => ($list)? $count : 0,
         ];
     }
     

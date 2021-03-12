@@ -48,7 +48,7 @@ class ChatController extends Controller
                 $qry->where(['sender_id'=>auth()->user()->id, 'recipient_id'=>$request->recipient_id])
                 ->orWhere(['sender_id'=>$request->recipient_id, 'recipient_id'=>auth()->user()->id]);
             })->orderBy('id',$order_by);
-
+            $update = $list->update(['read_status'=>1]);
             $paginatedata = $list->paginate($paginate, ['*'], 'page', $pageNumber);
 
             $data = collect();

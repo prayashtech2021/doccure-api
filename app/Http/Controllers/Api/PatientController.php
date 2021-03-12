@@ -92,6 +92,10 @@ class PatientController extends Controller
                 $list = $list->whereHas('appointments', function ($qry) use ($doctor_id) {
                     $qry->where('appointments.doctor_id',$doctor_id);
                 });
+
+               /* $list = $list->orwhereHas('chats',function ($qry) {
+                    $qry->orderBy('chats.created_at','desc');
+                }); */
             
             }else{ //for Admin -> patient list
                 $list = User::role('patient')->orderBy('created_at', $order_by);
