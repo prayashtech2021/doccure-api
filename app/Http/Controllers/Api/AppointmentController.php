@@ -798,7 +798,7 @@ class AppointmentController extends Controller
         try{
 
             $rules = array(
-                'invoice_id' => 'required',
+                'invoice_id' => 'required|exists:payments,id',
             );
 
             if ($request->language_id) {
@@ -809,8 +809,12 @@ class AppointmentController extends Controller
 
             $result = [];
             $user = $request->user();
-            if($user->hasRole(['patient', 'doctor'])){
+            if($user->hasRole('patient')){
                 $payment = $user->payment()->where('payments.id', $request->invoice_id)->first();
+            }
+            if($user->hasRole('doctor')){
+                $payment = $user->providerPayment()->where('payments.id', $request->invoice_id)->first();
+            }
                 if($payment){
                     $appointment = $payment->appointment()->first();
 
@@ -823,7 +827,6 @@ class AppointmentController extends Controller
                 }else{
                     return self::send_bad_request_response(['message' => 'Invoice not found with ID given', 'error' => 'Invoice not found with ID given'],$common);
                 }
-            }
 
             return self::send_success_response($result,'OK',$common);
         } catch (Exception | Throwable $exception) {
