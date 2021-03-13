@@ -410,7 +410,7 @@ class PostController extends Controller
                 return self::send_bad_request_response('Not a valid user!');
             }
 
-        return self::send_success_response($data, 'Comment Deleted Sucessfully');
+        return self::send_success_response('Comment Deleted Sucessfully');
         } catch (Exception | Throwable $exception) {
             return self::send_exception_response($exception->getMessage());
         }
