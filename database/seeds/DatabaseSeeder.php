@@ -28,6 +28,7 @@ class DatabaseSeeder extends Seeder
         $this->call(PageContentSeeder::class);
         $this->call(EmailTemplateSeeder::class);
         $this->call(PostSeeder::class);
+        $this->call(FeatureSeeder::class);
     }
 
 }

@@ -48,7 +48,7 @@ class PageContentController extends Controller
                 $file = $request->login_image;
                 $keyword = 'login';
                 $rules = array(
-                    'login_image' => 'nullable|image|mimes:jpeg,png,jpg|dimensions:max_width=1000,max_height=650',
+                    'login_image' => 'nullable|image|mimes:jpeg,png,jpg|dimensions:max_width=1000,max_height=750',
                 );
             }
 
@@ -132,9 +132,11 @@ class PageContentController extends Controller
 
             }
             foreach($getSettings as $result){
-                if (!empty($result->image) && Storage::exists('images/cms-images/' . $result->image)) {
+                if (!empty($result->image) && Storage::exists('app/public/images/cms-images/' . $result->image)) {
                     $path = (config('filesystems.default') == 's3') ? Storage::temporaryUrl('app/public/images/cms-images/' . $result->image, now()->addMinutes(5)) : Storage::url('app/public/images/cms-images/' . $result->image);
-                } else {
+                } elseif(!empty($result->image)){
+                    $path = url('img/cms-images/' . $result->image);
+                }else{
                     $path = url('img/logo.png');
                 }
                 $array[$result->slug] = [

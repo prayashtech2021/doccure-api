@@ -20,6 +20,7 @@ class PageContentSeeder extends Seeder
                 'title' => 'Search Doctor, Make an Appointment',
                 'sub_title' => 'Discover the best doctors, clinic & hospital the city nearest to you.',
                 'content' => '',
+                'image' => '20210315124048_banner.png'
             ],
             2 => [
                 'page_master_id' => 2,
@@ -52,6 +53,7 @@ class PageContentSeeder extends Seeder
                 'title' => 'Availabe Features in Our Clinic',
                 'sub_title' => '',
                 'content' => 'It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout.',
+                'image' => '20210315125247_features.png',
             ],
             6 => [
                 'page_master_id' => 2,
@@ -66,6 +68,7 @@ class PageContentSeeder extends Seeder
                 'title' => 'Login',
                 'sub_title' => '',
                 'content' => '',
+                'image' => '20210315125434_login.png',
             ],
             
         ];

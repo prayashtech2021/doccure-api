@@ -29,10 +29,12 @@ class Feature extends Model
 
     function getFeatureImage(){
         $image = $this->image;
-        if (!empty($image) && Storage::exists('images/features/' . $image)) {
+        if (!empty($image) && Storage::exists('app/public/images/features/' . $image)) {
             $path = (config('filesystems.default') == 's3') ? Storage::temporaryUrl('app/public/images/features/' . $image, now()->addMinutes(5)) : Storage::url('app/public/images/features/' . $image);
-        } else {
-            $path = url('img/feature-logo.png');
+        }elseif(!empty($this->image)){
+            $path = url('img/features/' . $image);
+        }else{
+            $path = url('img/logo.png');
         }
         return $path;
     }
