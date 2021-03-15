@@ -172,7 +172,6 @@ function getAppMenu() {
                 //'notifications' => ucwords($lang->first(function($item) {return $item->keyword == 'notifications';})->value),
                 'social_media' => ucwords($lang->first(function($item) {return $item->keyword == 'social_media';})->value),
                 'my_profile' => ucwords($lang->first(function($item) {return $item->keyword == 'my_profile';})->value),
-                'blog' => ucwords($lang->first(function($item) {return $item->keyword == 'blog';})->value),
                 'change_password' => ucwords($lang->first(function($item) {return $item->keyword == 'change_password';})->value),
                 'logout' => ucwords($lang->first(function($item) {return $item->keyword == 'logout';})->value),
             ];
