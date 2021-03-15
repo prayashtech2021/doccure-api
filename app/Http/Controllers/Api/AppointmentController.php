@@ -127,7 +127,9 @@ class AppointmentController extends Controller
             }elseif ($user->hasRole('patient')) {
                 // $list = $list->where('appointment_status','<>',3);
             } elseif ($user->hasRole('doctor')) {
+                if(empty($request->status)){
                 $list = $list->where('appointment_status','<>',4);
+                }
             }
 
             removeMetaColumn($user);
