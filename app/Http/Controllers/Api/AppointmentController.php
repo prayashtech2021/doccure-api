@@ -429,13 +429,25 @@ class AppointmentController extends Controller
 
     public function prescriptionList(Request $request)
     {
+        $common = [];
+        $lang_id = ($request->language_id)? getLang($request->language_id) : defaultLang();
+        $common['header'] = getLangContent(8,$lang_id);
+        $common['setting'] = getSettingData();
+        $common['menu'] = getAppMenu();
+        $common['lang_content'] = getLangContent(35,$lang_id);
+        $common['footer'] = getLangContent(9,$lang_id);
+
         $rules = array(
             'consumer_id' => 'nullable|numeric|exists:users,id',
             'count_per_page' => 'nullable|numeric',
             'order_by' => 'nullable|in:desc,asc',
             'page' => 'nullable|numeric',
         );
-        $valid = self::customValidation($request, $rules);
+        if ($request->language_id) {
+            $rules['language_id'] = 'integer|exists:languages,id';
+        }
+    
+        $valid = self::customValidation($request, $rules,$common);
         if ($valid) {return $valid;}
 
         try {
@@ -464,14 +476,14 @@ class AppointmentController extends Controller
             $result['current_page'] = $paginatedata->currentPage();
 
             if($data){
-                return self::send_success_response($result,'Prescription Details Fetched Successfully');
+                return self::send_success_response($result,'Prescription Details Fetched Successfully',$common);
             }else{
-                return self::send_bad_request_response('No Records Found');
+                return self::send_bad_request_response('No Records Found',$common);
             }
 
         } catch (Exception | Throwable $exception) {
             DB::rollBack();
-            return self::send_exception_response($exception->getMessage());
+            return self::send_exception_response($exception->getMessage(),$common);
         }
     }
 

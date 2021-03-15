@@ -73,13 +73,24 @@ class MedicalRecordController extends Controller
 
     public function getList(Request $request)
     {
+        $common = [];
+        $lang_id = ($request->language_id)? getLang($request->language_id) : defaultLang();
+        $common['header'] = getLangContent(8,$lang_id);
+        $common['setting'] = getSettingData();
+        $common['menu'] = getAppMenu();
+        $common['lang_content'] = getLangContent(36,$lang_id);
+        $common['footer'] = getLangContent(9,$lang_id);
+
         $rules = array(
             'consumer_id' => 'required|numeric|exists:users,id',
             'count_per_page' => 'nullable|numeric',
             'order_by' => 'nullable|in:desc,asc',
             'page' => 'nullable|numeric',
         );
-        $valid = self::customValidation($request, $rules);
+        if ($request->language_id) {
+            $rules['language_id'] = 'integer|exists:languages,id';
+        }
+        $valid = self::customValidation($request, $rules,$common);
         if ($valid) {return $valid;}
 
         try {
@@ -107,12 +118,12 @@ class MedicalRecordController extends Controller
                 $result['total_count'] = $paginatedata->total();
                 $result['last_page'] = $paginatedata->lastPage();
                 $result['current_page'] = $paginatedata->currentPage();
-                return self::send_success_response($result, 'Medical Record content fetched successfully');
+                return self::send_success_response($result, 'Medical Record content fetched successfully',$common);
             }else{
-                return self::send_bad_request_response('No Records Found');
+                return self::send_bad_request_response('No Records Found',$common);
             }
         } catch (Exception | Throwable $e) {
-            return self::send_exception_response($exception->getMessage());
+            return self::send_exception_response($exception->getMessage(),$common);
         }
     }
 

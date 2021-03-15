@@ -134,7 +134,7 @@ function getAppMenu() {
     if (auth()->check()) {
         $menus = [];
         $lang = MultiLanguage::where(['page_master_id'=>1, 'language_id'=>auth()->user()->language_id])->get();
-        if(auth()->user()->hasRole(['company_admin'])){
+        /*if(auth()->user()->hasRole(['company_admin'])){
             $menus = [
                 'dashboard' => ucwords($lang->first(function($item) {return $item->keyword == 'dashboard';})->value),
                 'appointments' => ucwords($lang->first(function($item) {return $item->keyword == 'appointments';})->value),
@@ -155,7 +155,8 @@ function getAppMenu() {
                 'change_password' => ucwords($lang->first(function($item) {return $item->keyword == 'change_password';})->value),
                 'logout' => ucwords($lang->first(function($item) {return $item->keyword == 'logout';})->value),
             ];
-        }elseif(auth()->user()->hasRole(['doctor'])){
+        }else*/
+        if(auth()->user()->hasRole(['doctor'])){
             $menus = [
                 'dashboard' => ucwords($lang->first(function($item) {return $item->keyword == 'dashboard';})->value),
                 'appointments' => ucwords($lang->first(function($item) {return $item->keyword == 'appointments';})->value),
