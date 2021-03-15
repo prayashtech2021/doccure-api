@@ -169,7 +169,7 @@ function getAppMenu() {
                 'accounts' => ucwords($lang->first(function($item) {return $item->keyword == 'accounts';})->value),
                 'reviews' => ucwords($lang->first(function($item) {return $item->keyword == 'reviews';})->value),
                 'chat' => ucwords($lang->first(function($item) {return $item->keyword == 'chat';})->value),
-                'notifications' => ucwords($lang->first(function($item) {return $item->keyword == 'notifications';})->value),
+                //'notifications' => ucwords($lang->first(function($item) {return $item->keyword == 'notifications';})->value),
                 'social_media' => ucwords($lang->first(function($item) {return $item->keyword == 'social_media';})->value),
                 'my_profile' => ucwords($lang->first(function($item) {return $item->keyword == 'my_profile';})->value),
                 'blog' => ucwords($lang->first(function($item) {return $item->keyword == 'blog';})->value),
