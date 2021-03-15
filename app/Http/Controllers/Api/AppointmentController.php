@@ -243,7 +243,7 @@ class AppointmentController extends Controller
                 $amount = $speciality_amt * $request->selected_slots;
                 $transaction_charge = ($amount * ($getSettings['trans_percent'] / 100));
                 $total_amount = $amount + $transaction_charge;
-                $tax_amount = (round($total_amount) * $getSettings['tax_percent'] / 100);
+                $tax_amount = ($total_amount * $getSettings['tax_percent'] / 100);
 
                 $total_amount = $total_amount + $tax_amount;
 
@@ -298,7 +298,7 @@ class AppointmentController extends Controller
                     $stripeCharge = $stripe->balanceTransactions->retrieve($charges->first()->balance_transaction);
 
                     $payment->txn_id = $paymentIntent->id;
-                    $payment->transaction_charge = $stripeCharge->fee_details[0]->amount / 100;
+                    // $payment->transaction_charge = $stripeCharge->fee_details[0]->amount / 100;
                     $payment->save();
                     DB::commit();
                     return self::send_success_response($appointment->getData());
@@ -810,7 +810,7 @@ class AppointmentController extends Controller
         try{
 
             $rules = array(
-                'invoice_id' => 'required',
+                'invoice_id' => 'required|exists:payments,id',
             );
 
             if ($request->language_id) {
@@ -821,8 +821,12 @@ class AppointmentController extends Controller
 
             $result = [];
             $user = $request->user();
-            if($user->hasRole(['patient', 'doctor'])){
+            if($user->hasRole('patient')){
                 $payment = $user->payment()->where('payments.id', $request->invoice_id)->first();
+            }
+            if($user->hasRole('doctor')){
+                $payment = $user->providerPayment()->where('payments.id', $request->invoice_id)->first();
+            }
                 if($payment){
                     $appointment = $payment->appointment()->first();
 
@@ -835,7 +839,6 @@ class AppointmentController extends Controller
                 }else{
                     return self::send_bad_request_response(['message' => 'Invoice not found with ID given', 'error' => 'Invoice not found with ID given'],$common);
                 }
-            }
 
             return self::send_success_response($result,'OK',$common);
         } catch (Exception | Throwable $exception) {
