@@ -18,6 +18,7 @@ class LanguageSeeder extends Seeder
                 'name' => 'English',
                 'code' => 'En',
                 'is_default' => 1,
+                'is_enable' => 1,
                 'created_by' => 1,
             ],
         ];

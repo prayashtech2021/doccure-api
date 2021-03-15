@@ -107,6 +107,8 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
     // Language
     Route::post('language/update', 'Api\LanguageController@update');
     Route::post('language/save','Api\LanguageController@save');
+    Route::get('language/enable','Api\LanguageController@enableLang');
+
     /* Multi Language */
     Route::post('multi-language/edit','Api\LanguageController@multiLangEdit');
     Route::post('multi-language/save','Api\LanguageController@multiLangSave');

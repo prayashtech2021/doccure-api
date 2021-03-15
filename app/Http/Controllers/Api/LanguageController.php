@@ -15,7 +15,7 @@ class LanguageController extends Controller
     public function list(Request $request)
     {
         try {
-            $language = Language::orderBy('name')->get();
+            $language = Language::orderBy('name')->where('is_enable',1)->get();
             removeMetaColumn($language);
             return self::send_success_response($language);
 
@@ -102,6 +102,24 @@ class LanguageController extends Controller
             return self::send_success_response([],'Language Updated Successfully');
         } catch (Exception | Throwable $exception) {
             DB::rollback();
+            return self::send_exception_response($exception->getMessage());
+        }
+    }
+
+    public function enableLang(Request $request)
+    {
+        $rules = self::customValidation($request, [
+            'language_id' => 'required|exists:languages,id',
+        ]);
+        if($rules){ return $rules;}
+        try {
+                $language = Language::find($request->language_id);
+                $language->updated_by = auth()->user()->id;
+                $language->is_enable = $request->is_enable;
+                $language->save();
+                return self::send_success_response([],'Language updated successfully');
+
+        } catch (Exception | Throwable $exception) {
             return self::send_exception_response($exception->getMessage());
         }
     }

@@ -17,8 +17,8 @@ class CreateLanguagesTable extends Migration
             $table->id();
             $table->char('name',20);
             $table->char('code',3);
-            $table->unsignedTinyInteger('is_default');
-            
+            $table->unsignedTinyInteger('is_default');            
+            $table->unsignedTinyInteger('is_enable');
             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
 			$table->timestamp('updated_at')->nullable();
             $table->softDeletes();
