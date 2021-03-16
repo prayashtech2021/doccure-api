@@ -221,16 +221,39 @@ class SettingSeeder extends Seeder
             35 => [
                 'slug' => 'tokbox',
                 'keyword' => 'tokbox_api_key',
-                'value' => '',
+                'value' => '47119584',
                 'created_by' => 1,
             ],
             36 => [
                 'slug' => 'tokbox',
-                'keyword' => 'tokbox_api_secret',
+                'keyword' => 'tokbox_session_id',
+                'value' => '2_MX40NzExOTU4NH5-MTYxMjk2NTI3MDc1OX42YVlZeURoejhEQTZsWVd5RHFVUk9jSXp-fg',
+                'created_by' => 1,
+            ],
+            37 => [
+                'slug' => 'tokbox',
+                'keyword' => 'tokbox_token_id',
+                'value' => 'cGFydG5lcl9pZD00NzExOTU4NCZzaWc9ODM5ZjdiNTVmYjU0ZWViNDY2MzI1ZThhNjdiOTJkOWM1Nzg5ODJiYTpzZXNzaW9uX2lkPTJfTVg0ME56RXhPVFU0Tkg1LU1UWXhNamsyTlRJM01EYzFPWDQyWVZsWmVVUm9lamhFUVRac1dWZDVSSEZWVWs5alNYcC1mZyZjcmVhdGVfdGltZT0xNjEyOTY1MzA1Jm5vbmNlPTAuNzEyNDU0NzIwNDIyODA2OSZyb2xlPXB1Ymxpc2hlciZleHBpcmVfdGltZT0xNjE1NTU3MzA0JmluaXRpYWxfbGF5b3V0X2NsYXNzX2xpc3Q9',
+                'created_by' => 1,
+            ],
+            38 => [
+                'slug' => 'general_settings',
+                'keyword' => 'website_content',
                 'value' => '',
                 'created_by' => 1,
             ],
-            
+            39 => [
+                'slug' => 'privacy_policy',
+                'keyword' => 'privacy_policy',
+                'value' => '',
+                'created_by' => 1,
+            ],
+            40 => [
+                'slug' => 'terms_and_condition',
+                'keyword' => 'terms_and_condition',
+                'value' => '',
+                'created_by' => 1,
+            ],
 		];
 		foreach ($datas as $id => $data) {
 			$row = Setting::firstOrNew([

@@ -919,9 +919,10 @@ class AppointmentController extends Controller
             $applog->status = 3; //completed
             $applog->save();
 
-            auth()->user()->notify(new AppointmentNoty($app));
-            $doctor = User::find($app->doctor_id); 
-            $doctor->notify(new AppointmentNoty($app));
+            $consumer = User::find($app->user_id); 
+            $consumer->notify(new AppointmentNoty($app));
+            $provider = User::find($app->doctor_id); 
+            $provider->notify(new AppointmentNoty($app));
 
             DB::commit();       
             return self::send_success_response($log,'Log Saved Successfully');

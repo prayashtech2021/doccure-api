@@ -21,6 +21,7 @@ class PostController extends Controller
         $lang_id = ($request->language_id)? getLang($request->language_id) : defaultLang();
         $common['header'] = getLangContent(8,$lang_id);
         $common['setting'] = getSettingData();
+        $common['menu'] = getAppMenu();
         if($request->is_doctor){ //doctor login content
             $common['lang_content'] = getLangContent(33,$lang_id);
         }else{ //front end
