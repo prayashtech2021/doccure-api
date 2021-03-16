@@ -284,7 +284,9 @@ class User extends Authenticatable implements Wallet, WalletFloat
         });
         $list = $chat->orderBy('id','desc')->first();
         //$count = $chat->where('read_status',1)->count();
+        if($list){
         (empty($list->message))? $msg = $list->file_path : $msg = $list->message; 
+        }else{$msg =''; }
 
         return [
             'message' => $msg,
