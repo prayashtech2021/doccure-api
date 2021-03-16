@@ -286,11 +286,12 @@ class User extends Authenticatable implements Wallet, WalletFloat
         //$count = $chat->where('read_status',1)->count();
         if($list){
         (empty($list->message))? $msg = $list->file_path : $msg = $list->message; 
-        }else{$msg =''; }
+        $created_at=$list->created_at->diffForHumans();
+        }else{$msg =''; $created_at=''; }
 
         return [
             'message' => $msg,
-            'created_at' => $list->created_at->diffForHumans(),
+            'created_at' => $created_at,
            // 'unread' => ($list)? $count : 0,
         ];
     }
