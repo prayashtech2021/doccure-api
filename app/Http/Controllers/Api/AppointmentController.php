@@ -539,9 +539,10 @@ class AppointmentController extends Controller
                 $user->depositFloat($requested_amount);
             }
 
-            auth()->user()->notify(new AppointmentNoty($appointment));
-            $doctor = User::find($appointment->doctor_id); 
-            $doctor->notify(new AppointmentNoty($appointment));
+            $consumer = User::find($appointment->user_id); 
+            $consumer->notify(new AppointmentNoty($appointment));
+            $provider = User::find($appointment->doctor_id); 
+            $provider->notify(new AppointmentNoty($appointment));
             
             return self::send_success_response([], 'Status updated sucessfully');
         } catch (Exception | Throwable $exception) {
