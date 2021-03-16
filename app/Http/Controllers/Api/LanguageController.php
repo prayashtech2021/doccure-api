@@ -121,7 +121,9 @@ class LanguageController extends Controller
             if($request->check_keyword){
                 $count = Language::whereId($request->language_id)->whereNull('keywords')->count();
                 if($count){
-                    return self::send_success_response([],'Language Not yet updated for all keywords');
+                    return self::send_bad_request_response('Language Not yet updated for all keywords');
+                }else{
+                    return self::send_success_response([],'Language updated for all keywords'); 
                 }
             }
                 $language = Language::find($request->language_id);
