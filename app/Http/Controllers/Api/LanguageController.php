@@ -119,7 +119,7 @@ class LanguageController extends Controller
         if($rules){ return $rules;}
         try {
             if($request->check_keyword){
-                $count = Language::whereId($request->language_id)->whereNull('keywords')->count();
+                $count = MultiLanguage::where('language_id',$request->language_id)->where('value','')->count();
                 if($count){
                     return self::send_bad_request_response('Language Not yet updated for all keywords');
                 }else{

@@ -161,7 +161,11 @@ class AppointmentController extends Controller
                 $result['total_count'] = $paginatedata->total();
                 $result['last_page'] = $paginatedata->lastPage();
                 $result['current_page'] = $paginatedata->currentPage();
-                
+                if($request->payment_gateway){
+                    $result['payment_gateway'] = Setting::select('keyword','value')->where('slug','payment_gateway')->get();
+                }elseif($request->toxbox){
+                    $result['toxbox'] = Setting::select('keyword','value')->where('slug','tokbox')->get();
+                }
                 return self::send_success_response($result,'',$common);
             }
         } catch (Exception | Throwable $exception) {
