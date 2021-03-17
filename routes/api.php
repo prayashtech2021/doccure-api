@@ -159,6 +159,7 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
     Route::get('notification/read-all', 'Api\NotificationController@markNotificationsAsRead');
     
     //blogs
+    Route::get('post/list', 'Api\PostController@index');
     Route::get('post/delete/{id}', 'Api\PostController@destroy');
     Route::post('post/verify', 'Api\PostController@verifyPost');
     Route::post('post/add/comment', 'Api\PostController@addComment');
