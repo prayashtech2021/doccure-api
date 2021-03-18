@@ -482,7 +482,6 @@ class AppointmentController extends Controller
             }
 
         } catch (Exception | Throwable $exception) {
-            DB::rollBack();
             return self::send_exception_response($exception->getMessage(),$common);
         }
     }
@@ -908,20 +907,12 @@ class AppointmentController extends Controller
             ]);
 
             $app = Appointment::find($request->appointment_id);
-            $app->appointment_status = 3;
-            $app->call_status = 1;
-            $app->save();
+            
 
-            $applog = new AppointmentLog;
-            $applog->appointment_id = $request->appointment_id;
-            $applog->request_type = 1;
-            $applog->description = config('custom.appointment_log_message.3');
-            $applog->status = 3; //completed
-            $applog->save();
-
-            auth()->user()->notify(new AppointmentNoty($app));
-            $doctor = User::find($app->doctor_id); 
-            $doctor->notify(new AppointmentNoty($app));
+            $consumer = User::find($app->user_id); 
+            $consumer->notify(new AppointmentNoty($app));
+            $provider = User::find($app->doctor_id); 
+            $provider->notify(new AppointmentNoty($app));
 
             DB::commit();       
             return self::send_success_response($log,'Log Saved Successfully');
@@ -948,6 +939,18 @@ class AppointmentController extends Controller
             $log->end_time =$request->end_time;
             $log->duration = ($duration>0)?$duration:0;
             $log->save();
+
+            $app = Appointment::find($log->appointment_id);
+            $app->appointment_status = 3;
+            $app->call_status = 1;
+            $app->save();
+
+            $applog = new AppointmentLog;
+            $applog->appointment_id = $log->appointment_id;
+            $applog->request_type = 1;
+            $applog->description = config('custom.appointment_log_message.3');
+            $applog->status = 3; //completed
+            $applog->save();
 
             return self::send_success_response('Log updated Successfully');
         } catch (Exception | Throwable $exception) {
