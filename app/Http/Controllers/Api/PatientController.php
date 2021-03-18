@@ -133,7 +133,7 @@ class PatientController extends Controller
                 'last_name'  => 'string|max:191',
                 'email' => 'required|email|unique:users,email,'.$request->user_id,
                 'country_code_id' => 'required|numeric|exists:countries,id',
-                'mobile_number' => 'required|min:7|max:13|unique:users,mobile_number,'.$request->user_id,
+                'mobile_number' => 'required|min:7|max:15|unique:users,mobile_number,'.$request->user_id,
                 'gender'  => 'required|integer|between:1,2',
                 'dob'  => 'date',
                 'contact_address_line1' => 'required',
