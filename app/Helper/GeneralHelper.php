@@ -98,12 +98,18 @@ function getLangContent($page_master_id,$lang_id){
     }
     return $data;
 }
-function getSettingData(){
-    $result = Setting::whereIn('slug',['general_settings','social_link'])->get();
+function getSettingData($addon = NULL){
+    $array = ['general_settings','social_link'];
+    if($addon){
+        array_push($array,$addon);
+    }
+    $result = Setting::whereIn('slug',$array)->get();
     $setting = [];
     foreach($result as $data){
         if(($data->keyword=='company_logo') || ($data->keyword=='footer_logo') || ($data->keyword=='favicon') ){
             $setting[$data->keyword] = getSettingImage($data->value);
+        }elseif($data->keyword == 'privacy_policy' || $data->keyword == 'terms_and_condition'){
+            $setting[$data->keyword] = htmlspecialchars_decode($data->value);
         }else{
             $setting[$data->keyword] = $data->value;
         }

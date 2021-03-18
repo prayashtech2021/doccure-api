@@ -33,7 +33,7 @@ Route::middleware(['secureApi', 'responseHeader'])->group(function () {
     Route::get('doctor/profile/{id}', 'Api\DoctorController@doctorProfile');
     Route::get('landing-page','Api\PageContentController@getList');
     Route::get('common-page','Api\HomeController@getCommonData');
-
+    Route::get('page-setting','Api\SettingController@getPageSetting');
     // for blogs
     Route::get('post', 'Api\PostController@index');
     Route::get('post/view/{id}', 'Api\PostController@view');
@@ -42,6 +42,7 @@ Route::middleware(['secureApi', 'responseHeader'])->group(function () {
 Route::middleware(['CheckAuthHeader', 'auth:api', 'responseHeader'])->group(function () {
     Route::post('email-template/save','Api\EmailTemplateController@save');
     Route::post('post/save', 'Api\PostController@save');
+    Route::post('settings/save','Api\SettingController@save');
 });
 Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader'])->group(function () {
     /* common */
@@ -76,7 +77,6 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
     //invoice
     Route::get('invoice/list', 'Api\AppointmentController@invoiceList');
     Route::post('invoice/view', 'Api\AppointmentController@viewInvoice');
-
 
     /* Doctor Module */
     Route::get('doctor/dashboard', 'Api\DoctorController@dashboard');
@@ -119,7 +119,6 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
     Route::post('payment/request/update', 'Api\PaymentRequestController@updatePaymentRequest')->name('updatePaymentRequest');
     /* Settings */
     Route::get('settings','Api\SettingController@getSetting');
-    Route::post('settings/save','Api\SettingController@save');
     /* Dashboard */
     Route::get('admin/dashboard','Api\HomeController@adminDashboard');
     Route::get('patient/dashboard','Api\PatientController@patientDashboard');

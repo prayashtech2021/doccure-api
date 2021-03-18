@@ -130,5 +130,30 @@ class SettingController extends Controller
         }
     }
 
+    public function getPageSetting(Request $request){
+        $common = [];
+        $lang_id = ($request->language_id)? getLang($request->language_id) : defaultLang();
+        $common['header'] = getLangContent(8,$lang_id);
+        if($request->content && $request->contest ==1){
+            $content = 'terms_and_condition';
+        }else{
+            $content = 'privacy_policy';     
+        }
+        $common['setting'] = getSettingData($content);
+        $common['footer'] = getLangContent(9,$lang_id);
+        
+        try {
+            if ($request->language_id) {
+                $rules['language_id'] = 'integer|exists:languages,id';
+                $valid = self::customValidation($request, $rules,$common);
+                if($valid){ return $valid;}
+            }
+            return self::send_success_response([], 'Setting data fetched successfully',$common);
+        } catch (Exception | Throwable $e) {
+            DB::rollback();
+            return self::send_exception_response($exception->getMessage(),$common);
+        }
+    }
+
     
 }

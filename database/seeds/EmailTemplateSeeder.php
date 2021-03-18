@@ -17,7 +17,7 @@ class EmailTemplateSeeder extends Seeder
 			1 => [
                 'slug' => 'registration',
                 'subject' => 'Doccure Registration',
-                'content' => '# Hi {{username}},\r\n\r\nThank you for register with {{config_app_name}} account. <br>\r\nYour Verification code is <h2><b>{{verification_code}}</b></h2>\r\n\r\n<button><a href=\"{{link}}\" target=\"_blank\">Verify Your Email Address</a></button> <br>\r\n\r\nPlease click the above link to verify your email address. <br><br>\r\nRegards,<br>\r\n<span style=\"color:#11cdef;\">{{config_app_name}} Team</span><br>\r\n<small>{{custom_support_phone}} <br> {{custom_support_email}}</small>',
+                'content' => '<p><strong># Hi There,</strong></p><p>&nbsp;</p><p>Thank You for register with {{config_app_name}} account.</p><p>Your Verfication Code is <strong>{{verification_code}}.</strong></p><p><a href="{{link}}" type="button">Click here to verify e-mail address</a></p><p>&nbsp;</p><p>Please&nbsp;click&nbsp;the&nbsp;above&nbsp;link&nbsp;to&nbsp;verify&nbsp;your&nbsp;email&nbsp;address.&nbsp;</p><p>&nbsp;</p><p>Regards,</p><p>{{config_app_name}} Team,</p><p>{{custom_support_phone}},</p><p>{{custom_support_email}}.</p>',
             ],
             2 => [
                 'slug' => 'reset_password',
