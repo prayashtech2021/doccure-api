@@ -31,7 +31,7 @@ class HomeController extends Controller
                 'last_name'  => 'required|string|max:191',
                 'email' => 'required|email|unique:users',
                 'country_id' => 'required|integer',
-                'mobile_number' => 'required|min:10|max:10|unique:users',
+                'mobile_number' => 'required|min:7|max:13|unique:users',
                 'password' => 'required|confirmed|min:6|string',
                 'type' => 'required|integer',
             ]);
@@ -55,7 +55,7 @@ class HomeController extends Controller
             $user->assignRole($request->type);
             DB::commit();
             
-            $url = env("FRONTEND_URL")."verifymail/".$user->id.'/'.$token;
+            $url = env('FRONTEND_URL','https://doccure-frontend.dreamguystech.com/').'verifymail/'.$user->id.'/'.$token;
 
             $template = EmailTemplate::where('slug','registration')->first();
             if($template){
@@ -108,7 +108,7 @@ class HomeController extends Controller
                     $user->verification_code = $verification_code;
                     $user->save();
 
-                    $url =  env("FRONTEND_URL")."verifymail/".$user->id.'/'.$token;
+                    $url =  env('FRONTEND_URL','https://doccure-frontend.dreamguystech.com/').'verifymail/'.$user->id.'/'.$token;
 
                     $template = EmailTemplate::where('slug','registration')->first();
                     if($template){

@@ -134,7 +134,7 @@ class SettingController extends Controller
         $common = [];
         $lang_id = ($request->language_id)? getLang($request->language_id) : defaultLang();
         $common['header'] = getLangContent(8,$lang_id);
-        if($request->content && $request->contest ==1){
+        if($request->content && $request->content ==1){
             $content = 'terms_and_condition';
         }else{
             $content = 'privacy_policy';     
