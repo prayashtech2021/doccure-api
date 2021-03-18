@@ -3912,8 +3912,8 @@ class MultiLanguageSeeder extends Seeder
             ],648 => [
                 'page_master_id' => 33,
                 'language_id' => 1,
-                'keyword' => 'are_you_sure_delete_this_post?',
-                'value' => 'Are you sure delete this post?',
+                'keyword' => 'are_you_sure_delete_this_post',
+                'value' => 'Are you sure delete this post',
                 'created_by' => 1, 
             ],649 => [
                 'page_master_id' => 33,
@@ -4275,6 +4275,30 @@ class MultiLanguageSeeder extends Seeder
                 'keyword' => 'print',
                 'value' => 'Print',
                 'created_by' => 1, 
+            ],710 => [
+                'page_master_id' => 34,
+                'language_id' => 1,
+                'keyword' => 'edit_post',
+                'value' => 'Edit Post',
+                'created_by' => 1, 
+            ],711 => [
+                'page_master_id' => 34,
+                'language_id' => 1,
+                'keyword' => 'saving',
+                'value' => 'Saving',
+                'created_by' => 1,
+            ],712 => [
+                'page_master_id' => 34,
+                'language_id' => 1,
+                'keyword' => 'home',
+                'value' => 'Home',
+                'created_by' => 1,
+            ],713 => [
+                'page_master_id' => 34,
+                'language_id' => 1,
+                'keyword' => 'update',
+                'value' => 'Update',
+                'created_by' => 1,
             ],
             
             // for menu page end

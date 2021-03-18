@@ -15,7 +15,12 @@ class LanguageController extends Controller
     public function list(Request $request)
     {
         try {
-            $language = Language::orderBy('name')->where('is_enable',1)->get();
+            $language = Language::orderBy('name');
+            if($request->is_all){
+                $language = $language->get();
+            }else{
+                $language = $language->where('is_enable',1)->get();
+            }
             removeMetaColumn($language);
             return self::send_success_response($language);
 
@@ -113,6 +118,14 @@ class LanguageController extends Controller
         ]);
         if($rules){ return $rules;}
         try {
+            if($request->check_keyword){
+                $count = MultiLanguage::where('language_id',$request->language_id)->where('value','')->count();
+                if($count){
+                    return self::send_bad_request_response('Language Not yet updated for all keywords');
+                }else{
+                    return self::send_success_response([],'Language updated for all keywords'); 
+                }
+            }
                 $language = Language::find($request->language_id);
                 $language->updated_by = auth()->user()->id;
                 $language->is_enable = $request->is_enable;

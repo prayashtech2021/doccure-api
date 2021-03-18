@@ -167,7 +167,11 @@ class DoctorController extends Controller
                     $fav = $list->userHasFav(auth('api')->user()->id);
                 }
                 $array['favourite'] = $fav;
-
+                if($request->payment_gateway){
+                    $array['payment_gateway'] = Setting::select('keyword','value')->where('slug','payment_gateway')->get();
+                }elseif($request->toxbox){
+                    $array['toxbox'] = Setting::select('keyword','value')->where('slug','tokbox')->get();
+                }
                 return self::send_success_response($array, 'Doctor Details Fetched Successfully.',$common);
             } else {
                 return self::send_bad_request_response('Incorrect User Id. Please check and try again.',$common);
