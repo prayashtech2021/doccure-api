@@ -124,6 +124,9 @@ class DoctorController extends Controller
         $lang_id = ($request->language_id)? getLang($request->language_id) : defaultLang();
         $common['header'] = getLangContent(8,$lang_id);
         $common['setting'] = getSettingData();
+        if ($request->bearerToken()) {
+            $common['menu'] = getAppMenu($request);
+        }
         if($request->is_profile_setting){
             $common['lang_content'] = getLangContent(19,$lang_id);
         }else{

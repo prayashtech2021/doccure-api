@@ -136,10 +136,10 @@ function updateLastSeen($user){
     }
 }
 
-function getAppMenu() {
-    if (auth()->check()) {
+function getAppMenu($request = NULL) {
+    if (auth()->check() || $request->bearerToken()) {
         $menus = [];
-        $lang = MultiLanguage::where(['page_master_id'=>1, 'language_id'=>auth()->user()->language_id])->get();
+        $lang = MultiLanguage::where(['page_master_id'=>1, 'language_id'=>auth('api')->user()->language_id])->get();
         /*if(auth()->user()->hasRole(['company_admin'])){
             $menus = [
                 'dashboard' => ucwords($lang->first(function($item) {return $item->keyword == 'dashboard';})->value),
@@ -162,7 +162,7 @@ function getAppMenu() {
                 'logout' => ucwords($lang->first(function($item) {return $item->keyword == 'logout';})->value),
             ];
         }else*/
-        if(auth()->user()->hasRole(['doctor'])){
+        if(auth('api')->user()->hasRole(['doctor'])){
             $menus = [
                 'dashboard' => ucwords($lang->first(function($item) {return $item->keyword == 'dashboard';})->value),
                 'appointments' => ucwords($lang->first(function($item) {return $item->keyword == 'appointments';})->value),
@@ -182,7 +182,7 @@ function getAppMenu() {
                 'change_password' => ucwords($lang->first(function($item) {return $item->keyword == 'change_password';})->value),
                 'logout' => ucwords($lang->first(function($item) {return $item->keyword == 'logout';})->value),
             ];
-        }elseif(auth()->user()->hasRole(['patient'])){
+        }elseif(auth('api')->user()->hasRole(['patient'])){
             $menus = [
                 'dashboard' => ucwords($lang->first(function($item) {return $item->keyword == 'dashboard';})->value),
                 'appointments' => ucwords($lang->first(function($item) {return $item->keyword == 'appointments';})->value),
