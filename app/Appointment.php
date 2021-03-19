@@ -22,8 +22,8 @@ class Appointment extends Model
             'doctor' => $this->doctor()->first()->basicProfile(),
             'patient' => $this->patient()->first()->basicProfile(),
             'date' => convertToLocal(Carbon::parse($this->appointment_date),'','d/m/Y'),
-            'start_time' => Carbon::parse($this->start_time)->format('h:i A'),
-            'end_time' => Carbon::parse($this->end_time)->format('h:i A'),
+            'start_time' => convertToLocal(Carbon::parse($this->start_time),'','h:i A'), //Carbon::parse($this->start_time)->format('h:i A'),
+            'end_time' => convertToLocal(Carbon::parse($this->end_time),'','h:i A'), //Carbon::parse($this->end_time)->format('h:i A'),
             'next_visit' => convertToLocal(Carbon::parse($this->next_visit),'','d/m/Y'),
             'transaction_data' => $this->payment()->first()->getData()
         ];
@@ -38,8 +38,8 @@ class Appointment extends Model
             'doctor' => $this->doctor()->first()->basicProfile(),
             'patient' => $this->patient()->first()->basicProfile(),
             'date' => convertToLocal(Carbon::parse($this->appointment_date),'','d/m/Y'),
-            'start_time' => Carbon::parse($this->start_time)->format('h:i A'),
-            'end_time' => Carbon::parse($this->end_time)->format('h:i A'),
+            'start_time' => convertToLocal(Carbon::parse($this->start_time),'','h:i A'), //Carbon::parse($this->start_time)->format('h:i A'),
+            'end_time' => convertToLocal(Carbon::parse($this->end_time),'','h:i A'), //Carbon::parse($this->end_time)->format('h:i A'),
             'amount' => $this->payment()->select('currency_code','total_amount')->first(),
         ];
     }

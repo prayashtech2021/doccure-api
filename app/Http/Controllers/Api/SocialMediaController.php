@@ -49,6 +49,7 @@ class SocialMediaController extends Controller
         $lang_id = ($request->language_id)? getLang($request->language_id) : defaultLang();
         $common['header'] = getLangContent(8,$lang_id);
         $common['setting'] = getSettingData();
+        $common['menu'] = getAppMenu();
         $common['lang_content'] = getLangContent(31,$lang_id);
         $common['footer'] = getLangContent(9,$lang_id);
 

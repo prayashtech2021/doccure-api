@@ -73,7 +73,7 @@ class SettingController extends Controller
                     $file = $request->favicon;
                     $keyword = 'favicon';
                     $rules = array(
-                        'favicon' => 'nullable|image|mimes:png|dimensions:max_width=32,max_height=32',
+                        'favicon' => 'nullable|mimes:png,ico|dimensions:min_width=16,min_height=16,max_width=32,max_height=32',
                     );
                     $valid = self::customValidation($request, $rules);
                     if($valid){ return $valid;}

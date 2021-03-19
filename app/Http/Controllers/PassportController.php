@@ -18,18 +18,21 @@ class PassportController extends Controller {
 	public function login(Request $request) {
 
 		$validator = Validator::make($request->all(), [
-			'email' => 'required|email',
+			'email' => 'required',
 			'password' => 'required',
 			'type' => 'required|in:0,1', //1=>admin login
 		]);
 		if ($validator->fails()) {
             return self::send_bad_request_response($validator->errors()->first());
 		}
-		$credentials = [
-			'email' => $request->email,
-			'password' => $request->password,
-			'is_verified' => 1,
-		];
+		
+		if(is_numeric($request->email)){
+			$credentials = ['mobile_number'=>$request->email,'password'=>$request->password, 'is_verified' => 1];
+		}elseif (filter_var($request->email, FILTER_VALIDATE_EMAIL)) {
+			$credentials = ['email' => $request->email, 'password'=>$request->password, 'is_verified' => 1];
+		}else{
+			return self::send_bad_request_response('Mobile number or Email is invalid');
+		}
 		
 		if (auth()->attempt($credentials)) {
 			$user = auth()->user();
@@ -78,7 +81,7 @@ class PassportController extends Controller {
 				];
 				return response()->json(self::convertNullsAsEmpty($response_array), 200);
             }
-			$message = "No Records Found.";
+			$message = "User is not Registered.";
             return self::send_unauthorised_request_response($message);
 		}
 	}
