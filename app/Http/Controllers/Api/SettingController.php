@@ -25,7 +25,7 @@ class SettingController extends Controller
                     $file = $request->company_logo;
                     $keyword = 'company_logo';
                     $rules = array(
-                        'company_logo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+                        'company_logo' => 'nullable|image|mimes:jpeg,png,jpg|dimensions:max_width=200,max_height=50',
                     );
                     $valid = self::customValidation($request, $rules);
                     if($valid){ return $valid;}
@@ -49,7 +49,7 @@ class SettingController extends Controller
                     $file = $request->footer_logo;
                     $keyword = 'footer_logo';
                     $rules = array(
-                        'footer_logo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+                        'footer_logo' => 'nullable|image|mimes:jpeg,png,jpg|dimensions:max_width=200,max_height=50',
                     );
                     $valid = self::customValidation($request, $rules);
                     if($valid){ return $valid;}
@@ -73,7 +73,7 @@ class SettingController extends Controller
                     $file = $request->favicon;
                     $keyword = 'favicon';
                     $rules = array(
-                        'favicon' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+                        'favicon' => 'nullable|image|mimes:png|dimensions:max_width=32,max_height=32',
                     );
                     $valid = self::customValidation($request, $rules);
                     if($valid){ return $valid;}
