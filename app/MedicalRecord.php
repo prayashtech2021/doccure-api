@@ -21,7 +21,7 @@ class MedicalRecord extends Model
         return [
             'id' => $this->id,
             'appointment_id' => $this->appointment_id,
-            'created' => Carbon::parse($this->created_at)->format('d/m/Y h:i A'),
+            'created' => convertToLocal(Carbon::parse($this->created_at),'','d/m/Y h:i A'),
             'appointment_reference_no' => $this->appointment()->select('appointment_reference')->first(),
             'doctor' => $this->doctor()->first()->basicProfile(),
             'patient' => $this->patient()->first()->basicProfile(),

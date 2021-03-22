@@ -18,7 +18,7 @@ class PostSubCategory extends Model
             'id' => $this->id,
             'category' => $this->category()->withTrashed()->select('id','name')->first(),
             'name' => $this->name,
-            'created_at' => $this->created_at,
+            'created_at' => convertToLocal(Carbon::parse($this->created_at),'','d/m/Y h:i A'),
             'deleted_at' => $this->deleted_at,         
         ];
     }

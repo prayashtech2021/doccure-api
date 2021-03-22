@@ -4461,7 +4461,13 @@ class MultiLanguageSeeder extends Seeder
                 'keyword' => 'blog',
                 'value' => 'Blog',
                 'created_by' => 1, 
-            ],
+            ],741 => [
+                'page_master_id' => 26,
+                'language_id' => 1,
+                'keyword' => 'total_appointment',
+                'value' => 'Total Appointment',
+                'created_by' => 1, 
+            ]
             
             // for menu page end
         ];

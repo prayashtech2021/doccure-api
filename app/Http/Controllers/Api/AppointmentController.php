@@ -838,20 +838,26 @@ class AppointmentController extends Controller
             $result = [];
             $user = $request->user();
             if($user->hasRole('patient')){
-                $payment = $user->payment()->where('payments.id', $request->invoice_id)->first();
+                $payments = $user->payment()->where('payments.id', $request->invoice_id)->first();
             }
             if($user->hasRole('doctor')){
-                $payment = $user->providerPayment()->where('payments.id', $request->invoice_id)->first();
+                $payments = $user->providerPayment()->where('payments.id', $request->invoice_id)->first();
             }
-                if($payment){
-                    $appointment = $payment->appointment()->first();
+                if($payments){
+                    //$appointment = $payment->appointment()->first();
+                    
+                    $data = collect();
+                    $payments->each(function ($s) use (&$data) {
+                        $data->push($s->getData());
+                    });
+                    $result['list']= $payments->getData(); //$data;
 
-                    $result = [
+                    /*$result = [
                         'payment' => $payment->getData(),
                         'from' => $appointment->getData()['doctor'],
                         'to' => $appointment->getData()['patient'],
                         'created' => $payment->getData()['created'],
-                    ];
+                    ];*/
                 }else{
                     return self::send_bad_request_response(['message' => 'Invoice not found with ID given', 'error' => 'Invoice not found with ID given'],$common);
                 }

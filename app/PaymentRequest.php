@@ -20,7 +20,7 @@ class PaymentRequest extends Model
     public function getData(){
         return [
             'id' => $this->id,
-            'created' => Carbon::parse($this->created_at)->format('d/m/Y h:i A'),
+            'created' => convertToLocal(Carbon::parse($this->created_at),'','d/m/Y h:i A'),
             'reference_id' => $this->reference_id,
             'currency_code' => $this->currency_code,
             'request_type' => ucfirst(config('custom.payment_request_type')[$this->request_type]),
