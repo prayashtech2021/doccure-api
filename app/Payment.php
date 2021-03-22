@@ -12,7 +12,6 @@ class Payment extends Model
         return [
             'id' => $this->id,
             'reference' => $this->invoice_no,
-            'created' => Carbon::parse($this->created_at)->format('d/m/Y h:i A'),
             'type' => config('appointments.payment')[$this->payment_type],
             'total_amount' => $this->total_amount,
             'currency_code' => $this->currency_code,
@@ -20,7 +19,10 @@ class Payment extends Model
             'tax' => $this->tax ?? 'NA',
             'tax_amount' => $this->tax_amount ?? 'NA',
             'transaction_charge' => $this->transaction_charge ?? 'NA',
-            'card_details' => $this->cardDetails()
+            'card_details' => $this->cardDetails(),
+            'from' => $this->appointment->doctor()->first()->basicProfile(),
+            'to' => $this->appointment->patient()->first()->basicProfile(),
+            'created' => Carbon::parse($this->created_at)->format('d/m/Y h:i A'),
         ];
     }
 

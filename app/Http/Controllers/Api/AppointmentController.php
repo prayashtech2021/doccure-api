@@ -773,37 +773,42 @@ class AppointmentController extends Controller
         $common['footer'] = getLangContent(9,$lang_id);
 
         try {
+            $rules = array(
+                'count_per_page' => 'nullable|numeric',
+                'order_by' => 'nullable|in:desc,asc',
+                'page' => 'nullable|numeric',
+            );
             if ($request->language_id) {
                 $rules['language_id'] = 'integer|exists:languages,id';
-            
-                $valid = self::customValidation($request, $rules,$common);
-                if ($valid) {return $valid;}
             }
+            $valid = self::customValidation($request, $rules,$common);
+            if ($valid) {return $valid;}
+
+            $paginate = $request->count_per_page ? $request->count_per_page : 10;
+            $order_by = $request->order_by ? $request->order_by : 'desc';
+            $pageNumber = $request->page ? $request->page : 1;
 
             $invoice_list = collect();
             $user = $request->user();
             updateLastSeen(auth()->user());
             $payments =[];
             if ($user->hasRole(['patient'])) {
-                $payments = $user->payment()->get();
+                $payments = $user->payment();
             }
             if ($user->hasRole(['doctor'])) {
-                $payments = $user->providerPayment()->get();
+                $payments = $user->providerPayment();
             }
-            if(!empty($payments)){
-                foreach ($payments as $payment) {
-                    $appointment = $payment->appointment()->first();
-                    $invoice_list->push([
-                        'payment' => $payment->getData(),
-                        'from' => $appointment->getData()['doctor'],
-                        'to' => $appointment->getData()['patient'],
-                        'created' => $payment->getData()['created'],
-                    ]);
-
-                }
-            }
+            $data = collect();
+            $paginatedata = $payments->paginate($paginate, ['*'], 'page', $pageNumber);
+            $paginatedata->getCollection()->each(function ($payment) use (&$data) {
+                $data->push($payment->getData());
+            });
+            $result['list'] = $data;
+            $result['total_count'] = $paginatedata->total();
+            $result['last_page'] = $paginatedata->lastPage();
+            $result['current_page'] = $paginatedata->currentPage(); 
             
-            return self::send_success_response($invoice_list->toArray(),'OK',$common);
+            return self::send_success_response($result,'OK',$common);
         } catch (Exception | Throwable $exception) {
             return self::send_exception_response($exception->getMessage(),$common);
         }
