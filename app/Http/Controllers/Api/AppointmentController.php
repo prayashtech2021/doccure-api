@@ -838,7 +838,7 @@ class AppointmentController extends Controller
             $result = [];
             $user = $request->user();
             if($user->hasRole('patient')){
-                $payments = $user->payment()->where('payments.id', $request->invoice_id)->first();
+                $payment = $user->payment()->where('payments.id', $request->invoice_id)->first();
             }
             if($user->hasRole('doctor')){
                 $payment = $user->providerPayment()->where('payments.id', $request->invoice_id)->first();
