@@ -844,13 +844,8 @@ class AppointmentController extends Controller
                 $payment = $user->providerPayment()->where('payments.id', $request->invoice_id)->first();
             }
                 if($payment){
-                    $appointment = $payment->appointment()->first();
-
                     $result = [
                         'payment' => $payment->getData(),
-                        'from' => $appointment->getData()['doctor'],
-                        'to' => $appointment->getData()['patient'],
-                        'created' => $payment->getData()['created'],
                     ];
                 }else{
                     return self::send_bad_request_response(['message' => 'Invoice not found with ID given', 'error' => 'Invoice not found with ID given'],$common);
