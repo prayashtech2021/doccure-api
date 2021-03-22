@@ -80,7 +80,12 @@ class AppointmentController extends Controller
 
             $user = auth()->user();
             updateLastSeen(auth()->user());
-            $update = Appointment::whereIn('appointment_status',[1,2])->whereDate('appointment_date','<',convertToUTC(now()))->update(['appointment_status'=>7]);
+            $update = Appointment::whereIn('appointment_status',[1,2])->whereDate('appointment_date','<=',convertToUTC(now()))->get();
+            if($update){
+            foreach($update as $upd){
+                Appointment::where('id',$upd->id)->where('end_time','<',convertToLocal(Carbon::parse(now()),$upd->time_zone,'H:i:s'))->update(['appointment_status'=>7]);
+            }
+            }
             
             $paginate = $request->count_per_page ? $request->count_per_page : 10;
             $pageNumber = $request->page ? $request->page : 1;
