@@ -83,7 +83,14 @@ class AppointmentController extends Controller
             $update = Appointment::whereIn('appointment_status',[1,2])->whereDate('appointment_date','<=',convertToUTC(now()))->get();
             if($update){
             foreach($update as $upd){
-                Appointment::where('id',$upd->id)->where('end_time','<',convertToLocal(Carbon::parse(now()),$upd->time_zone,'H:i:s'))->update(['appointment_status'=>7]);
+                $app = Appointment::where('id',$upd->id)->where('end_time','<',convertToLocal(Carbon::parse(now()),$upd->time_zone,'H:i:s'))->first();
+                if($app){
+                Appointment::where('id',$app->id)->update(['appointment_status'=>7]);
+
+                $user = User::find($appointment->user_id);
+                $requested_amount = $app->payment->total_amount - $app->payment->transaction_charge;
+                $user->depositFloat($requested_amount);
+                }
             }
             }
             
@@ -223,6 +230,9 @@ class AppointmentController extends Controller
             $appointment->payment_type = $request->payment_type;
             $appointment->request_type = 1;
             $appointment->appointment_status = 1;
+            if(isset($request->time_zone) && !empty($request->time_zone)){
+            $appointment->time_zone = $request->time_zone;
+            }
             $appointment->save();
 
             $log = new AppointmentLog;
@@ -271,8 +281,8 @@ class AppointmentController extends Controller
             $payment->currency_code = $doctor->currency_code ?? config('cashier.currency');
             $payment->save();
 
-            $requested_amount = $payment->total_amount - ($payment->tax_amount + $payment->transaction_charge);
-            $doctor->depositFloat($requested_amount);
+            // $requested_amount = $payment->total_amount - ($payment->tax_amount + $payment->transaction_charge);
+            // $doctor->depositFloat($requested_amount);
 
             if ($request->payment_type == 1 || $request->payment_type == 2) {
 
@@ -526,7 +536,13 @@ class AppointmentController extends Controller
         if ($valid) {return $valid;}
 
         try {
+            $cancel=0;
             $appointment = Appointment::find($request->appointment_id);
+            if($request->status == 6){
+                if($appointment->appointment_status==1 || $appointment->appointment_status==2){
+                    $cancel=1;
+                }
+            }
             $appointment->appointment_status = $request->status;
             if(isset($request->request_type)){
             $appointment->request_type = $request->request_type;
@@ -542,6 +558,15 @@ class AppointmentController extends Controller
             $log->status = $appointment->appointment_status;
             $log->save();
             if ($request->status == 5 && $appointment->payment->total_amount>0) { // refund approved
+                $user = User::find($appointment->user_id);
+                $requested_amount = $appointment->payment->total_amount - $appointment->payment->transaction_charge;
+                $user->depositFloat($requested_amount);
+                
+                $withdraw_amount = $appointment->payment->total_amount - ($appointment->payment->transaction_charge-$appointment->payment->tax_amount);
+                $doctor = User::find($appointment->doctor_id);
+                $doctor->withdrawFloat($withdraw_amount);
+            }
+            if($request->status == 6 && $cancel==1){
                 $user = User::find($appointment->user_id);
                 $requested_amount = $appointment->payment->total_amount - $appointment->payment->transaction_charge;
                 $user->depositFloat($requested_amount);
@@ -960,6 +985,10 @@ class AppointmentController extends Controller
             $applog->description = config('custom.appointment_log_message.3');
             $applog->status = 3; //completed
             $applog->save();
+
+            $doctor = User::find($app->doctor_id);
+            $requested_amount = $app->payment->total_amount - ($app->payment->transaction_charge-$app->payment->tax_amount);
+            $doctor->depositFloat($requested_amount);
 
             return self::send_success_response('Log updated Successfully');
         } catch (Exception | Throwable $exception) {
