@@ -70,7 +70,7 @@ class ChatController extends Controller
         if($request->attachments){
             $rules = array(
                 'recipient_id' => 'required|exists:users,id',
-                'attachments' => 'required|mimes:jpeg,png,jpg,pdf,doc|max:2048',
+                'attachments' => 'required|mimes:jpeg,png,jpg,pdf,doc,docx|max:2048',
             );
         }else{
             $rules = array(
