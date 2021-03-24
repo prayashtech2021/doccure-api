@@ -189,7 +189,7 @@ class HomeController extends Controller
                     $message = "Check your old password.";
                     return self::send_bad_request_response($message);
                 } else if ((Hash::check(request('new_password'), auth()->user()->password)) == true) {
-                    $message = "Please enter a password which is not similar then current password.";
+                    $message = "Please enter a password which is not similar than current password.";
                     return self::send_bad_request_response($message);
                 } else {
                     DB::beginTransaction();

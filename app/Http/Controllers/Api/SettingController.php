@@ -113,9 +113,10 @@ class SettingController extends Controller
 
     public function getSetting(Request $request){
         try {
-            $getSettings = Setting::get();
+            $getSettings = Setting::all();
         
             $array = [];
+           
             foreach($getSettings as $result){
                 if(($result->keyword=='company_logo') || ($result->keyword=='footer_logo') || ($result->keyword=='favicon') ){
                     $array[$result->keyword] = getSettingImage($result->value);
@@ -125,7 +126,6 @@ class SettingController extends Controller
             }
             return self::send_success_response($array, 'Setting data fetched successfully');
         } catch (Exception | Throwable $e) {
-            DB::rollback();
             return self::send_exception_response($exception->getMessage());
         }
     }
@@ -150,7 +150,6 @@ class SettingController extends Controller
             }
             return self::send_success_response([], 'Setting data fetched successfully',$common);
         } catch (Exception | Throwable $e) {
-            DB::rollback();
             return self::send_exception_response($exception->getMessage(),$common);
         }
     }

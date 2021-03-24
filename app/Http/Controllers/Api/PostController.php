@@ -101,7 +101,7 @@ class PostController extends Controller
                 }
             }elseif(isset($request->viewable) && $request->viewable==0){
                 $list = $list->where(function($qry){
-                    $qry->where('is_verified',0)->orWhere('is_viewable',0); 
+                    $qry->where('is_verified',0); 
                 }); 
             }
 
