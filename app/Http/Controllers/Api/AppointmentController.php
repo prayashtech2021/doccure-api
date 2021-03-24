@@ -231,7 +231,7 @@ class AppointmentController extends Controller
             $appointment->request_type = 1;
             $appointment->appointment_status = 1;
             if(isset($request->time_zone) && !empty($request->time_zone)){
-            $appointment->time_zone = $request->time_zone;
+                $appointment->time_zone = $request->time_zone;
             }
             $appointment->save();
 
