@@ -10,7 +10,7 @@ class Appointment extends Model
     public function getData(){
         return [
             'id' => $this->id,
-            'created' => Carbon::parse($this->created_at)->format('d/m/Y h:i A'),
+            'created' => convertToLocal(Carbon::parse($this->created_at),'','d/m/Y h:i A'),
             'reference' => $this->appointment_reference,
             'type' => $this->appointment_type,
             'type_name' => config('appointments.type')[$this->appointment_type],

@@ -82,9 +82,9 @@ class AppointmentController extends Controller
             updateLastSeen(auth()->user());
             $update = Appointment::whereIn('appointment_status',[1,2])->whereDate('appointment_date','<=',convertToUTC(now()))->get();
             if($update){
-            foreach($update as $upd){
-                Appointment::where('id',$upd->id)->where('end_time','<',convertToLocal(Carbon::parse(now()),$upd->time_zone,'H:i:s'))->update(['appointment_status'=>7]);
-            }
+                foreach($update as $upd){
+                    Appointment::where('id',$upd->id)->where('end_time','<',convertToLocal(Carbon::parse(now()),$upd->time_zone,'H:i:s'))->update(['appointment_status'=>7]);
+                }
             }
             
             $paginate = $request->count_per_page ? $request->count_per_page : 10;
@@ -223,6 +223,7 @@ class AppointmentController extends Controller
             $appointment->payment_type = $request->payment_type;
             $appointment->request_type = 1;
             $appointment->appointment_status = 1;
+            $appointment->created_at = convertToUTC(Carbon::parse(now()),'','Y-m-d H:i:s');
             $appointment->save();
 
             $log = new AppointmentLog;
@@ -230,6 +231,7 @@ class AppointmentController extends Controller
             $log->request_type = 1;
             $log->description = config('custom.appointment_log_message.1');
             $log->status = $appointment->appointment_status;
+            $log->created_at = convertToUTC(Carbon::now());
             $log->save();
 
             auth()->user()->notify(new AppointmentNoty($appointment));

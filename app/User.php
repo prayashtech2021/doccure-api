@@ -72,7 +72,7 @@ class User extends Authenticatable implements Wallet, WalletFloat
             'providerspeciality' => $this->getProviderSpecialityAttribute(),
             'permanent_address' => $this->getPermanentAddressAttribute(),
             'office_address' => $this->getOfficeAddressAttribute(),
-            'member_since' => date('d M Y H:s A', strtotime($this->created_at)),
+            'member_since' => convertToLocal(Carbon::parse($this->created_at),'','d M Y H:s A'),
             'accountstatus' => $this->getAccountStatusAttribute(),
             'doctor_earned' => ($this->providerPayment())?$this->providerPayment()->sum(DB::raw('total_amount-(transaction_charge + tax_amount)')):'',
             'doctorRating' => ($this->avgRating())? $this->avgRating() : 0,
@@ -100,7 +100,7 @@ class User extends Authenticatable implements Wallet, WalletFloat
             'language_id' => $this->language_id,
             'currency_code' => $this->currency_code,
             'permanent_address' => $this->getPermanentAddressAttribute(),
-            'member_since' => date('d M Y H:s A', strtotime($this->created_at)),
+            'member_since' => convertToLocal(Carbon::parse($this->created_at),'','d M Y H:s A'),
             'accountstatus' => $this->getAccountStatusAttribute(),
             'last_visit' => ($this->appointments()->first())?$this->appointments()->orderby('id','desc')->first()->appointment_date:'',
             'patient_paid' => ($this->payment())?$this->payment()->sum('total_amount'):'',
@@ -279,8 +279,8 @@ class User extends Authenticatable implements Wallet, WalletFloat
     public function lastChat($id){
         $recipient_id = $this->id;
         $chat = Chat::select('message','created_at')->where(function($qry) use ($recipient_id,$id){
-            $qry->where(['sender_id'=>$id, 'recipient_id'=>$recipient_id])
-            ->orWhere(['sender_id'=>$recipient_id, 'recipient_id'=>$id]);
+            $qry->where(['sender_id'=>$recipient_id, 'recipient_id'=>$id])
+            ->orWhere(['sender_id'=>$id, 'recipient_id'=>$recipient_id]);
         });
         $list = $chat->orderBy('id','desc')->first();
         //$count = $chat->where('read_status',1)->count();
