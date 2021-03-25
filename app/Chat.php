@@ -33,7 +33,7 @@ class Chat extends Model
         'file_path' => $this->getUserAttachment(),
         'read_status' => $this->read_status,
         'delete_status' => $this->delete_status,
-        'created_at' => convertToLocal(Carbon::parse($this->created_at),'','d-m-Y h:i A'),
+        'created_at' => convertToLocal(Carbon::parse($this->created_at),config('custom.timezone')[251],'d-m-Y h:i A'),
      ];
     }
     function getUserAttachment(){

@@ -16,11 +16,14 @@ use App\TimeZone;
 use App\User;
 use App\CallLog;
 use App\UserSpeciality;
+use App\EmailTemplate;
+use App\Mail\SendInvitation;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Mail;
 use Storage;
 use \Exception;
 use \Throwable;
@@ -243,10 +246,35 @@ class AppointmentController extends Controller
             $log->created_at = convertToUTC(Carbon::now());
             $log->save();
 
+            /* Notification */
             auth()->user()->notify(new AppointmentNoty($appointment));
-            $doctor = User::find($request->doctor_id); 
+            //$doctor = User::find($request->doctor_id); 
             $doctor->notify(new AppointmentNoty($appointment));
             
+            /* Mail */
+            $template = EmailTemplate::where('slug','book_appointment')->first();
+            if($template){
+                $body = ($template->content); // this is template dynamic body. You may get other parameters too from database.
+                
+                $name = $doctor->first_name.' '.$doctor->last_name;
+                $app_date = Carbon::parse($appointment->appointment_date)->format('d/m/Y');
+                $start_time = Carbon::parse($request->start_time)->format('h:i A');
+                $end_time = Carbon::parse($request->end_time)->format('h:i A');
+                $reference = $appointment->appointment_reference;
+                $a1 = array('{{username}}','{{doctor}}','{{app_date}}','{{start_time}}','{{end_time}}','{{reference}}','{{config_app_name}}','{{custom_support_phone}}','{{custom_support_email}}');
+                $a2 = array($user->first_name,$name,$app_date,$start_time,$end_time,$reference,config('app.name'),config('custom.support_phone'),config('custom.support_email'));
+
+                $response = str_replace($a1,$a2,$body); // this will replace {{username}} with $data['username']
+                
+                $mail = [
+                    'body' => html_entity_decode(htmlspecialchars_decode($response)),
+                    'subject' => $template->subject,
+                ];
+
+                $mailObject = new SendInvitation($mail); // you can make php artisan make:mail MyMail
+                Mail::to($user->email)->send($mailObject);
+            }
+
             /**
              * Payment
              */

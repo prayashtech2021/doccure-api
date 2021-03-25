@@ -22,7 +22,7 @@ class Payment extends Model
             'card_details' => $this->cardDetails(),
             'from' => $this->appointment->doctor()->first()->basicProfile(),
             'to' => $this->appointment->patient()->first()->basicProfile(),
-            'created' => convertToLocal(Carbon::parse($this->created_at),'','d/m/Y h:i A'),
+            'created' => convertToLocal(Carbon::parse($this->created_at),config('custom.timezone')[251],'d/m/Y h:i A'),
         ];
     }
 
