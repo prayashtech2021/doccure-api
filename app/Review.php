@@ -18,7 +18,6 @@ class Review extends Model
     ];
 
     public function getData(){
-        $a =  convertToLocal(Carbon::parse($this->created_at),'','d-m-Y h:i A');
         return [
             'id' => $this->id,
             'appointment_id' => $this->appointment_id,

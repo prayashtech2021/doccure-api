@@ -23,7 +23,7 @@ class Prescription extends Model
             'patient' => $this->patient()->first()->basicProfile(),
             'prescription_details' => $this->prescriptionDetails()->get(),
             'appointment_reference_no' => $this->appointment()->select('appointment_reference')->first(),
-            'created_at' => convertToLocal(Carbon::parse($this->created_at),'','d/m/Y h:i A'),
+            'created_at' => convertToLocal(Carbon::parse($this->created_at),config('custom.timezone')[251],'d-m-Y h:i A'),
             'sign' => $this->signature(),
         ];
     }
