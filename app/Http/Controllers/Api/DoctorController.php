@@ -197,7 +197,7 @@ class DoctorController extends Controller
                 'mobile_number' => 'required|min:7|max:15|unique:users,mobile_number,' . $request->user_id,
                 'gender' => 'required|integer|between:1,2',
                 'dob' => 'date',
-                'price_type' => 'required|between:1,2',
+                // 'price_type' => 'required|between:1,2',
                 'amount' => 'numeric',
                 'contact_address_line1' => 'required',
                 'speciality' => 'required',
@@ -217,6 +217,7 @@ class DoctorController extends Controller
             if ($doctor) {
                 $doctor->fill($request->all());
                 $doctor->country_id = $request->country_code_id;
+                $doctor->price_type = 2;
                 $doctor->currency_code = Country::getCurrentCode($request->country_code_id);
                 $doctor->dob = date('Y-m-d', strtotime(str_replace('/', '-', $request->dob)));
                 $doctor->save();
