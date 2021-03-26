@@ -74,6 +74,7 @@ class AppointmentController extends Controller
                 'status' => 'nullable|numeric',
                 'request_type' => 'nullable|numeric|in:1,2',
                 'appointment_date' => 'nullable|date_format:d/m/Y',
+                'consumer_id' => 'integer|exists:users,id',
             );
             if ($request->language_id) {
                 $rules['language_id'] = 'integer|exists:languages,id';
@@ -135,6 +136,10 @@ class AppointmentController extends Controller
                 $list = $list->whereUserId($user->id);
             } elseif ($user->hasRole('doctor')) {
                 $list = $list->whereDoctorId($user->id);
+            }
+
+            if($request->consumer_id){
+                $list = $list->whereUserId($request->consumer_id);
             }
 
             if (!empty($request->request_type) && $request->request_type > 0) {
