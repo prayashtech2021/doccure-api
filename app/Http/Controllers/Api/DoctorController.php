@@ -65,16 +65,26 @@ class DoctorController extends Controller
 
     public function doctorList(Request $request)
     {
-        $rules = array(
-            'count_per_page' => 'nullable|numeric',
-            'order_by' => 'nullable|in:desc,asc',
-            'page' => 'nullable|numeric',
-            'language_id' => 'integer|exists:languages,id',
-        );
-        $valid = self::customValidation($request, $rules);
-        if ($valid) {return $valid;}
+        $lang_id = ($request->language_id)? getLang($request->language_id) : defaultLang();
+        $common['header'] = getLangContent(8,$lang_id);
+        $common['setting'] = getSettingData();
+        $common['lang_content'] = getLangContent(16,$lang_id);
+        $common['footer'] = getLangContent(9,$lang_id);
 
         try {
+            $rules = array(
+                'count_per_page' => 'nullable|numeric',
+                'order_by' => 'nullable|in:desc,asc',
+                'page' => 'nullable|numeric',
+            );
+            if($request->language_id){ 
+                $rules = array(
+                    'language_id' => 'integer|exists:languages,id',
+                );
+            }
+            $valid = self::customValidation($request, $rules,$common);
+            if ($valid) {return $valid;}
+
             $user = auth()->user();
             updateLastSeen($user);
             
@@ -113,9 +123,9 @@ class DoctorController extends Controller
             $result['last_page'] = $paginatedata->lastPage();
             $result['current_page'] = $paginatedata->currentPage();
             
-            return self::send_success_response($result, 'Doctor Details Fetched Successfully');
+            return self::send_success_response($result, 'Doctor Details Fetched Successfully',$common);
         } catch (Exception | Throwable $exception) {
-            return self::send_exception_response($exception->getMessage());
+            return self::send_exception_response($exception->getMessage(),$common);
         }
     }
 

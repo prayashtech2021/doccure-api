@@ -63,22 +63,25 @@ class PatientController extends Controller
         $common['header'] = getLangContent(8,$lang_id);
         $common['setting'] = getSettingData();
         $common['menu'] = getAppMenu();
-        $common['lang_content'] = getLangContent(27,$lang_id);
-        $common['footer'] = getLangContent(9,$lang_id);
-
-        $rules = array(
-            'count_per_page' => 'nullable|numeric',
-            'order_by' => 'nullable|in:desc,asc',
-            'page' => 'nullable|numeric',
-        );
-        if ($request->language_id) {
-            $rules['language_id'] = 'integer|exists:languages,id';
+        if($request->is_chat){
+            $common['lang_content'] = getLangContent(16,$lang_id);
+        }else{
+            $common['lang_content'] = getLangContent(27,$lang_id);
         }
-        
-        $valid = self::customValidation($request, $rules, $common);
-        if ($valid) {return $valid;}
-
+        $common['footer'] = getLangContent(9,$lang_id);
         try {
+            $rules = array(
+                'count_per_page' => 'nullable|numeric',
+                'order_by' => 'nullable|in:desc,asc',
+                'page' => 'nullable|numeric',
+            );
+            if ($request->language_id) {
+                $rules['language_id'] = 'integer|exists:languages,id';
+            }
+            
+            $valid = self::customValidation($request, $rules, $common);
+            if ($valid) {return $valid;}
+        
             updateLastSeen(auth()->user());
 
             $paginate = $request->count_per_page ? $request->count_per_page : 10;

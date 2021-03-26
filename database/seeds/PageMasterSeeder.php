@@ -123,6 +123,9 @@ class PageMasterSeeder extends Seeder
             36 => [
                 'name' => 'medical_record'
             ],
+            37 => [
+                'name' => 'call'
+            ]
         ];
             foreach ($datas as $id => $data) {
                 $row = PageMaster::firstOrNew([
