@@ -50,22 +50,21 @@ class ChatController extends Controller
             })->orderBy('id',$order_by);
 
 
-            
-
             $paginatedata = $list->paginate($paginate, ['*'], 'page', $pageNumber);
 
             $data = collect();
             $paginatedata->getCollection()->each(function ($chat) use (&$data) {
                 $data->push($chat->getData());
             });
+           
 
-            $update = Chat::where('sender_id',$request->recipient_id)->where('recipient_id',auth()->user()->id)->update(['read_status'=>1]);
-            
             $array['list'] = $data;
             $array['total_count'] = $paginatedata->total();
             $array['last_page'] = $paginatedata->lastPage();
             $array['current_page'] = $paginatedata->currentPage();
 
+            $update = Chat::where('sender_id',$request->recipient_id)->where('recipient_id',auth()->user()->id)->update(['read_status'=>1]);
+            
             return self::send_success_response($array,'Chat List Fetched Successfully',$common);
         } catch (Exception | Throwable $exception) {
             return self::send_exception_response($exception->getMessage(),$common);
