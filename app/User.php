@@ -39,7 +39,7 @@ class User extends Authenticatable implements Wallet, WalletFloat
      * The attributes that should be hidden for arrays.
      *
      * @var array
-     */
+ */
     protected $hidden = [
         'password','remember_token',
     ];
@@ -116,8 +116,7 @@ class User extends Authenticatable implements Wallet, WalletFloat
 
     public function doctorService(){
         return $this->hasMany(Service::class);
-    }
-    
+    }    
     public function homeAddress(){
         return $this->hasMany(Address::class)->with('country','state','city')->whereNull('name');
     }
@@ -156,6 +155,7 @@ class User extends Authenticatable implements Wallet, WalletFloat
     public function userFav(){        
         return $this->belongsToMany('App\User', 'user_favourites', 'user_id', 'favourite_id');
     }
+    
 
     public function userHasFav($consumer_id){
         return $this->whereHas('userFav', function ($a) use($consumer_id) {
@@ -278,7 +278,7 @@ class User extends Authenticatable implements Wallet, WalletFloat
 
     public function lastChat($id){
         $recipient_id = $this->id;
-        $chat = Chat::select('message','created_at')->where(function($qry) use ($recipient_id,$id){
+        $chat = Chat::select('message','file_path','created_at')->where(function($qry) use ($recipient_id,$id){
             $qry->where(['sender_id'=>$recipient_id, 'recipient_id'=>$id])
             ->orWhere(['sender_id'=>$id, 'recipient_id'=>$recipient_id]);
         });
