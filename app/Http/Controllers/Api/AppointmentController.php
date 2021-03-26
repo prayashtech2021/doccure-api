@@ -932,7 +932,11 @@ class AppointmentController extends Controller
 
         try {
             $user = auth()->user();
-            DB::beginTransaction();
+
+            $callLog = CallLog::where('appointment_id',$request->appointment_id)->where('from',$user->id)->where('to',$request->call_to)->whereNull('end_time')->first();
+            if($callLog){
+                $log = $callLog;
+            }else{
             $log = $user->callLog()->create([
             'appointment_id' => $request->appointment_id,
             'from' => $user->id,
@@ -941,15 +945,13 @@ class AppointmentController extends Controller
             'start_time' => $request->start_time,
             ]);
 
-            $app = Appointment::find($request->appointment_id);
-            
+            // $app = Appointment::find($request->appointment_id);
+            // $consumer = User::find($app->user_id); 
+            // $consumer->notify(new AppointmentNoty($app));
+            // $provider = User::find($app->doctor_id); 
+            // $provider->notify(new AppointmentNoty($app));
 
-            $consumer = User::find($app->user_id); 
-            $consumer->notify(new AppointmentNoty($app));
-            $provider = User::find($app->doctor_id); 
-            $provider->notify(new AppointmentNoty($app));
-
-            DB::commit();       
+            }     
             return self::send_success_response($log,'Log Saved Successfully');
         } catch (Exception | Throwable $exception) {
             DB::rollBack();
@@ -969,12 +971,13 @@ class AppointmentController extends Controller
         try {
             $user = auth()->user();
             
-            $log = CallLog::find($request->call_log_id);
+            $log = CallLog::where('id',$request->call_log_id)->whereNull('end_time')->first();
+            if($log){
             $duration = Carbon::parse($request->end_time)->diffInSeconds(Carbon::parse($log->start_time));
             $log->end_time =$request->end_time;
             $log->duration = ($duration>0)?$duration:0;
             $log->save();
-
+            
             $app = Appointment::find($log->appointment_id);
             $app->appointment_status = 3;
             $app->call_status = 1;
@@ -990,6 +993,7 @@ class AppointmentController extends Controller
             $doctor = User::find($app->doctor_id);
             $requested_amount = $app->payment->total_amount - ($app->payment->transaction_charge-$app->payment->tax_amount);
             $doctor->depositFloat($requested_amount);
+            }
 
             return self::send_success_response('Log updated Successfully');
         } catch (Exception | Throwable $exception) {
