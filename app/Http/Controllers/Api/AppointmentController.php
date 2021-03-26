@@ -1007,20 +1007,22 @@ class AppointmentController extends Controller
             $log->save();
             
             $app = Appointment::find($log->appointment_id);
-            $app->appointment_status = 3;
-            $app->call_status = 1;
-            $app->save();
+                if($app->call_status==0){
+                    $app->appointment_status = 3;
+                    $app->call_status = 1;
+                    $app->save();
 
-            $applog = new AppointmentLog;
-            $applog->appointment_id = $log->appointment_id;
-            $applog->request_type = 1;
-            $applog->description = config('custom.appointment_log_message.3');
-            $applog->status = 3; //completed
-            $applog->save();
+                    $applog = new AppointmentLog;
+                    $applog->appointment_id = $log->appointment_id;
+                    $applog->request_type = 1;
+                    $applog->description = config('custom.appointment_log_message.3');
+                    $applog->status = 3; //completed
+                    $applog->save();
 
-            $doctor = User::find($app->doctor_id);
-            $requested_amount = $app->payment->total_amount - ($app->payment->transaction_charge-$app->payment->tax_amount);
-            $doctor->depositFloat($requested_amount);
+                    $doctor = User::find($app->doctor_id);
+                    $requested_amount = $app->payment->total_amount - ($app->payment->transaction_charge-$app->payment->tax_amount);
+                    $doctor->depositFloat($requested_amount);
+                }
             }
 
             return self::send_success_response('Log updated Successfully');
