@@ -47,11 +47,11 @@ class ChatController extends Controller
             $list = Chat::where(function($qry) use ($request){
                 $qry->whereRaw("sender_id=".auth()->user()->id." and recipient_id=".$request->recipient_id)
                 ->orWhereRaw("sender_id=".$request->recipient_id." and recipient_id=".auth()->user()->id);
-
-                // $qry->where(['sender_id'=>auth()->user()->id, 'recipient_id'=>$request->recipient_id])
-                // ->orWhere(['sender_id'=>$request->recipient_id, 'recipient_id'=>auth()->user()->id]);
             })->orderBy('id',$order_by);
-            // $update = $list->update(['read_status'=>1]);
+
+
+            $update = Chat::where('sender_id',$request->recipient_id)->where('recipient_id',auth()->user()->id)->update(['read_status'=>1]);
+            
             $paginatedata = $list->paginate($paginate, ['*'], 'page', $pageNumber);
 
             $data = collect();

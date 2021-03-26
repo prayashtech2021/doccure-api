@@ -279,8 +279,8 @@ class User extends Authenticatable implements Wallet, WalletFloat
     public function lastChat($id){
         $recipient_id = $this->id;
         $chat = Chat::select('message','file_path','created_at')->where(function($qry) use ($recipient_id,$id){
-            $qry->where(['sender_id'=>$recipient_id, 'recipient_id'=>$id])
-            ->orWhere(['sender_id'=>$id, 'recipient_id'=>$recipient_id]);
+            $qry->whereRaw("sender_id=".$id." and recipient_id=".$recipient_id)
+                ->orWhereRaw("sender_id=".$recipient_id." and recipient_id=".$id);
         });
         $list = $chat->orderBy('id','desc')->first();
         //$count = $chat->where('read_status',1)->count();
