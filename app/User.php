@@ -39,7 +39,7 @@ class User extends Authenticatable implements Wallet, WalletFloat
      * The attributes that should be hidden for arrays.
      *
      * @var array
-     */
+ */
     protected $hidden = [
         'password','remember_token',
     ];
@@ -72,7 +72,7 @@ class User extends Authenticatable implements Wallet, WalletFloat
             'providerspeciality' => $this->getProviderSpecialityAttribute(),
             'permanent_address' => $this->getPermanentAddressAttribute(),
             'office_address' => $this->getOfficeAddressAttribute(),
-            'member_since' => convertToLocal(Carbon::parse($this->created_at),'','d M Y H:s A'),
+            'member_since' => convertToLocal(Carbon::parse($this->created_at),config('custom.timezone')[251],'d M Y H:s A'),
             'accountstatus' => $this->getAccountStatusAttribute(),
             'doctor_earned' => ($this->providerPayment())?$this->providerPayment()->sum(DB::raw('total_amount-(transaction_charge + tax_amount)')):'',
             'doctorRating' => ($this->avgRating())? $this->avgRating() : 0,
@@ -100,7 +100,7 @@ class User extends Authenticatable implements Wallet, WalletFloat
             'language_id' => $this->language_id,
             'currency_code' => $this->currency_code,
             'permanent_address' => $this->getPermanentAddressAttribute(),
-            'member_since' => convertToLocal(Carbon::parse($this->created_at),'','d M Y H:s A'),
+            'member_since' => convertToLocal(Carbon::parse($this->created_at),config('custom.timezone')[251],'d M Y H:s A'),
             'accountstatus' => $this->getAccountStatusAttribute(),
             'last_visit' => ($this->appointments()->first())?$this->appointments()->orderby('id','desc')->first()->appointment_date:'',
             'patient_paid' => ($this->payment())?$this->payment()->sum('total_amount'):'',
@@ -116,8 +116,7 @@ class User extends Authenticatable implements Wallet, WalletFloat
 
     public function doctorService(){
         return $this->hasMany(Service::class);
-    }
-    
+    }    
     public function homeAddress(){
         return $this->hasMany(Address::class)->with('country','state','city')->whereNull('name');
     }
@@ -156,6 +155,7 @@ class User extends Authenticatable implements Wallet, WalletFloat
     public function userFav(){        
         return $this->belongsToMany('App\User', 'user_favourites', 'user_id', 'favourite_id');
     }
+    
 
     public function userHasFav($consumer_id){
         return $this->whereHas('userFav', function ($a) use($consumer_id) {
@@ -278,7 +278,7 @@ class User extends Authenticatable implements Wallet, WalletFloat
 
     public function lastChat($id){
         $recipient_id = $this->id;
-        $chat = Chat::select('message','created_at')->where(function($qry) use ($recipient_id,$id){
+        $chat = Chat::select('message','file_path','created_at')->where(function($qry) use ($recipient_id,$id){
             $qry->where(['sender_id'=>$recipient_id, 'recipient_id'=>$id])
             ->orWhere(['sender_id'=>$id, 'recipient_id'=>$recipient_id]);
         });
@@ -307,7 +307,7 @@ class User extends Authenticatable implements Wallet, WalletFloat
         $from = Carbon::parse($this->last_seen_time);
 
         $diff_in_minutes = $current->diffInMinutes($from);
-        if($diff_in_minutes > 10){
+        if($diff_in_minutes > 2){
             return 0;
         }else{
             return 1;

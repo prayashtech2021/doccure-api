@@ -31,9 +31,10 @@ class Chat extends Model
         'recipient_image' => getUserProfileImage($this->recipient->id),
         'message' => $this->message,
         'file_path' => $this->getUserAttachment(),
+        'file_attach' => $this->getFileAttach(),
         'read_status' => $this->read_status,
         'delete_status' => $this->delete_status,
-        'created_at' => convertToLocal(Carbon::parse($this->created_at),'','d-m-Y h:i A'),
+        'created_at' => convertToLocal(Carbon::parse($this->created_at),config('custom.timezone')[251],'d-m-Y h:i A'),
      ];
     }
     function getUserAttachment(){
@@ -41,6 +42,14 @@ class Chat extends Model
             return (config('filesystems.default') == 's3') ? Storage::temporaryUrl('app/public/images/chat-attachments/' . $this->file_path, now()->addMinutes(5)) : Storage::url('app/public/images/chat-attachments/' . $this->file_path);
         } else {
             return URL::asset('img/no_attachment.jpg');
+        }
+    }
+
+    function getFileAttach(){
+        $ext     = explode('.', $this->file_path); // Explode the string
+        $my_ext  = end($ext); 
+        if($my_ext == 'pdf' || $my_ext == 'doc' || $my_ext == 'docx'){
+            return URL::asset('img/attach.jpg');
         }
     }
 }

@@ -62,7 +62,7 @@ class AppointmentNoty extends Notification implements ShouldQueue
     public function toArray($notifiable)
     {
         if($this->request->appointment_status==1){
-            $message = 'Appointment is Scheduled on '.convertToLocal(Carbon::parse($this->request->appointment_date),'','d/m/Y').' at '.Carbon::parse($this->request->start_time)->format('h:i A').' to '.Carbon::parse($this->request->end_time)->format('h:i A').' reference #' . $this->request->appointment_reference . '!';
+            $message = 'Appointment is Scheduled on '.Carbon::parse($this->request->appointment_date)->format('d/m/Y').' at '.Carbon::parse($this->request->start_time)->format('h:i A').' to '.Carbon::parse($this->request->end_time)->format('h:i A').' reference #' . $this->request->appointment_reference . '!';
         }else{
             $message = config('custom.appointment_log_message.'.$this->request->appointment_status).' with reference to #' . $this->request->appointment_reference . '!';
         }

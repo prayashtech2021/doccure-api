@@ -52,4 +52,7 @@ return [
         2=>"paid",
         3=>"rejected",
     ],
+    'timezone' => [
+        251 => 'Asia/Kolkata',
+    ]
 ];

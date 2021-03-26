@@ -24,14 +24,18 @@ class EmailTemplateSeeder extends Seeder
                 'subject' => 'User Account Password Reset',
                 'content' => '<p><strong># Hi {{username}},</strong></p><p>&nbsp;</p><p>Please click the following link to reset the password.</p><p><a href="{{link}}" type="button">Click here to Reset Password</a></p><p>&nbsp;</p><p>Regards,</p><p>{{config_app_name}} Team,</p><p>{{custom_support_phone}},</p><p>{{custom_support_email}}.</p>',
             ],
-            
+            3 => [
+                'slug' => 'book_appointment',
+                'subject' => 'Appointment Booked',
+                'content' => '<p><strong># Hi {{username}},</strong></p><p>&nbsp;</p><p>Your Appointment booked successfully with <b>Dr.{{doctor}}</b> on <b>{{app_date}}</b> at <b>{{start_time}}</b> to <b>{{end_time}}</b> with reference <b>#{{reference}}</b></p><p>&nbsp;</p><p>Regards,</p><p>{{config_app_name}} Team,</p><p>{{custom_support_phone}},</p><p>{{custom_support_email}}.</p>',
+            ],
         ];
-            foreach ($datas as $id => $data) {
-                $row = EmailTemplate::firstOrNew([
-                    'id' => $id,
-                ]);
-                $row->fill($data);
-                $row->save();
-            }
+        foreach ($datas as $id => $data) {
+            $row = EmailTemplate::firstOrNew([
+                'id' => $id,
+            ]);
+            $row->fill($data);
+            $row->save();
+        }
     }
 }
