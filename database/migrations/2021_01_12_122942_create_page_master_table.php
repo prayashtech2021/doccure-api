@@ -15,7 +15,7 @@ class CreatePageMasterTable extends Migration
     {
         Schema::create('page_masters', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            $table->text('name');
             
             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
         });

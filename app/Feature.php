@@ -1,22 +1,23 @@
 <?php
 
 namespace App;
-
+use ESolution\DBEncryption\Traits\EncryptedAttribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 use Storage;
 use URL;
 
-
 class Feature extends Model
 {
-    //
     use SoftDeletes;
+    use EncryptedAttribute;
 
-    
     protected $fillable = [
         'name', 'image', 'created_by',
+    ];
+    protected $encryptable = [
+        'name'
     ];
     public function getData(){
         return [

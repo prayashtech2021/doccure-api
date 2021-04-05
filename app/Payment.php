@@ -1,14 +1,20 @@
 <?php
 
 namespace App;
+use ESolution\DBEncryption\Traits\EncryptedAttribute;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 
 class Payment extends Model
 {
+    use EncryptedAttribute;
+    protected $encryptable = [
+        'invoice_no','txn_id'
+    ];
     public function getData()
     {
+        
         return [
             'id' => $this->id,
             'reference' => $this->invoice_no,

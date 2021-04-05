@@ -17,8 +17,8 @@ class CreateMultiLanguagesTable extends Migration
             $table->id();
             $table->unsignedBigInteger('page_master_id');
             $table->unsignedBigInteger('language_id');
-            $table->string('keyword');
-            $table->string('value');
+            $table->text('keyword');
+            $table->text('value');
             
             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
 			$table->timestamp('updated_at')->nullable();

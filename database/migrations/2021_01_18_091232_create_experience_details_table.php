@@ -16,10 +16,10 @@ class CreateExperienceDetailsTable extends Migration
         Schema::create('experience_details', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id');
-            $table->string('hospital_name');
+            $table->text('hospital_name');
             $table->year('from');
             $table->year('to');
-            $table->string('designation');
+            $table->text('designation');
             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
             $table->timestamp('updated_at')->nullable();
             $table->softDeletes();

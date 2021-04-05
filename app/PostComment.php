@@ -1,13 +1,16 @@
 <?php
 
 namespace App;
+use ESolution\DBEncryption\Traits\EncryptedAttribute;
 
 use Illuminate\Database\Eloquent\Model;
 
 class PostComment extends Model
 {
-  
-
+    use EncryptedAttribute;
+    protected $encryptable = [
+        'comments'
+    ];
     public function user(){
         return $this->belongsTo(User::class,'user_id');
     }

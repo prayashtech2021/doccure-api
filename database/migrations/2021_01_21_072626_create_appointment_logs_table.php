@@ -17,7 +17,7 @@ class CreateAppointmentLogsTable extends Migration
             $table->id();
             $table->unsignedBigInteger('appointment_id');
             $table->unsignedTinyInteger('request_type')->comment('1=>payment,2=>refund');
-            $table->string('description');
+            $table->text('description');
             $table->unsignedTinyInteger('status');
 
             $table->timestamps();

@@ -16,9 +16,9 @@ class CreateEducationDetailsTable extends Migration
         Schema::create('education_details', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id');
-            $table->string('degeree');
-            $table->string('institute');
-            $table->string('year_of_completion');
+            $table->text('degeree');
+            $table->text('institute');
+            $table->text('year_of_completion');
 
             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
             $table->timestamp('updated_at')->nullable();

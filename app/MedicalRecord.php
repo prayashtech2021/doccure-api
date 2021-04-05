@@ -5,16 +5,20 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
-
+use ESolution\DBEncryption\Traits\EncryptedAttribute;
 
 class MedicalRecord extends Model
 {
     //
     use SoftDeletes;
-
+    use EncryptedAttribute;
     
     protected $fillable = [
         'appointment_id','consumer_id', 'provider_id','description','document_','created_by',
+    ];
+
+    protected $encryptable = [
+        'description'
     ];
 
     public function getData(){

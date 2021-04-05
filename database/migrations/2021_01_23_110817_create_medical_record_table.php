@@ -18,7 +18,7 @@ class CreateMedicalRecordTable extends Migration
             $table->unsignedBigInteger('appointment_id');
             $table->unsignedBigInteger('consumer_id');
             $table->unsignedBigInteger('provider_id');
-            $table->string('description');
+            $table->text('description');
             $table->string('document_file')->nullable();
             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
             $table->timestamp('updated_at')->nullable();

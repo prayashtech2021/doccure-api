@@ -1,14 +1,20 @@
 <?php
 
 namespace App;
+use ESolution\DBEncryption\Traits\EncryptedAttribute;
 
 use Illuminate\Database\Eloquent\Model;
 
 class Setting extends Model
 {
+    use EncryptedAttribute;
+
     protected $fillable = [
         'slug', 'keyword', 'value', 'created_by',
-   ];
+    ];
+    protected $encryptable = [
+    'keyword','value'
+    ];
     
     public function getAmount(){
         $getSettings = $this->where('slug','general_settings')->get();

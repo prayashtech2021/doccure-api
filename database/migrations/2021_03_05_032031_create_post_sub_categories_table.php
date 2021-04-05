@@ -16,7 +16,7 @@ class CreatePostSubCategoriesTable extends Migration
         Schema::create('post_sub_categories', function (Blueprint $table) {
             $table->increments('id');
             $table->unsignedInteger('post_category_id');
-            $table->string('name');
+            $table->text('name');
             
             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
 			$table->timestamp('updated_at')->nullable();

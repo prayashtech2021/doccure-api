@@ -1,6 +1,7 @@
 <?php
 
 namespace App;
+use ESolution\DBEncryption\Traits\EncryptedAttribute;
 
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -24,6 +25,8 @@ class User extends Authenticatable implements Wallet, WalletFloat
     use Billable;
 
     use HasWalletFloat;
+    use EncryptedAttribute;
+
 
     /**
      * The attributes that are mass assignable.
@@ -34,7 +37,9 @@ class User extends Authenticatable implements Wallet, WalletFloat
         'first_name', 'last_name', 'email', 'password', 'mobile_number', 'profile_image','country_id','currency_code','gender','dob','blood_group',
         'biography','price_type','amount','verification_code','is_verified','currency_code','created_by',
    ];
-
+    protected $encryptable = [
+        'first_name','last_name','email','biography'
+    ];
     /**
      * The attributes that should be hidden for arrays.
      *

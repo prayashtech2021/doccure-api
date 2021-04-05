@@ -16,7 +16,7 @@ class CreatePrescriptionDetailsTable extends Migration
         Schema::create('prescription_details', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('prescription_id');
-            $table->string('drug_name');
+            $table->text('drug_name');
             $table->string('quantity');
             $table->string('type')->comment('1=>Before,2=>After Food');
             $table->unsignedTinyInteger('days');
