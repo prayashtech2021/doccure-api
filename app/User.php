@@ -38,7 +38,7 @@ class User extends Authenticatable implements Wallet, WalletFloat
         'biography','price_type','amount','verification_code','is_verified','currency_code','created_by',
    ];
     protected $encryptable = [
-        'first_name','last_name','email','biography'
+        'first_name','last_name','biography'
     ];
     /**
      * The attributes that should be hidden for arrays.
