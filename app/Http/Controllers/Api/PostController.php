@@ -36,7 +36,7 @@ class PostController extends Controller
             'order_by' => 'nullable|in:desc,asc',
             'page' => 'nullable|numeric',
             'category_id' => 'nullable|numeric|exists:post_categories,id',
-            'tag_name' => 'nullable|string|exists:post_tags,name',
+            'tag_name' => 'nullable|string|exists_encrypted:post_tags,name',
             'viewable' => 'nullable|numeric|in:0,1',
             'search_keyword' => 'nullable|string|min:1|max:50',
         );

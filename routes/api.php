@@ -85,10 +85,10 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
     Route::get('doctor/address-image/delete/{address_image_id}','Api\DoctorController@deleteAddressImage');
 
     /* Speciality */
-    Route::group(['middleware' => ['can:specialization']], function () {
+   // Route::group(['middleware' => ['can:specialization']], function () {
         Route::post('speacility/save', 'Api\SpecialityController@save');
         Route::get('speacility/delete/{id}', 'Api\SpecialityController@destroy');
-    });
+    //});
     /* signature */
     Route::get('signature/{id}','Api\AppointmentController@getsignature');
     /* Prescription */

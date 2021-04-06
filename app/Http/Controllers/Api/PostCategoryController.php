@@ -14,11 +14,11 @@ class PostCategoryController extends Controller
         if ($request->category_id) { //edit
             $rules = array(
                 'category_id' => 'integer|exists:post_categories,id',
-                'name' => 'required|unique:post_categories,id,' . $request->category_id,
+                'name' => 'required|unique_encrypted:post_categories,name,' . $request->category_id,
             );
         } else {
             $rules = array(
-                'name' => 'required|unique:post_categories',
+                'name' => 'required|unique_encrypted:post_categories,name',
             );
         }
         $valid = self::customValidation($request, $rules);

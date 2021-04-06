@@ -17,7 +17,7 @@ class CreateSocialMediaTable extends Migration
             $table->id();
             $table->unsignedBigInteger('provider_id');
             $table->text('name');
-            $table->string('link');
+            $table->text('link');
             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
             $table->timestamp('updated_at')->nullable();
             $table->softDeletes();

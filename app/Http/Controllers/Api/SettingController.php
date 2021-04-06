@@ -42,7 +42,7 @@ class SettingController extends Controller
                         $path = 'images/company-images/';
                         $store = $file->storeAs($path, $file_name);
 
-                        $setting_update = Setting::where('keyword',$keyword)->update(['slug'=>'general_settings', 'value' => $file_name, 'created_by'=> auth()->user()->id]);
+                        $setting_update = Setting::where('keyword',$keyword)->update(['value' => $file_name, 'created_by'=> auth()->user()->id]);
                     }
                 }
                 if($request->footer_logo){ 
@@ -66,7 +66,7 @@ class SettingController extends Controller
                         $path = 'images/company-images/';
                         $store = $file->storeAs($path, $file_name);
 
-                        $setting_update = Setting::where('keyword',$keyword)->update(['slug'=>'general_settings', 'value' => $file_name, 'created_by'=> auth()->user()->id]);
+                        $setting_update = Setting::where('keyword',$keyword)->update(['value' => $file_name, 'created_by'=> auth()->user()->id]);
                     }
                 }
                 if($request->favicon){ 
@@ -90,7 +90,7 @@ class SettingController extends Controller
                         $path = 'images/company-images/';
                         $store = $file->storeAs($path, $file_name);
 
-                        $setting_update = Setting::where('keyword',$keyword)->update(['slug'=>'general_settings', 'value' => $file_name, 'created_by'=> auth()->user()->id]);
+                        $setting_update = Setting::where('keyword',$keyword)->update(['value' => $file_name, 'created_by'=> auth()->user()->id]);
                     }
                 }
             
@@ -98,7 +98,7 @@ class SettingController extends Controller
             if($request->settings){
                 $setting_result = json_decode($request->settings, true);
                 foreach($setting_result as $data){
-                    $update = Setting::where('keyword',$data['keyword'])->update(['slug'=>$data['slug'], 'value' => $data['value'], 'created_by'=> auth()->user()->id]);
+                    $update = Setting::where('keyword',$data['keyword'])->update(['value' => $data['value'], 'created_by'=> auth()->user()->id]);
                 }
             }
            

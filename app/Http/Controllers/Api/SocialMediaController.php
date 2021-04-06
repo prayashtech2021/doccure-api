@@ -28,8 +28,6 @@ class SocialMediaController extends Controller
                             'name'=>$data['name']
                         ],
                         [
-                            'provider_id' => $data['provider_id'],
-                            'name' => $data['name'],
                             'link'=>$data['link'],
                         ]);
                 }

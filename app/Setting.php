@@ -13,7 +13,7 @@ class Setting extends Model
         'slug', 'keyword', 'value', 'created_by',
     ];
     protected $encryptable = [
-    'keyword','value'
+    'value',
     ];
     
     public function getAmount(){
