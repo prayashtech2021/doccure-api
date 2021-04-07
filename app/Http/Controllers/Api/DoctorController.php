@@ -501,8 +501,8 @@ class DoctorController extends Controller
             $doctors = User::role('doctor');
 
             if ($request->keywords) {
-                $doctors = $doctors->where('first_name', 'like', '%' . $request->keywords . '%')
-                    ->orWhere('last_name', 'like', '%' . $request->keywords . '%');
+                $doctors = $doctors->whereEncrypted('first_name', 'like', '%' . $request->keywords . '%')
+                    ->orWhereEncrypted('last_name', 'like', '%' . $request->keywords . '%');
             }
 
             if ($request->gender) {
@@ -514,10 +514,11 @@ class DoctorController extends Controller
                     $category->whereIn('user_speciality.speciality_id', [$request->speciality]);
                 });
             }
+            
             if ($request->speciality_name) {
                 $speciality_name = $request->speciality_name;
                 $doctors = $doctors->whereHas('doctorSpecialization', function ($category) use ($speciality_name) {
-                    $category->where('specialities.name', 'like', '%' . $speciality_name . '%');
+                    $category->whereEncrypted('specialities.name', 'like', '%' . $speciality_name . '%');
                 });
             }
 

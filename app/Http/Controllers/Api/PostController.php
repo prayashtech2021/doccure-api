@@ -200,7 +200,7 @@ class PostController extends Controller
         if ($request->post_id) { //edit
             $rules = array(
                 'post_id' => 'integer|exists:posts,id',
-                'title' => 'required|unique:posts,id,' . $request->post_id,
+                'title' => 'required|unique_encrypted:posts,title,' . $request->post_id,
                 'slug' => 'nullable|unique:posts,id,' . $request->post_id,
                 'content' => 'required',
                 'meta_description' => 'nullable',
@@ -213,7 +213,7 @@ class PostController extends Controller
             );
         } else {
             $rules = array(
-                'title' => 'required|unique:posts',
+                'title' => 'required|unique_encrypted:posts,title',
                 'slug' => 'nullable|unique:posts',
                 'content' => 'required',
                 'meta_description' => 'nullable',
