@@ -1,7 +1,7 @@
 <?php
 
 namespace App;
-use ESolution\DBEncryption\Traits\EncryptedAttribute;
+//use ESolution\DBEncryption\Traits\EncryptedAttribute;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -14,14 +14,12 @@ class Speciality extends Model
 {
     //
     use SoftDeletes;
-    use EncryptedAttribute;
+    //use EncryptedAttribute;
 
     protected $fillable = [
         'name', 'image', 'created_by',
     ];
-    protected $encryptable = [
-        'name'
-    ];
+    
     public function getData(){
         return [
             'id' => $this->id,

@@ -22,14 +22,14 @@ class SpecialityController extends Controller
         if ($request->speciality_id) { //edit
             $rules = array(
                 'speciality_id' => 'integer|exists:specialities,id',
-                'name' => 'required|unique_encrypted:specialities,name,' . $request->speciality_id,
+                'name' => 'required|unique:specialities,name,' . $request->speciality_id,
                 'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048|dimensions:max_width=74,max_height=74',
                 'duration' => 'required|date_format:"H:i:s',
                 'amount' => 'required|numeric',
             );
         } else {
             $rules = array(
-                'name' => 'required|unique_encrypted:specialities,name',
+                'name' => 'required|unique:specialities',
                 'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048|dimensions:max_width=74,max_height=74',
                 'duration' => 'required|date_format:"H:i:s',
                 'amount' => 'required|numeric',
