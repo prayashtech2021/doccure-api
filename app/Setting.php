@@ -1,19 +1,14 @@
 <?php
 
 namespace App;
-use ESolution\DBEncryption\Traits\EncryptedAttribute;
 
 use Illuminate\Database\Eloquent\Model;
 
 class Setting extends Model
 {
-    use EncryptedAttribute;
 
     protected $fillable = [
         'slug', 'keyword', 'value', 'created_by',
-    ];
-    protected $encryptable = [
-    'value',
     ];
     
     public function getAmount(){
