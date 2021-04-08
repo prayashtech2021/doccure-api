@@ -177,7 +177,9 @@ return [
 
         Spatie\Permission\PermissionServiceProvider::class,
         Laravel\Passport\PassportServiceProvider::class,
-        Intervention\Image\ImageServiceProvider::class
+        Intervention\Image\ImageServiceProvider::class,
+
+        \ESolution\DBEncryption\Providers\DBEncryptionServiceProvider::class,
     ],
 
     /*
