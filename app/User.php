@@ -18,6 +18,8 @@ use DB;
 
 class User extends Authenticatable implements Wallet, WalletFloat
 {
+    use EncryptedAttribute;
+
     use SoftDeletes;
     use Notifiable;
     use HasRoles;
@@ -25,8 +27,6 @@ class User extends Authenticatable implements Wallet, WalletFloat
     use Billable;
 
     use HasWalletFloat;
-    use EncryptedAttribute;
-
 
     /**
      * The attributes that are mass assignable.
