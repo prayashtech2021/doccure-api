@@ -12,11 +12,11 @@ use Illuminate\Support\Facades\Mail;
 use Validator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Carbon;
-
+use Illuminate\Support\Facades\Route;
 class PassportController extends Controller {
 
 	public function login(Request $request) {
-
+		
 		$validator = Validator::make($request->all(), [
 			'email' => 'required',
 			'password' => 'required',
@@ -58,12 +58,17 @@ class PassportController extends Controller {
 			}
 			$user->role_names = $arr;
 			removeMetaColumn($user);
+			if($request->route()->getName() == 'MobileLogin'){
+				$data = self::convertNullsAsEmpty($user);
+			}else{
+				$data = $user;
+			}
 			
 			$response_array = [
 				"code" => "200",
 				"message" => "Logged Successfully",
 				"token" => $token,
-				"data" => $user,
+				"data" => $data,
 			];
 			unset($user->tokens);
 			unset($user->roles);
@@ -138,7 +143,7 @@ class PassportController extends Controller {
 	}
 
 	public function resetPassword(Request $request)
-    {
+	{
         $input = $request->all();
         
         $rules = array(

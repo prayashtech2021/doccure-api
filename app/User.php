@@ -240,11 +240,21 @@ class User extends Authenticatable implements Wallet, WalletFloat
     }
 
     public function getPermanentAddressAttribute(){
-        return Address::with('country','state','city')->whereNull('name')->where('user_id',$this->id)->first();
+        $address = Address::with('country','state','city')->whereNull('name')->where('user_id',$this->id)->first();
+        if($address){
+            return $address;
+        }else{
+            return '';
+        }
     }
     
     public function getOfficeAddressAttribute(){
-        return Address::with('country','state','city','addressImage')->whereNotNull('name')->where('user_id',$this->id)->first();
+        $address = Address::with('country','state','city','addressImage')->whereNotNull('name')->where('user_id',$this->id)->first();
+        if($address){
+            return $address;
+        }else{
+            return '';
+        }
     }
 
     public function getUserImageAttribute() { 

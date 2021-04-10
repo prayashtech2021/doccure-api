@@ -17,7 +17,7 @@ Route::middleware(['secureApi', 'responseHeader'])->group(function () {
     Route::get('/', function () {
         return response()->json(['message' => 'Page Not Found'], 404);
     });
-    Route::post('login', 'PassportController@login');
+    Route::post('login', 'PassportController@login')->name('MobileLogin');
     Route::post('register', 'Api\HomeController@register');
 
     Route::get('getList/{case}/{id?}', 'Api\HomeController@getList')->name('getList');
