@@ -17,10 +17,10 @@ class CreatePostsTable extends Migration
             $table->increments('id');
             $table->unsignedInteger('post_category_id');
             $table->unsignedInteger('post_sub_category_id')->nullable();
-            $table->string('title');
+            $table->text('title');
             $table->string('slug');
-            $table->string('meta_description')->nullable();
-            $table->string('meta_keywords')->nullable();
+            $table->text('meta_description')->nullable();
+            $table->text('meta_keywords')->nullable();
             $table->string('url')->nullable();
             $table->string('banner_image');
             $table->string('thumbnail_image');

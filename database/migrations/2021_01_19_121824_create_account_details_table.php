@@ -16,10 +16,10 @@ class CreateAccountDetailsTable extends Migration
         Schema::create('account_details', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id');
-            $table->string('account_name');
+            $table->text('account_name');
             $table->string('account_number');
-            $table->string('bank_name');
-            $table->string('branch_name');
+            $table->text('bank_name');
+            $table->text('branch_name');
             $table->string('ifsc_code')->nullable();
             
             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));

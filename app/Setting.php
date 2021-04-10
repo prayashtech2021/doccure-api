@@ -6,9 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Setting extends Model
 {
+
     protected $fillable = [
         'slug', 'keyword', 'value', 'created_by',
-   ];
+    ];
     
     public function getAmount(){
         $getSettings = $this->where('slug','general_settings')->get();

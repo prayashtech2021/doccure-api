@@ -16,7 +16,7 @@ class CreatePaymentRequestsTable extends Migration
         Schema::create('payment_requests', function (Blueprint $table) {
             $table->increments('id');
             $table->unsignedBigInteger('user_id');
-            $table->string('reference_id');
+            $table->text('reference_id');
             $table->text('description')->nullable();
             $table->char('currency_code',5);
             $table->unsignedTinyInteger('request_type')->comment('1=>Payment,2=>Refund');

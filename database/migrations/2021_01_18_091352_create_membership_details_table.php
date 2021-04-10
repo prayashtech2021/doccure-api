@@ -16,7 +16,7 @@ class CreateMembershipDetailsTable extends Migration
         Schema::create('membership_details', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id');
-            $table->string('name');
+            $table->text('name');
             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
             $table->timestamp('updated_at')->nullable();
             $table->softDeletes();

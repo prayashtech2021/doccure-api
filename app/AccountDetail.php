@@ -1,13 +1,16 @@
 <?php
 
 namespace App;
+use ESolution\DBEncryption\Traits\EncryptedAttribute;
 
 use Illuminate\Database\Eloquent\Model;
 
 class AccountDetail extends Model
 {
-    
-
+    use EncryptedAttribute;
+    protected $encryptable = [
+        'account_name','bank_name','branch_name'
+    ];
     public function getData(){
         return [
             'id' => $this->id,

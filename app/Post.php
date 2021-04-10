@@ -1,6 +1,7 @@
 <?php
 
 namespace App;
+use ESolution\DBEncryption\Traits\EncryptedAttribute;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
@@ -10,7 +11,11 @@ use DB;
 class Post extends Model
 {
     use SoftDeletes;
+    use EncryptedAttribute;
 
+    protected $encryptable = [
+        'content','title','meta_description','meta_keywords'
+    ];
     public function getData(){
         return [
             'id' => $this->id,

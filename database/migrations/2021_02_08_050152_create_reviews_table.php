@@ -20,7 +20,7 @@ class CreateReviewsTable extends Migration
             $table->unsignedBigInteger('reviewer_id');
             $table->unsignedTinyInteger('rating');
             $table->text('description');
-            $table->string('reply')->nullable();
+            $table->text('reply')->nullable();
             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
             $table->timestamp('updated_at')->nullable();
             $table->softDeletes();

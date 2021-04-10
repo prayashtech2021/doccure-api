@@ -17,8 +17,8 @@ class CreatePageContentsTable extends Migration
             $table->increments('id');
             $table->unsignedBigInteger('page_master_id');
             $table->string('slug');
-            $table->string('title');
-            $table->string('sub_title')->nullable();
+            $table->text('title');
+            $table->text('sub_title')->nullable();
             $table->text('content')->nullable();
             $table->string('image')->nullable();
 

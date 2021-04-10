@@ -1,22 +1,23 @@
 <?php
 
 namespace App;
+use ESolution\DBEncryption\Traits\EncryptedAttribute;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 
-
 class Review extends Model
 {
-    //
     use SoftDeletes;
-
+    use EncryptedAttribute;
     
     protected $fillable = [
         'appointment_id','user_id', 'reviewer_id', 'rating', 'description','reply','created_by',
     ];
-
+    protected $encryptable = [
+        'description','reply'
+    ];
     public function getData(){
         return [
             'id' => $this->id,

@@ -36,7 +36,7 @@ class PostController extends Controller
             'order_by' => 'nullable|in:desc,asc',
             'page' => 'nullable|numeric',
             'category_id' => 'nullable|numeric|exists:post_categories,id',
-            'tag_name' => 'nullable|string|exists:post_tags,name',
+            'tag_name' => 'nullable|string|exists_encrypted:post_tags,name',
             'viewable' => 'nullable|numeric|in:0,1',
             'search_keyword' => 'nullable|string|min:1|max:50',
         );
@@ -200,7 +200,7 @@ class PostController extends Controller
         if ($request->post_id) { //edit
             $rules = array(
                 'post_id' => 'integer|exists:posts,id',
-                'title' => 'required|unique:posts,id,' . $request->post_id,
+                'title' => 'required|unique_encrypted:posts,title,' . $request->post_id,
                 'slug' => 'nullable|unique:posts,id,' . $request->post_id,
                 'content' => 'required',
                 'meta_description' => 'nullable',
@@ -213,7 +213,7 @@ class PostController extends Controller
             );
         } else {
             $rules = array(
-                'title' => 'required|unique:posts',
+                'title' => 'required|unique_encrypted:posts,title',
                 'slug' => 'nullable|unique:posts',
                 'content' => 'required',
                 'meta_description' => 'nullable',

@@ -17,7 +17,7 @@ class CreateChatsTable extends Migration
             $table->id();
             $table->unsignedBigInteger('sender_id');
             $table->unsignedBigInteger('recipient_id');
-            $table->string('message',255)->nullable();
+            $table->text('message')->nullable();
             $table->string('file_path')->nullable();
             $table->unsignedTinyInteger('read_status')->comment('1=>read');
             $table->unsignedTinyInteger('delete_status')->comment('1=>deleted');

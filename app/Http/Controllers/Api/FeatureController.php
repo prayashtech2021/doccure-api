@@ -22,7 +22,7 @@ class FeatureController extends Controller
         if ($request->feature_id) { //edit
             $rules = array(
                 'feature_id' => 'integer|exists:features,id',
-                'name' => 'required|unique:features,id,' . $request->feature_id,
+                'name' => 'required|unique:features,name,' . $request->feature_id,
                 'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             );
         } else {

@@ -1,20 +1,16 @@
 <?php
 
 namespace App;
-
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 use Storage;
 use URL;
 
-
 class Feature extends Model
 {
-    //
     use SoftDeletes;
 
-    
     protected $fillable = [
         'name', 'image', 'created_by',
     ];

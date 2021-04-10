@@ -20,10 +20,11 @@ class UserSpeciality extends Model{
 
 
     public function getData(){
+        $spl = $this->special()->select('name')->first();
         return [
             'id' => $this->id,
             'speciality_id' => $this->speciality_id,
-            'name' => $this->special()->first(),
+            'name' => ($spl)? $spl['name'] : '',
             'duration' => $this->duration,
             'amount' => $this->amount,
         ];
@@ -33,7 +34,7 @@ class UserSpeciality extends Model{
         return $this->belongsTo('App\User'); 
     }
     public function special() { 
-        return $this->belongsTo('App\Speciality','speciality_id')->pluck('name'); 
+        return $this->belongsTo('App\Speciality','speciality_id'); 
     }
     
 }
