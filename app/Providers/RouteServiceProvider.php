@@ -46,7 +46,7 @@ class RouteServiceProvider extends ServiceProvider
 
         $this->mapWebRoutes();
 
-        $this->mapApi2Routes();
+        $this->mapMobileRoutes();
         //
     }
 
@@ -79,10 +79,10 @@ class RouteServiceProvider extends ServiceProvider
             ->group(base_path('routes/api.php'));
     }
 
-    protected function mapApi2Routes()
+    protected function mapMobileRoutes()
     {
-        Route::prefix('api2')
+        Route::prefix('mobile')
             ->namespace($this->namespace)
-            ->group(base_path('routes/api2.php'));
+            ->group(base_path('routes/mobile.php'));
     }
 }
