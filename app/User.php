@@ -256,7 +256,7 @@ class User extends Authenticatable implements Wallet, WalletFloat
     public function getOfficeAddressAttribute(){
         $address = Address::with('country','state','city','addressImage')->whereNotNull('name')->where('user_id',$this->id)->first();
         if($address){
-            return $address;
+            return convertNullsAsEmpty($address);
         }else{
             return '';
         }
