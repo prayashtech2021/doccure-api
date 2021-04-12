@@ -18,12 +18,6 @@ class Address extends Model
         'name','line_1','line_2'
     ];
     
-    /*public function setNameAttribute($value)
-    {
-        if (is_null($value)) {
-            $this->attributes['name'] = '';
-        }
-    }*/
     public function country()
     {
         return $this->belongsTo('App\Country','country_id')->select(array('id', 'name'))->withDefault();

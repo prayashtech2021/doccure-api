@@ -65,13 +65,13 @@ class User extends Authenticatable implements Wallet, WalletFloat
             'mobile_number' => $this->mobile_number,
             'gendername' => $this->getGenderNameAttribute(),
             'profile_image' => getUserProfileImage($this->id),
-            'dob' => $this->dob,
+            'dob' => ($this->dob)? $this->dob : '',
             'age' => Carbon::parse($this->dob)->age,
-            'blood_group' => $this->blood_group,
-            'biography' => $this->biography,
+            'blood_group' => ($this->blood_group)?$this->blood_group : '',
+            'biography' => ($this->biography)?$this->biography : '',
             'fees' =>  ($this->price_type == 1)? 'Free' : $this->amount,
             'currency_code' => $this->currency_code,
-            'time_zone_id' => $this->time_zone_id,
+            'time_zone_id' => ($this->time_zone_id)?$this->time_zone_id : '',
             'language_id' => $this->language_id,
             'service' => $this->doctorService()->get(),
             'providerspeciality' => $this->getProviderSpecialityAttribute(),
@@ -80,8 +80,8 @@ class User extends Authenticatable implements Wallet, WalletFloat
             'member_since' => convertToLocal(Carbon::parse($this->created_at),config('custom.timezone')[251],'d M Y H:s A'),
             'accountstatus' => $this->getAccountStatusAttribute(),
             'doctor_earned' => ($this->providerPayment())?$this->providerPayment()->sum(DB::raw('total_amount-(transaction_charge + tax_amount)')):'',
-            'doctorRating' => ($this->avgRating())? $this->avgRating() : 0,
-            'feedback_count' => ($this->doctorRatings())? $this->doctorRatings()->where('user_id',$this->id)->count() : 0,
+            'doctorRating' => ($this->avgRating())? $this->avgRating() : "0",
+            'feedback_count' => ($this->doctorRatings())? $this->doctorRatings()->where('user_id',$this->id)->count() : "0",
             'total_unread_chat' => ($id)? $this->unreadChat($id) : '',
             'last_message' => ($id)? $this->lastChat($id) : '',
             'status' => $this->status,
@@ -98,10 +98,10 @@ class User extends Authenticatable implements Wallet, WalletFloat
             'mobile_number' => $this->mobile_number,
             'gendername' => $this->getGenderNameAttribute(),
             'profile_image' => getUserProfileImage($this->id),
-            'dob' => $this->dob,
+            'dob' => ($this->dob)? $this->dob : '',
             'age' => Carbon::parse($this->dob)->age,
-            'blood_group' => $this->blood_group,
-            'time_zone_id' => $this->time_zone_id,
+            'blood_group' => ($this->blood_group)?$this->blood_group : '',
+            'time_zone_id' => ($this->time_zone_id)? $this->time_zone_id : '',
             'language_id' => $this->language_id,
             'currency_code' => $this->currency_code,
             'permanent_address' => $this->getPermanentAddressAttribute(),
@@ -176,8 +176,8 @@ class User extends Authenticatable implements Wallet, WalletFloat
            'email' => $this->email,
            'address' => $this->getPermanentAddressAttribute(),
            'doctorSpecialization' => $this->getProviderSpecialityAttribute(),
-           'doctorRating' => ($this->avgRating())? $this->avgRating() : 0,
-           'feedback_count' => ($this->doctorRatings())? $this->doctorRatings()->where('user_id',$this->id)->count() : 0,
+           'doctorRating' => ($this->avgRating())? $this->avgRating() : "0",
+           'feedback_count' => ($this->doctorRatings())? $this->doctorRatings()->where('user_id',$this->id)->count() : "0",
            'status' => $this->status,
            'role' => $this->roles()->first()->name,
         ];
@@ -207,9 +207,9 @@ class User extends Authenticatable implements Wallet, WalletFloat
 
     public function getAccountStatusAttribute(){
         if($this->deleted_at == NULL){
-            return true;
+            return "true";
         }else{
-            return false;
+            return "false";
         }
     }
 

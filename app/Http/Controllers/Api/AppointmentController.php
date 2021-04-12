@@ -154,7 +154,7 @@ class AppointmentController extends Controller
 
             removeMetaColumn($user);
             unset($user->roles);
-            $result['user_details'] = $user;
+            $result['user_details'] = convertNullsAsEmpty($user);
             if (isset($user->accountDetails)) {
                 $user->accountDetails;
                 removeMetaColumn($user->accountDetails);

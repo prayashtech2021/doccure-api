@@ -16,12 +16,14 @@ class Prescription extends Model
    ];
 
     public function getData(){
+        $detail = $this->prescriptionDetails()->get();
+        removeMetaColumn($detail);
         return [
             'id' => $this->id,
             'appointment_id' => $this->appointment_id,
             'doctor' => $this->doctor()->first()->basicProfile(),
             'patient' => $this->patient()->first()->basicProfile(),
-            'prescription_details' => $this->prescriptionDetails()->get(),
+            'prescription_details' => $detail,
             'appointment_reference_no' => $this->appointment()->select('appointment_reference')->first(),
             'created_at' => convertToLocal(Carbon::parse($this->created_at),config('custom.timezone')[251],'d-m-Y h:i A'),
             'sign' => $this->signature(),

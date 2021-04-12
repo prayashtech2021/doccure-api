@@ -156,9 +156,9 @@ class DoctorController extends Controller
             $list = User::role('doctor')->with('doctorService', 'doctorEducation', 'doctorExperience', 'doctorAwards', 'doctorMembership', 'doctorRegistration')->find($user_id);
             if ($list) {
                 
-                $array['profile'] = $list;
-                $array['average_rating'] = ($list->avgRating()) ? $list->avgRating() : 0;
-                $array['feedback'] = ($list->doctorRatings()) ? $list->doctorRatings()->where('user_id', $user_id)->count() : 0;
+                $array['profile'] = self::convertNullsAsEmpty($list);
+                $array['average_rating'] = ($list->avgRating()) ? $list->avgRating() : "0";
+                $array['feedback'] = ($list->doctorRatings()) ? $list->doctorRatings()->where('user_id', $user_id)->count() : "0";
                 $review = Review::orderBy('id', 'desc')->where('user_id', $user_id);
                 $result = collect();
                 $review->each(function ($provider) use (&$result) {
