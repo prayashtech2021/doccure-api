@@ -17,17 +17,24 @@ class Address extends Model
     protected $encryptable = [
         'name','line_1','line_2'
     ];
+    
+    /*public function setNameAttribute($value)
+    {
+        if (is_null($value)) {
+            $this->attributes['name'] = '';
+        }
+    }*/
     public function country()
     {
-        return $this->belongsTo('App\Country','country_id')->select(array('id', 'name'));
+        return $this->belongsTo('App\Country','country_id')->select(array('id', 'name'))->withDefault();
     }
     public function state()
     {
-        return $this->belongsTo('App\State','state_id')->select(array('id', 'name'));
+        return $this->belongsTo('App\State','state_id')->select(array('id', 'name'))->withDefault();
     }
     public function city()
     {
-        return $this->belongsTo('App\City','city_id')->select(array('id', 'name'));
+        return $this->belongsTo('App\City','city_id')->select(array('id', 'name'))->withDefault();
     }
 
     public function addressImage(){

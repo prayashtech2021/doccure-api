@@ -128,7 +128,7 @@ class PageContentController extends Controller
                 $blog_list->paginate(4)->getCollection()->each(function ($post) use (&$blog_data) {
                     $blog_data->push($post->getData());
                 });
-                $array['blog_list'] = $blog_data;
+                $array['blog_list'] = self::convertNullsAsEmpty($blog_data);
 
             }
             foreach($getSettings as $result){

@@ -236,3 +236,13 @@ function imageResize($originalImage, $file_name, $path, $width = '', $height = '
         return $e->getMessage();
     }
 }
+
+function convertNullsAsEmpty($response_array) {
+
+    array_walk_recursive($response_array, function (&$value, $key) {
+        $value = is_int($value) ? (string) $value : $value;
+        $value = $value === null ? "" : $value;
+    });
+
+    return $response_array;
+}
