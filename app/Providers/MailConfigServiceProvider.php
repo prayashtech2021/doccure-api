@@ -5,7 +5,6 @@ namespace App\Providers;
 use Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
-use App\Setting;
 
 class MailConfigServiceProvider extends ServiceProvider
 {
@@ -16,7 +15,22 @@ class MailConfigServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        //
+        $emailServices =  DB::table('settings')->select('value')->where('slug','smtp_settings')->pluck('value');
+
+        if ($emailServices) {
+                $config = array(
+                    'driver'     => $emailServices[4],
+                    'host'       => $emailServices[0],
+                    'port'       => $emailServices[1],
+                    'from'       => array('address' => $emailServices[2], 'name' => $emailServices[6]),
+                    'encryption' => $emailServices[5],
+                    'username'   => $emailServices[2],
+                    'password'   => $emailServices[3],
+                    'sendmail'   => '/usr/sbin/sendmail -bs',
+                    'pretend'    => false,
+                );
+                Config::set('mail', $config);
+        }
     }
 
     /**
@@ -26,23 +40,6 @@ class MailConfigServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
-        $emailServices = Setting::select('keyword','value')->where('slug','smtp_settings')->get();
 
-        if ($emailServices) {
-            $config = array(
-                'driver'     => 'smtp',
-                'host'       => $emailServices[0]->smtp_host,
-                'port'       => $emailServices[0]->smtp_port,
-                'username'   => $emailServices[0]->smtp_user,
-                'password'   => $emailServices[0]->smtp_password,
-                'encryption' => 'ssl',
-                'from'       => array('address' => $emailServices[0]->smtp_user, 'name' => $emailServices[0]->name),
-                'sendmail'   => '/usr/sbin/sendmail -bs',
-                'pretend'    => false,
-            );
-
-            Config::set('mail', $config);
-        }
     }
 }

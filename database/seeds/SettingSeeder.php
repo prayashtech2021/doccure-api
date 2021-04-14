@@ -254,6 +254,24 @@ class SettingSeeder extends Seeder
                 'value' => '',
                 'created_by' => 1,
             ],
+            41 => [
+                'slug' => 'smtp_settings',
+                'keyword' => 'driver',
+                'value' => 'smtp',
+                'created_by' => 1,
+            ],
+            42 => [
+                'slug' => 'smtp_settings',
+                'keyword' => 'encryption',
+                'value' => 'ssl',
+                'created_by' => 1,
+            ],
+            43 => [
+                'slug' => 'smtp_settings',
+                'keyword' => 'username',
+                'value' => 'Doccure',
+                'created_by' => 1,
+            ],
 		];
 		foreach ($datas as $id => $data) {
 			$row = Setting::firstOrNew([
