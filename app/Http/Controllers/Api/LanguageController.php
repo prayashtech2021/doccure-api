@@ -22,6 +22,9 @@ class LanguageController extends Controller
                 $language = $language->where('is_enable',1)->get();
             }
             removeMetaColumn($language);
+            if($request->route()->getName() == 'languageList'){
+                $language = $language->toArray();
+            }
             return self::send_success_response($language);
 
         } catch (Exception | Throwable $exception) {

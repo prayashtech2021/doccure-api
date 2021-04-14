@@ -104,23 +104,19 @@ class PageContentController extends Controller
                 $provider_list->each(function ($provider) use (&$doc_array) {
                     $doc_array->push($provider->basicProfile());
                 });
-                $array['doctors'] = $doc_array;
 
                 $speciality = Speciality::orderBy('id','asc');
                 $spl_array = collect();
                 $speciality->each(function ($data) use (&$spl_array) {
                     $spl_array->push($data->getData());
                 });
-
-                $array['speciality'] = $spl_array;
-
+                
                 $feature = Feature::orderBy('id', 'desc');
                 
                 $list = collect();
                 $feature->each(function ($feature) use (&$list) {
                     $list->push($feature->getData());
                 });
-                $array['features_list'] = $list;
 
                 $blog_list = Post::where('is_verified',1)->where('is_viewable',1);
 
@@ -128,7 +124,17 @@ class PageContentController extends Controller
                 $blog_list->paginate(4)->getCollection()->each(function ($post) use (&$blog_data) {
                     $blog_data->push($post->getData());
                 });
-                $array['blog_list'] = self::convertNullsAsEmpty($blog_data);
+                if($request->route()->getName() == 'landingPage'){
+                    $array['doctors'] = $doc_array->toArray();
+                    $array['speciality'] = $spl_array->toArray();
+                    $array['features_list'] = $list->toArray();
+                    $array['blog_list'] = $blog_data->toArray();
+                }else{
+                    $array['doctors'] = $doc_array;
+                    $array['speciality'] = $spl_array;
+                    $array['features_list'] = $list;
+                    $array['blog_list'] = $blog_data;
+                }
 
             }
             foreach($getSettings as $result){
@@ -146,7 +152,7 @@ class PageContentController extends Controller
                     'path'=>$path
                 ];
             }
-
+            
             return self::send_success_response($array, 'Page Content data fetched successfully',$common);
         } catch (Exception | Throwable $e) {
             return self::send_exception_response($exception->getMessage(),$common);

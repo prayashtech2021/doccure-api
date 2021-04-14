@@ -59,7 +59,7 @@ class PassportController extends Controller {
 			$user->role_names = $arr;
 			removeMetaColumn($user);
 			if($request->route()->getName() == 'MobileLogin'){
-				$data = self::convertNullsAsEmpty($user);
+				$data = $user->toArray();
 			}else{
 				$data = $user;
 			}
