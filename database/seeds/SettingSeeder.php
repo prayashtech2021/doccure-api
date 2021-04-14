@@ -77,25 +77,25 @@ class SettingSeeder extends Seeder
             11 => [
                 'slug' => 'smtp_settings',
                 'keyword' => 'smtp_host',
-                'value' => '',
+                'value' => 'smtp.googlemail.com',
                 'created_by' => 1,
             ],
             12 => [
                 'slug' => 'smtp_settings',
                 'keyword' => 'smtp_port',
-                'value' => '',
+                'value' => '465',
                 'created_by' => 1,
             ],
             13 => [
                 'slug' => 'smtp_settings',
                 'keyword' => 'smtp_user',
-                'value' => '',
+                'value' => 'seo@dreamguys.co.in',
                 'created_by' => 1,
             ],
             14 => [
                 'slug' => 'smtp_settings',
                 'keyword' => 'smtp_password',
-                'value' => '',
+                'value' => '@Dreams@SEO',
                 'created_by' => 1,
             ],
             15 => [
