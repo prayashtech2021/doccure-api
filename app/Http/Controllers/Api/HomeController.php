@@ -213,12 +213,17 @@ class HomeController extends Controller
         }
     }
     
-    public function getList($case,$id=NULL){
+    public function getList(Request $request,$case,$id=NULL){
         try {
             if ($case) {
                 switch ($case) {
                     case '1' : 
-                        $response = Country::select('id','name','phone_code','currency','emoji','emojiU')->get();
+                        $country = Country::select('id','name','phone_code','currency','emoji','emojiU')->get();
+                        if($request->route()->getName() == "getGeneralList"){
+                            $response = $country->toArray();
+                        }else{
+                            $response = $country;
+                        }
                         break;
                     case '2' : 
                         $state = State::select('id','name');
@@ -226,6 +231,9 @@ class HomeController extends Controller
                             $state = $state->where('country_id',$id);
                         }
                         $response = $state->get(); 
+                        if($request->route()->getName() == "getGeneralList"){
+                           $response = $response->toArray();
+                        }
                         break;
                     case '3' : 
                         $city = City::select('id','name');
@@ -233,6 +241,9 @@ class HomeController extends Controller
                             $city = $city->where('state_id',$id);
                         }
                         $response = $city->get(); 
+                        if($request->route()->getName() == "getGeneralList"){
+                            $response = $response->toArray();
+                        }
                         break;
                     default : 
                         $response = ['case' => $case, 'status' => 'Action not found']; 

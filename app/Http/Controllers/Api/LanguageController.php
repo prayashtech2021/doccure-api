@@ -194,19 +194,13 @@ class LanguageController extends Controller
         if($valid){ return $valid;}
 
         try {
-           
-            $lang = MultiLanguage::where('language_id',$request->language_id)->orderBy('page_master_id', 'asc')->get();
-
-            $list = collect();
-            
-            $lang->each(function ($category) use (&$list) {
-                $list->push($category->getData());
-            });
-            
-            if($request->route()->getName() == "languageKeyword"){
-                $list = $list->toArray();
+            $page = PageMaster::get();
+        
+            foreach($page as $value){
+                $array[$value->name] = getLangContent($value->id,$request->language_id);
             }
-            return self::send_success_response($list,'List Fetched Successfully');
+            
+            return self::send_success_response($array,'List Fetched Successfully');
         } catch (Exception | Throwable $exception) {
             DB::rollback();
             return self::send_exception_response($exception->getMessage());

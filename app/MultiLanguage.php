@@ -18,12 +18,7 @@ class MultiLanguage extends Model
     ];
 
     public function getData(){
-        return [
-            'id' => $this->id,
-            'keyword' => $this->keyword,
-            'value' => $this->value,
-            'page' => $this->page()->select('name')->first(),
-        ];
+        return [ $this->keyword => $this->value ];
     }
 
     public function page(){
