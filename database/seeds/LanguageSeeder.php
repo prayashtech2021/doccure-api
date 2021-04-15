@@ -19,6 +19,7 @@ class LanguageSeeder extends Seeder
                 'code' => 'En',
                 'is_default' => 1,
                 'is_enable' => 1,
+                'tag' => 1,
                 'created_by' => 1,
             ],
         ];

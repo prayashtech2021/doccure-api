@@ -245,21 +245,11 @@ class User extends Authenticatable implements Wallet, WalletFloat
     }
 
     public function getPermanentAddressAttribute(){
-        $address = Address::with('country','state','city')->whereNull('name')->where('user_id',$this->id)->first();
-        if($address){
-            return convertNullsAsEmpty($address);
-        }else{
-            return '';
-        }
+        return Address::with('country','state','city')->whereNull('name')->where('user_id',$this->id)->first();  
     }
     
     public function getOfficeAddressAttribute(){
-        $address = Address::with('country','state','city','addressImage')->whereNotNull('name')->where('user_id',$this->id)->first();
-        if($address){
-            return convertNullsAsEmpty($address);
-        }else{
-            return '';
-        }
+        return Address::with('country','state','city','addressImage')->whereNotNull('name')->where('user_id',$this->id)->first();
     }
 
     public function getUserImageAttribute() { 
@@ -301,7 +291,6 @@ class User extends Authenticatable implements Wallet, WalletFloat
                 ->orWhereRaw("sender_id=".$recipient_id." and recipient_id=".$id);
         });
         $list = $chat->orderBy('id','desc')->first();
-        //$count = $chat->where('read_status',1)->count();
         if($list){
         (empty($list->message))? $msg = $list->file_path : $msg = $list->message; 
         $created_at=$list->created_at->diffForHumans();
@@ -310,7 +299,6 @@ class User extends Authenticatable implements Wallet, WalletFloat
         return [
             'message' => $msg,
             'created_at' => $created_at,
-           // 'unread' => ($list)? $count : 0,
         ];
     }
     

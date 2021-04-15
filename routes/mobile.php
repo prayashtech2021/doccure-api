@@ -29,7 +29,7 @@ Route::middleware(['secureApi', 'responseHeader'])->group(function () {
     Route::get('language/list', 'Api\LanguageController@list')->name('languageList');
     Route::get('speacility/list', 'Api\SpecialityController@getList');
     Route::get('features/list', 'Api\FeatureController@getList');
-    Route::post('doctors-search', 'Api\DoctorController@doctorSearchList');
+    Route::post('doctors-search', 'Api\DoctorController@doctorSearchList')->name('doctorSearch');
     Route::get('doctor/profile/{id}', 'Api\DoctorController@doctorProfile');
     Route::get('landing-page','Api\PageContentController@getList')->name('landingPage');
     Route::get('common-page','Api\HomeController@getCommonData');
@@ -37,14 +37,14 @@ Route::middleware(['secureApi', 'responseHeader'])->group(function () {
     // for blogs
     Route::get('post', 'Api\PostController@index');
     Route::get('post/view/{id}', 'Api\PostController@view');
-    
+    Route::get('allkeywords','Api\LanguageController@allKeywords')->name('languageKeyword');
 });
-Route::middleware(['CheckAuthHeader', 'auth:api2', 'responseHeader'])->group(function () {
+Route::middleware(['CheckAuthHeader', 'auth:api', 'responseHeader'])->group(function () {
     Route::post('email-template/save','Api\EmailTemplateController@save');
     Route::post('post/save', 'Api\PostController@save');
     Route::post('settings/save','Api\SettingController@save');
 });
-Route::middleware(['CheckAuthHeader', 'auth:api2', 'secureApi', 'responseHeader'])->group(function () {
+Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader'])->group(function () {
     /* common */
     Route::get('auth-common-page','Api\HomeController@getCommonData');
     Route::post('changepassword', 'Api\HomeController@changePassword');
@@ -63,7 +63,7 @@ Route::middleware(['CheckAuthHeader', 'auth:api2', 'secureApi', 'responseHeader'
     Route::get('patient/profile/{id}', 'Api\PatientController@profile_details');
 
     //appointments
-    Route::get('appointments/list', 'Api\AppointmentController@list');
+    Route::get('appointments/list', 'Api\AppointmentController@list')->name('appointmentList');
     Route::post('appointments/create', 'Api\AppointmentController@create');
     Route::get('appointments/saved-cards','Api\AppointmentController@savedCards');
     Route::get('schedule/list', 'Api\AppointmentController@scheduleList');

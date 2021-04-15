@@ -16,4 +16,17 @@ class MultiLanguage extends Model
     protected $encryptable = [
     'keyword','value'
     ];
+
+    public function getData(){
+        return [
+            'id' => $this->id,
+            'keyword' => $this->keyword,
+            'value' => $this->value,
+            'page' => $this->page()->select('name')->first(),
+        ];
+    }
+
+    public function page(){
+        return $this->belongsTo(PageMaster::class, 'page_master_id', 'id');
+    }
 }

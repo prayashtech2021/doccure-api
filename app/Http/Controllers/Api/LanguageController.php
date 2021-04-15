@@ -184,4 +184,32 @@ class LanguageController extends Controller
             return self::send_exception_response($exception->getMessage());
         }
     }
+
+    public function allKeywords(Request $request){
+        $rules = [
+            'language_id' => 'required|exists:languages,id',
+            ];
+
+        $valid = self::customValidation($request, $rules);
+        if($valid){ return $valid;}
+
+        try {
+           
+            $lang = MultiLanguage::where('language_id',$request->language_id)->orderBy('page_master_id', 'asc')->get();
+
+            $list = collect();
+            
+            $lang->each(function ($category) use (&$list) {
+                $list->push($category->getData());
+            });
+            
+            if($request->route()->getName() == "languageKeyword"){
+                $list = $list->toArray();
+            }
+            return self::send_success_response($list,'List Fetched Successfully');
+        } catch (Exception | Throwable $exception) {
+            DB::rollback();
+            return self::send_exception_response($exception->getMessage());
+        }
+    }
 }

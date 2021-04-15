@@ -154,7 +154,11 @@ class AppointmentController extends Controller
 
             removeMetaColumn($user);
             unset($user->roles);
-            $result['user_details'] = convertNullsAsEmpty($user);
+            if($request->route()->getName() == 'appointmentList'){
+                $result['user_details'] = self::convertNullsAsEmpty($user->toArray());
+            }else{
+                $result['user_details'] = $user;
+            }
             if (isset($user->accountDetails)) {
                 $user->accountDetails;
                 removeMetaColumn($user->accountDetails);
@@ -176,8 +180,11 @@ class AppointmentController extends Controller
                 $paginatedata->getCollection()->each(function ($appointment) use (&$data) {
                     $data->push($appointment->getData());
                 });
-                
-                $result['list'] = $data;
+                if($request->route()->getName() == 'appointmentList'){
+                    $result['list'] = self::convertNullsAsEmpty($data);
+                }else{
+                    $result['list'] = $data;
+                }
                 $result['total_count'] = $paginatedata->total();
                 $result['last_page'] = $paginatedata->lastPage();
                 $result['current_page'] = $paginatedata->currentPage();

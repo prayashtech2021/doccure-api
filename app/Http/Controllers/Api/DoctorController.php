@@ -572,7 +572,12 @@ class DoctorController extends Controller
             $doctors->each(function ($provider) use (&$data) {
                 $data->push($provider->doctorProfile());
             });
-            $array['profile'] = $data;
+            
+            if($request->route()->getName() == 'doctorSearch'){
+                $array['profile'] = self::convertNullsAsEmpty($data->toArray());
+            }else{
+                $array['profile'] = $data;
+            }
 
             if (count($data) > 0) {
                 $msg = 'Doctors data fetched successfully';
