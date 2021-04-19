@@ -174,6 +174,8 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
     Route::post('sub-category/save', 'Api\PostSubCategoryController@save');
     Route::get('sub-category/list', 'Api\PostSubCategoryController@getList');
     Route::get('sub-category/delete/{id}', 'Api\PostSubCategoryController@destroy');
+
+    Route::get('test','Api\HomeController@testing');
 });
 
 Route::any('{path}', function () {
