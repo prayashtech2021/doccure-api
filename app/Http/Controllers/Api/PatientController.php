@@ -48,7 +48,11 @@ class PatientController extends Controller
             removeMetaColumn($user);
         
             if($user){
-                return self::send_success_response(self::convertNullsAsEmpty($user),'Patient Profile Detail Fetched Successfully',$common);
+                if($request->route()->getName() == 'patientProfile'){
+                    return self::send_success_response($user->toArray(),'Patient Profile Detail Fetched Successfully',$common);
+                }else{
+                    return self::send_success_response($user,'Patient Profile Detail Fetched Successfully',$common);
+                }
             }else{
                 return self::send_bad_request_response('No Records Found',$common);
             }

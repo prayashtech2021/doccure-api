@@ -30,7 +30,7 @@ Route::middleware(['secureApi', 'responseHeader'])->group(function () {
     Route::get('speacility/list', 'Api\SpecialityController@getList');
     Route::get('features/list', 'Api\FeatureController@getList');
     Route::post('doctors-search', 'Api\DoctorController@doctorSearchList')->name('doctorSearch');
-    Route::get('doctor/profile/{id}', 'Api\DoctorController@doctorProfile');
+    Route::get('doctor/profile/{id}', 'Api\DoctorController@doctorProfile')->name('doctorProfile');
     Route::get('landing-page','Api\PageContentController@getList')->name('landingPage');
     Route::get('common-page','Api\HomeController@getCommonData');
     Route::get('page-setting','Api\SettingController@getPageSetting');
@@ -60,7 +60,7 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
 
     Route::get('patient/list', 'Api\PatientController@patientList');
     Route::post('patient/saveprofile', 'Api\PatientController@profile_update');
-    Route::get('patient/profile/{id}', 'Api\PatientController@profile_details');
+    Route::get('patient/profile/{id}', 'Api\PatientController@profile_details')->name('patientProfile');
 
     //appointments
     Route::get('appointments/list', 'Api\AppointmentController@list')->name('appointmentList');

@@ -155,8 +155,11 @@ class DoctorController extends Controller
 
             $list = User::role('doctor')->with('doctorService', 'doctorEducation', 'doctorExperience', 'doctorAwards', 'doctorMembership', 'doctorRegistration')->find($user_id);
             if ($list) {
-                
-                $array['profile'] = self::convertNullsAsEmpty($list);
+                if($request->route()->getName() == "doctorProfile"){
+                    $array['profile'] = $list->toArray();
+                }else{
+                    $array['profile'] = $list;
+                }
                 $array['average_rating'] = ($list->avgRating()) ? $list->avgRating() : "0";
                 $array['feedback'] = ($list->doctorRatings()) ? $list->doctorRatings()->where('user_id', $user_id)->count() : "0";
                 $review = Review::orderBy('id', 'desc')->where('user_id', $user_id);
@@ -170,9 +173,13 @@ class DoctorController extends Controller
                 $shedule->each(function ($schedule_timing) use (&$data) {
                     $data->push($schedule_timing->getData());
                 });
-
-                $array['business_hours'] = $data;
-                $array['review'] = $result;
+                if($request->route()->getName() == "doctorProfile"){
+                    $array['business_hours'] = $data->toArray();
+                    $array['review'] = $result->toArray();
+                }else{
+                    $array['business_hours'] = $data;
+                    $array['review'] = $result;
+                }
                 $array['transaction'] = Setting::where('keyword', 'transaction_charge')->pluck('value');
                 $array['tax'] = Setting::where('keyword', 'tax')->pluck('value');
                 $fav = 0;
@@ -574,7 +581,7 @@ class DoctorController extends Controller
             });
             
             if($request->route()->getName() == 'doctorSearch'){
-                $array['profile'] = self::convertNullsAsEmpty($data->toArray());
+                $array['profile'] = $data->toArray();
             }else{
                 $array['profile'] = $data;
             }
