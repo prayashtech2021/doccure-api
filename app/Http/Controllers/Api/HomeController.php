@@ -55,7 +55,7 @@ class HomeController extends Controller
             $user->assignRole($request->type);
             DB::commit();
             
-            $url = env('FRONTEND_URL','https://doccure-frontend.dreamguystech.com/').'verifymail/'.$user->id.'/'.$token;
+            $url = env('FRONTEND_URL','http://3.133.24.219/').'verifymail/'.$user->id.'/'.$token;
 
             $template = EmailTemplate::where('slug','registration')->first();
             if($template){
@@ -108,7 +108,7 @@ class HomeController extends Controller
                     $user->verification_code = $verification_code;
                     $user->save();
 
-                    $url =  env('FRONTEND_URL','https://doccure-frontend.dreamguystech.com/').'verifymail/'.$user->id.'/'.$token;
+                    $url =  env('FRONTEND_URL','http://3.133.24.219/').'verifymail/'.$user->id.'/'.$token;
 
                     $template = EmailTemplate::where('slug','registration')->first();
                     if($template){
@@ -397,9 +397,20 @@ class HomeController extends Controller
         }
     }
 
-    public function destroy(Request $request)
+    public function destroy($id,$type)
     {
-        return self::customDelete('\App\User', $request->id);
+        if($type){
+            $data = User::withTrashed()->find($id);
+            if($data){
+                $data->forceDelete();
+                $msg='Record Deleted successfully!';
+                return self::send_success_response([], $msg);
+            }else{
+                return self::send_bad_request_response('Something went wrong! Please try again later.');
+            }
+        }else{
+            return self::customDelete('\App\User', $id);
+        }
     }
 
     public function adminDashboard(Request $request){
