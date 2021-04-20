@@ -397,7 +397,7 @@ class HomeController extends Controller
         }
     }
 
-    public function destroy($id,$type)
+    public function destroy($id,$type=NULL)
     {
         if($type){
             $data = User::withTrashed()->find($id);
