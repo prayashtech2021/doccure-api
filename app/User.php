@@ -80,8 +80,8 @@ class User extends Authenticatable implements Wallet, WalletFloat
             'member_since' => convertToLocal(Carbon::parse($this->created_at),config('custom.timezone')[251],'d M Y H:s A'),
             'accountstatus' => $this->getAccountStatusAttribute(),
             'doctor_earned' => ($this->providerPayment())?$this->providerPayment()->sum(DB::raw('total_amount-(transaction_charge + tax_amount)')):'',
-            'doctorRating' => ($this->avgRating())? $this->avgRating() : "0",
-            'feedback_count' => ($this->doctorRatings())? $this->doctorRatings()->where('user_id',$this->id)->count() : "0",
+            'doctorRating' => ($this->avgRating())? $this->avgRating() : 0,
+            'feedback_count' => ($this->doctorRatings())? $this->doctorRatings()->where('user_id',$this->id)->count() : 0,
             'total_unread_chat' => ($id)? $this->unreadChat($id) : '',
             'last_message' => ($id)? $this->lastChat($id) : '',
             'status' => $this->status,
@@ -176,8 +176,8 @@ class User extends Authenticatable implements Wallet, WalletFloat
            'email' => $this->email,
            'address' => $this->getPermanentAddressAttribute(),
            'doctorSpecialization' => $this->getProviderSpecialityAttribute(),
-           'doctorRating' => ($this->avgRating())? $this->avgRating() : "0",
-           'feedback_count' => ($this->doctorRatings())? $this->doctorRatings()->where('user_id',$this->id)->count() : "0",
+           'doctorRating' => ($this->avgRating())? $this->avgRating() : 0,
+           'feedback_count' => ($this->doctorRatings())? $this->doctorRatings()->where('user_id',$this->id)->count() : 0,
            'status' => $this->status,
            'role' => $this->roles()->first()->name,
         ];
@@ -207,9 +207,9 @@ class User extends Authenticatable implements Wallet, WalletFloat
 
     public function getAccountStatusAttribute(){
         if($this->deleted_at == NULL){
-            return "true";
+            return true;
         }else{
-            return "false";
+            return false;
         }
     }
 
@@ -245,7 +245,7 @@ class User extends Authenticatable implements Wallet, WalletFloat
     }
 
     public function getPermanentAddressAttribute(){
-        return Address::with('country','state','city')->whereNull('name')->where('user_id',$this->id)->first();  
+        return Address::with('country','state','city')->whereNull('name')->where('user_id',$this->id)->first();
     }
     
     public function getOfficeAddressAttribute(){
@@ -291,6 +291,7 @@ class User extends Authenticatable implements Wallet, WalletFloat
                 ->orWhereRaw("sender_id=".$recipient_id." and recipient_id=".$id);
         });
         $list = $chat->orderBy('id','desc')->first();
+        //$count = $chat->where('read_status',1)->count();
         if($list){
         (empty($list->message))? $msg = $list->file_path : $msg = $list->message; 
         $created_at=$list->created_at->diffForHumans();
@@ -299,6 +300,7 @@ class User extends Authenticatable implements Wallet, WalletFloat
         return [
             'message' => $msg,
             'created_at' => $created_at,
+           // 'unread' => ($list)? $count : 0,
         ];
     }
     

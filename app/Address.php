@@ -20,15 +20,15 @@ class Address extends Model
     
     public function country()
     {
-        return $this->belongsTo('App\Country','country_id')->select(array('id', 'name'))->withDefault();
+        return $this->belongsTo('App\Country','country_id')->select(array('id', 'name'));
     }
     public function state()
     {
-        return $this->belongsTo('App\State','state_id')->select(array('id', 'name'))->withDefault();
+        return $this->belongsTo('App\State','state_id')->select(array('id', 'name'));
     }
     public function city()
     {
-        return $this->belongsTo('App\City','city_id')->select(array('id', 'name'))->withDefault();
+        return $this->belongsTo('App\City','city_id')->select(array('id', 'name'));
     }
 
     public function addressImage(){
