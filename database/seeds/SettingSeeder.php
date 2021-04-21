@@ -53,13 +53,13 @@ class SettingSeeder extends Seeder
             7 => [
                 'slug' => 'general_settings',
                 'keyword' => 'support_number',
-                'value' => '',
+                'value' => '9942576886',
                 'created_by' => 1,
             ],
             8 => [
                 'slug' => 'general_settings',
                 'keyword' => 'support_email',
-                'value' => '',
+                'value' => 'doccure@gmail.com',
                 'created_by' => 1,
             ],
             9 => [
@@ -239,19 +239,19 @@ class SettingSeeder extends Seeder
             38 => [
                 'slug' => 'general_settings',
                 'keyword' => 'website_content',
-                'value' => '',
+                'value' => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
                 'created_by' => 1,
             ],
             39 => [
                 'slug' => 'privacy_policy',
                 'keyword' => 'privacy_policy',
-                'value' => '',
+                'value' => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
                 'created_by' => 1,
             ],
             40 => [
                 'slug' => 'terms_and_condition',
                 'keyword' => 'terms_and_condition',
-                'value' => '',
+                'value' => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
                 'created_by' => 1,
             ],
             41 => [
