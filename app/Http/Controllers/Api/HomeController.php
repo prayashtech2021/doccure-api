@@ -55,7 +55,7 @@ class HomeController extends Controller
             $user->assignRole($request->type);
             DB::commit();
             
-            $url = env('FRONTEND_URL','http://3.133.24.219/').'verifymail/'.$user->id.'/'.$token;
+            $url = config('app.frontend_url').'verifymail/'.$user->id.'/'.$token;
 
             $template = EmailTemplate::where('slug','registration')->first();
             if($template){
@@ -108,7 +108,7 @@ class HomeController extends Controller
                     $user->verification_code = $verification_code;
                     $user->save();
 
-                    $url =  env('FRONTEND_URL','http://3.133.24.219/').'verifymail/'.$user->id.'/'.$token;
+                    $url =  config('app.frontend_url').'verifymail/'.$user->id.'/'.$token;
 
                     $template = EmailTemplate::where('slug','registration')->first();
                     if($template){
@@ -158,6 +158,9 @@ class HomeController extends Controller
                     $user->is_verified = 1;
                     $user->save();
                     DB::commit();
+                    if($request->route()->getName() == "verification"){
+                        $user = $user->toArray();
+                    }
                     return self::send_success_response($user,'User Email Verified Sucessfully');
                 }else{
                     return self::send_bad_request_response('Invalid User id or verification code provided');

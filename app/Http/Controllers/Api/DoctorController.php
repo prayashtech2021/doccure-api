@@ -113,11 +113,18 @@ class DoctorController extends Controller
                 $id = auth('api')->user()->id;
             }
             $paginatedata = $list->paginate($paginate, ['*'], 'page', $pageNumber);
-
+            if($request->route()->getName() == "doctorList"){
+                $mobile = 1;
+            }else{
+                $mobile = 0;
+            }
             $data = collect();
-            $paginatedata->getCollection()->each(function ($provider) use (&$data,$id) {
-                $data->push($provider->doctorProfile($id));
+            $paginatedata->getCollection()->each(function ($provider) use (&$data,$id,$mobile) {
+                $data->push($provider->doctorProfile($id,$mobile));
             });
+            if($request->route()->getName() == "doctorList"){
+                $data = $data->toArray();
+            }
             $result['doctor_list'] = $data;
             $result['total_count'] = $paginatedata->total();
             $result['last_page'] = $paginatedata->lastPage();

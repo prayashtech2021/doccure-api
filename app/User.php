@@ -56,7 +56,12 @@ class User extends Authenticatable implements Wallet, WalletFloat
         return $this->hasMany('App\OauthAccessToken');
     }
 
-    public function doctorProfile($id = NULL){
+    public function doctorProfile($id = NULL,$mobile = NULL){
+        if(isset($mobile) && ($mobile==1)){
+            $service = count($this->doctorService()->get())>0 ? $this->doctorService()->get()->toArray() : (object)[];
+        }else{
+            $service = $this->doctorService()->get();
+        }
         return [
             'id' => $this->id,
             'did' => $this->getDidAttribute(),
@@ -73,7 +78,7 @@ class User extends Authenticatable implements Wallet, WalletFloat
             'currency_code' => $this->currency_code,
             'time_zone_id' => $this->time_zone_id,
             'language_id' => $this->language_id,
-            'service' => $this->doctorService()->get(),
+            'service' => $service,
             'providerspeciality' => $this->getProviderSpecialityAttribute(),
             'permanent_address' => $this->getPermanentAddressAttribute(),
             'office_address' => $this->getOfficeAddressAttribute(),

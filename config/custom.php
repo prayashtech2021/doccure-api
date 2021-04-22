@@ -3,6 +3,7 @@
 return [
     'support_phone' => env('SUPPORT_PHONE', '0422-11223344'),
     'support_email' => env('SUPPORT_EMAIL', 'doccure@gmail.com'),
+    'frontend_url' => env('FRONTEND_URL', 'https://doccure-mobile.dreamguystech.com/'),
 
     'importSecret' => 'OrcaloTaxi1020',
 

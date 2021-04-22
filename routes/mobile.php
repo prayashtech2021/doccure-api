@@ -22,7 +22,7 @@ Route::middleware(['secureApi', 'responseHeader'])->group(function () {
 
     Route::get('getList/{case}/{id?}', 'Api\HomeController@getList')->name('getGeneralList');
     Route::post('resend-verification-link', 'Api\HomeController@resendVerificationLink');
-    Route::post('verification', 'Api\HomeController@verification');
+    Route::post('verification', 'Api\HomeController@verification')->name('verification');
     Route::post('password/email', 'PassportController@forgot');
     Route::post('password/reset', 'PassportController@resetPassword');
     Route::post('check-email', 'Api\HomeController@checkEmail')->name('checkEmail');
@@ -80,7 +80,7 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
 
     /* Doctor Module */
     Route::get('doctor/dashboard', 'Api\DoctorController@dashboard');
-    Route::get('doctor/list', 'Api\DoctorController@doctorList');
+    Route::get('doctor/list', 'Api\DoctorController@doctorList')->name('doctorList');
     Route::post('doctor/saveprofile', 'Api\DoctorController@saveProfile');
     Route::get('doctor/address-image/delete/{address_image_id}','Api\DoctorController@deleteAddressImage');
 
