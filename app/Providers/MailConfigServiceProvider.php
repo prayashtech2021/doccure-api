@@ -22,7 +22,7 @@ class MailConfigServiceProvider extends ServiceProvider
              if ($data) {
                  $emailServices = DB::table('settings')->where('slug', 'smtp_settings')->pluck('value');
 
-                 if ($emailServices) {
+                 if (count($emailServices)>0) {
                      $config = array(
                          'driver' => $emailServices[4],
                          'host' => $emailServices[0],

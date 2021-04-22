@@ -3,6 +3,7 @@
 use Illuminate\Database\Seeder;
 use App\Speciality;
 use App\UserSpeciality;
+use App\User;
 
 class SpecialitySeeder extends Seeder
 {
