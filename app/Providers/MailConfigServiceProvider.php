@@ -5,6 +5,7 @@ namespace App\Providers;
 use Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
+use Schema;
 
 class MailConfigServiceProvider extends ServiceProvider
 {
@@ -15,6 +16,7 @@ class MailConfigServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        if (Schema::hasTable('settings')) {
         $emailServices =  DB::table('settings')->select('value')->where('slug','smtp_settings')->pluck('value');
 
         if ($emailServices) {
@@ -30,6 +32,7 @@ class MailConfigServiceProvider extends ServiceProvider
                     'pretend'    => false,
                 );
                 Config::set('mail', $config);
+        }
         }
     }
 
