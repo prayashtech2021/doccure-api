@@ -16,27 +16,28 @@ class MailConfigServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        if (Schema::hasTable('settings')) {
-            $data = DB::table('settings')->where('slug', 'smtp_settings')->get();
-            if ($data) {
-                $emailServices = DB::table('settings')->where('slug', 'smtp_settings')->pluck('value');
+        
+        // if (Schema::hasTable('settings')) {
+            // $data = DB::table('settings')->where('slug', 'smtp_settings')->get();
+            // if ($data) {
+            //     $emailServices = DB::table('settings')->where('slug', 'smtp_settings')->pluck('value');
 
-                if ($emailServices) {
-                    $config = array(
-                        'driver' => $emailServices[4],
-                        'host' => $emailServices[0],
-                        'port' => $emailServices[1],
-                        'from' => array('address' => $emailServices[2], 'name' => $emailServices[6]),
-                        'encryption' => $emailServices[5],
-                        'username' => $emailServices[2],
-                        'password' => $emailServices[3],
-                        'sendmail' => '/usr/sbin/sendmail -bs',
-                        'pretend' => false,
-                    );
-                    Config::set('mail', $config);
-                }
-            }
-        }
+            //     if ($emailServices) {
+            //         $config = array(
+            //             'driver' => $emailServices[4],
+            //             'host' => $emailServices[0],
+            //             'port' => $emailServices[1],
+            //             'from' => array('address' => $emailServices[2], 'name' => $emailServices[6]),
+            //             'encryption' => $emailServices[5],
+            //             'username' => $emailServices[2],
+            //             'password' => $emailServices[3],
+            //             'sendmail' => '/usr/sbin/sendmail -bs',
+            //             'pretend' => false,
+            //         );
+            //         Config::set('mail', $config);
+            //     }
+            // }
+        // }
     }
 
     /**
