@@ -17,9 +17,9 @@ class MailConfigServiceProvider extends ServiceProvider
     public function register()
     {
         if (Schema::hasTable('settings')) {
-            $data = DB::table('settings')->select('value')->where('slug', 'smtp_settings')->get();
+            $data = DB::table('settings')->where('slug', 'smtp_settings')->get();
             if ($data) {
-                $emailServices = DB::table('settings')->select('value')->where('slug', 'smtp_settings')->pluck('value');
+                $emailServices = DB::table('settings')->where('slug', 'smtp_settings')->pluck('value');
 
                 if ($emailServices) {
                     $config = array(
