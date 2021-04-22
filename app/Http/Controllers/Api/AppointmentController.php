@@ -373,7 +373,7 @@ class AppointmentController extends Controller
 
             DB::commit();
 
-            return self::send_success_response($appointment->getData());
+            return self::send_success_response($appointment->getData(),'Appointment has been scheduled');
 
         } catch (Exception | Throwable $exception) {
             return self::send_exception_response($exception->getMessage());

@@ -45,5 +45,6 @@ class SpecialitySeeder extends Seeder
 			$row->fill($data);
             $row->save();
         }
+        User::whereId('3')->update(['status'=>1]);
     }
 }
