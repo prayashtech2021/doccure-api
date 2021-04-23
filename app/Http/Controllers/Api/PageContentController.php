@@ -100,9 +100,14 @@ class PageContentController extends Controller
         
             if($request->type == 1){ // 1 only for lang page content 
                 $provider_list = User::role('doctor')->orderBy('id','asc');
+                if($request->route()->getName() == "landingPage"){
+                    $mobile = 1;
+                }else{
+                    $mobile = 0;
+                }
                 $doc_array = collect();
-                $provider_list->each(function ($provider) use (&$doc_array) {
-                    $doc_array->push($provider->basicProfile());
+                $provider_list->each(function ($provider) use (&$doc_array,$mobile) {
+                    $doc_array->push($provider->basicProfile($mobile));
                 });
 
                 $speciality = Speciality::orderBy('id','asc');

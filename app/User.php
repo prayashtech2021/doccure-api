@@ -59,8 +59,23 @@ class User extends Authenticatable implements Wallet, WalletFloat
     public function doctorProfile($id = NULL,$mobile = NULL){
         if(isset($mobile) && ($mobile==1)){
             $service = count($this->doctorService()->get())>0 ? $this->doctorService()->get()->toArray() : (object)[];
+            $education = count($this->doctorEducation()->get())>0 ? $this->doctorEducation()->get()->toArray() : (object)[];
+            $specilization = ($this->getProviderSpecialityAttribute())? $this->getProviderSpecialityAttribute() : (object)[];
+            $permanentAddress = ($this->getPermanentAddressAttribute()) ? $this->getPermanentAddressAttribute() : (object)[];
+            $officeAddress = ($this->getOfficeAddressAttribute()) ? $this->getOfficeAddressAttribute() : (object)[];
+
         }else{
             $service = $this->doctorService()->get();
+            $education = $this->doctorEducation()->get();
+            $specilization = $this->getProviderSpecialityAttribute();
+            $permanentAddress = $this->getPermanentAddressAttribute();
+            $officeAddress = $this->getOfficeAddressAttribute();
+
+        } 
+        if (isset($id) && $id!=0) {
+            $fav = $this->userHasFav($id);
+        }else{
+            $fav = 0;
         }
         return [
             'id' => $this->id,
@@ -79,9 +94,9 @@ class User extends Authenticatable implements Wallet, WalletFloat
             'time_zone_id' => $this->time_zone_id,
             'language_id' => $this->language_id,
             'service' => $service,
-            'providerspeciality' => $this->getProviderSpecialityAttribute(),
-            'permanent_address' => $this->getPermanentAddressAttribute(),
-            'office_address' => $this->getOfficeAddressAttribute(),
+            'providerspeciality' => $specilization,
+            'permanent_address' => $permanentAddress,
+            'office_address' => $officeAddress,
             'member_since' => convertToLocal(Carbon::parse($this->created_at),config('custom.timezone')[251],'d M Y H:s A'),
             'accountstatus' => $this->getAccountStatusAttribute(),
             'doctor_earned' => ($this->providerPayment())?$this->providerPayment()->sum(DB::raw('total_amount-(transaction_charge + tax_amount)')):'',
@@ -91,6 +106,8 @@ class User extends Authenticatable implements Wallet, WalletFloat
             'last_message' => ($id)? $this->lastChat($id) : '',
             'status' => $this->status,
             'online_status' => $this->onlineStatus(),
+            'education' => $education,
+            'favourite' => $fav,
         ];
     }
 
@@ -172,19 +189,35 @@ class User extends Authenticatable implements Wallet, WalletFloat
         })->count();
     }
 
-    public function basicProfile(){
-       return [
+    public function basicProfile($id = NULL,$mobile=NULL){
+        if(isset($mobile) && ($mobile==1)){
+            $education = count($this->doctorEducation()->get())>0 ? $this->doctorEducation()->get()->toArray() : (object)[];
+            $address = ($this->getPermanentAddressAttribute()) ? $this->getPermanentAddressAttribute() : (object)[];
+            $specilization = ($this->getProviderSpecialityAttribute())? $this->getProviderSpecialityAttribute() : (object)[];
+        }else{
+            $education = $this->doctorEducation()->get();
+            $address = $this->getPermanentAddressAttribute();
+            $specilization = $this->getProviderSpecialityAttribute();
+        }
+        if (isset($id) && $id!=0) {
+            $fav = $this->userHasFav($id);
+        }else{
+            $fav = 0;
+        }
+        return [
            'id' => $this->id,
            'name' => trim($this->first_name . ' '. $this->last_name),
            'profile_image' => getUserProfileImage($this->id),
            'mobile_number' => $this->mobile_number,
            'email' => $this->email,
-           'address' => $this->getPermanentAddressAttribute(),
-           'doctorSpecialization' => $this->getProviderSpecialityAttribute(),
+           'address' => $address,
+           'doctorSpecialization' => $specilization,
            'doctorRating' => ($this->avgRating())? $this->avgRating() : 0,
            'feedback_count' => ($this->doctorRatings())? $this->doctorRatings()->where('user_id',$this->id)->count() : 0,
            'status' => $this->status,
            'role' => $this->roles()->first()->name,
+           'education' => $education,     
+           'favourite' => $fav,
         ];
     }
 
@@ -250,11 +283,13 @@ class User extends Authenticatable implements Wallet, WalletFloat
     }
 
     public function getPermanentAddressAttribute(){
-        return Address::with('country','state','city')->whereNull('name')->where('user_id',$this->id)->first();
+        $add =  Address::with('country','state','city')->whereNull('name')->where('user_id',$this->id)->first();
+        return $add ? $add : (object)[];
     }
     
     public function getOfficeAddressAttribute(){
-        return Address::with('country','state','city','addressImage')->whereNotNull('name')->where('user_id',$this->id)->first();
+        $add =  Address::with('country','state','city','addressImage')->whereNotNull('name')->where('user_id',$this->id)->first();
+        return $add ? $add : (object)[];
     }
 
     public function getUserImageAttribute() { 

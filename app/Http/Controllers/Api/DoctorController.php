@@ -532,7 +532,7 @@ class DoctorController extends Controller
             if ($request->speciality_name) {
                 $speciality_name = $request->speciality_name;
                 $doctors = $doctors->whereHas('doctorSpecialization', function ($category) use ($speciality_name) {
-                    $category->whereEncrypted('specialities.name', 'like', '%' . $speciality_name . '%');
+                    $category->where('specialities.name', 'like', '%' . $speciality_name . '%');
                 });
             }
 
@@ -581,10 +581,18 @@ class DoctorController extends Controller
             if ($request->sort == 3) { //free
                 $doctors = $doctors->where('price_type', 1);
             }
-
+            $id = 0;
+            if ($request->bearerToken()) {
+                $id = auth('api')->user()->id;
+            }
+            if($request->route()->getName() == "doctorSearch"){
+                $mobile = 1;
+            }else{
+                $mobile = 0;
+            }
             $data = collect();
-            $doctors->each(function ($provider) use (&$data) {
-                $data->push($provider->doctorProfile());
+            $doctors->each(function ($provider) use (&$data,$id,$mobile) {
+                $data->push($provider->doctorProfile($id,$mobile));
             });
             
             if($request->route()->getName() == 'doctorSearch'){
@@ -592,7 +600,7 @@ class DoctorController extends Controller
             }else{
                 $array['profile'] = $data;
             }
-
+            
             if (count($data) > 0) {
                 $msg = 'Doctors data fetched successfully';
             } else {
