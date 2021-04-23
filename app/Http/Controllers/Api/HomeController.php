@@ -55,7 +55,7 @@ class HomeController extends Controller
             $user->assignRole($request->type);
             DB::commit();
             
-            $url = config('app.frontend_url').'verifymail/'.$user->id.'/'.$token;
+            $url = config('custom.frontend_url').'verifymail/'.$user->id.'/'.$token;
 
             $template = EmailTemplate::where('slug','registration')->first();
             if($template){
@@ -108,7 +108,7 @@ class HomeController extends Controller
                     $user->verification_code = $verification_code;
                     $user->save();
 
-                    $url =  config('app.frontend_url').'verifymail/'.$user->id.'/'.$token;
+                    $url =  config('custom.frontend_url').'verifymail/'.$user->id.'/'.$token;
 
                     $template = EmailTemplate::where('slug','registration')->first();
                     if($template){

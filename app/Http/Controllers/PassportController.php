@@ -117,7 +117,7 @@ class PassportController extends Controller {
 			$message = "Your account is not activated.";
             return self::send_bad_request_response($message);
 		}
-		$url = config('app.frontend_url').'resetpassword/'.$user->id;
+		$url = config('custom.frontend_url').'resetpassword/'.$user->id;
 		$template = EmailTemplate::where('id',2)->first();
 		if($template){
 			$body = ($template->content); // this is template dynamic body. You may get other parameters too from database. $title = $template->title; $from = $template->from;
