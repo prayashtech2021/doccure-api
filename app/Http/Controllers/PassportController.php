@@ -16,8 +16,7 @@ use Illuminate\Support\Facades\Route;
 class PassportController extends Controller {
 
 	public function login(Request $request) {
-		return $request->all();
-		exit();
+		
 		$validator = Validator::make($request->all(), [
 			'email' => 'required',
 			'password' => 'required',
