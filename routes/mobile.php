@@ -38,6 +38,7 @@ Route::middleware(['secureApi', 'responseHeader'])->group(function () {
     Route::get('post', 'Api\PostController@index');
     Route::get('post/view/{id}', 'Api\PostController@view');
     Route::get('allkeywords','Api\LanguageController@allKeywords')->name('languageKeyword');
+    Route::get('doctors', 'Api\DoctorController@doctorList')->name('doctors');
 });
 Route::middleware(['CheckAuthHeader', 'auth:api', 'responseHeader'])->group(function () {
     Route::post('email-template/save','Api\EmailTemplateController@save');

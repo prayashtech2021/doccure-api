@@ -93,8 +93,8 @@ class DoctorController extends Controller
             $pageNumber = $request->page ? $request->page : 1;
             
            
-            if (auth()->user()->hasrole('patient')) { //doctors -> my patients who attended appointments
-                $patient_id = auth()->user()->id;
+            if ($request->bearerToken() && auth('api')->user()->hasrole('patient')) { //doctors -> my patients who attended appointments
+                $patient_id = auth('api')->user()->id;
                 $list = User::orderBy('created_at', $order_by);
 
                 $list = $list->whereHas('providerAppointments', function ($qry) use ($patient_id) {
@@ -103,7 +103,7 @@ class DoctorController extends Controller
 
             } else {
                 $list = User::role('doctor')->orderBy('created_at', $order_by);
-                if (auth()->user()->hasrole('company_admin')) {
+                if ($request->bearerToken() && auth('api')->user()->hasrole('company_admin')) {
                     $list = $list->withTrashed();
                 }
             }
@@ -113,7 +113,7 @@ class DoctorController extends Controller
                 $id = auth('api')->user()->id;
             }
             $paginatedata = $list->paginate($paginate, ['*'], 'page', $pageNumber);
-            if($request->route()->getName() == "doctorList"){
+            if($request->route()->getName() == "doctorList" || $request->route()->getName() == "doctors" ){
                 $mobile = 1;
             }else{
                 $mobile = 0;
@@ -122,7 +122,7 @@ class DoctorController extends Controller
             $paginatedata->getCollection()->each(function ($provider) use (&$data,$id,$mobile) {
                 $data->push($provider->doctorProfile($id,$mobile));
             });
-            if($request->route()->getName() == "doctorList"){
+            if($request->route()->getName() == "doctorList" || $request->route()->getName() == "doctors" ){
                 $data = $data->toArray();
             }
             $result['doctor_list'] = $data;
