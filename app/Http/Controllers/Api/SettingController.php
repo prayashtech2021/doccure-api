@@ -99,7 +99,7 @@ class SettingController extends Controller
                 $setting_result = json_decode($request->settings, true);
                 foreach($setting_result as $data){
                     if(empty($data['value'])){
-                        $msg = $data['keyword'].' field is required.';
+                        $msg = 'All fields are required.';
                         return self::send_bad_request_response($msg);
                     }
                     $update = Setting::where('keyword',$data['keyword'])->update(['value' => $data['value'], 'created_by'=> auth()->user()->id]);
