@@ -23,7 +23,10 @@ class PageContentController extends Controller
 
             if($request->cms){
                 $setting_result = json_decode($request->cms, true);
-                foreach($setting_result as $data){   
+                foreach($setting_result as $data){  
+                    if(empty($data['title'])){
+                        return self::send_bad_request_response('All Fields are required');
+                    } 
                     $update = PageContent::where('slug',$data['slug'])->update([
                         'title'=> ($data['title'])? $data['title'] : '', 
                         'sub_title' => ($data['sub_title'])? $data['sub_title'] : '', 

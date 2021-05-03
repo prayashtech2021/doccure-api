@@ -75,6 +75,7 @@ class AppointmentController extends Controller
                 'request_type' => 'nullable|numeric|in:1,2',
                 'appointment_date' => 'nullable|date_format:d/m/Y',
                 'consumer_id' => 'integer|exists:users,id',
+                'appointment_type' => 'integer|numeric|in:1,2'
             );
             if ($request->language_id) {
                 $rules['language_id'] = 'integer|exists:languages,id';
@@ -141,7 +142,9 @@ class AppointmentController extends Controller
             if($request->consumer_id){
                 $list = $list->whereUserId($request->consumer_id);
             }
-
+            if (!empty($request->appointment_type) && $request->appointment_type > 0) { // required only for mobile - api
+                $list = $list->where('appointment_type', $request->appointment_type);
+            }
             if (!empty($request->request_type) && $request->request_type > 0) {
                 $list = $list->where('request_type', $request->request_type);
             }elseif ($user->hasRole('patient')) {
