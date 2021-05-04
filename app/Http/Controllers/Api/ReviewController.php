@@ -101,8 +101,11 @@ class ReviewController extends Controller
             $paginatedata->getCollection()->each(function ($provider) use (&$data) {
                 $data->push($provider->getData());
             });
-            
-            $result['review_list'] = $data;
+            if($request->route()->getName() == "reviewList"){
+                $result['review_list'] = $data->toArray();
+            }else{
+                $result['review_list'] = $data;
+            }
             $result['total_count'] = $paginatedata->total();
             $result['last_page'] = $paginatedata->lastPage();
             $result['current_page'] = $paginatedata->currentPage();

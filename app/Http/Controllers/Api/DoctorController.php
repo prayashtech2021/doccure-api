@@ -45,13 +45,14 @@ class DoctorController extends Controller
                 $total_patient = Appointment::where('doctor_id', $user_id)->groupby('user_id')->get()->count();
                 $today_patient = Appointment::where('doctor_id', $user_id)->whereDate('appointment_date', date('Y-m-d'))->groupBy('user_id')->count();
                 $appointment = Appointment::where('doctor_id', $user_id)->count();
-
+                $upcoming = Appointment::where('doctor_id', $user_id)->whereIn('appointment_status', [1,2])->whereDate('appointment_date', '>=', convertToUTC(now()))->count();
                 $appointment_result = (new AppointmentController)->list($request, 1);
 
                 $result = [
                     'total_patient' => $total_patient,
                     'today_patient' => $today_patient,
                     'appointments' => $appointment,
+                    'upcoming_appointment' => $upcoming,
                     'patient_appointment' => $appointment_result,
                 ];
                 return self::send_success_response($result,'OK',$common);

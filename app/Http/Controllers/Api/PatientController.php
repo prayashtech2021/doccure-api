@@ -372,8 +372,12 @@ class PatientController extends Controller
                 $list->each(function ($provider) use (&$data) {
                     $data->push($provider->basicProfile());
                 });
-
-                return self::send_success_response($data,'Patient Favourite List',$common);
+                if($request->route()->getName() == 'favouriteList'){
+                    $result = $data->toArray();
+                }else{
+                    $result = $data;
+                }
+                return self::send_success_response($result,'Patient Favourite List',$common);
             }else{
                 return self::send_unauthorised_request_response("Unauthorised request",$common);
             }

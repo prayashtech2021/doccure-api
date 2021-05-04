@@ -128,7 +128,7 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
 
     /* Reviews */
     Route::post('review/save','Api\ReviewController@save');
-    Route::get('review/list','Api\ReviewController@getList');
+    Route::get('review/list','Api\ReviewController@getList')->name('reviewList');
     Route::get('review/delete/{id}','Api\ReviewController@destroy');
     Route::post('review/doctor-reply','Api\ReviewController@doctorReply');
 
@@ -142,7 +142,7 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
 
     /* Favourite */
     Route::post('favourite/save','Api\PatientController@favouriteSave');
-    Route::get('favourite/list','Api\PatientController@getFavouriteList');
+    Route::get('favourite/list','Api\PatientController@getFavouriteList')->name('favouriteList');
 
     /* Page Content */
     Route::post('page-content/save','Api\PageContentController@save');
