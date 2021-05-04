@@ -174,7 +174,11 @@ class LanguageController extends Controller
             DB::beginTransaction();
             $keyword_update = json_decode($request->keyword_update, true);
             foreach($keyword_update as $update){
-                $get = MultiLanguage::where('id',$update['id'])->update(['value'=> $update['value'], 'updated_by'=> auth()->user()->id]); 
+                // $get = MultiLanguage::where('id',$update['id'])->update(['value'=> $value, 'updated_by'=> auth()->user()->id]); 
+                $get = MultiLanguage::find($update['id']);
+                $get->value = $update['value'];
+                $get->updated_by = auth()->user()->id;
+                $get->save();            
             }
            
             DB::commit();
