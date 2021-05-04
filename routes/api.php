@@ -58,7 +58,6 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
 
     /* Patient Module */
     Route::post('patient-search', 'Api\PatientController@patientSearchList');
-
     Route::get('patient/list', 'Api\PatientController@patientList');
     Route::post('patient/saveprofile', 'Api\PatientController@profile_update');
     Route::get('patient/profile/{id}', 'Api\PatientController@profile_details');

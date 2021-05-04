@@ -58,13 +58,15 @@ class User extends Authenticatable implements Wallet, WalletFloat
 
     public function doctorProfile($id = NULL,$mobile = NULL){
         if(isset($mobile) && ($mobile==1)){
-            $service = count($this->doctorService()->get())>0 ? $this->doctorService()->get()->toArray() : (object)[];
+            //$service = count($this->doctorService()->get())>0 ? $this->doctorService()->get()->toArray() : (object)[];
             $permanentAddress = ($this->getPermanentAddressAttribute()) ? $this->getPermanentAddressAttribute() : (object)[];
             $officeAddress = ($this->getOfficeAddressAttribute()) ? $this->getOfficeAddressAttribute() : (object)[];
+            $last_message = ($id)? $this->lastChat($id) : (object)[];
         }else{
-            $service = $this->doctorService()->get();
+           // $service = $this->doctorService()->get();
             $permanentAddress = $this->getPermanentAddressAttribute();
             $officeAddress = $this->getOfficeAddressAttribute();
+            $last_message = ($id)? $this->lastChat($id) : '';
         } 
         if (isset($id) && $id!=0) {
             $fav = $this->userHasFav($id);
@@ -87,7 +89,7 @@ class User extends Authenticatable implements Wallet, WalletFloat
             'currency_code' => $this->currency_code,
             'time_zone_id' => $this->time_zone_id,
             'language_id' => $this->language_id,
-            'service' => $service,
+            'service' => $this->doctorService()->get(),
             'providerspeciality' => $this->getProviderSpecialityAttribute(),
             'permanent_address' => $permanentAddress,
             'office_address' => $officeAddress,
@@ -97,7 +99,7 @@ class User extends Authenticatable implements Wallet, WalletFloat
             'doctorRating' => ($this->avgRating())? $this->avgRating() : 0,
             'feedback_count' => ($this->doctorRatings())? $this->doctorRatings()->where('user_id',$this->id)->count() : 0,
             'total_unread_chat' => ($id)? $this->unreadChat($id) : '',
-            'last_message' => ($id)? $this->lastChat($id) : '',
+            'last_message' => $last_message,
             'status' => $this->status,
             'online_status' => $this->onlineStatus(),
             'education' => $this->doctorEducation()->get(),

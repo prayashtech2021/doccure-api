@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use Validator;
-use App\ { User,Address,Appointment,Prescription,PrescriptionDetails,Country,UserFavourite,PageContent };
+use App\ { User,Address,Appointment,Prescription,PrescriptionDetails,Country,UserFavourite,PageContent,MedicalRecord };
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use DB;
@@ -379,6 +379,34 @@ class PatientController extends Controller
             }
         } catch (Exception | Throwable $exception) {
             return self::send_exception_response($exception->getMessage(),$common);
+        }
+    }
+
+    public function mobileDashboard(Request $request){
+        try {
+            $user = auth()->user();
+            $user_id = auth()->user()->id;
+            if($user_id && auth()->user()->hasrole('patient')){
+                
+                $appointment = Appointment::where('user_id',$user_id)->count();
+                $prescription = Prescription::where('user_id',$user_id)->count();
+                $medical_record = MedicalRecord::where('consumer_id',$user_id)->count();
+                $invoice = auth()->user()->payment()->count();
+                
+                $result = [ 
+                    'profile' => auth()->user()->toArray(),
+                    'appointment' => $appointment, 
+                    'prescription' => $prescription,
+                    'medical_record' => $medical_record,
+                    'invoice' => $invoice,
+                ];
+                return self::send_success_response($result);
+            }else{
+                $message = "Unauthorised request.";
+                return self::send_unauthorised_request_response($message);
+            }
+        } catch (\Exception | \Throwable $exception) {
+           return self::send_exception_response($exception->getMessage());
         }
     }
 

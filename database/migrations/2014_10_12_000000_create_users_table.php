@@ -23,7 +23,7 @@ class CreateUsersTable extends Migration
             $table->string('password');
             $table->unsignedTinyInteger('gender')->default(1)->comment('1=>Male,2=>Female');
             $table->date('dob')->nullable();
-            $table->char('blood_group',3)->nullable();
+            $table->char('blood_group',5)->nullable();
             $table->text('biography')->nullable();
             $table->string('profile_image')->nullable();
             $table->string('api_token')->nullable();

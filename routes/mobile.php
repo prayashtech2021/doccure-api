@@ -123,6 +123,7 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
     /* Dashboard */
     Route::get('admin/dashboard','Api\HomeController@adminDashboard');
     Route::get('patient/dashboard','Api\PatientController@patientDashboard');
+    Route::get('patient/dashboard/count','Api\PatientController@mobileDashboard');
     Route::get('doctor/dashboard','Api\DoctorController@doctorDashboard');
 
     /* Reviews */
