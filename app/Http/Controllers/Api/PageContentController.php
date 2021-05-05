@@ -154,6 +154,7 @@ class PageContentController extends Controller
                     $path = url('img/logo.png');
                 }
                 $array[$result->slug] = [
+                    'slug' =>$request->slug,
                     'title'=>$result->title, 
                     'sub_title'=>$result->sub_title, 
                     'content'=>$result->content, 
