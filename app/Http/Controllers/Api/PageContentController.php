@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\ { PageContent,User,Speciality,Feature,Post };
+use App\ { PageContent,User,Speciality,Feature,Post,Banner };
 use DB;
 use Illuminate\Http\Request;
 use Validator;
@@ -100,7 +100,14 @@ class PageContentController extends Controller
             } 
         
             $getSettings = PageContent::get();
-        
+            
+            $banner = Banner::orderBy('id', 'desc');
+                
+            $banner_list = collect();
+            $banner->each(function ($banner) use (&$banner_list) {
+                $banner_list->push($banner->getData());
+            });
+
             if($request->type == 1){ // 1 only for lang page content 
                 $provider_list = User::role('doctor')->orderBy('id','asc');
                 if($request->route()->getName() == "landingPage"){
@@ -132,6 +139,7 @@ class PageContentController extends Controller
                 $blog_list->paginate(4)->getCollection()->each(function ($post) use (&$blog_data) {
                     $blog_data->push($post->getData());
                 });
+
                 if($request->route()->getName() == 'landingPage'){
                     $array['doctors'] = $doc_array->toArray();
                     $array['speciality'] = $spl_array->toArray();
@@ -145,6 +153,7 @@ class PageContentController extends Controller
                 }
 
             }
+            
             foreach($getSettings as $result){
                 if (!empty($result->image) && Storage::exists('images/cms-images/' . $result->image)) {
                     $path = (config('filesystems.default') == 's3') ? Storage::temporaryUrl('app/public/images/cms-images/' . $result->image, now()->addMinutes(5)) : Storage::url('app/public/images/cms-images/' . $result->image);
@@ -161,10 +170,75 @@ class PageContentController extends Controller
                     'path'=>$path
                 ];
             }
-            
+            $array['banner_list'] = $banner_list;
+
             return self::send_success_response($array, 'Page Content data fetched successfully',$common);
         } catch (Exception | Throwable $e) {
             return self::send_exception_response($exception->getMessage(),$common);
+        }
+    }
+
+    public function saveBanner(Request $request)
+    {
+        if ($request->banner_id) { //edit
+            $rules = array(
+                'banner_id' => 'integer|exists:banners,id',
+                'name' => 'required|unique:banners,name,' . $request->banner_id,
+                'button_name' => 'required',
+                'link' => 'nullable',
+                'image' => 'required|image|mimes:jpeg,png,jpg',
+            );
+        } else {
+            $rules = array(
+                'name' => 'required|unique:banners',
+                'button_name' => 'required',
+                'link' => 'nullable',
+                'image' => 'required|image|mimes:jpeg,png,jpg',
+            );
+        }
+        $valid = self::customValidation($request, $rules);
+        if($valid){ return $valid;}
+
+        try {
+            DB::beginTransaction();
+            
+            if ($request->banner_id) {
+                $banner = Banner::find($request->banner_id);
+                if (!$banner) {
+                    return self::send_bad_request_response('Incorrect Banner id. Please check and try again!');
+                }
+                $banner->updated_by = auth()->user()->id;
+            } else {
+                $banner = new Banner();
+                $banner->created_by = auth()->user()->id;
+            }
+
+            $banner->name = $request->name;
+            $banner->button_name = $request->button_name;
+            $banner->link = $request->link;
+            $banner->save();
+
+            if(!empty($banner->image)){
+                if (Storage::exists('images/cms-images/' . $banner->image)) {
+                    Storage::delete('images/cms-images/' . $banner->image);
+                }
+            }
+            if (!empty($request->image)) {
+                $extension = $request->file('image')->getClientOriginalExtension();
+                $file_name = date('YmdHis') . '_' . auth()->user()->id . '.png';
+                $path = 'images/cms-images';
+                $store = $request->file('image')->storeAs($path, $file_name);
+
+                $banner->image = $file_name;
+                $banner->save();
+            }
+
+            DB::commit();
+            return self::send_success_response([], 'Banner Stored Sucessfully');
+
+        } catch (Exception | Throwable $e) {
+            DB::rollback();
+            return self::send_exception_response($exception->getMessage());
         }
     }
 

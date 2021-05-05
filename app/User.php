@@ -55,7 +55,22 @@ class User extends Authenticatable implements Wallet, WalletFloat
     public function accessToken(){
         return $this->hasMany('App\OauthAccessToken');
     }
-
+    
+    /*public static function boot() {
+        parent::boot();
+        self::deleting(function($user) { // before delete() method call this
+             $user->appointments()->each(function($photo) {
+                $photo->delete(); // <-- direct deletion
+             });
+            if($user->doctorService()){
+             $user->doctorService()->each(function($post) {
+                $post->delete(); // <-- raise another deleting event on Post to delete comments
+             });
+            }
+             // do the rest of the cleanup...
+        });
+    }*/
+    
     public function doctorProfile($id = NULL,$mobile = NULL){
         if(isset($mobile) && ($mobile==1)){
             //$service = count($this->doctorService()->get())>0 ? $this->doctorService()->get()->toArray() : (object)[];

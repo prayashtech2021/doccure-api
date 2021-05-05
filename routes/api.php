@@ -50,7 +50,7 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
     Route::get('auth-common-page','Api\HomeController@getCommonData');
     Route::post('changepassword', 'Api\HomeController@changePassword');
     Route::post('reset-password', 'Api\HomeController@resetPassword');
-    Route::get('user/delete/{id}', 'Api\HomeController@destroy');
+    Route::get('user/delete/{id}/{type?}', 'Api\HomeController@destroy');
     Route::post('upload/profile-image', 'Api\HomeController@uploadProfileImage');
     /* Admin Profile */
     Route::get('admin/profile/{id}', 'Api\HomeController@adminProfile');
@@ -174,6 +174,10 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
     Route::post('sub-category/save', 'Api\PostSubCategoryController@save');
     Route::get('sub-category/list', 'Api\PostSubCategoryController@getList');
     Route::get('sub-category/delete/{id}', 'Api\PostSubCategoryController@destroy');
+
+    /*Banner */
+    Route::post('banner/save','Api\PageContentController@saveBanner');
+    Route::get('banner/list','Api\PageContentController@getBannerList');
 });
 
 Route::any('{path}', function () {

@@ -29,6 +29,7 @@ class DatabaseSeeder extends Seeder
         $this->call(EmailTemplateSeeder::class);
         $this->call(PostSeeder::class);
         $this->call(FeatureSeeder::class);
+        $this->call(BannerSeeder::class);
     }
 
 }

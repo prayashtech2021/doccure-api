@@ -70,30 +70,6 @@ class PageContentSeeder extends Seeder
                 'content' => '',
                 'image' => '20210315125434_login.png',
             ],
-            8 => [
-                'page_master_id' => 2,
-                'slug' => 'looking_for_banner_1',
-                'title' => 'Visit a Doctor',
-                'sub_title' => 'Book Now',
-                'content' => config('custom.frontend_url').'doctor/search-doctor',
-                'image' => 'looking_for_1.jpg',
-            ],
-            9 => [
-                'page_master_id' => 2,
-                'slug' => 'looking_for_banner_2',
-                'title' => 'Find a Pharmacy',
-                'sub_title' => 'Coming Soon',
-                'content' => config('custom.frontend_url').'home',
-                'image' => 'looking_for_2.jpg',
-            ],
-            10 => [
-                'page_master_id' => 2,
-                'slug' => 'looking_for_banner_3',
-                'title' => 'Find a Lab',
-                'sub_title' => 'Coming Soon',
-                'content' => config('custom.frontend_url').'home',
-                'image' => 'looking_for_3.jpg',
-            ],
             
         ];
             foreach ($datas as $id => $data) {
