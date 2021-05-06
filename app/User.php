@@ -56,20 +56,88 @@ class User extends Authenticatable implements Wallet, WalletFloat
         return $this->hasMany('App\OauthAccessToken');
     }
     
-    /*public static function boot() {
+    public static function boot() {
         parent::boot();
         self::deleting(function($user) { // before delete() method call this
-             $user->appointments()->each(function($photo) {
-                $photo->delete(); // <-- direct deletion
-             });
+           
+            $user->accountDetails()->each(function($account) {
+                $account->delete(); // <-- direct deletion
+            }); 
+            $user->homeAddress()->each(function($home) {
+                $home->delete(); // <-- direct deletion
+            });
+            $user->clinicAddress()->each(function($clinic) {
+                $clinic->delete(); // <-- direct deletion
+            });
+            $user->addressImage()->each(function($image) {
+                $image->delete(); // <-- direct deletion
+            });
+            $user->appointments()->each(function($appointment) {
+                $appointment->delete(); // <-- direct deletion
+                AppointmentLog::where('appointment_id',$appointment->id)->delete();
+                CallLog::where('appointment_id',$appointment->id)->delete();
+                Prescription::where('appointment_id',$appointment->id)->delete();
+                MedicalRecord::where('appointment_id',$appointment->id)->delete();
+                Payment::where('appointment_id',$appointment->id)->delete();
+                Review::where('appointment_id',$appointment->id)->delete();
+
+            });
+            $user->providerAppointments()->each(function($provider_appointment) {
+                $provider_appointment->delete(); // <-- direct deletion
+                AppointmentLog::where('appointment_id',$provider_appointment->id)->delete();
+                CallLog::where('appointment_id',$provider_appointment->id)->delete();
+                Prescription::where('appointment_id',$appointment->id)->delete();
+                MedicalRecord::where('appointment_id',$appointment->id)->delete();
+                Payment::where('appointment_id',$appointment->id)->delete();
+                Review::where('appointment_id',$appointment->id)->delete();
+
+            });
+            
             if($user->doctorService()){
              $user->doctorService()->each(function($post) {
                 $post->delete(); // <-- raise another deleting event on Post to delete comments
              });
             }
+            $user->doctorAwards()->each(function($award) {
+                $award->delete(); // <-- raise another deleting event on Post to delete comments
+             });
+             
+            $user->chats()->each(function($chat) {
+                $chat->delete(); // <-- raise another deleting event on Post to delete comments
+            });
+            $user->chat_inbox()->each(function($chat_inbox) {
+                $chat_inbox->delete(); // <-- raise another deleting event on Post to delete comments
+            });
+            $user->doctorEducation()->each(function($edu) {
+                $edu->delete(); // <-- raise another deleting event on Post to delete comments
+            });
+            $user->doctorExperience()->each(function($exp) {
+                $exp->delete(); // <-- raise another deleting event on Post to delete comments
+            });
+            $user->doctorMembership()->each(function($member) {
+                $member->delete(); // <-- raise another deleting event on Post to delete comments
+            });
+            
+            PostComment::where('user_id',$user->id)->delete();
+            
+            $user->doctorRegistration()->each(function($reg) {
+                $reg->delete(); // <-- raise another deleting event on Post to delete comments
+            });
+
+            ScheduleTiming::where('provider_id',$user->id)->delete();
+            Signature::where('user_id',$user->id)->delete();
+            SocialMedia::where('provider_id',$user->id)->delete();
+            //$user->userFav()->detach($user->id);
+            $user->doctorSpecialization()->each(function($spl) {
+                $spl->delete(); // <-- raise another deleting event on Post to delete comments
+            });
+            $user->paymentRequest()->each(function($req) {
+                $req->delete(); // <-- raise another deleting event on Post to delete comments
+            });
+            
              // do the rest of the cleanup...
         });
-    }*/
+    }
     
     public function doctorProfile($id = NULL,$mobile = NULL){
         if(isset($mobile) && ($mobile==1)){
@@ -297,6 +365,10 @@ class User extends Authenticatable implements Wallet, WalletFloat
     public function getOfficeAddressAttribute(){
         $add =  Address::with('country','state','city','addressImage')->whereNotNull('name')->where('user_id',$this->id)->first();
         return $add ? $add : (object)[];
+    }
+
+    public function addressImage() { 
+        return $this->hasMany('App\AddressImage', 'user_id');
     }
 
     public function getUserImageAttribute() { 

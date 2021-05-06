@@ -411,15 +411,16 @@ class HomeController extends Controller
         }
     }
 
-    public function destroy($id,$type){
-        if(isset($type)){
-            $data = User::find($id);
-            $data->forceDelete();
+    public function destroy($id,$type=NULL){
+        if(isset($type) && $type == 1){
+            echo $type;
+            $user = User::withTrashed()->find($id);
+            $user->forcedelete();
 			$msg='Record Deleted successfully!';
             return self::send_success_response([],$msg);
+        }else{
+           return self::customDelete('\App\User', $id);
         }
-        return self::customDelete('\App\User', $id);
-        
     }
 
     public function adminDashboard(Request $request){

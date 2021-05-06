@@ -29,8 +29,8 @@ class PageContentController extends Controller
                     } 
                     $update = PageContent::where('slug',$data['slug'])->update([
                         'title'=> ($data['title'])? $data['title'] : '', 
-                        'sub_title' => ($data['sub_title'])? $data['sub_title'] : '', 
-                        'content' => ($data['content'])? $data['content'] : '', 
+                        'sub_title' => isset($data['sub_title'])? $data['sub_title'] : '', 
+                        'content' => isset($data['content'])? $data['content'] : '', 
                         ]);
                 } //foreach
             } 
@@ -186,14 +186,12 @@ class PageContentController extends Controller
                 'name' => 'required|unique:banners,name,' . $request->banner_id,
                 'button_name' => 'required',
                 'link' => 'nullable',
-                'image' => 'required|image|mimes:jpeg,png,jpg',
             );
         } else {
             $rules = array(
                 'name' => 'required|unique:banners',
                 'button_name' => 'required',
                 'link' => 'nullable',
-                'image' => 'required|image|mimes:jpeg,png,jpg',
             );
         }
         $valid = self::customValidation($request, $rules);
@@ -218,12 +216,13 @@ class PageContentController extends Controller
             $banner->link = $request->link;
             $banner->save();
 
-            if(!empty($banner->image)){
-                if (Storage::exists('images/cms-images/' . $banner->image)) {
-                    Storage::delete('images/cms-images/' . $banner->image);
-                }
-            }
+            
             if (!empty($request->image)) {
+                if(!empty($banner->image)){
+                    if (Storage::exists('images/cms-images/' . $banner->image)) {
+                        Storage::delete('images/cms-images/' . $banner->image);
+                    }
+                }
                 $extension = $request->file('image')->getClientOriginalExtension();
                 $file_name = date('YmdHis') . '_' . auth()->user()->id . '.png';
                 $path = 'images/cms-images';
