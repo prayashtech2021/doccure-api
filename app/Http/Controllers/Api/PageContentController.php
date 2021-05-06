@@ -101,7 +101,7 @@ class PageContentController extends Controller
         
             $getSettings = PageContent::get();
             
-            $banner = Banner::orderBy('id', 'desc');
+            $banner = Banner::orderBy('id', 'asc');
                 
             $banner_list = collect();
             $banner->each(function ($banner) use (&$banner_list) {

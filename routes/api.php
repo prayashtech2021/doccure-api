@@ -177,7 +177,6 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
 
     /*Banner */
     Route::post('banner/save','Api\PageContentController@saveBanner');
-    Route::get('banner/list','Api\PageContentController@getBannerList');
 });
 
 Route::any('{path}', function () {
