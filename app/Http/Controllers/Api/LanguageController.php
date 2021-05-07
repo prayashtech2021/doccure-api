@@ -198,7 +198,7 @@ class LanguageController extends Controller
         if($valid){ return $valid;}
 
         try {
-            $page = PageMaster::get();
+            $page = PageMaster::where('type',1)->get();
         
             foreach($page as $value){
                 $array[$value->name] = getLangContent($value->id,$request->language_id);

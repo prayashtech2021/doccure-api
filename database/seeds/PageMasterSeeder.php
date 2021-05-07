@@ -125,7 +125,92 @@ class PageMasterSeeder extends Seeder
             ],
             37 => [
                 'name' => 'call'
-            ]
+            ],
+            38 => [
+                'name' => 'appointmentspage',
+                'type' => 1,
+            ],
+            39 => [
+                'name' => 'callpage',
+                'type' => 1,
+            ],
+            40 => [
+                'name' => 'changepasswordpage',
+                'type' => 1,
+            ],
+            41 => [
+                'name' => 'chatpage',
+                'type' => 1,
+            ],
+            42 => [
+                'name' => 'checkoutpage',
+                'type' => 1,
+            ],
+            43 => [
+                'name' => 'commonlyusedtexts',
+                'type' => 1,
+            ],
+            44 => [
+                'name' => 'doctordashboardpage',
+                'type' => 1,
+            ],
+            45 => [
+                'name' => 'doctorprofilepage',
+                'type' => 1,
+            ],
+            46 => [
+                'name' => 'forgotpasswordpage',
+                'type' => 1,
+            ],
+            47 => [
+                'name' => 'homepage',
+                'type' => 1,
+            ],
+            48 => [
+                'name' => 'login',
+                'type' => 1,
+            ],
+            49 => [
+                'name' => 'navigationpage',
+                'type' => 1,
+            ],
+            50 => [
+                'name' => 'navigationpagedoctor',
+                'type' => 1,
+            ],
+            51 => [
+                'name' => 'navigationpagepatient',
+                'type' => 1,
+            ],
+            52 => [
+                'name' => 'patientdashboard',
+                'type' => 1,
+            ],
+            53 => [
+                'name' => 'prescriptionpage',
+                'type' => 1,
+            ],
+            54 => [
+                'name' => 'profilesettingspage',
+                'type' => 1,
+            ],
+            55 => [
+                'name' => 'rate_and_review_page',
+                'type' => 1,
+            ],
+            56 => [
+                'name' => 'registerpage',
+                'type' => 1,
+            ],
+            57 => [
+                'name' => 'scheduletimingspage',
+                'type' => 1,
+            ],
+            58 => [
+                'name' => 'searchdoctorpage',
+                'type' => 1,
+            ],
+
         ];
             foreach ($datas as $id => $data) {
                 $row = PageMaster::firstOrNew([
