@@ -246,3 +246,36 @@ function convertNullsAsEmpty($response_array) {
 
     return $response_array;
 }
+
+function sendFCMNotification($data){
+
+        $SERVER_API_KEY = 'AAAAWLRdl-c:APA91bExMBuh-Bin9L2AZbfT7DqpyoPQWidaUTYWs0UpGRVBwd3d0BIm0miBP7KH1Png_9v9goJRCW84a4ZJ-I0rLyoAyWq58JY-b5sB5bDEXPkjP7ol17cqwQklQPU4JdVITreI_IMn';
+        
+        $data['additional_data']['body']=$data['message'];
+        $data['additional_data']['title']=$data['notifications_title'];
+        
+        $data = [
+            "registration_ids" => array($data['device_id']),
+            "data" => $data['additional_data'],
+        ];
+
+        $dataString = json_encode($data);
+    
+        $headers = [
+            'Authorization: key=' . $SERVER_API_KEY,
+            'Content-Type: application/json',
+        ];
+    
+        $ch = curl_init();
+      
+        curl_setopt($ch, CURLOPT_URL, 'https://fcm.googleapis.com/fcm/send');
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $dataString);
+               
+        $response = curl_exec($ch);
+  
+        dd($response);
+}

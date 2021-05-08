@@ -388,14 +388,14 @@ class PatientController extends Controller
 
     public function mobileDashboard(Request $request){
         try {
-            $user = auth()->user();
-            $user_id = auth()->user()->id;
-            if($user_id && auth()->user()->hasrole('patient')){
+            $user = User::Find($request->user_id);
+            $user_id = $request->user_id;
+            if($user_id && $user){
                 
                 $appointment = Appointment::where('user_id',$user_id)->count();
                 $prescription = Prescription::where('user_id',$user_id)->count();
                 $medical_record = MedicalRecord::where('consumer_id',$user_id)->count();
-                $invoice = auth()->user()->payment()->count();
+                $invoice = $user->payment()->count();
                 
                 $result = [ 
                     'profile' => auth()->user()->toArray(),

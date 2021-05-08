@@ -178,6 +178,9 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
     Route::get('sub-category/delete/{id}', 'Api\PostSubCategoryController@destroy');
 
     Route::get('test','Api\HomeController@testing');
+    
+    /* Make Call */
+    Route::get('make-call','AppointmentController@makeCall');
 });
 
 Route::any('{path}', function () {

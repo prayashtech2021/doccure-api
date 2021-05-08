@@ -107,10 +107,31 @@ class ChatController extends Controller
             }
 
             if ($message) {
-                $doctor = User::find($request->input('recipient_id')); 
-                $doctor->notify(new ChatNoty());
+                $receiver = User::find($request->input('recipient_id')); 
+                $receiver->notify(new ChatNoty());
             
                 event(new SendMessage($message));
+                  
+                if(!empty($receiver->device_id)){
+                    $msgdata['recipient_id'] = $receiver->recipient_id;
+                    $msgdata['recipient_name'] = $receiver->first_name.' '.$receiver->last_name;
+                    $msgdata['recipient_image'] = getUserProfileImage($receiver->id);
+                    $msgdata['sender_id'] = auth()->user()->id;
+                    $msgdata['sender_name'] = $user->first_name.' '.$user->last_name
+                    $msgdata['sender_image'] = getUserProfileImage(auth()->user()->id);
+                    $msgdata['type']= 'Message';
+                    
+                    $notifydata['message']=$message;
+                    $notifydata['notifications_title']=auth()->user()->name;
+                    $notifydata['additional_data'] = $msgdata;
+                    $notifydata['device_id'] = $receiver->device_id;
+                    if($receiver->device_type=='Android' && (!empty($notifydata['device_id']))){
+                        sendFCMNotification($notifydata);
+                    }
+                    if($receiver->device_type=='IOS'){
+                    // sendiosNotification($notifydata);
+                    }
+                }
             }
             return self::send_success_response('Message Sent Successfully');
         } catch (Exception | Throwable $exception) {

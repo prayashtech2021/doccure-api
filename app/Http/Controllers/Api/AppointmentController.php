@@ -266,16 +266,17 @@ class AppointmentController extends Controller
             //$doctor = User::find($request->doctor_id); 
             $doctor->notify(new AppointmentNoty($appointment));
             
-            /* Mail */
-            $template = EmailTemplate::where('slug','book_appointment')->first();
-            if($template){
-                $body = ($template->content); // this is template dynamic body. You may get other parameters too from database.
-                
                 $name = $doctor->first_name.' '.$doctor->last_name;
                 $app_date = Carbon::parse($appointment->appointment_date)->format('d/m/Y');
                 $start_time = Carbon::parse($request->start_time)->format('h:i A');
                 $end_time = Carbon::parse($request->end_time)->format('h:i A');
                 $reference = $appointment->appointment_reference;
+                
+            /* Mail */
+            $template = EmailTemplate::where('slug','book_appointment')->first();
+            if($template){
+                $body = ($template->content); // this is template dynamic body. You may get other parameters too from database.
+                
                 $a1 = array('{{username}}','{{doctor}}','{{app_date}}','{{start_time}}','{{end_time}}','{{reference}}','{{config_app_name}}','{{custom_support_phone}}','{{custom_support_email}}');
                 $a2 = array($user->first_name,$name,$app_date,$start_time,$end_time,$reference,config('app.name'),config('custom.support_phone'),config('custom.support_email'));
 
@@ -289,7 +290,30 @@ class AppointmentController extends Controller
                 $mailObject = new SendInvitation($mail); // you can make php artisan make:mail MyMail
                 Mail::to($user->email)->send($mailObject);
             }
+            /* MOBILE NOTY */
+              
+                $notifydata['device_id'] = $doctor->doctor_device_id;
 
+                $device_type = $doctor->doctor_device_type;
+
+                $nresponse['from_name']=auth()->user()->first_name.' '.auth()->user()->last_name;
+
+                $message = $nresponse['from_name'].' has booked an appointment on '.$app_date.' at '.$start_time.' to '.$end_time.' reference #' . $reference . '!';
+
+              $notifydata['message']=$message;
+              $notifydata['notifications_title']='';
+              $nresponse['type']='Booking';
+              $notifydata['additional_data'] = $nresponse;
+              if($device_type=='Android' && (!empty($notifydata['device_id'])))
+              {
+                sendFCMNotification($notifydata);
+              }
+              if($device_type=='IOS')
+              {
+               // sendiosNotification($notifydata);
+              }
+              
+              
             /**
              * Payment
              */
@@ -1044,5 +1068,71 @@ class AppointmentController extends Controller
         } catch (Exception | Throwable $exception) {
             return self::send_exception_response($exception->getMessage());
         }
+    }
+
+    public function makeCall(Request $request){
+        $rules = array(
+            'appoinment_id' => 'required|exists:appoinments,id',
+        );
+        $valid = self::customValidation($request, $rules);
+        if ($valid) {return $valid;}
+
+        try {
+            $user = auth()->user();
+        
+
+       // if(!empty($user_data['appoinment_id']) && !empty($user_data['call_type']) )
+            $appoinments_details = Appointment::Find($request->appointment_id);
+            
+            $patient = User::Find($appoinments_details->user_id);
+            $doctor = User::Find($appoinments_details->doctor_id);
+
+            $msgdata['patient_id'] = $patient->id;
+            $msgdata['patient_name'] = $patient->first_name.' '.$patient->last_name;
+            $msgdata['patient_image'] = getUserProfileImage($patient->id);
+            $msgdata['doctor_id'] = $doctor->id;
+            $msgdata['doctor_name'] = $doctor->first_name.' '.$doctor->last_name
+            $msgdata['doctor_image'] = getUserProfileImage($doctor->id);
+            
+
+            if ($user->hasRole('doctor')) {
+
+                    $notifydata['device_id'] = $patient->device_id;
+                    $device_type = $patient->device_type;
+                    $notifydata['message']='Incoming call from '.$doctor->first_name.' '.$doctor->last_name;
+
+            }else($user->hasRole('patient')) {
+
+                    $notifydata['device_id'] = $doctor->device_id;
+                    $device_type = $doctor->device_type;
+                    $notifydata['message']='Incoming call from '.$patient->first_name.' '.$patient->last_name;
+            }
+                  $response['appoinment_id'] = $request->appoinment_id;
+                  $response['type'] = $request->call_type;
+
+                  $response['tokbox'] = Setting::select('keyword','value')->where('slug','tokbox')->get();
+
+                  //$response['sessionId'] = $appoinments_details['tokboxsessionId'];
+                  //$response['token'] = $appoinments_details['tokboxtoken'];
+                  //$response['tokbox_apiKey'] =$this->tokbox_apiKey;
+                  //$response['tokbox_apiSecret'] =$this->tokbox_apiSecret;
+                  $notifydata['notifications_title']='Incoming call';
+                  $notifydata['additional_data'] = $response;
+
+
+                  if($device_type=='Android' && (!empty($notifydata['device_id'])))
+                  {
+                    sendFCMNotification($notifydata);
+                  }
+                  if($device_type=='IOS')
+                  {
+                   // sendiosNotification($notifydata);
+                  }
+                  //$this->call_details($response['invite_id'],$response['from_user_id'],$response['to'],$user_data['call_type']);
+                  $result = $this->data_format($response_code,$response_message,$response);
+                return self::send_success_response($response,'Make Call');
+            } catch (Exception | Throwable $exception) {
+                return self::send_exception_response($exception->getMessage());
+            }
     }
 }
