@@ -87,6 +87,7 @@ class ChatController extends Controller
         if ($valid) {return $valid;}
 
         try {
+            $msgdata = [];
             $user = auth()->user();
             updateLastSeen(auth()->user());
             if (!empty($request->attachments)) {    //only attachments
@@ -113,14 +114,15 @@ class ChatController extends Controller
                 event(new SendMessage($message));
                   
                 if(!empty($receiver->device_id)){
+                    
                     $msgdata['recipient_id'] = $receiver->recipient_id;
                     $msgdata['recipient_name'] = $receiver->first_name.' '.$receiver->last_name;
                     $msgdata['recipient_image'] = getUserProfileImage($receiver->id);
                     $msgdata['sender_id'] = auth()->user()->id;
-                    $msgdata['sender_name'] = $user->first_name.' '.$user->last_name
+                    $msgdata['sender_name'] = $user->first_name.' '.$user->last_name;
                     $msgdata['sender_image'] = getUserProfileImage(auth()->user()->id);
                     $msgdata['type']= 'Message';
-                    
+
                     $notifydata['message']=$message;
                     $notifydata['notifications_title']=auth()->user()->name;
                     $notifydata['additional_data'] = $msgdata;
@@ -133,7 +135,7 @@ class ChatController extends Controller
                     }
                 }
             }
-            return self::send_success_response('Message Sent Successfully');
+            return self::send_success_response([],'Message Sent Successfully');
         } catch (Exception | Throwable $exception) {
             return self::send_exception_response($exception->getMessage());
         }

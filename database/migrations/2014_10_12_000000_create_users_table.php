@@ -35,6 +35,8 @@ class CreateUsersTable extends Migration
             $table->char('currency_code',4)->nullable();
             $table->unsignedInteger('time_zone_id')->nullable();
             $table->unsignedTinyInteger('status')->default(0)->comment('1=>speciality updated,0=>not updated');
+            $table->text('device_id')->nullable();
+            $table->string('device_type')->nullable();
             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
 			$table->timestamp('updated_at')->nullable();
             $table->softDeletes();

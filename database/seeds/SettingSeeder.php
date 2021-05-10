@@ -272,7 +272,25 @@ class SettingSeeder extends Seeder
                 'value' => 'Doccure',
                 'created_by' => 1,
             ],
-		];
+            44 => [
+                'slug' => 'push_notification',
+                'keyword' => 'firebase_api_key',
+                'value' => '',
+                'created_by' => 1,
+            ],
+            45 => [
+                'slug' => 'push_notification',
+                'keyword' => 'apns_pem_file',
+                'value' => '',
+                'created_by' => 1,
+            ],
+            46 => [
+                'slug' => 'push_notification',
+                'keyword' => 'apns_password',
+                'value' => '',
+                'created_by' => 1,
+            ],
+        ];
 		foreach ($datas as $id => $data) {
 			$row = Setting::firstOrNew([
 				'id' => $id,

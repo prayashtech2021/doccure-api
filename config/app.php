@@ -180,6 +180,7 @@ return [
         Intervention\Image\ImageServiceProvider::class,
         App\Providers\MailConfigServiceProvider::class,
 
+
     ],
 
     /*

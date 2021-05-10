@@ -967,7 +967,7 @@ class MultiLanguageSeeder extends Seeder
                 'page_master_id' => 5,
                 'language_id' => 1,
                 'keyword' => 'logged_successfully',
-                'value' => "Logged Successfully" ,
+                'value' => "Logged In Successfully" ,
                 'created_by' => 1,
             ],160 => [
                 'page_master_id' => 5,
@@ -978,8 +978,8 @@ class MultiLanguageSeeder extends Seeder
             ],161 => [
                 'page_master_id' => 5,
                 'language_id' => 1,
-                'keyword' => 'logged_successfully',
-                'value' => "Logged Successfully" ,
+                'keyword' => 'logged_out_successfully',
+                'value' => "Logged Out Successfully" ,
                 'created_by' => 1,
             ],162 => [
                 'page_master_id' => 5,
@@ -6481,6 +6481,13 @@ class MultiLanguageSeeder extends Seeder
                 'page_master_id' => 58,
                 'keyword' => 'btn_clear',
                 'value' => 'Clear',
+                'created_by' => 1, 
+                'language_id' => 1,
+            ],
+            1030 =>[
+                'page_master_id' => 26,
+                'keyword' => 'appointment_date',
+                'value' => 'Appointment Date',
                 'created_by' => 1, 
                 'language_id' => 1,
             ],

@@ -31,7 +31,7 @@ class HomeController extends Controller
                 'last_name'  => 'required|string|max:191',
                 'email' => 'required|email|unique:users',
                 'country_id' => 'required|integer',
-                'mobile_number' => 'required|min:7|max:15|unique:users',
+                'mobile_number' => 'required|numeric|min:7|max:15|unique:users',
                 'password' => 'required|confirmed|min:6|string',
                 'type' => 'required|integer',
             ]);

@@ -390,7 +390,7 @@ class AppointmentController extends Controller
                     // $payment->transaction_charge = $stripeCharge->fee_details[0]->amount / 100;
                     $payment->save();
                     DB::commit();
-                    return self::send_success_response($appointment->getData());
+                    return self::send_success_response($appointment->getData(),'Appointment has been scheduled.');
 
                 } else {
                     DB::rollBack();
@@ -400,7 +400,7 @@ class AppointmentController extends Controller
 
             DB::commit();
 
-            return self::send_success_response($appointment->getData(),'Appointment has been scheduled');
+            return self::send_success_response($appointment->getData(),'Appointment has been scheduled.');
 
         } catch (Exception | Throwable $exception) {
             return self::send_exception_response($exception->getMessage());
@@ -1072,7 +1072,8 @@ class AppointmentController extends Controller
 
     public function makeCall(Request $request){
         $rules = array(
-            'appoinment_id' => 'required|exists:appoinments,id',
+            'appointment_id' => 'required|exists:appointments,id',
+            'call_type' => 'required'
         );
         $valid = self::customValidation($request, $rules);
         if ($valid) {return $valid;}
@@ -1086,13 +1087,13 @@ class AppointmentController extends Controller
             
             $patient = User::Find($appoinments_details->user_id);
             $doctor = User::Find($appoinments_details->doctor_id);
-
-            $msgdata['patient_id'] = $patient->id;
-            $msgdata['patient_name'] = $patient->first_name.' '.$patient->last_name;
-            $msgdata['patient_image'] = getUserProfileImage($patient->id);
-            $msgdata['doctor_id'] = $doctor->id;
-            $msgdata['doctor_name'] = $doctor->first_name.' '.$doctor->last_name
-            $msgdata['doctor_image'] = getUserProfileImage($doctor->id);
+            $response=array();
+            $response['patient_id'] = $patient->id;
+            $response['patient_name'] = $patient->first_name.' '.$patient->last_name;
+            $response['patient_image'] = getUserProfileImage($patient->id);
+            $response['doctor_id'] = $doctor->id;
+            $response['doctor_name'] = $doctor->first_name.' '.$doctor->last_name;
+            $response['doctor_image'] = getUserProfileImage($doctor->id);
             
 
             if ($user->hasRole('doctor')) {
@@ -1101,13 +1102,15 @@ class AppointmentController extends Controller
                     $device_type = $patient->device_type;
                     $notifydata['message']='Incoming call from '.$doctor->first_name.' '.$doctor->last_name;
 
-            }else($user->hasRole('patient')) {
+            }
+            
+            if($user->hasRole('patient')) {
 
                     $notifydata['device_id'] = $doctor->device_id;
                     $device_type = $doctor->device_type;
                     $notifydata['message']='Incoming call from '.$patient->first_name.' '.$patient->last_name;
             }
-                  $response['appoinment_id'] = $request->appoinment_id;
+                  $response['appoinment_id'] = $request->appointment_id;
                   $response['type'] = $request->call_type;
 
                   $response['tokbox'] = Setting::select('keyword','value')->where('slug','tokbox')->get();
@@ -1129,7 +1132,7 @@ class AppointmentController extends Controller
                    // sendiosNotification($notifydata);
                   }
                   //$this->call_details($response['invite_id'],$response['from_user_id'],$response['to'],$user_data['call_type']);
-                  $result = $this->data_format($response_code,$response_message,$response);
+                  //$result = $this->data_format($response_code,$response_message,$response);
                 return self::send_success_response($response,'Make Call');
             } catch (Exception | Throwable $exception) {
                 return self::send_exception_response($exception->getMessage());
