@@ -22,6 +22,7 @@ class PassportController extends Controller {
 			'password' => 'required',
 			'type' => 'required|in:0,1', //1=>admin login
 		]);
+		
 		if ($validator->fails()) {
             return self::send_bad_request_response($validator->errors()->first());
 		}
@@ -49,6 +50,14 @@ class PassportController extends Controller {
 			// 	}
 			// }
 			$user->last_seen_time=Carbon::now();
+			if($request->route()->getName() == 'MobileLogin'){
+				if($request->device_id && $request->device_type){
+					$user->device_id = $request->device_id;
+					$user->device_type = $request->device_type;
+				}else{
+					return self::send_bad_request_response('Device Id and Device Type are required');
+				}
+			}
 			$user->save();
 			$token = auth()->user()->createToken('APIAUTH')->accessToken;
 			$tmp = $user->roles()->select('id', 'name')->get()->toArray();
