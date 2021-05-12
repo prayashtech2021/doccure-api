@@ -994,6 +994,9 @@ class AppointmentController extends Controller
             'start_time' => 'required|date_format:"Y-m-d H:i:s"',
             'type' => 'required|in:1,2',
         );
+        if($request->route()->getName() == "saveCallLog"){
+            $rules['call_type'] = 'required';
+        }
         $valid = self::customValidation($request, $rules);
         if ($valid) {return $valid;}
 
@@ -1017,9 +1020,52 @@ class AppointmentController extends Controller
             // $consumer->notify(new AppointmentNoty($app));
             // $provider = User::find($app->doctor_id); 
             // $provider->notify(new AppointmentNoty($app));
+            }    
 
-            }     
-            return self::send_success_response($log,'Log Saved Successfully');
+            if($request->route()->getName() == "saveCallLog"){
+                $appoinments_details = Appointment::Find($request->appointment_id);
+            
+                $patient = User::Find($appoinments_details->user_id);
+                $doctor = User::Find($appoinments_details->doctor_id);
+                $response=array();
+                $response['patient_id'] = $patient->id;
+                $response['patient_name'] = $patient->first_name.' '.$patient->last_name;
+                $response['patient_image'] = getUserProfileImage($patient->id);
+                $response['doctor_id'] = $doctor->id;
+                $response['doctor_name'] = $doctor->first_name.' '.$doctor->last_name;
+                $response['doctor_image'] = getUserProfileImage($doctor->id);    
+
+                if ($user->hasRole('doctor')) {
+                    $notifydata['device_id'] = $patient->device_id;
+                    $device_type = $patient->device_type;
+                    $notifydata['message']='Incoming call from '.$doctor->first_name.' '.$doctor->last_name;
+                }
+                
+                if($user->hasRole('patient')) {
+                    $notifydata['device_id'] = $doctor->device_id;
+                    $device_type = $doctor->device_type;
+                    $notifydata['message']='Incoming call from '.$patient->first_name.' '.$patient->last_name;
+                }
+                  $response['appoinment_id'] = $request->appointment_id;
+                  $response['type'] = $request->call_type;
+
+                  $response['tokbox'] = Setting::select('keyword','value')->where('slug','tokbox')->get();
+                  $response['call_log'] = $log;
+                  $notifydata['notifications_title']='Incoming call';
+                  $notifydata['additional_data'] = $response;
+
+                  if($device_type=='Android' && (!empty($notifydata['device_id'])))
+                  {
+                    sendFCMNotification($notifydata);
+                  }
+                  if($device_type=='IOS')
+                  {
+                   // sendiosNotification($notifydata);
+                  }
+                  return self::send_success_response($response,'Log Saved Successfully');
+            }else{
+                return self::send_success_response($log,'Log Saved Successfully');
+            }
         } catch (Exception | Throwable $exception) {
             DB::rollBack();
             return self::send_exception_response($exception->getMessage());
@@ -1081,8 +1127,6 @@ class AppointmentController extends Controller
         try {
             $user = auth()->user();
         
-
-       // if(!empty($user_data['appoinment_id']) && !empty($user_data['call_type']) )
             $appoinments_details = Appointment::Find($request->appointment_id);
             
             $patient = User::Find($appoinments_details->user_id);
