@@ -248,18 +248,21 @@ function convertNullsAsEmpty($response_array) {
 }
 
 function sendFCMNotification($data){
+    
+    $key = Setting::whereIn('slug','push_notification')->where('keyword','firebase_api_key')->pluck('value');
+    if($key){
 
-        $SERVER_API_KEY = 'AAAAWLRdl-c:APA91bExMBuh-Bin9L2AZbfT7DqpyoPQWidaUTYWs0UpGRVBwd3d0BIm0miBP7KH1Png_9v9goJRCW84a4ZJ-I0rLyoAyWq58JY-b5sB5bDEXPkjP7ol17cqwQklQPU4JdVITreI_IMn';
+        $SERVER_API_KEY = $key[0];
         
         $data['additional_data']['body']=$data['message'];
         $data['additional_data']['title']=$data['notifications_title'];
         
-        $data = [
+        $result = [
             "registration_ids" => array($data['device_id']),
             "data" => $data['additional_data'],
         ];
 
-        $dataString = json_encode($data);
+        $dataString = json_encode($result);
     
         $headers = [
             'Authorization: key=' . $SERVER_API_KEY,
@@ -278,4 +281,5 @@ function sendFCMNotification($data){
         $response = curl_exec($ch);
   
         //dd($response);
+    }
 }
