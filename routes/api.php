@@ -177,6 +177,8 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
 
     /*Banner */
     Route::post('banner/save','Api\PageContentController@saveBanner');
+    Route::get('Pagetype','Api\LanguageController@getMobilePage');
+
 });
 
 Route::any('{path}', function () {

@@ -210,4 +210,20 @@ class LanguageController extends Controller
             return self::send_exception_response($exception->getMessage());
         }
     }
+
+    public function getMobilePage(Request $request){
+        $rules = [
+            'type' => 'required|in:0,1',
+        ];
+
+        $valid = self::customValidation($request, $rules);
+        if($valid){ return $valid;}
+
+        try {
+            $page = PageMaster::where('type',$request->type)->get();
+            return self::send_success_response($page,'List Fetched Successfully');
+        } catch (Exception | Throwable $exception) {
+            return self::send_exception_response($exception->getMessage());
+        }
+    }
 }

@@ -180,7 +180,8 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
     Route::get('test','Api\HomeController@testing');
     
     /* Make Call */
-    Route::get('make-call','api\AppointmentController@makeCall');
+    Route::get('make-call','Api\AppointmentController@makeCall');
+    Route::get('Pagetype','Api\LanguageController@getMobilePage');
 });
 
 Route::any('{path}', function () {
