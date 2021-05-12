@@ -65,7 +65,7 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
 
     //appointments
     Route::get('appointments/list', 'Api\AppointmentController@list')->name('appointmentList');
-    Route::post('appointments/create', 'Api\AppointmentController@create');
+    Route::post('appointments/create', 'Api\AppointmentController@create')->name('appointmentCreate');
     Route::get('appointments/saved-cards','Api\AppointmentController@savedCards');
     Route::get('schedule/list', 'Api\AppointmentController@scheduleList');
     Route::post('schedule/create', 'Api\AppointmentController@scheduleCreate');
@@ -181,7 +181,7 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
     
     /* Make Call */
     Route::get('make-call','Api\AppointmentController@makeCall');
-    Route::get('Pagetype','Api\LanguageController@getMobilePage');
+    Route::get('pagetype','Api\LanguageController@getMobilePage');
 });
 
 Route::any('{path}', function () {

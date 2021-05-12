@@ -233,7 +233,11 @@ class AppointmentController extends Controller
             $appointment_date = convertToUTC(Carbon::createFromFormat('d/m/Y', $request->appointment_date));
             $chk = Appointment::where(['doctor_id' => $doctor->id, 'appointment_date' => $appointment_date->toDateString(), 'start_time' => $request->start_time, 'end_time' => $request->end_time])->first();
             if ($chk) {
-                return self::send_bad_request_response(['message' => 'Appointment already exists', 'error' => 'Appointment already exists']);
+                if($request->route()->getName() == "appointmentCreate"){
+                    return self::send_bad_request_response('Appointment already exists');
+                }else{
+                    return self::send_bad_request_response(['message' => 'Appointment already exists', 'error' => 'Appointment already exists']);
+                }
             }
 
             $appointment = new Appointment();

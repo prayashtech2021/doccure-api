@@ -398,7 +398,7 @@ class PatientController extends Controller
                 $invoice = $user->payment()->count();
                 
                 $result = [ 
-                    'profile' => auth()->user()->toArray(),
+                    'profile' => $user->toArray(),
                     'appointment' => $appointment, 
                     'prescription' => $prescription,
                     'medical_record' => $medical_record,
