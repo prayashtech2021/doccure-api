@@ -249,7 +249,7 @@ function convertNullsAsEmpty($response_array) {
 
 function sendFCMNotification($data){
     
-    $key = Setting::whereIn('slug','push_notification')->where('keyword','firebase_api_key')->pluck('value');
+    $key = Setting::where('slug','push_notification')->where('keyword','firebase_api_key')->pluck('value');
     if($key){
 
         $SERVER_API_KEY = $key[0];
