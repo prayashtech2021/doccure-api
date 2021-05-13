@@ -219,7 +219,7 @@ class DoctorController extends Controller
                 'first_name' => 'required|string|max:191',
                 'last_name' => 'string|max:191',
                 'country_code_id' => 'required|integer|exists:countries,id',
-                'mobile_number' => 'required|numeric|min:7|max:15|unique:users,mobile_number,' . $request->user_id,
+                'mobile_number' => 'required|min:7|max:15|unique:users,mobile_number,' . $request->user_id,
                 'gender' => 'required|integer|between:1,2',
                 'dob' => 'date',
                 // 'price_type' => 'required|between:1,2',

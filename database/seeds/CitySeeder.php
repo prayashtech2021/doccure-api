@@ -18,9 +18,9 @@ class CitySeeder extends Seeder
             $data = json_decode($json, true);
             // City::insert($data);
             foreach($data as $item){
-                if($item['country_id']==101 && $item['state_id']==4035){
+                //if($item['country_id']==101 && $item['state_id']==4035){
                     City::insert($item);
-                }
+                //}
             }
     }
 }

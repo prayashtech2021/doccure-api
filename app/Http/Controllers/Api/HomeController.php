@@ -76,7 +76,7 @@ class HomeController extends Controller
             }
             $response_array = [
                 "code" => "200",
-                "message" => "Registered Successfully",
+                "message" => "Verification Mail has sent to complete Registration",
             ];
     
             return response()->json(self::convertNullsAsEmpty($response_array), 200);
