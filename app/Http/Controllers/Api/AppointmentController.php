@@ -314,7 +314,7 @@ class AppointmentController extends Controller
               }
               if($device_type=='IOS')
               {
-               // sendiosNotification($notifydata);
+                sendFCMiOSMessage($notifydata);
               }
               
               
@@ -1066,7 +1066,7 @@ class AppointmentController extends Controller
                   }
                   if($device_type=='IOS')
                   {
-                   // sendiosNotification($notifydata);
+                    sendFCMiOSMessage($notifydata);
                   }
                   return self::send_success_response($response,'Log Saved Successfully');
             }else{
@@ -1183,7 +1183,7 @@ class AppointmentController extends Controller
                   }
                   if($device_type=='IOS')
                   {
-                   // sendiosNotification($notifydata);
+                    sendFCMiOSMessage($notifydata);
                   }
                   //$this->call_details($response['invite_id'],$response['from_user_id'],$response['to'],$user_data['call_type']);
                   //$result = $this->data_format($response_code,$response_message,$response);

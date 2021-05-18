@@ -131,7 +131,7 @@ class ChatController extends Controller
                         sendFCMNotification($notifydata);
                     }
                     if($receiver->device_type=='IOS'){
-                    // sendiosNotification($notifydata);
+                     sendFCMiOSMessage($notifydata);
                     }
                 }
             }
