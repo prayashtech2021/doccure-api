@@ -228,7 +228,7 @@ class DoctorController extends Controller
                 'speciality' => 'required',
             );
 
-            if ($request->clinic_name) {
+            if (!empty($request->clinic_name)) {
                 $rules['clinic_address_line1'] = 'required';
             }
 
@@ -267,7 +267,7 @@ class DoctorController extends Controller
                 $contact_details->save();
 
                 /* Doctor Clinic Info */
-                if ($request->clinic_name) {
+                if (!empty($request->clinic_name)) {
                     $get_clinic_details = Address::whereUserId($user_id)->whereNotNull('name')->first();
 
                     if (isset($get_clinic_details)) {
@@ -560,7 +560,7 @@ class DoctorController extends Controller
 
             if ($request->city_name) {
                 $city_name =  $request->city_name;
-                $doctors = $doctors->WhereHas('homeAddress.city', function ($category) use ($city_name) {
+                $doctors = $doctors->whereHas('homeAddress.city', function ($category) use ($city_name) {
                     $category->where('name', $city_name);
                 });
             }
