@@ -634,9 +634,9 @@ class AppointmentController extends Controller
                 $requested_amount = $appointment->payment->total_amount - $appointment->payment->transaction_charge;
                 $user->depositFloat($requested_amount);
 
-                ($appointment->payment->transaction_charge > $appointment->payment->tax_amount) ? $value = $appointment->payment->transaction_charge - $appointment->payment->tax_amount :  $value = $appointment->payment->tax_amount - $appointment->payment->transaction_charge;
-
-                $withdraw_amount = $appointment->payment->total_amount - ($appointment->payment->transaction_charge-$value);
+                //($appointment->payment->transaction_charge > $appointment->payment->tax_amount) ? $value = $appointment->payment->transaction_charge - $appointment->payment->tax_amount :  $value = $appointment->payment->tax_amount - $appointment->payment->transaction_charge;
+                $value = $appointment->payment->transaction_charge + $appointment->payment->tax_amount;
+                $withdraw_amount = $appointment->payment->total_amount - ($value);
                 $doctor = User::find($appointment->doctor_id);
                 $doctor->withdrawFloat($withdraw_amount);
             }
@@ -1113,8 +1113,8 @@ class AppointmentController extends Controller
                     $applog->save();
 
                     $doctor = User::find($app->doctor_id);
-                    ($app->payment->transaction_charge > $app->payment->tax_amount) ? $value = $app->payment->transaction_charge - $app->payment->tax_amount :  $value = $app->payment->tax_amount - $app->payment->transaction_charge;
-                    
+                    //($app->payment->transaction_charge > $app->payment->tax_amount) ? $value = $app->payment->transaction_charge - $app->payment->tax_amount :  $value = $app->payment->tax_amount - $app->payment->transaction_charge;
+                    $value = ($app->payment->transaction_charge + $app->payment->tax_amount);
                     $requested_amount = $app->payment->total_amount - $value;
                     $doctor->depositFloat($requested_amount);
                 }
