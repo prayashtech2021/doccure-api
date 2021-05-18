@@ -182,6 +182,9 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
     /* Make Call */
     Route::get('make-call','Api\AppointmentController@makeCall');
     Route::get('pagetype','Api\LanguageController@getMobilePage');
+
+    Route::post('create_setup_intent', 'Api\AppointmentController@create_setup_intent');
+
 });
 
 Route::any('{path}', function () {

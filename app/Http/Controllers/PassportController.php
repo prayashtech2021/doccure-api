@@ -75,7 +75,7 @@ class PassportController extends Controller {
 			
 			$response_array = [
 				"code" => "200",
-				"message" => "Logged Successfully",
+				"message" => "Logged In Successfully",
 				"token" => $token,
 				"data" => $data,
 			];

@@ -276,7 +276,7 @@ class AppointmentController extends Controller
                 $end_time = Carbon::parse($request->end_time)->format('h:i A');
                 $reference = $appointment->appointment_reference;
                 
-            /* Mail 
+            /* Mail */
             $template = EmailTemplate::where('slug','book_appointment')->first();
             if($template){
                 $body = ($template->content); // this is template dynamic body. You may get other parameters too from database.
@@ -293,7 +293,7 @@ class AppointmentController extends Controller
 
                 $mailObject = new SendInvitation($mail); // you can make php artisan make:mail MyMail
                 Mail::to($user->email)->send($mailObject);
-            }*/
+            }
             /* MOBILE NOTY */
               
                 $notifydata['device_id'] = $doctor->doctor_device_id;
@@ -1191,5 +1191,78 @@ class AppointmentController extends Controller
             } catch (Exception | Throwable $exception) {
                 return self::send_exception_response($exception->getMessage());
             }
+    }
+
+    /*private function process_card_for_charge_later($user, $card_details)
+    {
+
+        $StripePayment = new \App\Stripe\StripePayment();
+
+            $stripe_cus_exist = $StripePayment->check_stripe_customer_exist($user->id);
+            if ($stripe_cus_exist) {
+                $stripe_res = $StripePayment->add_card_to_existing_stripe_customer($user->id, $card_details['setup_intent_id']);
+                //Log::info('Order - Add Card to Stripe Customer', ['orderId' => $order_id]);
+            } else {
+                $stripe_res = $StripePayment->create_stripe_customer_and_save_card($user, $card_details['setup_intent_id']);
+                //Log::info('Order - Create Stripe Customer & Save Card', ['orderId' => $order_id]);
+            }
+        
+
+        if ($stripe_res['status'] === '1') {
+            return TRUE;
+        } elseif ($stripe_res['status'] === '0') {
+            return $stripe_res['message'];
+        } else {
+            return $stripe_res['message'];
+        }
+    }*/
+
+    public function create_setup_intent(Request $request)
+    {
+        try {
+            
+            $response_array = [];
+            // check api_key
+            $value = Setting::where("slug","tokbox")->where('keyword','tokbox_api_key')->pluck('value');
+            
+            if ( $value && ($request->api_key == $value[0])) {
+
+                $StripePayment = new \App\Stripe\StripePayment();
+
+                    $intent_param = [
+                        'payment_method_types' => ['card']
+                    ];
+
+                $stripe_setup_intent = \Stripe\SetupIntent::create($intent_param);
+
+                $response_array = ['Response' => [
+                    'response_code' => '1',
+                    'response_message' => 'setupintent created successfully'
+                ],
+                    'data' => [
+                        'intent_client_secret' => $stripe_setup_intent->client_secret,
+                        'payment_method' => '',
+                    ]
+                ];
+
+            } else {
+                //return error message if authencation failed
+                $response_array = ['Response' => [
+                    'response_code' => '-1',
+                    'response_message' => 'authentication failed'
+                ],
+                    'data' => (object)[]
+                ];
+            }
+        } catch (\Exception | \Throwable $e) {
+            $response_array = [
+                'Response' => [
+                    'response_code' => '-1',
+                    'response_message' => $e->getMessage()
+                ],
+                'data' => (object)[]
+            ];
+        }
+        return $this->convertNullsAsEmpty($response_array);
     }
 }
