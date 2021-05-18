@@ -92,7 +92,7 @@ class AppointmentController extends Controller
                 if($app){
                 Appointment::where('id',$app->id)->update(['appointment_status'=>7]);
 
-                $user = User::find($appointment->user_id);
+                $user = User::find($app->user_id);
                 $requested_amount = $app->payment->total_amount - $app->payment->transaction_charge;
                 $user->depositFloat($requested_amount);
                 }
@@ -276,7 +276,7 @@ class AppointmentController extends Controller
                 $end_time = Carbon::parse($request->end_time)->format('h:i A');
                 $reference = $appointment->appointment_reference;
                 
-            /* Mail */
+            /* Mail 
             $template = EmailTemplate::where('slug','book_appointment')->first();
             if($template){
                 $body = ($template->content); // this is template dynamic body. You may get other parameters too from database.
@@ -293,7 +293,7 @@ class AppointmentController extends Controller
 
                 $mailObject = new SendInvitation($mail); // you can make php artisan make:mail MyMail
                 Mail::to($user->email)->send($mailObject);
-            }
+            }*/
             /* MOBILE NOTY */
               
                 $notifydata['device_id'] = $doctor->doctor_device_id;
@@ -633,8 +633,10 @@ class AppointmentController extends Controller
                 $user = User::find($appointment->user_id);
                 $requested_amount = $appointment->payment->total_amount - $appointment->payment->transaction_charge;
                 $user->depositFloat($requested_amount);
-                
-                $withdraw_amount = $appointment->payment->total_amount - ($appointment->payment->transaction_charge-$appointment->payment->tax_amount);
+
+                ($appointment->payment->transaction_charge > $appointment->payment->tax_amount) ? $value = $appointment->payment->transaction_charge - $appointment->payment->tax_amount :  $value = $appointment->payment->tax_amount - $appointment->payment->transaction_charge;
+
+                $withdraw_amount = $appointment->payment->total_amount - ($appointment->payment->transaction_charge-$value);
                 $doctor = User::find($appointment->doctor_id);
                 $doctor->withdrawFloat($withdraw_amount);
             }
@@ -1089,6 +1091,7 @@ class AppointmentController extends Controller
             $user = auth()->user();
             
             $log = CallLog::where('id',$request->call_log_id)->whereNull('end_time')->first();
+            
             if($log){
             $duration = Carbon::parse($request->end_time)->diffInSeconds(Carbon::parse($log->start_time));
             $log->end_time =$request->end_time;
@@ -1096,6 +1099,7 @@ class AppointmentController extends Controller
             $log->save();
             
             $app = Appointment::find($log->appointment_id);
+            
                 if($app->call_status==0){
                     $app->appointment_status = 3;
                     $app->call_status = 1;
@@ -1109,7 +1113,9 @@ class AppointmentController extends Controller
                     $applog->save();
 
                     $doctor = User::find($app->doctor_id);
-                    $requested_amount = $app->payment->total_amount - ($app->payment->transaction_charge-$app->payment->tax_amount);
+                    ($app->payment->transaction_charge > $app->payment->tax_amount) ? $value = $app->payment->transaction_charge - $app->payment->tax_amount :  $value = $app->payment->tax_amount - $app->payment->transaction_charge;
+                    
+                    $requested_amount = $app->payment->total_amount - $value;
                     $doctor->depositFloat($requested_amount);
                 }
             }
