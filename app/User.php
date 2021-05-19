@@ -141,12 +141,10 @@ class User extends Authenticatable implements Wallet, WalletFloat
     
     public function doctorProfile($id = NULL,$mobile = NULL){
         if(isset($mobile) && ($mobile==1)){
-            //$service = count($this->doctorService()->get())>0 ? $this->doctorService()->get()->toArray() : (object)[];
-            $permanentAddress = ($this->getPermanentAddressAttribute()) ? $this->getPermanentAddressAttribute() : (object)[];
+            $permanentAddress = ($this->getPermanentAddressAttribute()) ? $this->getPermanentAddressAttribute($mobile) : (object)[];
             $officeAddress = ($this->getOfficeAddressAttribute()) ? $this->getOfficeAddressAttribute() : (object)[];
             $last_message = ($id)? $this->lastChat($id) : (object)[];
         }else{
-           // $service = $this->doctorService()->get();
             $permanentAddress = $this->getPermanentAddressAttribute();
             $officeAddress = $this->getOfficeAddressAttribute();
             $last_message = ($id)? $this->lastChat($id) : '';
@@ -192,7 +190,7 @@ class User extends Authenticatable implements Wallet, WalletFloat
 
     public function patientProfile($id = NULL,$mobile = NULL){
         if(isset($mobile) && ($mobile==1)){
-            $address = ($this->getPermanentAddressAttribute()) ? $this->getPermanentAddressAttribute() : (object)[];
+            $address = ($this->getPermanentAddressAttribute()) ? $this->getPermanentAddressAttribute($mobile) : (object)[];
         }else{
             $address = $this->getPermanentAddressAttribute();
         }
@@ -275,7 +273,7 @@ class User extends Authenticatable implements Wallet, WalletFloat
 
     public function basicProfile($id = NULL,$mobile=NULL){
         if(isset($mobile) && ($mobile==1)){
-            $address = ($this->getPermanentAddressAttribute()) ? $this->getPermanentAddressAttribute() : (object)[];
+            $address = ($this->getPermanentAddressAttribute()) ? $this->getPermanentAddressAttribute($mobile) : (object)[];
         }else{
             $address = $this->getPermanentAddressAttribute();
         }
@@ -362,14 +360,39 @@ class User extends Authenticatable implements Wallet, WalletFloat
          return $data;
     }
 
-    public function getPermanentAddressAttribute(){
-        return Address::with('country','state','city')->whereNull('name')->where('user_id',$this->id)->first();
-        //return $add ? $add : (object)[];
+    public function getPermanentAddressAttribute($mobile = NULL){
+        if(isset($mobile) && ($mobile==1)){
+            $address = Address::with('country','state','city')->whereNull('name')->where('user_id',$this->id)->first();
+            return [
+                "id" => $address->id,
+                "user_id" => $address->user_id,
+                "name" => $address->name,
+                "line_1" => $address->line_1,
+                "line_2" => $address->line_2,
+                "country_id" => $address->country_id,
+                "state_id" => $address->state_id,
+                "city_id" => $address->city_id,
+                "postal_code" => $address->postal_code,
+                "country" => [
+                    "id" => ($address->country)? $address->country->id : "",
+                    "name" => ($address->country)? $address->country->name : "",
+                ],
+                "state" => [
+                    "id" => ($address->state)? $address->state->id : "",
+                    "name"=> ($address->state)? $address->state->name : ""
+                ],
+                "city" => [
+                    "id" => ($address->city)? $address->city->id : "",
+                    "name"=> ($address->city)? $address->city->name : ""
+                ], 
+            ];
+        }else{
+            return Address::with('country','state','city')->whereNull('name')->where('user_id',$this->id)->first();
+        }
     }
     
     public function getOfficeAddressAttribute(){
         return  Address::with('country','state','city','addressImage')->whereNotNull('name')->where('user_id',$this->id)->first();
-       // return $add ? $add : (object)[];
     }
 
     public function addressImage() { 

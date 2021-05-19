@@ -380,10 +380,14 @@ class PatientController extends Controller
             $user = auth()->user();
             if($user->hasrole('patient')){
                 $list =  auth()->user()->userFav;
+                if ($request->bearerToken()) {
+                    $id = auth('api')->user()->id;
+                }
+                ($request->route()->getName() == "favouriteList") ? $mobile = 1 : $mobile = 0;
                 
                 $data = collect();
-                $list->each(function ($provider) use (&$data) {
-                    $data->push($provider->basicProfile());
+                $list->each(function ($provider) use (&$data,$id,$mobile) {
+                    $data->push($provider->basicProfile($id,$mobile));
                 });
                 if($request->route()->getName() == 'favouriteList'){
                     $result = $data->toArray();
