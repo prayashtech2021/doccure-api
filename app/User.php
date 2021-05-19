@@ -358,13 +358,13 @@ class User extends Authenticatable implements Wallet, WalletFloat
     }
 
     public function getPermanentAddressAttribute(){
-        $add =  Address::with('country','state','city')->whereNull('name')->where('user_id',$this->id)->first();
-        return $add ? $add : (object)[];
+        return Address::with('country','state','city')->whereNull('name')->where('user_id',$this->id)->first();
+        //return $add ? $add : (object)[];
     }
     
     public function getOfficeAddressAttribute(){
-        $add =  Address::with('country','state','city','addressImage')->whereNotNull('name')->where('user_id',$this->id)->first();
-        return $add ? $add : (object)[];
+        return  Address::with('country','state','city','addressImage')->whereNotNull('name')->where('user_id',$this->id)->first();
+       // return $add ? $add : (object)[];
     }
 
     public function addressImage() { 
