@@ -283,11 +283,12 @@ function sendFCMNotification($data){
         //dd($response);
     }
 }
-if(!function_exists('sendFCMiOSMessage'))
-{
+//if(!function_exists('sendFCMiOSMessage'))
+//{
    function sendFCMiOSMessage($data){
 
         $key = Setting::where('slug','push_notification')->where('keyword','firebase_api_key')->pluck('value');
+        
         if($key){
 
             $SERVER_API_KEY = $key[0];
@@ -323,7 +324,7 @@ if(!function_exists('sendFCMiOSMessage'))
                 "data" => $data['additional_data'],
             ];
             //Generating JSON encoded string form the above array.
-            $json = json_encode($result);
+             $json = json_encode($result);
             //Setup headers:
             $headers = array();
             $headers[] = 'Content-Type: application/json';
@@ -337,13 +338,13 @@ if(!function_exists('sendFCMiOSMessage'))
 
             //Send the request
             $response = curl_exec($ch);
-
+            //dd($response);
             //Close request
-            curl_close($ch);
-            //return $response; 
+            //curl_close($ch);
+           // return $response; 
         }
     }
-}
+//}
 
 /*if(!function_exists('sendFCMiOSMessage'))
 {

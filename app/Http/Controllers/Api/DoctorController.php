@@ -515,57 +515,57 @@ class DoctorController extends Controller
             
             $doctors = User::role('doctor');
 
-            if ($request->keywords) {
+            if ($request->keywords && (!empty($request->keywords))) {
                 $doctors = $doctors->whereEncrypted('first_name', 'like', '%' . $request->keywords . '%')
                     ->orWhereEncrypted('last_name', 'like', '%' . $request->keywords . '%');
             }
 
-            if ($request->gender) {
+            if ($request->gender && (!empty($request->gender))) {
                 $doctors->whereIn('gender', [$request->gender]);
             }
 
-            if ($request->speciality) {
+            if ($request->speciality && (!empty($request->speciality))) {
                 $doctors = $doctors->whereHas('doctorSpecialization', function ($category) use ($request) {
                     $category->whereIn('user_speciality.speciality_id', [$request->speciality]);
                 });
             }
             
-            if ($request->speciality_name) {
+            if ($request->speciality_name && (!empty($request->speciality_name))) {
                 $speciality_name = $request->speciality_name;
                 $doctors = $doctors->whereHas('doctorSpecialization', function ($category) use ($speciality_name) {
                     $category->where('specialities.name', 'like', '%' . $speciality_name . '%');
                 });
             }
 
-            if ($request->country_id) {
+            if ($request->country_id && (!empty($request->country_id))) {
                 $country_id = $request->country_id;
                 $doctors = $doctors->whereHas('homeAddress', function ($category) use ($country_id) {
                     $category->where('addresses.country_id', $country_id);
                 });
             }
 
-            if ($request->state_id) {
+            if ($request->state_id && (!empty($request->state_id))) {
                 $state_id = $request->state_id;
                 $doctors = $doctors->whereHas('homeAddress', function ($category) use ($state_id) {
                     $category->where('addresses.state_id', $state_id);
                 });
             }
 
-            if ($request->state_name) {
+            if ($request->state_name && (!empty($request->state_name))) {
                 $state_name =  $request->state_name;
                 $doctors = $doctors->whereHas('homeAddress.state', function ($category) use ($state_name) {
                     $category->where('name', $state_name);
                 });
             }
 
-            if ($request->city_name) {
+            if ($request->city_name && (!empty($request->city_name))) {
                 $city_name =  $request->city_name;
                 $doctors = $doctors->whereHas('homeAddress.city', function ($category) use ($city_name) {
                     $category->where('name', $city_name);
                 });
             }
 
-            if ($request->city_id) {
+            if ($request->city_id && (!empty($request->city_id))) {
                 $city_id = $request->city_id;
                 $doctors = $doctors->whereHas('homeAddress', function ($category) use ($city_id) {
                     $category->where('addresses.city_id', $city_id);

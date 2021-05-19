@@ -267,7 +267,6 @@ class AppointmentController extends Controller
 
             /* Notification */
             auth()->user()->notify(new AppointmentNoty($appointment));
-            //$doctor = User::find($request->doctor_id); 
             $doctor->notify(new AppointmentNoty($appointment));
             
                 $name = $doctor->first_name.' '.$doctor->last_name;
@@ -296,27 +295,26 @@ class AppointmentController extends Controller
             }
             /* MOBILE NOTY */
               
-                $notifydata['device_id'] = $doctor->doctor_device_id;
+                $notifydata['device_id'] = $doctor->device_id;
 
-                $device_type = $doctor->doctor_device_type;
+                $device_type = $doctor->device_type;
 
                 $nresponse['from_name']=auth()->user()->first_name.' '.auth()->user()->last_name;
 
                 $message = $nresponse['from_name'].' has booked an appointment on '.$app_date.' at '.$start_time.' to '.$end_time.' reference #' . $reference . '!';
 
               $notifydata['message']=$message;
-              $notifydata['notifications_title']='';
+              $notifydata['notifications_title']='Appointment Schedule';
               $nresponse['type']='Booking';
               $notifydata['additional_data'] = $nresponse;
               if($device_type=='Android' && (!empty($notifydata['device_id'])))
               {
                 sendFCMNotification($notifydata);
               }
-              if($device_type=='IOS')
+              if($device_type=='IOS' && (!empty($notifydata['device_id'])))
               {
                 sendFCMiOSMessage($notifydata);
               }
-              
               
             /**
              * Payment
@@ -1064,7 +1062,7 @@ class AppointmentController extends Controller
                   {
                     sendFCMNotification($notifydata);
                   }
-                  if($device_type=='IOS')
+                  if($device_type=='IOS' && (!empty($notifydata['device_id'])))
                   {
                     sendFCMiOSMessage($notifydata);
                   }
@@ -1181,7 +1179,7 @@ class AppointmentController extends Controller
                   {
                     sendFCMNotification($notifydata);
                   }
-                  if($device_type=='IOS')
+                  if($device_type=='IOS' && (!empty($notifydata['device_id'])))
                   {
                     sendFCMiOSMessage($notifydata);
                   }
