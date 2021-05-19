@@ -115,9 +115,13 @@ class PageContentController extends Controller
                 }else{
                     $mobile = 0;
                 }
+                $id = 0;
+                if ($request->bearerToken()) {
+                    $id = auth('api')->user()->id;
+                }
                 $doc_array = collect();
-                $provider_list->each(function ($provider) use (&$doc_array,$mobile) {
-                    $doc_array->push($provider->basicProfile($mobile));
+                $provider_list->each(function ($provider) use (&$doc_array,$id,$mobile) {
+                    $doc_array->push($provider->basicProfile($id,$mobile));
                 });
 
                 $speciality = Speciality::orderBy('id','asc');

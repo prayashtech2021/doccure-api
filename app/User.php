@@ -190,7 +190,12 @@ class User extends Authenticatable implements Wallet, WalletFloat
         ];
     }
 
-    public function patientProfile($id = NULL){
+    public function patientProfile($id = NULL,$mobile = NULL){
+        if(isset($mobile) && ($mobile==1)){
+            $address = ($this->getPermanentAddressAttribute()) ? $this->getPermanentAddressAttribute() : (object)[];
+        }else{
+            $address = $this->getPermanentAddressAttribute();
+        }
         return [
             'id' => $this->id,
             'pid' => $this->getPidAttribute(),
@@ -205,7 +210,7 @@ class User extends Authenticatable implements Wallet, WalletFloat
             'time_zone_id' => $this->time_zone_id,
             'language_id' => $this->language_id,
             'currency_code' => $this->currency_code,
-            'permanent_address' => $this->getPermanentAddressAttribute(),
+            'permanent_address' => $address,
             'member_since' => convertToLocal(Carbon::parse($this->created_at),config('custom.timezone')[251],'d M Y H:s A'),
             'accountstatus' => $this->getAccountStatusAttribute(),
             'last_visit' => ($this->appointments()->first())?$this->appointments()->orderby('id','desc')->first()->appointment_date:'',

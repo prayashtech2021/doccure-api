@@ -116,8 +116,13 @@ class PatientController extends Controller
             if ($request->bearerToken()) {
                 $id = auth('api')->user()->id;
             }
-            $list->paginate($paginate, ['*'], 'page', $pageNumber)->getCollection()->each(function ($provider) use (&$data,$id) {
-                $data->push($provider->patientProfile($id));
+            if($request->route()->getName() == "patientList"){
+                $mobile = 1;
+            }else{
+                $mobile = 0;
+            }
+            $list->paginate($paginate, ['*'], 'page', $pageNumber)->getCollection()->each(function ($provider) use (&$data,$id,$mobile) {
+                $data->push($provider->patientProfile($id,$mobile));
             });
 
             if($data){
@@ -252,8 +257,16 @@ class PatientController extends Controller
             }
 
             $list = collect();
-            $data->each(function ($provider) use (&$list) {
-                $list->push($provider->patientProfile());
+            if ($request->bearerToken()) {
+                $id = auth('api')->user()->id;
+            }
+            if($request->route()->getName() == "patientSearch"){
+                $mobile = 1;
+            }else{
+                $mobile = 0;
+            }
+            $data->each(function ($provider) use (&$list,$id,$mobile) {
+                $list->push($provider->patientProfile($id,$mobile));
             });
             
             if(count($list)>0){
