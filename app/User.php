@@ -373,18 +373,18 @@ class User extends Authenticatable implements Wallet, WalletFloat
                 "state_id" => $address->state_id,
                 "city_id" => $address->city_id,
                 "postal_code" => $address->postal_code,
-                "country" => [
-                    "id" => ($address->country)? $address->country->id : "",
-                    "name" => ($address->country)? $address->country->name : "",
-                ],
-                "state" => [
-                    "id" => ($address->state)? $address->state->id : "",
-                    "name"=> ($address->state)? $address->state->name : ""
-                ],
-                "city" => [
-                    "id" => ($address->city)? $address->city->id : "",
-                    "name"=> ($address->city)? $address->city->name : ""
-                ], 
+                "country" => ($address->country)? [
+                    "id" => $address->country->id,
+                    "name" => $address->country->name,
+                ] : (object)[],
+                "state" => ($address->state)? [
+                    "id" => $address->state->id,
+                    "name"=> $address->state->name
+                ] : (object)[],
+                "city" => ($address->city)? [
+                    "id" => $address->city->id,
+                    "name"=> $address->city->name
+                ] : (object)[], 
             ];
         }else{
             return Address::with('country','state','city')->whereNull('name')->where('user_id',$this->id)->first();
