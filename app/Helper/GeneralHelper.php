@@ -296,52 +296,28 @@ function sendFCMNotification($data){
 
             $ch = curl_init("https://fcm.googleapis.com/fcm/send");
 
-            //Title of the Notification.
-            //$title = $data['body']['title'];
-
-            //Body of the Notification.
-            //$body = $data['body']['message'];
-
-            //$notification_type = $data['body']['notification_type'];
-
-            //Creating the notification array.
-            //$notification = array('title' =>$title , 'text' => $body , 'notification' => $notification_type);
         
-            //This array contains, the token and the notification. The 'to' attribute stores the token.
-            //$arrayToSend = array('notification' => $notification,'priority'=>'high');
-
-            /* if(is_array($target)){
-                $arrayToSend['registration_ids'] = $target;
-            }else{
-            $arrayToSend['to'] = $target;
-            }*/
-
             $data['additional_data']['body']=$data['message'];
             $data['additional_data']['title']=$data['notifications_title'];
             
-            /*$result = [
-                "registration_ids" => array($data['device_id']),
-                "data" => $data['additional_data'],
-                "notification" => $data['additional_data'],
-            ];*/
             
-            $result = [
-                "registration_ids" => array($data['device_id']),
-                //"data" => $data['additional_data'],
-                "notification" => $data['additional_data'],  
-            ];
-           $result['aps'] = [
+            $result['aps'] = [
                 'alert' => [
                     'title' => $data['notifications_title'],
                     'body' => $data['message'],
                 ],
                   'badge' => 0,
                   'sound' => 'default',
-                  'my_value_1' => $data['additional_data'],
+                'my_value_1' =>   $data['additional_data'],
+            ];
+            $result = [
+                "registration_ids" => array($data['device_id']),
+                "notification" => $result['aps'],  
             ];
             //Generating JSON encoded string form the above array.
+            
              $json = json_encode($result);
-            //Setup headers:
+             //Setup headers:
             $headers = array();
             $headers[] = 'Content-Type: application/json';
             $headers[] = 'Authorization: key= '. $SERVER_API_KEY.''; // key here

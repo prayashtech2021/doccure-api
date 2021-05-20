@@ -108,14 +108,14 @@ class ChatController extends Controller
             }
 
             if ($message) {
-                $receiver = User::find($request->input('recipient_id')); 
+                $receiver = User::find($request->recipient_id); 
                 $receiver->notify(new ChatNoty());
             
                 event(new SendMessage($message));
                   
                 if(!empty($receiver->device_id)){
                     
-                    $msgdata['recipient_id'] = $receiver->recipient_id;
+                    $msgdata['recipient_id'] = $receiver->id;
                     $msgdata['recipient_name'] = $receiver->first_name.' '.$receiver->last_name;
                     $msgdata['recipient_image'] = getUserProfileImage($receiver->id);
                     $msgdata['sender_id'] = auth()->user()->id;
@@ -123,10 +123,11 @@ class ChatController extends Controller
                     $msgdata['sender_image'] = getUserProfileImage(auth()->user()->id);
                     $msgdata['type']= 'Message';
 
-                    $notifydata['message']=$message;
-                    $notifydata['notifications_title']=auth()->user()->name;
+                    $notifydata['message']=$request->message;
+                    $notifydata['notifications_title']='Got a new message'; //auth()->user()->name;
                     $notifydata['additional_data'] = $msgdata;
                     $notifydata['device_id'] = $receiver->device_id;
+                    //print_r($notifydata);
                     if($receiver->device_type=='Android' && (!empty($notifydata['device_id']))){
                         sendFCMNotification($notifydata);
                     }
@@ -135,6 +136,7 @@ class ChatController extends Controller
                     }
                 }
             }
+
             return self::send_success_response([],'Message Sent Successfully');
         } catch (Exception | Throwable $exception) {
             return self::send_exception_response($exception->getMessage());
