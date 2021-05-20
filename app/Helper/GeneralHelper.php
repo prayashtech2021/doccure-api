@@ -324,20 +324,21 @@ function sendFCMNotification($data){
                 "data" => $data['additional_data'],
                 "notification" => $data['additional_data'],
             ];*/
+            
             $result = [
                 "registration_ids" => array($data['device_id']),
                 //"data" => $data['additional_data'],
-                "notification" => $data['additional_data'],
-                "aps" => [
-                    'alert' => [
-                        'title' => $data['notifications_title'],
-                        'body' => $data['message'],
-                    ],
-                      'badge' => 0,
-                      'sound' => 'default',
-                      'my_value_1' => $data['additional_data'],
-                ]
-           ]
+                "notification" => $data['additional_data'],  
+            ];
+           $result['aps'] = [
+                'alert' => [
+                    'title' => $data['notifications_title'],
+                    'body' => $data['message'],
+                ],
+                  'badge' => 0,
+                  'sound' => 'default',
+                  'my_value_1' => $data['additional_data'],
+            ];
             //Generating JSON encoded string form the above array.
              $json = json_encode($result);
             //Setup headers:
@@ -361,7 +362,7 @@ function sendFCMNotification($data){
     }
 //}
 
-if(!function_exists('sendFCMiOSMessage'))
+/*if(!function_exists('sendFCMiOSMessage'))
 {
 function sendiosNotification($data){
     $ci =& get_instance();
@@ -426,4 +427,4 @@ function sendiosNotification($data){
        echo 'Message successfully delivered' . PHP_EOL;
      fclose($fp); // Close the connection to the server
 }
-}
+}*/
