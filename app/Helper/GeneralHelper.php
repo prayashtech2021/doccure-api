@@ -322,6 +322,7 @@ function sendFCMNotification($data){
             $result = [
                 "registration_ids" => array($data['device_id']),
                 "data" => $data['additional_data'],
+                "notification" => $data['additional_data'],
             ];
             //Generating JSON encoded string form the above array.
              $json = json_encode($result);
