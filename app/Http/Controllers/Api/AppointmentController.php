@@ -27,6 +27,9 @@ use Illuminate\Support\Facades\Mail;
 use Storage;
 use \Exception;
 use \Throwable;
+use DateTime;
+use DatePeriod;
+use DateInterval;
 
 class AppointmentController extends Controller
 {
@@ -661,7 +664,7 @@ class AppointmentController extends Controller
         $lang_id = ($request->language_id)? getLang($request->language_id) : defaultLang();
         $common['header'] = getLangContent(8,$lang_id);
         $common['setting'] = getSettingData();
-        $common['menu'] = getAppMenu();
+        // $common['menu'] = getAppMenu();
         if($request->is_schedule_timing){
             $common['lang_content'] = getLangContent(29,$lang_id);
         }else{
@@ -688,6 +691,7 @@ class AppointmentController extends Controller
                     $data->push($schedule_timing->getData());
                 });
                 $result['list'] = $data;
+                // dd($data);
                 $result['specialities'] = $user->getProviderSpecialityAttribute();
             }
             return self::send_success_response($result, 'Schedule Details Fetched Successfully',$common);
@@ -696,6 +700,87 @@ class AppointmentController extends Controller
         }
     }
 
+    public function scheduleListForPatient(Request $request)
+    {
+        try{
+        $request_day = strtolower(Carbon::parse(str_replace('/','-',$request->selected_date))->format('l'));
+        $selectedDate = Carbon::parse(str_replace('/','-',$request->selected_date))->format('Y-m-d');
+        $list1 = ScheduleTiming::where('provider_id', $request->provider_id)->where('appointment_type',1)->first();
+        $list2 = ScheduleTiming::where('provider_id', $request->provider_id)->where('appointment_type',2)->first();
+        $array1 = json_decode($list1->working_hours, true);
+        $array1 = $array1[$request_day];
+        $array2 = json_decode($list2->working_hours, true);
+        $array2 = $array2[$request_day];
+        $final=array_merge($array1,$array2);
+        $speciality = Speciality::find($request->speciality_id);
+        $speciality_seconds=$speciality->duration;
+
+        $minutes = (($speciality_seconds / 60) % 60);
+        $interval = $minutes;
+        sort($final);
+        // dd($final);
+        $results=[];
+        foreach($final as $item){
+            $stime=explode('-',$item);
+            $startTime=Carbon::parse($stime[0]);
+            $endTime=Carbon::parse($stime[1]);
+            $sseconds = $endTime->diffInSeconds($startTime);
+            
+            if($sseconds>=$speciality_seconds){
+                $startTimeSeconds=strtotime($stime[0]);
+                $endTimeSeconds=strtotime($stime[1]);
+                $startPlusInterval = strtotime('+'.$interval.' minutes', $startTimeSeconds);
+                if($startPlusInterval<=$endTimeSeconds){
+                    $start = $this->roundToNearestMinuteInterval($startTime, $interval);
+                    $end = $this->roundToNearestMinuteInterval($endTime, $interval);
+                    $cnt=1;$test='';
+                    for (; $start <= $end; $start += $interval * 60) {
+                        // $results[] = date('H:i:s', $start)
+                        $temp=strtotime('+'.$interval.' minutes', $start);
+                        if($temp<=$endTimeSeconds){
+                            $chk = Appointment::where(['doctor_id' => $request->provider_id, 'appointment_date' => $selectedDate, 'start_time' => date('H:i:s', $start)])->first();
+                            if (!$chk) {
+                                $results[] = $start.'-'.$temp;
+                            }
+                        // $results[] = date('h:i A', $start).'-'.date('h:i A',$temp);
+                        }
+                    }
+                    // dd($results);
+                }
+            }
+        }
+        // dd($results);
+        $newresults=[];
+        if($results){
+            foreach($results as $res){
+                $exp=explode('-',$res);
+                // dd($exp);
+                $firstElement=$exp[0];
+                $morning=strtotime('12:00:00');
+                $afternoon=strtotime('16:00:00');
+                if($firstElement<=$morning){
+                    $newresults['morning'][] = date('h:i A', $exp[0]).' - '.date('h:i A',$exp[1]);
+                }elseif($firstElement<=$afternoon){
+                    $newresults['afternoon'][] = date('h:i A', $exp[0]).' - '.date('h:i A',$exp[1]);
+                }else{
+                    $newresults['evening'][] = date('h:i A', $exp[0]).' - '.date('h:i A',$exp[1]);
+                }
+            }
+        }
+        dd($newresults);
+        // sort($results);
+        return self::send_success_response($results, 'Schedule Details Fetched Successfully');
+        } catch (Exception | Throwable $exception) {
+            return self::send_exception_response($exception->getMessage());
+        }
+        
+    }
+    public function roundToNearestMinuteInterval($time, $interval) {
+        $timestamp = strtotime($time);
+        $rounded = round($timestamp / ($interval * 60), 0) * $interval * 60;
+        return $rounded;
+    }
+    
     public function scheduleCreate(Request $request)
     {
         // dd(json_encode(config('custom.empty_working_hours')));

@@ -179,6 +179,8 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
     Route::post('banner/save','Api\PageContentController@saveBanner');
     Route::get('Pagetype','Api\LanguageController@getMobilePage');
 
+    Route::get('schedule/listfor/patient','Api\AppointmentController@scheduleListForPatient');
+
 });
 
 Route::any('{path}', function () {
