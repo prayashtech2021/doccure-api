@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use App\PostCategory;
 use DB;
+use Validator;
+
 
 class PostCategoryController extends Controller
 {
@@ -21,9 +23,15 @@ class PostCategoryController extends Controller
                 'name' => 'required|unique_encrypted:post_categories,name',
             );
         }
-        $valid = self::customValidation($request, $rules);
-        if($valid){ return $valid;}
-
+        
+        $messages = array(
+            'name.unique_encrypted' => 'Name already exists',
+        );
+       
+        $validator = Validator::make($request->all(), $rules,$messages);
+		if ($validator->fails()) {
+			return self::send_bad_request_response($validator->errors()->first());
+		}
         try {
             DB::beginTransaction();
             if ($request->category_id) {

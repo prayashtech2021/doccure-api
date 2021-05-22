@@ -13,6 +13,7 @@ use Illuminate\Support\Carbon;
 use DB;
 use Storage;
 use Image;
+use Validator;
 
 class PostController extends Controller
 {
@@ -225,8 +226,14 @@ class PostController extends Controller
                 'image' => 'required|image|mimes:jpeg,png,jpg|max:2048|dimensions:min_width=680,min_height=454',
             );
         }
-        $valid = self::customValidation($request, $rules);
-        if($valid){ return $valid;}
+        $messages = array(
+            'title.unique_encrypted' => 'Title already exists',
+        );
+       
+        $validator = Validator::make($request->all(), $rules,$messages);
+		if ($validator->fails()) {
+			return self::send_bad_request_response($validator->errors()->first());
+		}
 
         try {
             DB::beginTransaction();
