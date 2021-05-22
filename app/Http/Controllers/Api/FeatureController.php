@@ -93,7 +93,7 @@ class FeatureController extends Controller
                 $feature = $feature->withTrashed();
             }
 
-            $paginatedata = $spl->paginate($paginate, ['*'], 'page', $pageNumber);
+            $paginatedata = $feature->paginate($paginate, ['*'], 'page', $pageNumber);
 
             $list = collect();
             $paginatedata->each(function ($feature) use (&$list) {
