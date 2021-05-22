@@ -18,9 +18,9 @@ class StateSeeder extends Seeder
         $data = json_decode($json, true);
         // State::insert($data);
         foreach($data as $item){
-            //if($item['country_id']==101){
+            if($item['country_id']==101){
                 State::insert($item);
-            //}
+            }
         }
     }
 }
