@@ -15,7 +15,8 @@ class AlterUserTable extends Migration
     {
         //
         Schema::table('users', function (Blueprint $table) {
-            $table->string('device_id')->after('status');
+            $table->text('device_id')->nullable()->after('status');
+            $table->string('device_type')->nullable()->after('device_id');
         });
     }
 
