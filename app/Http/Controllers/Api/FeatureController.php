@@ -78,6 +78,7 @@ class FeatureController extends Controller
         $rules = array(
             'count_per_page' => 'nullable|numeric',
             'order_by' => 'nullable|in:desc,asc',
+            'page' => 'nullable|numeric',
         );
         $valid = self::customValidation($request, $rules);
         if ($valid) {return $valid;}
@@ -85,17 +86,25 @@ class FeatureController extends Controller
         try {
             $paginate = $request->count_per_page ? $request->count_per_page : 10;
             $order_by = $request->order_by ? $request->order_by : 'desc';
+            $pageNumber = $request->page ? $request->page : 1;
 
             $feature = Feature::orderBy('name', $order_by);
             if($request->withtrash){
                 $feature = $feature->withTrashed();
             }
+
+            $paginatedata = $spl->paginate($paginate, ['*'], 'page', $pageNumber);
+
             $list = collect();
-            $feature->each(function ($feature) use (&$list) {
+            $paginatedata->each(function ($feature) use (&$list) {
                 $list->push($feature->getData());
             });
+            $result['list'] = $list;
+            $result['total_count'] = $paginatedata->total();
+            $result['last_page'] = $paginatedata->lastPage();
+            $result['current_page'] = $paginatedata->currentPage();
             
-            return self::send_success_response($list, 'Feature content fetched successfully');
+            return self::send_success_response($result, 'Feature content fetched successfully');
         } catch (Exception | Throwable $e) {
             DB::rollback();
             return self::send_exception_response($exception->getMessage());
