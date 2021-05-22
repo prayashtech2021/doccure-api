@@ -15,9 +15,10 @@ class AlterPageMasterTable extends Migration
     {
         Schema::table('page_masters', function (Blueprint $table) {
             $table->unsignedTinyInteger('type')->after('name')->default(0)->comment('0=>web,1=>Mobile');
-        });
+        }); 
     }
 
+    
     /**
      * Reverse the migrations.
      *
