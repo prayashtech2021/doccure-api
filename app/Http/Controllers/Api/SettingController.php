@@ -93,30 +93,6 @@ class SettingController extends Controller
                         $setting_update = Setting::where('keyword',$keyword)->update(['value' => $file_name, 'created_by'=> auth()->user()->id]);
                     }
                 }
-                if($request->apns_pem_file){ 
-                    $file = $request->apns_pem_file;
-                    $keyword = 'apns_pem_file';
-                    $rules = array(
-                        'apns_pem_file' => 'nullable',
-                    );
-                    $valid = self::customValidation($request, $rules);
-                    if($valid){ return $valid;}
-
-                    if(!empty($file)){
-                        $getSettings = Setting::where('slug','push_notification')->where('keyword',$keyword)->first();
-                        if(!empty($getSettings->value)){
-                            if (Storage::exists('images/company-images/' . $getSettings->value)) {
-                                Storage::delete('images/company-images/' . $getSettings->value);
-                            }
-                        }
-                        $extension = $file->getClientOriginalExtension();
-                        $file_name = date('YmdHis') . '_' . $keyword . '.'.$extension;
-                        $path = 'images/company-images/';
-                        $store = $file->storeAs($path, $file_name);
-
-                        $setting_update = Setting::where('keyword',$keyword)->update(['value' => $file_name, 'created_by'=> auth()->user()->id]);
-                    }
-                }
                 
             
             if($request->settings){
