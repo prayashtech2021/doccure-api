@@ -3156,7 +3156,7 @@ class MultiLanguageSeeder extends Seeder
             ],522 => [
                 'page_master_id' => 23,
                 'language_id' => 1,
-                'keyword' => 'no_saved_cards_found!',
+                'keyword' => 'no_saved_cards_found',
                 'value' => 'No saved cards found!',
                 'created_by' => 1,
             ],523 => [

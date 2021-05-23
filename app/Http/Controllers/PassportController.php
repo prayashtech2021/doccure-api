@@ -91,7 +91,7 @@ class PassportController extends Controller {
 			}elseif($user && ($user->is_verified ==0)){
 				$response_array = [
 					"code" => "201",
-					"message" => "User email-id is not verified",
+					"message" => "User email-id is not yet verified. Check your registered email to verify.",
 				];
 				return response()->json(self::convertNullsAsEmpty($response_array), 200);
             }

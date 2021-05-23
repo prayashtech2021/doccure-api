@@ -275,21 +275,10 @@ class SettingSeeder extends Seeder
             44 => [
                 'slug' => 'push_notification',
                 'keyword' => 'firebase_api_key',
-                'value' => '',
+                'value' => 'AAAAWLRdl-c:APA91bExMBuh-Bin9L2AZbfT7DqpyoPQWidaUTYWs0UpGRVBwd3d0BIm0miBP7KH1Png_9v9goJRCW84a4ZJ-I0rLyoAyWq58JY-b5sB5bDEXPkjP7ol17cqwQklQPU4JdVITreI_IMn',
                 'created_by' => 1,
             ],
-            45 => [
-                'slug' => 'push_notification',
-                'keyword' => 'apns_pem_file',
-                'value' => '',
-                'created_by' => 1,
-            ],
-            46 => [
-                'slug' => 'push_notification',
-                'keyword' => 'apns_password',
-                'value' => '',
-                'created_by' => 1,
-            ],
+           
         ];
 		foreach ($datas as $id => $data) {
 			$row = Setting::firstOrNew([
