@@ -68,6 +68,7 @@ class PassportController extends Controller {
 			$user->role_names = $arr;
 			removeMetaColumn($user);
 			if($request->route()->getName() == 'MobileLogin'){
+				$user->permanentaddress_mobile = ($user->getPermanentAddressAttribute()) ? $user->getPermanentAddressAttribute(1) : (object)[];
 				$data = $user->toArray();
 			}else{
 				$data = $user;

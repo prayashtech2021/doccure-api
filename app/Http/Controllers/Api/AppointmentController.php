@@ -729,7 +729,7 @@ class AppointmentController extends Controller
                     // dd(date('H:i:s'));
                     $startTimeSeconds = strtotime($stime[0]);
                     $endTimeSeconds = strtotime($stime[1]);
-                    
+
                     if ($selectedDate == date('Y-m-d')) { //current date check
 
                         if ($startTimeSeconds >= $currentTime) { // if currenttime check
@@ -1328,9 +1328,9 @@ class AppointmentController extends Controller
 
             $response_array = [];
             // check api_key
-            $value = Setting::where("slug", "tokbox")->where('keyword', 'tokbox_api_key')->pluck('value');
-
-            if ($value && ($request->api_key == $value[0])) {
+            $value = Setting::where("slug","payment_gateway")->where('keyword','stripe_live_api_key')->pluck('value');
+            
+            if ( $value && ($request->api_key == $value[0])) {
 
                 $StripePayment = new \App\Stripe\StripePayment();
 
