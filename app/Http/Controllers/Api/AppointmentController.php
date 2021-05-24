@@ -664,7 +664,7 @@ class AppointmentController extends Controller
         $lang_id = ($request->language_id)? getLang($request->language_id) : defaultLang();
         $common['header'] = getLangContent(8,$lang_id);
         $common['setting'] = getSettingData();
-        // $common['menu'] = getAppMenu();
+        $common['menu'] = getAppMenu();
         if($request->is_schedule_timing){
             $common['lang_content'] = getLangContent(29,$lang_id);
         }else{
@@ -767,9 +767,9 @@ class AppointmentController extends Controller
                 }
             }
         }
-        dd($newresults);
+        // dd($newresults);
         // sort($results);
-        return self::send_success_response($results, 'Schedule Details Fetched Successfully');
+        return self::send_success_response($newresults, 'Schedule Details Fetched Successfully');
         } catch (Exception | Throwable $exception) {
             return self::send_exception_response($exception->getMessage());
         }
