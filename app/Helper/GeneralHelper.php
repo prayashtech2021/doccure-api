@@ -335,7 +335,7 @@ function sendFCMNotification($data){
 
             //Send the request
             $response = curl_exec($ch);
-            dd($response);
+            //dd($response);
             //Close request
             //curl_close($ch);
            // return $response; 
