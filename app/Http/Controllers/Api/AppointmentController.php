@@ -550,8 +550,9 @@ class AppointmentController extends Controller
                 $user_id = $request->consumer_id;
             }
             $list = Prescription::whereUserId($user_id)->orderBy('created_at', $order_by);
-            if($user->hasRole('doctor')){
-                $list = $list->where('doctor_id',$request->doctor_id);
+            
+            if(auth()->user()->hasrole('doctor')){
+                $list = $list->where('doctor_id',auth()->user()->id);
             }
             
             $data = collect(); 
