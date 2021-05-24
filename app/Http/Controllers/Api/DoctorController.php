@@ -162,8 +162,10 @@ class DoctorController extends Controller
             }
 
             $list = User::role('doctor')->with('doctorService', 'doctorEducation', 'doctorExperience', 'doctorAwards', 'doctorMembership', 'doctorRegistration')->find($user_id);
+            
             if ($list) {
                 if($request->route()->getName() == "doctorProfile"){
+                    $list->permanentaddress_mobile = ($list->getPermanentAddressAttribute()) ? $list->getPermanentAddressAttribute(1) : (object)[];
                     $array['profile'] = $list->toArray();
                 }else{
                     $array['profile'] = $list;
