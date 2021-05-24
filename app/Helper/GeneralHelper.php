@@ -301,22 +301,27 @@ function sendFCMNotification($data){
             $data['additional_data']['title']=$data['notifications_title'];
             
             
-            $result['aps'] = [
+            $aps['aps'] = [
                 'alert' => [
                     'title' => $data['notifications_title'],
                     'body' => $data['message'],
                 ],
                   'badge' => 0,
                   'sound' => 'default',
-                'my_value_1' =>   $data['additional_data'],
+                  'title' => $data['notifications_title'],
+                  'body' => $data['message'],
+                  'my_value_1' =>   $data['additional_data'],
             ];
             $result = [
                 "registration_ids" => array($data['device_id']),
-                "notification" => $result['aps'],  
+                "notification" => $aps['aps'],  
+                //"aps" => $aps['aps'],
             ];
+
             //Generating JSON encoded string form the above array.
             
              $json = json_encode($result);
+             //print_r($json);
              //Setup headers:
             $headers = array();
             $headers[] = 'Content-Type: application/json';
