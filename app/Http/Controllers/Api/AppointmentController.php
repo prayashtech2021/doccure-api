@@ -550,11 +550,12 @@ class AppointmentController extends Controller
                 $user_id = $request->consumer_id;
             }
             $list = Prescription::whereUserId($user_id)->orderBy('created_at', $order_by);
-
-            $data = collect();
-
+            if($user->hasRole('doctor')){
+                $list = $list->where('doctor_id',$request->doctor_id);
+            }
+            
+            $data = collect(); 
             $paginatedata = $list->paginate($paginate, ['*'], 'page', $pageNumber);
-
             $paginatedata->getCollection()->each(function ($prescription) use (&$data) {
                 $data->push($prescription->getData());
             });

@@ -44,6 +44,8 @@ class PatientController extends Controller
             }
             $user = User::find($id);
             $user->profile_image=getUserProfileImage($user->id);
+            $user->permanentaddress_mobile = ($user->getPermanentAddressAttribute()) ? $user->getPermanentAddressAttribute(1) : (object)[];
+
             unset($user->roles);
             removeMetaColumn($user);
         
