@@ -708,7 +708,7 @@ class AppointmentController extends Controller
             $array2 = json_decode($list2->working_hours, true);
             $array2 = $array2[$request_day];
             $final = array_merge($array1, $array2);
-            $speciality = Speciality::find($request->speciality_id);
+            $speciality = UserSpeciality::find($request->speciality_id);
             $speciality_seconds = $speciality->duration;
 
             $minutes = (($speciality_seconds / 60) % 60);
@@ -732,13 +732,11 @@ class AppointmentController extends Controller
 
                     if ($selectedDate == date('Y-m-d')) { //current date check
 
-                        if ($startTimeSeconds >= $currentTime) { // if currenttime check
+                        // if ($startTimeSeconds >= $currentTime) { // if currenttime check
                             $startPlusInterval = strtotime('+' . $interval . ' minutes', $startTimeSeconds);
                             if ($startPlusInterval <= $endTimeSeconds) {
                                 $start = $this->roundToNearestMinuteInterval($startTime, $interval);
                                 $end = $this->roundToNearestMinuteInterval($endTime, $interval);
-                                $cnt = 1;
-                                $test = '';
                                 for (; $start <= $end; $start += $interval * 60) {
                                     // $results[] = date('H:i:s', $start)
                                     $temp = strtotime('+' . $interval . ' minutes', $start);
@@ -751,14 +749,12 @@ class AppointmentController extends Controller
                                     }
                                 }
                             }
-                        } // if currenttime check
+                        // } // if currenttime check
                     } else {
                         $startPlusInterval = strtotime('+' . $interval . ' minutes', $startTimeSeconds);
                         if ($startPlusInterval <= $endTimeSeconds) {
                             $start = $this->roundToNearestMinuteInterval($startTime, $interval);
                             $end = $this->roundToNearestMinuteInterval($endTime, $interval);
-                            $cnt = 1;
-                            $test = '';
                             for (; $start <= $end; $start += $interval * 60) {
                                 // $results[] = date('H:i:s', $start)
                                 $temp = strtotime('+' . $interval . ' minutes', $start);
