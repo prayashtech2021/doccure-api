@@ -727,8 +727,13 @@ class AppointmentController extends Controller
             $sseconds = $endTime->diffInSeconds($startTime);
             
             if($sseconds>=$speciality_seconds){
+                // date_default_timezone_set('US/Eastern');
+                date_default_timezone_set('Asia/kolkata');
+                $currentTime=strtotime(date('H:i:s'));
+                // dd(date('H:i:s'));
                 $startTimeSeconds=strtotime($stime[0]);
                 $endTimeSeconds=strtotime($stime[1]);
+                if($startTimeSeconds>=$currentTime){// if currenttime check
                 $startPlusInterval = strtotime('+'.$interval.' minutes', $startTimeSeconds);
                 if($startPlusInterval<=$endTimeSeconds){
                     $start = $this->roundToNearestMinuteInterval($startTime, $interval);
@@ -747,6 +752,7 @@ class AppointmentController extends Controller
                     }
                     // dd($results);
                 }
+                }// if currenttime check
             }
         }
         // dd($results);
@@ -777,7 +783,7 @@ class AppointmentController extends Controller
     }
     public function roundToNearestMinuteInterval($time, $interval) {
         $timestamp = strtotime($time);
-        $rounded = round($timestamp / ($interval * 60), 0) * $interval * 60;
+        $rounded = (($timestamp / ($interval * 60)) * ($interval * 60));
         return $rounded;
     }
     
