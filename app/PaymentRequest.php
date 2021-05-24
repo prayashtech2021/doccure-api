@@ -35,6 +35,7 @@ class PaymentRequest extends Model
             'user_details' => $this->user()->first()->basicProfile(),
             'action_date' => convertToLocal(Carbon::parse($this->action_date),config('custom.timezone')[251],'d/m/Y'),
             'account_details' => ($this->user->accountDetails()->first())?$this->user->accountDetails()->first()->getData():[],
+            'description' => $this->description,
         ];
     }
 
