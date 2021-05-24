@@ -405,21 +405,32 @@ class PatientController extends Controller
 
     public function mobileDashboard(Request $request){
         try {
-            $user = User::Find($request->user_id);
+            $rules['user_id'] = 'integer|exists:users,id';
+            
+            $valid = self::customValidation($request, $rules);
+            if ($valid) {return $valid;}
+
+            $user = User::role('patient')->Find($request->user_id);
+            $user->permanentaddress_mobile = ($user->getPermanentAddressAttribute()) ? $user->getPermanentAddressAttribute(1) : (object)[];
+
             $user_id = $request->user_id;
             if($user_id && $user){
                 
-                $appointment = Appointment::where('user_id',$user_id)->count();
-                $prescription = Prescription::where('user_id',$user_id)->count();
-                $medical_record = MedicalRecord::where('consumer_id',$user_id)->count();
-                $invoice = $user->payment()->count();
-                
+                $appointment = Appointment::where('user_id',$user_id);
+                $prescription = Prescription::where('user_id',$user_id);
+                $medical_record = MedicalRecord::where('consumer_id',$user_id);
+                $invoice = $user->payment();
+                if ($request->doctor_id) {  //if need doctors -> patient details count
+                    $appointment = $appointment->where('doctor_id',$request->doctor_id); 
+                    $prescription = $prescription->where('doctor_id',$request->doctor_id); 
+                    $medical_record = $medical_record->where('provider_id',$request->doctor_id); 
+                }
                 $result = [ 
                     'profile' => $user->toArray(),
-                    'appointment' => $appointment, 
-                    'prescription' => $prescription,
-                    'medical_record' => $medical_record,
-                    'invoice' => $invoice,
+                    'appointment' => $appointment->count(), 
+                    'prescription' => $prescription->count(),
+                    'medical_record' => $medical_record->count(),
+                    'invoice' => $invoice->count(),
                 ];
                 return self::send_success_response($result);
             }else{
