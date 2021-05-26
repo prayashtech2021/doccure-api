@@ -833,8 +833,8 @@ class AppointmentController extends Controller
                     foreach ($incoming as $item) {
                         $t = explode('-', $item);
 
-                        $t1 = convertToUTC(Carbon::parse($t[0]),config('custom.timezone')[251],'h:i');
-                        $t2 = convertToUTC(Carbon::parse($t[1]),config('custom.timezone')[251],'h:i');
+                        $t1 = convertToUTC(Carbon::parse($t[0]),getUserTimeZone($request->provider_id),'h:i');
+                        $t2 = convertToUTC(Carbon::parse($t[1]),getUserTimeZone($request->provider_id),'h:i');
 
                         $b = $t1.'-'.$t2;
 
@@ -873,8 +873,8 @@ class AppointmentController extends Controller
                         foreach ($incoming as $item) {
                             $t = explode('-', $item);
 
-                            $t1 = convertToUTC(Carbon::parse($t[0]),config('custom.timezone')[251],'h:i');
-                            $t2 = convertToUTC(Carbon::parse($t[1]),config('custom.timezone')[251],'h:i');
+                            $t1 = convertToUTC(Carbon::parse($t[0]),getUserTimeZone($request->provider_id),'h:i');
+                            $t2 = convertToUTC(Carbon::parse($t[1]),getUserTimeZone($request->provider_id),'h:i');
 
                             $b = $t1.'-'.$t2;
 
