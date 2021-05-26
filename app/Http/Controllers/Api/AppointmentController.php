@@ -831,7 +831,14 @@ class AppointmentController extends Controller
                     $day_array = $array[config('custom.days.' . $request->day)];
                     $incoming = explode(',', $request->working_hours);
                     foreach ($incoming as $item) {
-                        array_push($day_array, $item);
+                        $t = explode('-', $item);
+
+                        $t1 = convertToUTC(Carbon::parse($t[0]),config('custom.timezone')[251],'h:i');
+                        $t2 = convertToUTC(Carbon::parse($t[1]),config('custom.timezone')[251],'h:i');
+
+                        $b = $t1.'-'.$t2;
+
+                        array_push($day_array, $b);
                     }
                     $array[config('custom.days.' . $request->day)] = $day_array;
                     $schedule->working_hours = json_encode($array);
@@ -860,7 +867,20 @@ class AppointmentController extends Controller
                     // $schedule->duration = $seconds;
                     if ($i == $request->appointment_type) {
                         $array = config('custom.empty_working_hours');
-                        $array[config('custom.days.' . $request->day)] = explode(',', $request->working_hours);
+
+                        $day_array = $array[config('custom.days.' . $request->day)];
+                        $incoming = explode(',', $request->working_hours);
+                        foreach ($incoming as $item) {
+                            $t = explode('-', $item);
+
+                            $t1 = convertToUTC(Carbon::parse($t[0]),config('custom.timezone')[251],'h:i');
+                            $t2 = convertToUTC(Carbon::parse($t[1]),config('custom.timezone')[251],'h:i');
+
+                            $b = $t1.'-'.$t2;
+
+                            array_push($day_array, $b);
+                        }
+                        $array[config('custom.days.' . $request->day)] = $day_array;
                         $schedule->working_hours = json_encode($array);
                     } else {
                         $schedule->working_hours = json_encode(config('custom.empty_working_hours'));
