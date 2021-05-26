@@ -15,7 +15,7 @@ use App\Http\Controllers\Api\PatientController;
 use App\Http\Controllers\Api\DoctorController;
 use App\Http\Controllers\Api\AppointmentController;
 use App\PageContent;
-
+use App\TimeZone;
 
 class HomeController extends Controller
 {
@@ -51,6 +51,10 @@ class HomeController extends Controller
 
             $token = substr(str_shuffle(str_repeat($pool, 5)), 0, 20);
             $array['remember_token'] = $token;
+            if($request->timezone){
+				$time = TimeZone::where('name',$request->timezone)->first();
+				$array['time_zone_id'] = $time->id;
+			}
             $user = User::create($array);
             $user->assignRole($request->type);
             DB::commit();

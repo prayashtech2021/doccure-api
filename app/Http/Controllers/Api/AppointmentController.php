@@ -807,7 +807,8 @@ class AppointmentController extends Controller
 
     public function scheduleCreate(Request $request)
     {
-        // dd(json_encode(config('custom.empty_working_hours')));
+        (auth()->user()->timezone)? $zone = auth()->user()->timezone->name : $zone = '';
+
         $rules = array(
             'provider_id' => 'required|numeric|exists:users,id',
             // 'duration' => 'required|date_format:"H:i:s',
@@ -831,13 +832,10 @@ class AppointmentController extends Controller
                     $day_array = $array[config('custom.days.' . $request->day)];
                     $incoming = explode(',', $request->working_hours);
                     foreach ($incoming as $item) {
-                        $t = explode('-', $item);
-
-                        $t1 = convertToUTC(Carbon::parse($t[0]),getUserTimeZone($request->provider_id),'h:i');
-                        $t2 = convertToUTC(Carbon::parse($t[1]),getUserTimeZone($request->provider_id),'h:i');
-
+                        $t = explode('-',$item);
+                        $t1 = convertToUTC(Carbon::parse($t[0]),$zone,'H:i'); //Carbon::parse($t[0], $zone)->timezone(new \DateTimeZone('UTC'))->format('H:i');
+                        $t2 = convertToUTC(Carbon::parse($t[1]),$zone,'H:i'); //Carbon::parse($t[1], $zone)->timezone(new \DateTimeZone('UTC'))->format('H:i');
                         $b = $t1.'-'.$t2;
-
                         array_push($day_array, $b);
                     }
                     $array[config('custom.days.' . $request->day)] = $day_array;
@@ -867,28 +865,23 @@ class AppointmentController extends Controller
                     // $schedule->duration = $seconds;
                     if ($i == $request->appointment_type) {
                         $array = config('custom.empty_working_hours');
-
-                        $day_array = $array[config('custom.days.' . $request->day)];
                         $incoming = explode(',', $request->working_hours);
-                        foreach ($incoming as $item) {
-                            $t = explode('-', $item);
+                    foreach($incoming as $item){
+                        $t = explode('-',$item);
+                        $t1 = utc($t[0],'H:i'); //Carbon::parse($t[0], $zone)->timezone(new \DateTimeZone('UTC'))->format('H:i');
+                        $t2 = utc($t[1],'H:i'); //Carbon::parse($t[1], $zone)->timezone(new \DateTimeZone('UTC'))->format('H:i');
+                        $b[] = $t1.'-'.$t2;
+                    }
 
-                            $t1 = convertToUTC(Carbon::parse($t[0]),getUserTimeZone($request->provider_id),'h:i');
-                            $t2 = convertToUTC(Carbon::parse($t[1]),getUserTimeZone($request->provider_id),'h:i');
-
-                            $b = $t1.'-'.$t2;
-
-                            array_push($day_array, $b);
-                        }
-                        $array[config('custom.days.' . $request->day)] = $day_array;
+                    $array[config('custom.days.' . $request->day)] = $b;
                         $schedule->working_hours = json_encode($array);
                     } else {
                         $schedule->working_hours = json_encode(config('custom.empty_working_hours'));
                     }
+                   
                     $schedule->save();
                 }
             }
-
             $data = collect();
             $result['provider_details'] = User::find($request->provider_id);
             $list = ScheduleTiming::where('provider_id', $request->provider_id)->get();

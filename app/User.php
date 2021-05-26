@@ -35,7 +35,7 @@ class User extends Authenticatable implements Wallet, WalletFloat
      */
     protected $fillable = [
         'first_name', 'last_name', 'email', 'password', 'mobile_number', 'profile_image','country_id','currency_code','gender','dob','blood_group',
-        'biography','price_type','amount','verification_code','is_verified','currency_code','created_by',
+        'biography','price_type','amount','verification_code','is_verified','currency_code','created_by','time_zone_id',
    ];
     protected $encryptable = [
         'first_name','last_name','biography'

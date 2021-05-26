@@ -58,16 +58,23 @@ function removeMetaColumn($model){
 
 function convertToUTC(Carbon $date, $timezone = null, $format = null)
 {
-    if (!$timezone) $timezone = config('app.timezone');
-    $datetime = Carbon::parse($date, $timezone)->timezone(new DateTimeZone('UTC'));
-    return $format ? $datetime->format($format) : $datetime;
+   if (!$timezone) $timezone = config('app.timezone');
+   $datetime = Carbon::createFromFormat('Y-m-d H:i:s', $date->toDateTimeString(), $timezone)->setTimezone(new DateTimeZone('UTC'));
+   return $format ? $datetime->format($format) : $datetime;
 }
 
 function convertToLocal(Carbon $date, $timezone = null, $format = null)
 {
-    if (!$timezone) $timezone = config('app.timezone');
-    $datetime = Carbon::parse($date, new DateTimeZone('UTC'))->timezone($timezone);
-    return $format ? $datetime->format($format) : $datetime;
+   if (!$timezone) $timezone = config('app.timezone');
+   $datetime = Carbon::createFromFormat('Y-m-d H:i:s', $date->toDateTimeString(), 'UTC')->timezone($timezone);
+   return $format ? $datetime->format($format) : $datetime;
+}
+
+function utc($datetime,$format){
+    (auth()->user()->timezone)? $zone = auth()->user()->timezone->name : $zone = config('custom.timezone')[251];
+    $time = Carbon::parse($datetime, $zone)->timezone(new \DateTimeZone('UTC'));
+    $format ? $a = $time->format('H:i') : $a = $time;
+    return $a;
 }
 
 function generateReference($user_id, $last_id, $prefix = '#', $length = 8)
@@ -335,12 +342,77 @@ function sendFCMNotification($data){
 
             //Send the request
             $response = curl_exec($ch);
-            
+            //dd($response);
+            //Close request
+            //curl_close($ch);
+           // return $response; 
         }
     }
 //}
 
-function getUserTimeZone($user_id){
-    $user = User::Find($user_id);
-    return $user->time_zone_id;
+/*if(!function_exists('sendFCMiOSMessage'))
+{
+function sendiosNotification($data){
+    $ci =& get_instance();
+    $ci->load->database();
+    $ci->db->select('key,value,system,groups');
+    $ci->db->from('system_settings');
+    $query = $ci->db->get();
+    $results = $query->result();
+    $apns_pem_file = '';
+    $apns_password = '';
+    if(!empty($results)){
+        foreach ($results as $result) {
+            $result = (array)$result;
+            if($result['key'] == 'apns_pem_file'){
+            $apns_pem_file = $result['value'];
+            }
+            if($result['key'] == 'apns_password'){
+            $apns_password = $result['value'];
+            }
+            
+        }
+    }
+
+     // Put your device token here (without spaces):
+     $deviceToken = $data['include_player_ids'];
+
+     // Put your private key's passphrase here:
+     $passphrase = $apns_password;
+     $pemfilename = $apns_pem_file;
+
+     // SIMPLE PUSH 
+     $body['aps'] = array(
+       'alert' => array(
+         'title' => $data['notifications_title'],
+         'body' => $data['message'],
+       ),
+       'badge' => 0,
+       'sound' => 'default',
+       'my_value_1' => $data['additional_data'],
+       ); // Create the payload body
+
+
+      
+     ////////////////////////////////////////////////////////////////////////////////
+
+     $ctx = stream_context_create();
+     stream_context_set_option($ctx, 'ssl', 'local_cert', $pemfilename);
+     stream_context_set_option($ctx, 'ssl', 'passphrase', $passphrase);
+
+     $fp = stream_socket_client(
+       'ssl://gateway.sandbox.push.apple.com:2195', $err,
+       $errstr, 60, STREAM_CLIENT_CONNECT|STREAM_CLIENT_PERSISTENT, $ctx); // Open a connection to the APNS server
+     if (!$fp)
+       exit("Failed to connect: $err $errstr" . PHP_EOL);
+     echo 'Connected to APNS' . PHP_EOL;
+     $payload = json_encode($body); // Encode the payload as JSON
+     $msg = chr(0) . pack('n', 32) . pack('H*', $deviceToken) . pack('n', strlen($payload)) . $payload; // Build the binary notification
+     $result = fwrite($fp, $msg, strlen($msg)); // Send it to the server
+     if (!$result)
+       echo 'Message not delivered' . PHP_EOL;
+     else
+       echo 'Message successfully delivered' . PHP_EOL;
+     fclose($fp); // Close the connection to the server
 }
+}*/

@@ -13,6 +13,7 @@ use Validator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Route;
+use App\TimeZone;
 class PassportController extends Controller {
 
 	public function login(Request $request) {
@@ -58,6 +59,10 @@ class PassportController extends Controller {
 					return self::send_bad_request_response('Device Id and Device Type are required');
 				}
 			}
+			if($request->timezone){
+				$time = TimeZone::where('name',$request->timezone)->first();
+				$user->time_zone_id = $time->id;
+			}
 			$user->save();
 			$token = auth()->user()->createToken('APIAUTH')->accessToken;
 			$tmp = $user->roles()->select('id', 'name')->get()->toArray();
@@ -66,6 +71,8 @@ class PassportController extends Controller {
 				$arr[$key]['name'] = $row['name'];
 			}
 			$user->role_names = $arr;
+			$user->time_zone_name = ($user->time_zone_id) ? $user->timezone->name : '';
+
 			removeMetaColumn($user);
 			if($request->route()->getName() == 'MobileLogin'){
 				$user->permanentaddress_mobile = ($user->getPermanentAddressAttribute()) ? $user->getPermanentAddressAttribute(1) : (object)[];
