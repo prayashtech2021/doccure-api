@@ -468,4 +468,8 @@ class User extends Authenticatable implements Wallet, WalletFloat
             return 1;
         }
     }
+
+    public function timezone(){
+        return $this->belongsTo(TimeZone::class, 'time_zone_id', 'id');
+    }
 }
