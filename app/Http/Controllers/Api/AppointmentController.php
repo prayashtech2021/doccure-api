@@ -807,8 +807,6 @@ class AppointmentController extends Controller
 
     public function scheduleCreate(Request $request)
     {
-        (auth()->user()->time_zone)? $zone = auth()->user()->time_zone : $zone = '';
-
         $rules = array(
             'provider_id' => 'required|numeric|exists:users,id',
             // 'duration' => 'required|date_format:"H:i:s',
@@ -833,8 +831,8 @@ class AppointmentController extends Controller
                     $incoming = explode(',', $request->working_hours);
                     foreach ($incoming as $item) {
                         $t = explode('-',$item);
-                        $t1 = convertToUTC(Carbon::parse($t[0]),$zone,'H:i'); //Carbon::parse($t[0], $zone)->timezone(new \DateTimeZone('UTC'))->format('H:i');
-                        $t2 = convertToUTC(Carbon::parse($t[1]),$zone,'H:i'); //Carbon::parse($t[1], $zone)->timezone(new \DateTimeZone('UTC'))->format('H:i');
+                        $t1 = convertToUTC(Carbon::parse($t[0]),'','H:i'); 
+                        $t2 = convertToUTC(Carbon::parse($t[1]),'','H:i'); 
                         $b = $t1.'-'.$t2;
                         array_push($day_array, $b);
                     }
@@ -868,8 +866,8 @@ class AppointmentController extends Controller
                         $incoming = explode(',', $request->working_hours);
                     foreach($incoming as $item){
                         $t = explode('-',$item);
-                        $t1 = utc($t[0],'H:i'); //Carbon::parse($t[0], $zone)->timezone(new \DateTimeZone('UTC'))->format('H:i');
-                        $t2 = utc($t[1],'H:i'); //Carbon::parse($t[1], $zone)->timezone(new \DateTimeZone('UTC'))->format('H:i');
+                        $t1 = convertToUTC(Carbon::parse($t[0]),'','H:i'); 
+                        $t2 = convertToUTC(Carbon::parse($t[1]),'','H:i'); 
                         $b[] = $t1.'-'.$t2;
                     }
 
