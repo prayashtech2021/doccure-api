@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AlterUserTable extends Migration
+class AlterUserszoneTable extends Migration
 {
     /**
      * Run the migrations.
@@ -15,8 +15,7 @@ class AlterUserTable extends Migration
     {
         //
         Schema::table('users', function (Blueprint $table) {
-            $table->text('device_id')->nullable()->after('status');
-            $table->string('device_type')->nullable()->after('device_id');
+            $table->string('time_zone')->nullable()->after('time_zone_id');
         });
     }
 
@@ -27,8 +26,9 @@ class AlterUserTable extends Migration
      */
     public function down()
     {
+        //
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('device_id');
+            $table->dropColumn('time_zone');
         });
     }
 }

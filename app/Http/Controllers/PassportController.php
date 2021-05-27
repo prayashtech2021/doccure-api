@@ -60,8 +60,7 @@ class PassportController extends Controller {
 				}
 			}
 			if($request->timezone){
-				$time = TimeZone::where('name',$request->timezone)->first();
-				$user->time_zone_id = $time->id;
+				$user->time_zone = $request->timezone;
 			}
 			$user->save();
 			$token = auth()->user()->createToken('APIAUTH')->accessToken;

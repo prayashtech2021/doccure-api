@@ -27,6 +27,9 @@ class AlterLanguageTable extends Migration
     public function down()
     {
         //
-        $table->dropColumn('tag');
+        Schema::table('languages', function (Blueprint $table) {
+
+            $table->dropColumn('tag');
+        });
     }
 }

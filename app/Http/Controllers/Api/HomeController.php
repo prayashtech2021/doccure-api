@@ -52,8 +52,7 @@ class HomeController extends Controller
             $token = substr(str_shuffle(str_repeat($pool, 5)), 0, 20);
             $array['remember_token'] = $token;
             if($request->timezone){
-				$time = TimeZone::where('name',$request->timezone)->first();
-				$array['time_zone_id'] = $time->id;
+				$array['time_zone'] = $request->timezone;
 			}
             $user = User::create($array);
             $user->assignRole($request->type);

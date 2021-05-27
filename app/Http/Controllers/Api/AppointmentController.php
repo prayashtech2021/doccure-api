@@ -807,7 +807,7 @@ class AppointmentController extends Controller
 
     public function scheduleCreate(Request $request)
     {
-        (auth()->user()->timezone)? $zone = auth()->user()->timezone->name : $zone = '';
+        (auth()->user()->time_zone)? $zone = auth()->user()->time_zone : $zone = '';
 
         $rules = array(
             'provider_id' => 'required|numeric|exists:users,id',
