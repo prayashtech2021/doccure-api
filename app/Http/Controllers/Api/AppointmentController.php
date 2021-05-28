@@ -718,6 +718,8 @@ class AppointmentController extends Controller
             sort($final);
             // dd($final);
             $results = [];
+            (auth()->user()->timezone)? $zone = auth()->user()->timezone->name : $zone = config('app.timezone');
+            date_default_timezone_set($zone);
             foreach ($final as $item) {
                 $stime = explode('-', $item);
                 $startTime = Carbon::parse($stime[0]);
@@ -726,8 +728,8 @@ class AppointmentController extends Controller
 
                 if ($sseconds >= $speciality_seconds) {
                     // date_default_timezone_set('US/Eastern');
-                    date_default_timezone_set('Asia/kolkata');
-                    $currentTime = strtotime(date('H:i:s'));
+                    
+                    // $currentTime = strtotime(date('H:i:s'));
                     // dd(date('H:i:s'));
                     $startTimeSeconds = strtotime($stime[0]);
                     $endTimeSeconds = strtotime($stime[1]);
@@ -779,21 +781,23 @@ class AppointmentController extends Controller
                 foreach ($results as $key=>$res) {
                     $exp = explode('-', $res);
                     // dd($exp);
-                    $firstElement = $exp[0];
+                    $timed = Carbon::parse($exp[0]);
+                    $time1 = Carbon::createFromFormat('Y-m-d H:i:s', $timed->toDateTimeString(), 'UTC')->timezone($zone);
+                    $firstElement = $time1;
                     $app_type = $this->getAppointmentType($array1,$array2,$exp[0]);
                     $morning = strtotime('12:00:00');
                     $afternoon = strtotime('16:00:00');
                     if ($firstElement <= $morning) {
                         $newresults['morning'][$mor]['appointment_type'] = $app_type;
-                        $newresults['morning'][$mor]['time'] = date('h:i A', $exp[0]) . ' - ' . date('h:i A', $exp[1]);
+                        $newresults['morning'][$mor]['time'] = convertToLocal(Carbon::parse($exp[0]),$zone,'h:i A') . ' - ' . convertToLocal(Carbon::parse($exp[1]),$zone,'h:i A');
                         $mor++;
                     } elseif ($firstElement <= $afternoon) {
                         $newresults['afternoon'][$aft]['appointment_type'] = $app_type;
-                        $newresults['afternoon'][$aft]['time'] = date('h:i A', $exp[0]) . ' - ' . date('h:i A', $exp[1]);
+                        $newresults['afternoon'][$aft]['time'] = convertToLocal(Carbon::parse($exp[0]),$zone,'h:i A') . ' - ' . convertToLocal(Carbon::parse($exp[1]),$zone,'h:i A');
                         $aft++;
                     } else {
                         $newresults['evening'][$eve]['appointment_type'] = $app_type;
-                        $newresults['evening'][$eve]['time'] = date('h:i A', $exp[0]) . ' - ' . date('h:i A', $exp[1]);
+                        $newresults['evening'][$eve]['time'] = convertToLocal(Carbon::parse($exp[0]),$zone,'h:i A') . ' - ' . convertToLocal(Carbon::parse($exp[1]),$zone,'h:i A');
                         $eve++;
                     }
                 }
