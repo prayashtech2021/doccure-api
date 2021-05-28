@@ -790,15 +790,15 @@ class AppointmentController extends Controller
                     $afternoon = strtotime('16:00:00');
                     if ($firstElement <= $morning) {
                         $newresults['morning'][$mor]['appointment_type'] = $app_type;
-                        $newresults['morning'][$mor]['time'] = date('h:i A',strtotime($exp[0])) . ' - ' . date('h:i A',strtotime($exp[1]));
+                        $newresults['morning'][$mor]['time'] = date('h:i A',$exp[0]) . ' - ' . date('h:i A',$exp[1]);
                         $mor++;
                     } elseif ($firstElement <= $afternoon) {
                         $newresults['afternoon'][$aft]['appointment_type'] = $app_type;
-                        $newresults['afternoon'][$aft]['time'] = date('h:i A',strtotime($exp[0])) . ' - ' . date('h:i A',strtotime($exp[1]));
+                        $newresults['afternoon'][$aft]['time'] = date('h:i A',$exp[0]) . ' - ' . date('h:i A',$exp[1]);
                         $aft++;
                     } else {
                         $newresults['evening'][$eve]['appointment_type'] = $app_type;
-                        $newresults['evening'][$eve]['time'] = date('h:i A',strtotime($exp[0])) . ' - ' . date('h:i A',strtotime($exp[1]));
+                        $newresults['evening'][$eve]['time'] = date('h:i A',$exp[0]) . ' - ' . date('h:i A',$exp[1]);
                         $eve++;
                     }
                 }
