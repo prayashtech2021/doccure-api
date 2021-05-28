@@ -706,36 +706,42 @@ class AppointmentController extends Controller
             $list1 = ScheduleTiming::where('provider_id', $request->provider_id)->where('appointment_type', 1)->first();
             $list2 = ScheduleTiming::where('provider_id', $request->provider_id)->where('appointment_type', 2)->first();
             $array1 = json_decode($list1->working_hours, true);
-            $array1 = $array1[$request_day];
+            $array1 = $array1[$request_day]; //online
             $array2 = json_decode($list2->working_hours, true);
-            $array2 = $array2[$request_day];
+            $array2 = $array2[$request_day]; //offline
             $final = array_merge($array1, $array2);
             $speciality = UserSpeciality::find($request->speciality_id);
-            $speciality_seconds = $speciality->duration;
+            $speciality_seconds = (isset($speciality->duration))?$speciality->duration:600;
 
             $minutes = (($speciality_seconds / 60) % 60);
             $interval = $minutes;
             sort($final);
+            
             // dd($final);
             $results = [];
+            (auth()->user()->timezone)? $zone = auth()->user()->timezone->name : $zone = 'Asia/Kolkata';
+            // date_default_timezone_set($zone);
             foreach ($final as $item) {
                 $stime = explode('-', $item);
-                $startTime = Carbon::parse($stime[0]);
-                $endTime = Carbon::parse($stime[1]);
+                // $startTime = Carbon::parse($stime[0]);
+                // $endTime = Carbon::parse($stime[1]);
+                $startTime = convertToLocal(Carbon::parse($stime[0]),$zone);
+                $endTime = convertToLocal(Carbon::parse($stime[1]),$zone);
                 $sseconds = $endTime->diffInSeconds($startTime);
-
+// dd($endTime->gt());
                 if ($sseconds >= $speciality_seconds) {
                     // date_default_timezone_set('US/Eastern');
-                    date_default_timezone_set('Asia/kolkata');
-                    $currentTime = strtotime(date('H:i:s'));
+                    
+                    // $currentTime = strtotime(date('H:i:s'));
                     // dd(date('H:i:s'));
-                    $startTimeSeconds = strtotime($stime[0]);
-                    $endTimeSeconds = strtotime($stime[1]);
+                    $startTimeSeconds = strtotime($startTime->format('H:i:s'));
+                    $endTimeSeconds = strtotime($endTime->format('H:i:s'));
 
                     if ($selectedDate == date('Y-m-d')) { //current date check
 
                         // if ($startTimeSeconds >= $currentTime) { // if currenttime check
                             $startPlusInterval = strtotime('+' . $interval . ' minutes', $startTimeSeconds);
+                            // $startPlusInterval = $startTime->addMinutes($interval);
                             if ($startPlusInterval <= $endTimeSeconds) {
                                 $start = $this->roundToNearestMinuteInterval($startTime, $interval);
                                 $end = $this->roundToNearestMinuteInterval($endTime, $interval);
@@ -775,18 +781,25 @@ class AppointmentController extends Controller
             // dd($results);
             $newresults = [];
             if ($results) {
-                foreach ($results as $res) {
+                $mor=$aft=$eve=0;
+                foreach ($results as $key=>$res) {
                     $exp = explode('-', $res);
-                    // dd($exp);
                     $firstElement = $exp[0];
+                    $app_type = $this->getAppointmentType($array1,$array2,$exp[0]);
                     $morning = strtotime('12:00:00');
                     $afternoon = strtotime('16:00:00');
                     if ($firstElement <= $morning) {
-                        $newresults['morning'][] = date('h:i A', $exp[0]) . ' - ' . date('h:i A', $exp[1]);
+                        $newresults['morning'][$mor]['appointment_type'] = $app_type;
+                        $newresults['morning'][$mor]['time'] = date('h:i A',$exp[0]) . ' - ' . date('h:i A',$exp[1]);
+                        $mor++;
                     } elseif ($firstElement <= $afternoon) {
-                        $newresults['afternoon'][] = date('h:i A', $exp[0]) . ' - ' . date('h:i A', $exp[1]);
+                        $newresults['afternoon'][$aft]['appointment_type'] = $app_type;
+                        $newresults['afternoon'][$aft]['time'] = date('h:i A',$exp[0]) . ' - ' . date('h:i A',$exp[1]);
+                        $aft++;
                     } else {
-                        $newresults['evening'][] = date('h:i A', $exp[0]) . ' - ' . date('h:i A', $exp[1]);
+                        $newresults['evening'][$eve]['appointment_type'] = $app_type;
+                        $newresults['evening'][$eve]['time'] = date('h:i A',$exp[0]) . ' - ' . date('h:i A',$exp[1]);
+                        $eve++;
                     }
                 }
             }
@@ -797,6 +810,32 @@ class AppointmentController extends Controller
             return self::send_exception_response($exception->getMessage());
         }
 
+    }
+    public function getAppointmentType($array1,$array2,$time)
+    {
+        (auth()->user()->timezone)? $zone = auth()->user()->timezone->name : $zone = 'Asia/Kolkata';
+        $app_type ='';
+        foreach ($array1 as $item) {
+            $stime = explode('-', $item);
+            $startTime = convertToLocal(Carbon::parse($stime[0]),$zone);
+            $endTime = convertToLocal(Carbon::parse($stime[1]),$zone);
+            $startTime = strtotime($startTime->format('H:i:s'));
+            $endTime = strtotime($endTime->format('H:i:s'));
+            if($time>=$startTime && $time<=$endTime){
+                $app_type = 1;
+            }
+        }
+        foreach ($array2 as $item) {
+            $stime = explode('-', $item);
+            $startTime = convertToLocal(Carbon::parse($stime[0]),$zone);
+            $endTime = convertToLocal(Carbon::parse($stime[1]),$zone);
+            $startTime = strtotime($startTime->format('H:i:s'));
+            $endTime = strtotime($endTime->format('H:i:s'));
+            if($time>=$startTime && $time<=$endTime){
+                $app_type = 2;
+            }
+        }
+        return $app_type;
     }
     public function roundToNearestMinuteInterval($time, $interval)
     {
