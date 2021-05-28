@@ -806,6 +806,27 @@ class AppointmentController extends Controller
         }
 
     }
+    public function getAppointmentType($array1,$array2,$time)
+    {
+        $app_type ='';
+        foreach ($array1 as $item) {
+            $stime = explode('-', $item);
+            $startTime = strtotime($stime[0]);
+            $endTime = strtotime($stime[1]);
+            if($time>=$startTime && $time<=$endTime){
+                $app_type = 1;
+            }
+        }
+        foreach ($array2 as $item) {
+            $stime = explode('-', $item);
+            $startTime = strtotime($stime[0]);
+            $endTime = strtotime($stime[1]);
+            if($time>=$startTime && $time<=$endTime){
+                $app_type = 2;
+            }
+        }
+        return $app_type;
+    }
     public function roundToNearestMinuteInterval($time, $interval)
     {
         $timestamp = strtotime($time);
