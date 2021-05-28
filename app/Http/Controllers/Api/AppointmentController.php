@@ -247,8 +247,8 @@ class AppointmentController extends Controller
             $appointment->doctor_id = $request->doctor_id;
             $appointment->appointment_type = $request->appointment_type; //1=online, 2=clinic
             $appointment->appointment_date = $appointment_date;
-            $appointment->start_time = $request->start_time;
-            $appointment->end_time = $request->end_time;
+            $appointment->start_time = convertToUTC(Carbon::parse($request->start_time),'','H:i');
+            $appointment->end_time = convertToUTC(Carbon::parse($request->end_time),'','H:i');
             $appointment->payment_type = $request->payment_type;
             $appointment->request_type = 1;
             $appointment->appointment_status = 1;
