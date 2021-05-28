@@ -706,12 +706,12 @@ class AppointmentController extends Controller
             $list1 = ScheduleTiming::where('provider_id', $request->provider_id)->where('appointment_type', 1)->first();
             $list2 = ScheduleTiming::where('provider_id', $request->provider_id)->where('appointment_type', 2)->first();
             $array1 = json_decode($list1->working_hours, true);
-            $array1 = $array1[$request_day];
+            $array1 = $array1[$request_day]; //online
             $array2 = json_decode($list2->working_hours, true);
-            $array2 = $array2[$request_day];
+            $array2 = $array2[$request_day]; //offline
             $final = array_merge($array1, $array2);
             $speciality = UserSpeciality::find($request->speciality_id);
-            $speciality_seconds = $speciality->duration;
+            $speciality_seconds = (isset($speciality->duration))?$speciality->duration:600;
 
             $minutes = (($speciality_seconds / 60) % 60);
             $interval = $minutes;
@@ -775,18 +775,26 @@ class AppointmentController extends Controller
             // dd($results);
             $newresults = [];
             if ($results) {
-                foreach ($results as $res) {
+                $mor=$aft=$eve=0;
+                foreach ($results as $key=>$res) {
                     $exp = explode('-', $res);
                     // dd($exp);
                     $firstElement = $exp[0];
+                    $app_type = $this->getAppointmentType($array1,$array2,$exp[0]);
                     $morning = strtotime('12:00:00');
                     $afternoon = strtotime('16:00:00');
                     if ($firstElement <= $morning) {
-                        $newresults['morning'][] = date('h:i A', $exp[0]) . ' - ' . date('h:i A', $exp[1]);
+                        $newresults['morning'][$mor]['appointment_type'] = $app_type;
+                        $newresults['morning'][$mor]['time'] = date('h:i A', $exp[0]) . ' - ' . date('h:i A', $exp[1]);
+                        $mor++;
                     } elseif ($firstElement <= $afternoon) {
-                        $newresults['afternoon'][] = date('h:i A', $exp[0]) . ' - ' . date('h:i A', $exp[1]);
+                        $newresults['afternoon'][$aft]['appointment_type'] = $app_type;
+                        $newresults['afternoon'][$aft]['time'] = date('h:i A', $exp[0]) . ' - ' . date('h:i A', $exp[1]);
+                        $aft++;
                     } else {
-                        $newresults['evening'][] = date('h:i A', $exp[0]) . ' - ' . date('h:i A', $exp[1]);
+                        $newresults['evening'][$eve]['appointment_type'] = $app_type;
+                        $newresults['evening'][$eve]['time'] = date('h:i A', $exp[0]) . ' - ' . date('h:i A', $exp[1]);
+                        $eve++;
                     }
                 }
             }
