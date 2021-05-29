@@ -734,7 +734,7 @@ class AppointmentController extends Controller
                     // date_default_timezone_set('US/Eastern');
                     
                     // $currentTime = strtotime(date('H:i:s'));
-                    $currentTime = strtotime(Carbon::now()->date('H:i:s'));
+                    $currentTime = strtotime(Carbon::now()->format('H:i:s'));
                     // dd(date('H:i:s'));
                     $startTimeSeconds = strtotime($startTime->format('H:i:s'));
                     $endTimeSeconds = strtotime($endTime->format('H:i:s'));
