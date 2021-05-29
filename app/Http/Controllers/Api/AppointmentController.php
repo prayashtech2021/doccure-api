@@ -85,7 +85,8 @@ class AppointmentController extends Controller
 
             $user = auth()->user();
             updateLastSeen(auth()->user());
-            $update = Appointment::whereIn('appointment_status', [1, 2])->whereDate('appointment_date', '<=', convertToUTC(Carbon::now(),'','Y-m-d'))->get();
+            $update = Appointment::whereIn('appointment_status', [1, 2])->whereDate('appointment_date', '<', convertToUTC(Carbon::now(),'','Y-m-d'))->get();
+            // dd( convertToUTC(Carbon::now(),'','Y-m-d'));
             if ($update) {
                 foreach ($update as $upd) {
                     $app = Appointment::where('id', $upd->id)->where('end_time', '<', convertToLocal(Carbon::parse(now()), $upd->time_zone, 'H:i:s'))->first();
@@ -231,7 +232,7 @@ class AppointmentController extends Controller
              * Appointment
              */
             $appointment_date = convertToUTC(Carbon::createFromFormat('d/m/Y', $request->appointment_date));
-            $chk = Appointment::where(['doctor_id' => $doctor->id, 'appointment_date' => $appointment_date->toDateString(), 'start_time' => $request->start_time, 'end_time' => $request->end_time])->first();
+            $chk = Appointment::where(['doctor_id' => $doctor->id, 'appointment_date' => $appointment_date->toDateString(), 'start_time' => convertToUTC(Carbon::parse($request->start_time),'','H:i:s'), 'end_time' => convertToUTC(Carbon::parse($request->end_time),'','H:i:s')])->first();
             if ($chk) {
                 if ($request->route()->getName() == "appointmentCreate") {
                     return self::send_bad_request_response('Appointment already exists');
@@ -737,7 +738,7 @@ class AppointmentController extends Controller
                     $startTimeSeconds = strtotime($startTime->format('H:i:s'));
                     $endTimeSeconds = strtotime($endTime->format('H:i:s'));
 
-                    if ($selectedDate == date('Y-m-d')) { //current date check
+                    if ($selectedDate == convertToLocal(Carbon::now(),$zone,'Y-m-d')) { //current date check
 
                         // if ($startTimeSeconds >= $currentTime) { // if currenttime check
                             $startPlusInterval = strtotime('+' . $interval . ' minutes', $startTimeSeconds);
@@ -749,7 +750,7 @@ class AppointmentController extends Controller
                                     // $results[] = date('H:i:s', $start)
                                     $temp = strtotime('+' . $interval . ' minutes', $start);
                                     if ($temp <= $endTimeSeconds) {
-                                        $chk = Appointment::where(['doctor_id' => $request->provider_id, 'appointment_date' => $selectedDate, 'start_time' => date('H:i:s', $start)])->first();
+                                        $chk = Appointment::where(['doctor_id' => $request->provider_id, 'appointment_date' => convertToUTC(Carbon::parse($selectedDate),'','Y-m-d'), 'start_time' => convertToUTC(date('H:i:s', $start),'','H:i:s')])->first();
                                         if (!$chk) {
                                             $results[] = $start . '-' . $temp;
                                         }
@@ -767,7 +768,7 @@ class AppointmentController extends Controller
                                 // $results[] = date('H:i:s', $start)
                                 $temp = strtotime('+' . $interval . ' minutes', $start);
                                 if ($temp <= $endTimeSeconds) {
-                                    $chk = Appointment::where(['doctor_id' => $request->provider_id, 'appointment_date' => $selectedDate, 'start_time' => date('H:i:s', $start)])->first();
+                                    $chk = Appointment::where(['doctor_id' => $request->provider_id, convertToUTC(Carbon::parse($selectedDate),'','Y-m-d'), 'start_time' => convertToUTC(date('H:i:s', $start),'','H:i:s')])->first();
                                     if (!$chk) {
                                         $results[] = $start . '-' . $temp;
                                     }
