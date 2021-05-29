@@ -734,6 +734,7 @@ class AppointmentController extends Controller
                     // date_default_timezone_set('US/Eastern');
                     
                     // $currentTime = strtotime(date('H:i:s'));
+                    $currentTime = strtotime(convertToLocal(Carbon::now(),$zone,'H:i:s'));
                     // dd(date('H:i:s'));
                     $startTimeSeconds = strtotime($startTime->format('H:i:s'));
                     $endTimeSeconds = strtotime($endTime->format('H:i:s'));
@@ -749,12 +750,15 @@ class AppointmentController extends Controller
                                 for (; $start <= $end; $start += $interval * 60) {
                                     // $results[] = date('H:i:s', $start)
                                     $temp = strtotime('+' . $interval . ' minutes', $start);
+                                    if ($start >= $currentTime){ 
                                     if ($temp <= $endTimeSeconds) {
                                         $chk = Appointment::where(['doctor_id' => $request->provider_id, 'appointment_date' => $selectedDate, 'start_time' => Carbon::parse($start)->format('H:i:s')])->first();
+                                        // dd(convertToUTC(Carbon::parse($selectedDate),'','Y-m-d'),$stime[0],$zone,$startTime,$start,date('H:i:s',$start),Carbon::parse($start),convertToUTC(Carbon::parse($start),'','H:i:s'));
                                         if (!$chk) {
                                             $results[] = $start . '-' . $temp;
                                         }
                                         // $results[] = date('h:i A', $start).'-'.date('h:i A',$temp);
+                                    }
                                     }
                                 }
                             }
