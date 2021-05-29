@@ -85,7 +85,7 @@ class AppointmentController extends Controller
 
             $user = auth()->user();
             updateLastSeen(auth()->user());
-            $update = Appointment::whereIn('appointment_status', [1, 2])->whereDate('appointment_date', '<=', convertToUTC(now()))->get();
+            $update = Appointment::whereIn('appointment_status', [1, 2])->whereDate('appointment_date', '<=', convertToUTC(Carbon::now(),'','Y-m-d'))->get();
             if ($update) {
                 foreach ($update as $upd) {
                     $app = Appointment::where('id', $upd->id)->where('end_time', '<', convertToLocal(Carbon::parse(now()), $upd->time_zone, 'H:i:s'))->first();
