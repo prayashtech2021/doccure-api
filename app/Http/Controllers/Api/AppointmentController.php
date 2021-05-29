@@ -751,7 +751,7 @@ class AppointmentController extends Controller
                                     $temp = strtotime('+' . $interval . ' minutes', $start);
                                     if ($temp <= $endTimeSeconds) {
                                         $chk = Appointment::where(['doctor_id' => $request->provider_id, 'appointment_date' => convertToUTC(Carbon::parse($selectedDate),'','Y-m-d'), 'start_time' => convertToUTC(Carbon::parse($start),'','H:i:s')])->first();
-                                        dd($start,convertToUTC(Carbon::parse($start),'','H:i:s'));
+                                        dd($stime[0],$zone,$startTime,$start,convertToUTC(Carbon::parse($start),'','H:i:s'));
                                         if (!$chk) {
                                             $results[] = $start . '-' . $temp;
                                         }
