@@ -185,6 +185,7 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
 
     Route::post('create_setup_intent', 'Api\AppointmentController@create_setup_intent');
 
+    Route::get('schedule/listfor/patient','Api\AppointmentController@scheduleListForPatient')->name('scheduleListPatient');
 });
 
 Route::any('{path}', function () {
