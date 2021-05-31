@@ -649,6 +649,30 @@ class AppointmentController extends Controller
             $consumer->notify(new AppointmentNoty($appointment));
             $provider = User::find($appointment->doctor_id);
             $provider->notify(new AppointmentNoty($appointment));
+            if ($request->status == 2 || $request->status == 6) { //mobile noty doctor accept / cancelled
+               
+                $notifydata['device_id'] = $consumer->device_id;
+
+                $device_type = $consumer->device_type;
+    
+                if($request->status == 2){  //accept
+                    $message = 'Your appointment request is accepted by Dr.'.$provider->first_name. ''. $provider->last_name;
+                }else{  //cancel
+                    $message = 'Your appointment request is cancelled by Dr.'.$provider->first_name. ''. $provider->last_name;
+                }
+    
+                $notifydata['message'] = $message;
+                $notifydata['notifications_title'] = 'Appointment Status';
+                $nresponse['type'] = 'Booking';
+                $notifydata['additional_data'] = $nresponse;
+                if ($device_type == 'Android' && (!empty($notifydata['device_id']))) {
+                    sendFCMNotification($notifydata);
+                }
+                if ($device_type == 'IOS' && (!empty($notifydata['device_id']))) {
+                    sendFCMiOSMessage($notifydata);
+                }
+            }
+            
 
             return self::send_success_response([], 'Status updated sucessfully');
         } catch (Exception | Throwable $exception) {
@@ -1326,10 +1350,6 @@ class AppointmentController extends Controller
 
             $response['tokbox'] = Setting::select('keyword', 'value')->where('slug', 'tokbox')->get();
 
-            //$response['sessionId'] = $appoinments_details['tokboxsessionId'];
-            //$response['token'] = $appoinments_details['tokboxtoken'];
-            //$response['tokbox_apiKey'] =$this->tokbox_apiKey;
-            //$response['tokbox_apiSecret'] =$this->tokbox_apiSecret;
             $notifydata['notifications_title'] = 'Incoming call';
             $notifydata['additional_data'] = $response;
 
@@ -1339,8 +1359,7 @@ class AppointmentController extends Controller
             if ($device_type == 'IOS' && (!empty($notifydata['device_id']))) {
                 sendFCMiOSMessage($notifydata);
             }
-            //$this->call_details($response['invite_id'],$response['from_user_id'],$response['to'],$user_data['call_type']);
-            //$result = $this->data_format($response_code,$response_message,$response);
+            
             return self::send_success_response($response, 'Make Call');
         } catch (Exception | Throwable $exception) {
             return self::send_exception_response($exception->getMessage());
