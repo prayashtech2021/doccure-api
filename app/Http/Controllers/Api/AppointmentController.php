@@ -786,6 +786,17 @@ class AppointmentController extends Controller
             // dd($results);
             $newresults = [];
             if ($results) {
+                if ($request->route()->getName() == "scheduleListPatient") {//for mobile
+                    $cnt =0;
+                    foreach ($results as $key=>$res) {
+                        $exp = explode('-', $res);
+                        $firstElement = $exp[0];
+                        $app_type = $this->getAppointmentType($array1,$array2,$exp[0]);
+                        $newresults[$cnt]['appointment_type'] = $app_type;
+                        $newresults[$cnt]['time'] = date('h:i A',$exp[0]) . ' - ' . date('h:i A',$exp[1]);
+                        $cnt++;
+                    }
+                }else{ //for web
                 $mor=$aft=$eve=0;
                 foreach ($results as $key=>$res) {
                     $exp = explode('-', $res);
@@ -807,6 +818,7 @@ class AppointmentController extends Controller
                         $eve++;
                     }
                 }
+            }
             }
             // dd($newresults);
             // sort($results);
