@@ -60,7 +60,8 @@ function convertToUTC(Carbon $date, $timezone = null, $format = null)
 {
    if (!$timezone) $timezone = config('app.timezone');
    $datetime = Carbon::createFromFormat('Y-m-d H:i:s', Carbon::now(), $timezone)->setTimezone(new DateTimeZone('UTC'));
-   print_r($timezone,$datetime);
+   print_r($timezone);
+   print_r($datetime);
    return $format ? $datetime->format($format) : $datetime;
 }
 
