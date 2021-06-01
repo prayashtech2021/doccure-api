@@ -59,8 +59,7 @@ function removeMetaColumn($model){
 function convertToUTC(Carbon $date, $timezone = null, $format = null)
 {
    if (!$timezone) $timezone = config('app.timezone');
-   $datetime = Carbon::parse($date, $timezone)->timezone(new DateTimeZone('UTC'));
-//    $datetime = Carbon::createFromFormat('Y-m-d H:i:s', $date->toDateTimeString(), $timezone)->setTimezone(new DateTimeZone('UTC'));
+   $datetime = Carbon::createFromFormat('Y-m-d H:i:s', $date->toDateTimeString(), $timezone)->setTimezone(new DateTimeZone('UTC'));
    return $format ? $datetime->format($format) : $datetime;
 }
 

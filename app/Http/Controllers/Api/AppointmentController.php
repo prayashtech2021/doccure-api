@@ -912,6 +912,7 @@ class AppointmentController extends Controller
                         $t = explode('-',$item);
                         $t1 = convertToUTC(Carbon::parse($t[0]),'','H:i'); 
                         $t2 = convertToUTC(Carbon::parse($t[1]),'','H:i'); 
+                        dd($t[0],$t1);
                         $b = $t1.'-'.$t2;
                         array_push($day_array, $b);
                     }
