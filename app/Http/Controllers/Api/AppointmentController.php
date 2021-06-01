@@ -889,7 +889,6 @@ class AppointmentController extends Controller
     {
         $rules = array(
             'provider_id' => 'required|numeric|exists:users,id',
-            // 'duration' => 'required|date_format:"H:i:s',
             'appointment_type' => 'required|numeric|in:1,2',
             'day' => 'required|numeric|in:1,2,3,4,5,6,7',
             'working_hours' => 'required|string',
@@ -899,8 +898,8 @@ class AppointmentController extends Controller
 
         try {
             $schedule = ScheduleTiming::where('provider_id', $request->provider_id)->first();
-            // $seconds = Carbon::parse('00:00:00')->diffInSeconds(Carbon::parse($request->duration));
-            // $seconds = (int) $seconds;
+           
+           
             if ($schedule) { //update
                 $schedule = ScheduleTiming::where('provider_id', $request->provider_id)->where('appointment_type', $request->appointment_type)->first();
                 if ($schedule) { //update
