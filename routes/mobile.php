@@ -100,7 +100,7 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
 
     /* Medical Record */
     Route::post('record/save', 'Api\MedicalRecordController@save');
-    Route::post('record/list/', 'Api\MedicalRecordController@getList');
+    Route::post('record/list/', 'Api\MedicalRecordController@getList')->name('recordList');
     Route::get('record/view/{id}', 'Api\MedicalRecordController@getView');
     Route::get('record/delete/{id}', 'Api\MedicalRecordController@destroy');
 

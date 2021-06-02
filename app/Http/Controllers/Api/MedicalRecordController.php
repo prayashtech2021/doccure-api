@@ -114,7 +114,11 @@ class MedicalRecordController extends Controller
             });
 
             if($data){
-                $result['list'] = $data;
+                if ($request->route()->getName() == "recordList") {
+                    $result['list'] = $data->toArray();
+                }else{
+                    $result['list'] = $data;
+                }
                 $result['total_count'] = $paginatedata->total();
                 $result['last_page'] = $paginatedata->lastPage();
                 $result['current_page'] = $paginatedata->currentPage();
