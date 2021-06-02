@@ -765,7 +765,7 @@ class AppointmentController extends Controller
 
                     if ($selectedDate == convertToLocal(Carbon::now(),$zone,'Y-m-d')) { //current date check
 
-                        if ($startTimeSeconds >= $currentTime) { // if currenttime check
+                        // if ($startTimeSeconds >= $currentTime) { // if currenttime check
                             $startPlusInterval = strtotime('+' . $interval . ' minutes', $startTimeSeconds);
                             // $startPlusInterval = $startTime->addMinutes($interval);
                             if ($startPlusInterval <= $endTimeSeconds) {
@@ -786,7 +786,7 @@ class AppointmentController extends Controller
                                     }
                                 }
                             }
-                        } // if currenttime check
+                        // } // if currenttime check
                     } else {
                         $startPlusInterval = strtotime('+' . $interval . ' minutes', $startTimeSeconds);
                         if ($startPlusInterval <= $endTimeSeconds) {

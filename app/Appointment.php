@@ -8,7 +8,7 @@ use Illuminate\Support\Carbon;
 class Appointment extends Model
 {
     public function getData(){
-        (auth()->user()->timezone)? $zone = auth()->user()->timezone->name : $zone = '';
+        (auth()->user()->time_zone)? $zone = auth()->user()->time_zone : $zone = '';
 
         return [
             'id' => $this->id,
@@ -32,7 +32,7 @@ class Appointment extends Model
     }
 
     public function basicData(){
-        (auth()->user()->timezone)? $zone = auth()->user()->timezone->name : $zone = '';
+        (auth()->user()->time_zone)? $zone = auth()->user()->time_zone : $zone = '';
 
         return [
             'id' => $this->id,
