@@ -85,7 +85,7 @@ class AppointmentController extends Controller
 
             $user = auth()->user();
             updateLastSeen(auth()->user());
-            $update = Appointment::whereIn('appointment_status', [1, 2])->whereDate('appointment_date', '<', convertToUTC(Carbon::now(),'','Y-m-d'))->get();
+            $update = Appointment::whereIn('appointment_status', [1, 2])->whereDate('appointment_date', '<', convertToUTC(Carbon::now(),auth()->user()->time_zone,'Y-m-d'))->get();
             // dd( convertToUTC(Carbon::now(),'','Y-m-d'));
             if ($update) {
                 foreach ($update as $upd) {
@@ -110,10 +110,10 @@ class AppointmentController extends Controller
             if ($status) {
                 switch ($status) {
                     case 1: //upcoming
-                        $list = $list->whereIn('appointment_status', [1, 2])->whereDate('appointment_date', '>=', convertToUTC(now()));
+                        $list = $list->whereIn('appointment_status', [1, 2])->whereDate('appointment_date', '>=', convertToUTC(now(),auth()->user()->time_zone));
                         break;
                     case 2: //missed
-                        $list = $list->whereIn('appointment_status', [1, 2])->whereDate('appointment_date', '<', convertToUTC(now()));
+                        $list = $list->whereIn('appointment_status', [1, 2])->whereDate('appointment_date', '<', convertToUTC(now(),auth()->user()->time_zone));
                         break;
                     case 3: //completed/approved
                         $list = $list->where('appointment_status', 3);
@@ -232,7 +232,7 @@ class AppointmentController extends Controller
              * Appointment
              */
             $appointment_date = convertToUTC(Carbon::createFromFormat('d/m/Y', $request->appointment_date));
-            $chk = Appointment::where(['doctor_id' => $doctor->id, 'appointment_date' => $appointment_date->toDateString(), 'start_time' => convertToUTC(Carbon::parse($request->start_time),'','H:i:s'), 'end_time' => convertToUTC(Carbon::parse($request->end_time),'','H:i:s')])->first();
+            $chk = Appointment::where(['doctor_id' => $doctor->id, 'appointment_date' => $appointment_date->toDateString(), 'start_time' => convertToUTC(Carbon::parse($request->start_time),auth()->user()->time_zone,'H:i:s'), 'end_time' => convertToUTC(Carbon::parse($request->end_time),auth()->user()->time_zone,'H:i:s')])->first();
             if ($chk) {
                 if ($request->route()->getName() == "appointmentCreate") {
                     return self::send_bad_request_response('Appointment already exists');
@@ -248,8 +248,8 @@ class AppointmentController extends Controller
             $appointment->doctor_id = $request->doctor_id;
             $appointment->appointment_type = $request->appointment_type; //1=online, 2=clinic
             $appointment->appointment_date = $appointment_date;
-            $appointment->start_time = convertToUTC(Carbon::parse($request->start_time),'','H:i');
-            $appointment->end_time = convertToUTC(Carbon::parse($request->end_time),'','H:i');
+            $appointment->start_time = convertToUTC(Carbon::parse($request->start_time),auth()->user()->time_zone,'H:i');
+            $appointment->end_time = convertToUTC(Carbon::parse($request->end_time),auth()->user()->time_zone,'H:i');
             $appointment->payment_type = $request->payment_type;
             $appointment->request_type = 1;
             $appointment->appointment_status = 1;
@@ -903,15 +903,14 @@ class AppointmentController extends Controller
             if ($schedule) { //update
                 $schedule = ScheduleTiming::where('provider_id', $request->provider_id)->where('appointment_type', $request->appointment_type)->first();
                 if ($schedule) { //update
-
                     // if ($schedule->duration == $seconds) { //update working hrs
                     $array = json_decode($schedule->working_hours, true);
                     $day_array = $array[config('custom.days.' . $request->day)];
                     $incoming = explode(',', $request->working_hours);
                     foreach ($incoming as $item) {
                         $t = explode('-',$item);
-                        $t1 = convertToUTC(Carbon::parse($t[0]),'','H:i'); 
-                        $t2 = convertToUTC(Carbon::parse($t[1]),'','H:i'); 
+                        $t1 = convertToUTC(Carbon::parse($t[0]),auth()->user()->time_zone,'H:i'); 
+                        $t2 = convertToUTC(Carbon::parse($t[1]),auth()->user()->time_zone,'H:i'); 
                         // dd($t[0],$t1);
                         $b = $t1.'-'.$t2;
                         array_push($day_array, $b);
@@ -946,8 +945,8 @@ class AppointmentController extends Controller
                         $incoming = explode(',', $request->working_hours);
                     foreach($incoming as $item){
                         $t = explode('-',$item);
-                        $t1 = convertToUTC(Carbon::parse($t[0]),'','H:i'); 
-                        $t2 = convertToUTC(Carbon::parse($t[1]),'','H:i'); 
+                        $t1 = convertToUTC(Carbon::parse($t[0]),auth()->user()->time_zone,'H:i'); 
+                        $t2 = convertToUTC(Carbon::parse($t[1]),auth()->user()->time_zone,'H:i'); 
                         $b[] = $t1.'-'.$t2;
                     }
 
