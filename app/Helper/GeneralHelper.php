@@ -56,18 +56,19 @@ function removeMetaColumn($model){
  * time conversion
  */
 
-function convertToUTC(Carbon $date, $timezone = null, $format = null)
+function convertToUTC(Carbon $date, $timezone = '', $format = '')
 {
-   if (!$timezone) $timezone = config('app.timezone');
-   $datetime = Carbon::createFromFormat('Y-m-d H:i:s', $date->toDateTimeString(), $timezone)->setTimezone(new DateTimeZone('UTC'));
-   return $format ? $datetime->format($format) : $datetime;
+   if (empty($timezone)) $timezone = config('app.timezone');
+   $datetime = Carbon::createFromFormat('Y-m-d H:i:s', $date->toDateTimeString(), $timezone)->setTimezone(new \DateTimeZone('UTC'));
+//    print_r($datetime);
+   return (!empty($format)) ? $datetime->format($format) : $datetime;
 }
 
-function convertToLocal(Carbon $date, $timezone = null, $format = null)
+function convertToLocal(Carbon $date, $timezone = '', $format = '')
 {
-   if (!$timezone) $timezone = config('app.timezone');
+   if (empty($timezone)) $timezone = config('app.timezone');
    $datetime = Carbon::createFromFormat('Y-m-d H:i:s', $date->toDateTimeString(), 'UTC')->timezone($timezone);
-   return $format ? $datetime->format($format) : $datetime;
+   return (!empty($format)) ? $datetime->format($format) : $datetime;
 }
 
 function utc($datetime,$format){
