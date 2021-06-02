@@ -777,7 +777,7 @@ class AppointmentController extends Controller
                                     // dd($start,$currentTime,Carbon::now()->date('H:i:s'),$startTime);
                                     if ($start >= $currentTime){ 
                                     if ($temp <= $endTimeSeconds) {
-                                        $chk = Appointment::where(['doctor_id' => $request->provider_id, 'appointment_date' => $selectedDate, 'start_time' => Carbon::parse($start)->format('H:i:s')])->first();
+                                        $chk = Appointment::where(['doctor_id' => $request->provider_id, 'appointment_date' => $selectedDate, 'start_time' => convertToUTC(Carbon::parse($start),$zone,'H:i:s')])->first();
                                         if (!$chk) {
                                             $results[] = $start . '-' . $temp;
                                         }
@@ -796,7 +796,7 @@ class AppointmentController extends Controller
                                 // $results[] = date('H:i:s', $start)
                                 $temp = strtotime('+' . $interval . ' minutes', $start);
                                 if ($temp <= $endTimeSeconds) {
-                                    $chk = Appointment::where(['doctor_id' => $request->provider_id,'appointment_date' => $selectedDate, 'start_time' => Carbon::parse($start)->format('H:i:s')])->first();
+                                    $chk = Appointment::where(['doctor_id' => $request->provider_id,'appointment_date' => $selectedDate, 'start_time' => convertToUTC(Carbon::parse($start),$zone,'H:i:s')])->first();
                                     if (!$chk) {
                                         $results[] = $start . '-' . $temp;
                                     }
