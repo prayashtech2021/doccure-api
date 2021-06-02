@@ -744,7 +744,7 @@ class AppointmentController extends Controller
             
             // dd($final);
             $results = [];
-            (auth()->user()->timezone)? $zone = auth()->user()->timezone->name : $zone = 'Asia/Kolkata';
+            (auth()->user()->time_zone)? $zone = auth()->user()->time_zone : '';
             // date_default_timezone_set($zone);
             foreach ($final as $item) {
                 $stime = explode('-', $item);
@@ -854,7 +854,7 @@ class AppointmentController extends Controller
     }
     public function getAppointmentType($array1,$array2,$time)
     {
-        (auth()->user()->timezone)? $zone = auth()->user()->timezone->name : $zone = 'Asia/Kolkata';
+        (auth()->user()->time_zone)? $zone = auth()->user()->time_zone : '';
         $app_type ='';
         foreach ($array1 as $item) {
             $stime = explode('-', $item);
