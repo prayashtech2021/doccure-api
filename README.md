@@ -40,25 +40,25 @@ The Laravel framework is open-sourced software licensed under the [MIT license](
 - Run this command to update vendor files 'composer update'.
 - Rename file .env.example to .env.
 - Change the APP_URL, DB_DATABASE, DB_USERNAME and DB_PASSWORD values in .env as per your configuration.
+- Run this artisan command to generate key - 'php artisan key:generate'.
   
 ## Migration
 
-- Create a Database named like 'taxi'.
-- Run this artisan command to generate key - 'php artisan key:generate'.
+- Create a Database.
 - Run this artisan command to migrate the tables with seeder - 'php artisan migrate --seed'.
 - Run this artisan command for Passport - 'php artisan passport:install'.
 
 ## Default Users
 
-# ADMIN Panel
+## ADMIN Panel
 USERNAME: admin@gmail.com
 PASSWORD: Will be shared personal
 
-# CASH Distributor Panel
-USERNAME: cash@gmail.com
+## Doctor Panel
+USERNAME: doctor@gmail.com
 PASSWORD: Will be shared personal
 
-# DRIVER Panel
-USERNAME: driver@gmail.com
+## Patient Panel
+USERNAME: patient@gmail.com
 PASSWORD: Will be shared personal
   
