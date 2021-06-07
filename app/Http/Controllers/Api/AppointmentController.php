@@ -761,7 +761,7 @@ class AppointmentController extends Controller
                 if($startTime_date==$selectedDate){
                     if ($sseconds >= $speciality_seconds) {
                         
-                        $today = Carbon::createFromFormat('Y-m-d H:i:s', date('Y-m-d H:i:s'), $user_zone);
+                        $today = Carbon::createFromFormat('Y-m-d H:i:s', date('Y-m-d H:i:s'))->setTimezone($user_zone);
                         $currentTime = strtotime($today->format('Y-m-d H:i:s'));
                         $startTimeSeconds = strtotime($startTime->format('Y-m-d H:i:s'));
                         $endTimeSeconds = strtotime($endTime->format('Y-m-d H:i:s'));
