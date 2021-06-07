@@ -396,7 +396,7 @@ class HomeController extends Controller
                     $user->profile_image = $file_name;
                     $user->save();
                 } else {
-                    return self::send_bad_request_response('Image Uploading Failed. Please check and try again!');
+                    return self::send_bad_request_response('Image Uploading Failed. Please check dimensions and try again!');
                 }
             }
             
