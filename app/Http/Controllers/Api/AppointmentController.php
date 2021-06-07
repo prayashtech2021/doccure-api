@@ -85,20 +85,18 @@ class AppointmentController extends Controller
 
             $user = auth()->user();
             updateLastSeen(auth()->user());
-            $update = Appointment::whereIn('appointment_status', [1, 2])->whereDate('appointment_date', '<', convertToUTC(Carbon::now(),auth()->user()->time_zone,'Y-m-d'))->get();
-            // dd( convertToUTC(Carbon::now(),'','Y-m-d'));
-            if ($update) {
-                foreach ($update as $upd) {
-                    $app = Appointment::where('id', $upd->id)->where('end_time', '<', convertToLocal(Carbon::parse(now()), $upd->time_zone, 'H:i:s'))->first();
-                    if ($app) {
-                        Appointment::where('id', $app->id)->update(['appointment_status' => 7]);
+            $getApp = Appointment::whereIn('appointment_status', [1, 2])->get();
+            foreach($getApp as $item){
+            $patient = User::find($item->user_id);
+            $patient_zone = Carbon::createFromFormat('Y-m-d H:i:s', Carbon::now()->toDateTimeString(), $patient->time_zone);
+                if($item->appointment_date < $patient_zone->format('Y-m-d')){
+                    Appointment::where('id', $item->id)->update(['appointment_status' => 7]);
 
-                        $user = User::find($app->user_id);
-                        $requested_amount = $app->payment->total_amount - $app->payment->transaction_charge;
-                        $user->depositFloat($requested_amount);
-                    }
+                    $requested_amount = $app->payment->total_amount - $app->payment->transaction_charge;
+                    $patient->depositFloat($requested_amount);
                 }
             }
+            
 
             $paginate = $request->count_per_page ? $request->count_per_page : 10;
             $pageNumber = $request->page ? $request->page : 1;
@@ -110,10 +108,10 @@ class AppointmentController extends Controller
             if ($status) {
                 switch ($status) {
                     case 1: //upcoming
-                        $list = $list->whereIn('appointment_status', [1, 2])->whereDate('appointment_date', '>=', convertToUTC(now(),auth()->user()->time_zone));
+                        $list = $list->whereIn('appointment_status', [1, 2])->whereDate('appointment_date', '>=', convertToLocal(now(),auth()->user()->time_zone));
                         break;
                     case 2: //missed
-                        $list = $list->whereIn('appointment_status', [1, 2])->whereDate('appointment_date', '<', convertToUTC(now(),auth()->user()->time_zone));
+                        $list = $list->whereIn('appointment_status', [1, 2])->whereDate('appointment_date', '<', convertToLocal(now(),auth()->user()->time_zone));
                         break;
                     case 3: //completed/approved
                         $list = $list->where('appointment_status', 3);
@@ -129,7 +127,7 @@ class AppointmentController extends Controller
 
             $appointment_date = $request->appointment_date ? Carbon::createFromFormat('d/m/Y', $request->appointment_date) : null;
             $list = $list->when($appointment_date, function ($qry) use ($appointment_date) {
-                return $qry->whereDate('appointment_date', convertToUTC($appointment_date));
+                return $qry->whereDate('appointment_date', convertToLocal($appointment_date));
             });
 
             $data = collect();
@@ -231,8 +229,8 @@ class AppointmentController extends Controller
             /**
              * Appointment
              */
-            $appointment_date = convertToUTC(Carbon::createFromFormat('d/m/Y', $request->appointment_date));
-            $chk = Appointment::where(['doctor_id' => $doctor->id, 'appointment_date' => $appointment_date->toDateString(), 'start_time' => convertToUTC(Carbon::parse($request->start_time),auth()->user()->time_zone,'H:i:s'), 'end_time' => convertToUTC(Carbon::parse($request->end_time),auth()->user()->time_zone,'H:i:s')])->first();
+            $appointment_date = Carbon::createFromFormat('d/m/Y', $request->appointment_date)->format('Y-m-d');
+            $chk = Appointment::where(['doctor_id' => $doctor->id, 'appointment_date' => $appointment_date, 'start_time' => $request->start_time, 'end_time' => $request->end_time])->first();
             if ($chk) {
                 if ($request->route()->getName() == "appointmentCreate") {
                     return self::send_bad_request_response('Appointment already exists');
@@ -248,8 +246,8 @@ class AppointmentController extends Controller
             $appointment->doctor_id = $request->doctor_id;
             $appointment->appointment_type = $request->appointment_type; //1=online, 2=clinic
             $appointment->appointment_date = $appointment_date;
-            $appointment->start_time = convertToUTC(Carbon::parse($request->start_time),auth()->user()->time_zone,'H:i');
-            $appointment->end_time = convertToUTC(Carbon::parse($request->end_time),auth()->user()->time_zone,'H:i');
+            $appointment->start_time = $request->start_time;
+            $appointment->end_time = $request->end_time;
             $appointment->payment_type = $request->payment_type;
             $appointment->request_type = 1;
             $appointment->appointment_status = 1;
@@ -263,7 +261,7 @@ class AppointmentController extends Controller
             $log->request_type = 1;
             $log->description = config('custom.appointment_log_message.1');
             $log->status = $appointment->appointment_status;
-            $log->created_at = convertToUTC(Carbon::now());
+            $log->created_at = Carbon::now();
             $log->save();
 
             /* Notification */
@@ -742,28 +740,34 @@ class AppointmentController extends Controller
             $interval = $minutes;
             sort($final);
             
+            $provider = User::find($request->provider_id);
             // dd($final);
             $results = [];
-            (auth()->user()->time_zone)? $zone = auth()->user()->time_zone : '';
+            $patient = auth()->user();
+            $user_zone = $patient->time_zone;
+            $provider_zone = $provider->time_zone;
             // date_default_timezone_set($zone);
             foreach ($final as $item) {
                 $stime = explode('-', $item);
                 // $startTime = Carbon::parse($stime[0]);
                 // $endTime = Carbon::parse($stime[1]);
-                $startTime = convertToLocal(Carbon::parse($stime[0]),$zone);
-                $endTime = convertToLocal(Carbon::parse($stime[1]),$zone);
+                $ttemp1 = $selectedDate.' '.$stime[0];
+                $ttemp2 = $selectedDate.' '.$stime[1];
+                $startTime = providerToUser($ttemp1,$provider_zone,$user_zone);
+                $endTime = providerToUser($ttemp2,$provider_zone,$user_zone);
                 $sseconds = $endTime->diffInSeconds($startTime);
-// dd($endTime->gt());
-                if ($sseconds >= $speciality_seconds) {
-                    // date_default_timezone_set('US/Eastern');
-                    
-                    // $currentTime = strtotime(date('H:i:s'));
-                    $currentTime = strtotime(convertToLocal(Carbon::now(),$zone,'H:i:s'));
-                    // dd(date('H:i:s'));
-                    $startTimeSeconds = strtotime($startTime->format('H:i:s'));
-                    $endTimeSeconds = strtotime($endTime->format('H:i:s'));
-
-                    if ($selectedDate == convertToLocal(Carbon::now(),$zone,'Y-m-d')) { //current date check
+                $startTime_date = $startTime->format('Y-m-d');
+                $endTime_date = $endTime->format('Y-m-d');
+                if($startTime_date==$selectedDate){
+                    if ($sseconds >= $speciality_seconds) {
+                        
+                        $today = Carbon::createFromFormat('Y-m-d H:i:s', date('Y-m-d H:i:s'), $user_zone);
+                        $currentTime = strtotime($today->format('Y-m-d H:i:s'));
+                        $startTimeSeconds = strtotime($startTime->format('Y-m-d H:i:s'));
+                        $endTimeSeconds = strtotime($endTime->format('Y-m-d H:i:s'));
+                        // dd($user_zone );
+                        
+                        if ($selectedDate == $today->format('Y-m-d')) { //current date check
 
                         // if ($startTimeSeconds >= $currentTime) { // if currenttime check
                             $startPlusInterval = strtotime('+' . $interval . ' minutes', $startTimeSeconds);
@@ -771,17 +775,22 @@ class AppointmentController extends Controller
                             if ($startPlusInterval <= $endTimeSeconds) {
                                 $start = $this->roundToNearestMinuteInterval($startTime, $interval);
                                 $end = $this->roundToNearestMinuteInterval($endTime, $interval);
+                                $carbon_start =$startTime; 
+                                $carbon_end =$endTime; 
                                 for (; $start <= $end; $start += $interval * 60) {
+                                    $carbon_start = $carbon_start->addMinute($interval);
+                                    if($selectedDate == $carbon_start->format('Y-m-d')){
                                     // $results[] = date('H:i:s', $start)
                                     $temp = strtotime('+' . $interval . ' minutes', $start);
-                                    // dd($start,$currentTime,Carbon::now()->date('H:i:s'),$startTime);
+                                    // dd(date('Y-m-d',strtotime($start)),$currentTime,date('Y-m-d',strtotime($temp)));
                                     if ($start >= $currentTime){ 
                                     if ($temp <= $endTimeSeconds) {
-                                        $chk = Appointment::where(['doctor_id' => $request->provider_id, 'appointment_date' => $selectedDate, 'start_time' => convertToUTC(Carbon::parse($start),$zone,'H:i:s')])->first();
+                                        $chk = Appointment::where(['doctor_id' => $request->provider_id, 'appointment_date' => $selectedDate, 'start_time' =>Carbon::parse($start)->format('H:i:s')])->first();
                                         if (!$chk) {
                                             $results[] = $start . '-' . $temp;
                                         }
                                         // $results[] = date('h:i A', $start).'-'.date('h:i A',$temp);
+                                    }
                                     }
                                     }
                                 }
@@ -792,20 +801,26 @@ class AppointmentController extends Controller
                         if ($startPlusInterval <= $endTimeSeconds) {
                             $start = $this->roundToNearestMinuteInterval($startTime, $interval);
                             $end = $this->roundToNearestMinuteInterval($endTime, $interval);
+                            $carbon_start =$startTime; 
+                                $carbon_end =$endTime; 
                             for (; $start <= $end; $start += $interval * 60) {
+                                $carbon_start = $carbon_start->addMinute($interval);
+                                    if($selectedDate == $carbon_start->format('Y-m-d')){
                                 // $results[] = date('H:i:s', $start)
                                 $temp = strtotime('+' . $interval . ' minutes', $start);
                                 if ($temp <= $endTimeSeconds) {
-                                    $chk = Appointment::where(['doctor_id' => $request->provider_id,'appointment_date' => $selectedDate, 'start_time' => convertToUTC(Carbon::parse($start),$zone,'H:i:s')])->first();
+                                    $chk = Appointment::where(['doctor_id' => $request->provider_id,'appointment_date' => $selectedDate, 'start_time' => Carbon::parse($start)->format('H:i:s')])->first();
                                     if (!$chk) {
                                         $results[] = $start . '-' . $temp;
                                     }
                                     // $results[] = date('h:i A', $start).'-'.date('h:i A',$temp);
                                 }
+                                }
                             }
                         }
                     }
                 }
+                } //check converted date==selected date
             }
             // dd($results);
             $newresults = [];
@@ -909,8 +924,8 @@ class AppointmentController extends Controller
                     $incoming = explode(',', $request->working_hours);
                     foreach ($incoming as $item) {
                         $t = explode('-',$item);
-                        $t1 = convertToUTC(Carbon::parse($t[0]),auth()->user()->time_zone,'H:i'); 
-                        $t2 = convertToUTC(Carbon::parse($t[1]),auth()->user()->time_zone,'H:i'); 
+                        $t1 = $t[0]; 
+                        $t2 = $t[1]; 
                         // dd($t[0],$t1);
                         $b = $t1.'-'.$t2;
                         array_push($day_array, $b);
@@ -945,8 +960,8 @@ class AppointmentController extends Controller
                         $incoming = explode(',', $request->working_hours);
                     foreach($incoming as $item){
                         $t = explode('-',$item);
-                        $t1 = convertToUTC(Carbon::parse($t[0]),auth()->user()->time_zone,'H:i'); 
-                        $t2 = convertToUTC(Carbon::parse($t[1]),auth()->user()->time_zone,'H:i'); 
+                        $t1 = $t[0]; 
+                        $t2 = $t[1]; 
                         $b[] = $t1.'-'.$t2;
                     }
 

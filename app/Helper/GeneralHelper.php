@@ -67,7 +67,19 @@ function convertToUTC(Carbon $date, $timezone = '', $format = '')
 function convertToLocal(Carbon $date, $timezone = '', $format = '')
 {
    if (empty($timezone)) $timezone = config('app.timezone');
-   $datetime = Carbon::createFromFormat('Y-m-d H:i:s', $date->toDateTimeString(), 'UTC')->timezone($timezone);
+   $datetime = Carbon::createFromFormat('Y-m-d H:i:s', $date->toDateTimeString(), 'UTC')->setTimezone($timezone);
+   return (!empty($format)) ? $datetime->format($format) : $datetime;
+}
+function providerToUser($date, $provider_zone = '', $user_zone = '', $format = '')
+{
+    $date = Carbon::parse($date);
+   $datetime = Carbon::createFromFormat('Y-m-d H:i:s', $date->toDateTimeString(), $provider_zone)->setTimezone($user_zone);
+   return (!empty($format)) ? $datetime->format($format) : $datetime;
+}
+function userToProvider($date, $user_zone = '', $provider_zone = '', $format = '')
+{
+    $date = Carbon::parse($date);
+   $datetime = Carbon::createFromFormat('Y-m-d H:i:s', $date->toDateTimeString(), $user_zone)->setTimezone($provider_zone);
    return (!empty($format)) ? $datetime->format($format) : $datetime;
 }
 
