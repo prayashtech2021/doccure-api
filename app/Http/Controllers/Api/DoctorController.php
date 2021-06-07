@@ -230,10 +230,21 @@ class DoctorController extends Controller
                 'speciality' => 'required',
             );
 
-            if (!empty($request->clinic_name)) {
-                $rules['clinic_address_line1'] = 'required';
-            }
+                $rules['contact_address_line1'] = 'required';            
+                $rules['contact_address_line2'] = 'required';
+                $rules['contact_country_id'] = 'required';
+                $rules['contact_state_id'] = 'required';
+                $rules['contact_city_id'] = 'required';
+                $rules['contact_postal_code'] = 'required';
 
+                $rules['clinic_name'] = 'required';
+                $rules['clinic_address_line1'] = 'required';
+                $rules['clinic_address_line2'] = 'required';
+                $rules['clinic_country_id'] = 'required';
+                $rules['clinic_state_id'] = 'required';
+                $rules['clinic_city_id'] = 'required';
+                $rules['clinic_postal_code'] = 'required';
+            
             $valid = self::customValidation($request, $rules);
             if ($valid) {return $valid;}
 
