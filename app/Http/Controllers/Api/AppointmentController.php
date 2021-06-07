@@ -830,7 +830,7 @@ class AppointmentController extends Controller
                     foreach ($results as $key=>$res) {
                         $exp = explode('-', $res);
                         $firstElement = $exp[0];
-                        $app_type = $this->getAppointmentType($array1,$array2,$exp[0]);
+                        $app_type = $this->getAppointmentType($array1,$array2,$exp[0],$provider_zone);
                         $newresults[$cnt]['appointment_type'] = $app_type;
                         $newresults[$cnt]['time'] = date('h:i A',$exp[0]) . ' - ' . date('h:i A',$exp[1]);
                         $cnt++;
@@ -840,7 +840,7 @@ class AppointmentController extends Controller
                 foreach ($results as $key=>$res) {
                     $exp = explode('-', $res);
                     $firstElement = $exp[0];
-                    $app_type = $this->getAppointmentType($array1,$array2,$exp[0]);
+                    $app_type = $this->getAppointmentType($array1,$array2,$exp[0],$provider_zone);
                     $morning = strtotime('12:00:00');
                     $afternoon = strtotime('16:00:00');
                     if ($firstElement <= $morning) {
@@ -867,30 +867,38 @@ class AppointmentController extends Controller
         }
 
     }
-    public function getAppointmentType($array1,$array2,$time)
+    public function getAppointmentType($array1,$array2,$time,$provider_zone)
     {
         (auth()->user()->time_zone)? $zone = auth()->user()->time_zone : '';
         $app_type ='';
+
         foreach ($array1 as $item) {
             $stime = explode('-', $item);
-            $startTime = convertToLocal(Carbon::parse($stime[0]),$zone);
-            $endTime = convertToLocal(Carbon::parse($stime[1]),$zone);
+            $startTime = providerToUser($stime[0],$provider_zone,$zone);
+            $endTime = providerToUser($stime[1],$provider_zone,$zone);
             $startTime = strtotime($startTime->format('H:i:s'));
             $endTime = strtotime($endTime->format('H:i:s'));
             if($time>=$startTime && $time<=$endTime){
                 $app_type = 1;
+            }elseif($time>=$startTime){
+                $app_type = 1;
             }
+            // $arr1[]=date('H:i:s',$startTime).'-'.date('H:i:s',$endTime);
         }
         foreach ($array2 as $item) {
             $stime = explode('-', $item);
-            $startTime = convertToLocal(Carbon::parse($stime[0]),$zone);
-            $endTime = convertToLocal(Carbon::parse($stime[1]),$zone);
+            $startTime = providerToUser($stime[0],$provider_zone,$zone);
+            $endTime = providerToUser($stime[1],$provider_zone,$zone);
             $startTime = strtotime($startTime->format('H:i:s'));
             $endTime = strtotime($endTime->format('H:i:s'));
             if($time>=$startTime && $time<=$endTime){
                 $app_type = 2;
+            }elseif($time>=$startTime){
+                $app_type = 2;
             }
+            // $arr2[]=date('H:i:s',$startTime).'-'.date('H:i:s',$endTime);
         }
+        // dd($arr1,$arr2,date('H:i:s',$time));
         return $app_type;
     }
     public function roundToNearestMinuteInterval($time, $interval)
