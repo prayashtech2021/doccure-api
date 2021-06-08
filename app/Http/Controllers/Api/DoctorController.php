@@ -239,7 +239,6 @@ class DoctorController extends Controller
 
                 $rules['clinic_name'] = 'required';
                 $rules['clinic_address_line1'] = 'required';
-                $rules['clinic_address_line2'] = 'required';
                 $rules['clinic_country_id'] = 'required';
                 $rules['clinic_state_id'] = 'required';
                 $rules['clinic_city_id'] = 'required';
