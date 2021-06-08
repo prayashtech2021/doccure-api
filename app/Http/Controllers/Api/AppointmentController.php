@@ -88,11 +88,11 @@ class AppointmentController extends Controller
             $getApp = Appointment::whereIn('appointment_status', [1, 2])->get();
             foreach($getApp as $item){
             $patient = User::find($item->user_id);
-            $patient_zone = Carbon::createFromFormat('Y-m-d H:i:s', Carbon::now()->toDateTimeString(), $patient->time_zone);
+            $patient_zone = Carbon::createFromFormat('Y-m-d H:i:s', Carbon::now()->toDateTimeString())->setTimezone($patient->time_zone);
                 if($item->appointment_date < $patient_zone->format('Y-m-d')){
                     Appointment::where('id', $item->id)->update(['appointment_status' => 7]);
 
-                    $requested_amount = $app->payment->total_amount - $app->payment->transaction_charge;
+                    $requested_amount = $getApp->payment->total_amount - $getApp->payment->transaction_charge;
                     $patient->depositFloat($requested_amount);
                 }
             }
@@ -127,7 +127,7 @@ class AppointmentController extends Controller
 
             $appointment_date = $request->appointment_date ? Carbon::createFromFormat('d/m/Y', $request->appointment_date) : null;
             $list = $list->when($appointment_date, function ($qry) use ($appointment_date) {
-                return $qry->whereDate('appointment_date', convertToLocal($appointment_date));
+                return $qry->whereDate('appointment_date', $appointment_date);
             });
 
             $data = collect();

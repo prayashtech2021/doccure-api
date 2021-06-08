@@ -4,6 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
+use App\User;
 
 class Appointment extends Model
 {
@@ -13,7 +14,7 @@ class Appointment extends Model
         $ttemp1 = $this->appointment_date.' '.$this->start_time;
         $ttemp2 = $this->appointment_date.' '.$this->end_time;
         $userr = User::find($this->user_id);
-        $providerr = User::find($this->provider_id);
+        $providerr = User::find($this->doctor_id);
         $startTime = userToProvider($ttemp1,$userr->time_zone,$providerr->time_zone,'h:i A');
         $endTime = userToProvider($ttemp2,$userr->time_zone,$providerr->time_zone,'h:i A');
         }else{
