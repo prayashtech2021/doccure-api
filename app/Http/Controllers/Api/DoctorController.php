@@ -180,9 +180,12 @@ class DoctorController extends Controller
 
                 $data = collect();
                 $shedule = ScheduleTiming::where('provider_id', $user_id)->get();
-                $shedule->each(function ($schedule_timing) use (&$data) {
+                $shedule->each(function ($schedule_timing) use (&$data,&$workingHours) {
                     $data->push($schedule_timing->getData());
                 });
+                // $schedule_array = $data->toArray();
+                // dd($wh_array);
+                
                 if($request->route()->getName() == "doctorProfile"){
                     $array['business_hours'] = $data->toArray();
                     $array['review'] = $result->toArray();
