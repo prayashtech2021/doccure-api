@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Api;
 
 use App\Appointment;
@@ -52,7 +53,8 @@ class AppointmentController extends Controller
         });
     }
 
-    function list(Request $request, $flag = null) {
+    function list(Request $request, $flag = null)
+    {
         $common = [];
         $lang_id = ($request->language_id) ? getLang($request->language_id) : defaultLang();
         $common['header'] = getLangContent(8, $lang_id);
@@ -81,22 +83,24 @@ class AppointmentController extends Controller
                 $rules['language_id'] = 'integer|exists:languages,id';
             }
             $valid = self::customValidation($request, $rules, $common);
-            if ($valid) {return $valid;}
+            if ($valid) {
+                return $valid;
+            }
 
             $user = auth()->user();
             updateLastSeen(auth()->user());
             $getApp = Appointment::whereIn('appointment_status', [1, 2])->get();
-            foreach($getApp as $item){
-            $patient = User::find($item->user_id);
-            $patient_zone = Carbon::createFromFormat('Y-m-d H:i:s', Carbon::now()->toDateTimeString())->setTimezone($patient->time_zone);
-                if($item->appointment_date < $patient_zone->format('Y-m-d')){
+            foreach ($getApp as $item) {
+                $patient = User::find($item->user_id);
+                $patient_zone = Carbon::createFromFormat('Y-m-d H:i:s', Carbon::now()->toDateTimeString())->setTimezone($patient->time_zone);
+                if ($item->appointment_date < $patient_zone->format('Y-m-d')) {
                     Appointment::where('id', $item->id)->update(['appointment_status' => 7]);
 
                     $requested_amount = $getApp->payment->total_amount - $getApp->payment->transaction_charge;
                     $patient->depositFloat($requested_amount);
                 }
             }
-            
+
 
             $paginate = $request->count_per_page ? $request->count_per_page : 10;
             $pageNumber = $request->page ? $request->page : 1;
@@ -108,10 +112,10 @@ class AppointmentController extends Controller
             if ($status) {
                 switch ($status) {
                     case 1: //upcoming
-                        $list = $list->whereIn('appointment_status', [1, 2])->whereDate('appointment_date', '>=', convertToLocal(now(),auth()->user()->time_zone));
+                        $list = $list->whereIn('appointment_status', [1, 2])->whereDate('appointment_date', '>=', convertToLocal(now(), auth()->user()->time_zone));
                         break;
                     case 2: //missed
-                        $list = $list->whereIn('appointment_status', [1, 2])->whereDate('appointment_date', '<', convertToLocal(now(),auth()->user()->time_zone));
+                        $list = $list->whereIn('appointment_status', [1, 2])->whereDate('appointment_date', '<', convertToLocal(now(), auth()->user()->time_zone));
                         break;
                     case 3: //completed/approved
                         $list = $list->where('appointment_status', 3);
@@ -353,9 +357,10 @@ class AppointmentController extends Controller
 
             if ($request->payment_type == 1 || $request->payment_type == 2) {
 
-                $billable_amount = (int) ($payment->total_amount * 100);
+                $billable_amount = (int)($payment->total_amount * 100);
 
                 $payment_options = [
+                    'currency' => strtolower($doctor->currency_code ?? 'usd'),
                     'description' => config('app.name') . ' appointment reference #' . $appointment->appointment_reference,
                     'metadata' => [
                         'reference' => $appointment->appointment_reference,
@@ -447,7 +452,9 @@ class AppointmentController extends Controller
         }
 
         $valid = self::customValidation($request, $rules);
-        if ($valid) {return $valid;}
+        if ($valid) {
+            return $valid;
+        }
 
         DB::beginTransaction();
 
@@ -535,7 +542,9 @@ class AppointmentController extends Controller
         }
 
         $valid = self::customValidation($request, $rules, $common);
-        if ($valid) {return $valid;}
+        if ($valid) {
+            return $valid;
+        }
 
         try {
             $paginate = $request->count_per_page ? $request->count_per_page : 10;
@@ -549,12 +558,12 @@ class AppointmentController extends Controller
                 $user_id = $request->consumer_id;
             }
             $list = Prescription::whereUserId($user_id)->orderBy('created_at', $order_by);
-            
-            if(auth()->user()->hasrole('doctor')){
-                $list = $list->where('doctor_id',auth()->user()->id);
+
+            if (auth()->user()->hasrole('doctor')) {
+                $list = $list->where('doctor_id', auth()->user()->id);
             }
-            
-            $data = collect(); 
+
+            $data = collect();
             $paginatedata = $list->paginate($paginate, ['*'], 'page', $pageNumber);
             $paginatedata->getCollection()->each(function ($prescription) use (&$data) {
                 $data->push($prescription->getData());
@@ -603,7 +612,9 @@ class AppointmentController extends Controller
             'status' => 'required|numeric|min:2|max:7',
         );
         $valid = self::customValidation($request, $rules);
-        if ($valid) {return $valid;}
+        if ($valid) {
+            return $valid;
+        }
 
         try {
             $cancel = 0;
@@ -649,17 +660,17 @@ class AppointmentController extends Controller
             $provider = User::find($appointment->doctor_id);
             $provider->notify(new AppointmentNoty($appointment));
             if ($request->status == 2 || $request->status == 6) { //mobile noty doctor accept / cancelled
-               
+
                 $notifydata['device_id'] = $consumer->device_id;
 
                 $device_type = $consumer->device_type;
-    
-                if($request->status == 2){  //accept
-                    $message = 'Your appointment request is accepted by Dr.'.$provider->first_name. ''. $provider->last_name;
-                }else{  //cancel
-                    $message = 'Your appointment request is cancelled by Dr.'.$provider->first_name. ''. $provider->last_name;
+
+                if ($request->status == 2) {  //accept
+                    $message = 'Your appointment request is accepted by Dr.' . $provider->first_name . '' . $provider->last_name;
+                } else {  //cancel
+                    $message = 'Your appointment request is cancelled by Dr.' . $provider->first_name . '' . $provider->last_name;
                 }
-    
+
                 $notifydata['message'] = $message;
                 $notifydata['notifications_title'] = 'Appointment Status';
                 $nresponse['type'] = 'Booking';
@@ -671,7 +682,7 @@ class AppointmentController extends Controller
                     sendFCMiOSMessage($notifydata);
                 }
             }
-            
+
 
             return self::send_success_response([], 'Status updated sucessfully');
         } catch (Exception | Throwable $exception) {
@@ -700,7 +711,9 @@ class AppointmentController extends Controller
             $rules['language_id'] = 'integer|exists:languages,id';
         }
         $valid = self::customValidation($request, $rules, $common);
-        if ($valid) {return $valid;}
+        if ($valid) {
+            return $valid;
+        }
 
         try {
             $data = collect();
@@ -734,12 +747,12 @@ class AppointmentController extends Controller
             $array2 = $array2[$request_day]; //offline
             $final = array_merge($array1, $array2);
             $speciality = UserSpeciality::find($request->speciality_id);
-            $speciality_seconds = (isset($speciality->duration))?$speciality->duration:600;
+            $speciality_seconds = (isset($speciality->duration)) ? $speciality->duration : 600;
 
             $minutes = (($speciality_seconds / 60) % 60);
             $interval = $minutes;
             sort($final);
-            
+
             $provider = User::find($request->provider_id);
             // dd($final);
             $results = [];
@@ -751,113 +764,113 @@ class AppointmentController extends Controller
                 $stime = explode('-', $item);
                 // $startTime = Carbon::parse($stime[0]);
                 // $endTime = Carbon::parse($stime[1]);
-                $ttemp1 = $selectedDate.' '.$stime[0];
-                $ttemp2 = $selectedDate.' '.$stime[1];
-                $startTime = providerToUser($ttemp1,$provider_zone,$user_zone);
-                $endTime = providerToUser($ttemp2,$provider_zone,$user_zone);
+                $ttemp1 = $selectedDate . ' ' . $stime[0];
+                $ttemp2 = $selectedDate . ' ' . $stime[1];
+                $startTime = providerToUser($ttemp1, $provider_zone, $user_zone);
+                $endTime = providerToUser($ttemp2, $provider_zone, $user_zone);
                 $sseconds = $endTime->diffInSeconds($startTime);
                 $startTime_date = $startTime->format('Y-m-d');
                 $endTime_date = $endTime->format('Y-m-d');
-                if($startTime_date==$selectedDate){
+                if ($startTime_date == $selectedDate) {
                     if ($sseconds >= $speciality_seconds) {
-                        
+
                         $today = Carbon::createFromFormat('Y-m-d H:i:s', date('Y-m-d H:i:s'))->setTimezone($user_zone);
                         $currentTime = strtotime($today->format('Y-m-d H:i:s'));
                         $startTimeSeconds = strtotime($startTime->format('Y-m-d H:i:s'));
                         $endTimeSeconds = strtotime($endTime->format('Y-m-d H:i:s'));
                         // dd($user_zone );
-                        
+
                         if ($selectedDate == $today->format('Y-m-d')) { //current date check
 
-                        // if ($startTimeSeconds >= $currentTime) { // if currenttime check
+                            // if ($startTimeSeconds >= $currentTime) { // if currenttime check
                             $startPlusInterval = strtotime('+' . $interval . ' minutes', $startTimeSeconds);
                             // $startPlusInterval = $startTime->addMinutes($interval);
                             if ($startPlusInterval <= $endTimeSeconds) {
                                 $start = $this->roundToNearestMinuteInterval($startTime, $interval);
                                 $end = $this->roundToNearestMinuteInterval($endTime, $interval);
-                                $carbon_start =$startTime; 
-                                $carbon_end =$endTime; 
+                                $carbon_start = $startTime;
+                                $carbon_end = $endTime;
                                 for (; $start <= $end; $start += $interval * 60) {
                                     $carbon_start = $carbon_start->addMinute($interval);
-                                    if($selectedDate == $carbon_start->format('Y-m-d')){
-                                    // $results[] = date('H:i:s', $start)
-                                    $temp = strtotime('+' . $interval . ' minutes', $start);
-                                    // dd(date('Y-m-d',strtotime($start)),$currentTime,date('Y-m-d',strtotime($temp)));
-                                    if ($start >= $currentTime){ 
-                                    if ($temp <= $endTimeSeconds) {
-                                        $chk = Appointment::where(['doctor_id' => $request->provider_id, 'appointment_date' => $selectedDate, 'start_time' =>Carbon::parse($start)->format('H:i:s')])->first();
-                                        if (!$chk) {
-                                            $results[] = $start . '-' . $temp;
+                                    if ($selectedDate == $carbon_start->format('Y-m-d')) {
+                                        // $results[] = date('H:i:s', $start)
+                                        $temp = strtotime('+' . $interval . ' minutes', $start);
+                                        // dd(date('Y-m-d',strtotime($start)),$currentTime,date('Y-m-d',strtotime($temp)));
+                                        if ($start >= $currentTime) {
+                                            if ($temp <= $endTimeSeconds) {
+                                                $chk = Appointment::where(['doctor_id' => $request->provider_id, 'appointment_date' => $selectedDate, 'start_time' => Carbon::parse($start)->format('H:i:s')])->first();
+                                                if (!$chk) {
+                                                    $results[] = $start . '-' . $temp;
+                                                }
+                                                // $results[] = date('h:i A', $start).'-'.date('h:i A',$temp);
+                                            }
                                         }
-                                        // $results[] = date('h:i A', $start).'-'.date('h:i A',$temp);
-                                    }
-                                    }
                                     }
                                 }
                             }
-                        // } // if currenttime check
-                    } else {
-                        $startPlusInterval = strtotime('+' . $interval . ' minutes', $startTimeSeconds);
-                        if ($startPlusInterval <= $endTimeSeconds) {
-                            $start = $this->roundToNearestMinuteInterval($startTime, $interval);
-                            $end = $this->roundToNearestMinuteInterval($endTime, $interval);
-                            $carbon_start =$startTime; 
-                                $carbon_end =$endTime; 
-                            for (; $start <= $end; $start += $interval * 60) {
-                                $carbon_start = $carbon_start->addMinute($interval);
-                                    if($selectedDate == $carbon_start->format('Y-m-d')){
-                                // $results[] = date('H:i:s', $start)
-                                $temp = strtotime('+' . $interval . ' minutes', $start);
-                                if ($temp <= $endTimeSeconds) {
-                                    $chk = Appointment::where(['doctor_id' => $request->provider_id,'appointment_date' => $selectedDate, 'start_time' => Carbon::parse($start)->format('H:i:s')])->first();
-                                    if (!$chk) {
-                                        $results[] = $start . '-' . $temp;
+                            // } // if currenttime check
+                        } else {
+                            $startPlusInterval = strtotime('+' . $interval . ' minutes', $startTimeSeconds);
+                            if ($startPlusInterval <= $endTimeSeconds) {
+                                $start = $this->roundToNearestMinuteInterval($startTime, $interval);
+                                $end = $this->roundToNearestMinuteInterval($endTime, $interval);
+                                $carbon_start = $startTime;
+                                $carbon_end = $endTime;
+                                for (; $start <= $end; $start += $interval * 60) {
+                                    $carbon_start = $carbon_start->addMinute($interval);
+                                    if ($selectedDate == $carbon_start->format('Y-m-d')) {
+                                        // $results[] = date('H:i:s', $start)
+                                        $temp = strtotime('+' . $interval . ' minutes', $start);
+                                        if ($temp <= $endTimeSeconds) {
+                                            $chk = Appointment::where(['doctor_id' => $request->provider_id, 'appointment_date' => $selectedDate, 'start_time' => Carbon::parse($start)->format('H:i:s')])->first();
+                                            if (!$chk) {
+                                                $results[] = $start . '-' . $temp;
+                                            }
+                                            // $results[] = date('h:i A', $start).'-'.date('h:i A',$temp);
+                                        }
                                     }
-                                    // $results[] = date('h:i A', $start).'-'.date('h:i A',$temp);
-                                }
                                 }
                             }
                         }
                     }
-                }
                 } //check converted date==selected date
             }
             // dd($results);
             $newresults = [];
             if ($results) {
                 if ($request->route()->getName() == "scheduleListPatient") {//for mobile
-                    $cnt =0;
-                    foreach ($results as $key=>$res) {
+                    $cnt = 0;
+                    foreach ($results as $key => $res) {
                         $exp = explode('-', $res);
                         $firstElement = $exp[0];
-                        $app_type = $this->getAppointmentType($array1,$array2,$exp[0],$provider_zone);
+                        $app_type = $this->getAppointmentType($array1, $array2, $exp[0], $provider_zone);
                         $newresults[$cnt]['appointment_type'] = $app_type;
-                        $newresults[$cnt]['time'] = date('h:i A',$exp[0]) . ' - ' . date('h:i A',$exp[1]);
+                        $newresults[$cnt]['time'] = date('h:i A', $exp[0]) . ' - ' . date('h:i A', $exp[1]);
                         $cnt++;
                     }
-                }else{ //for web
-                $mor=$aft=$eve=0;
-                foreach ($results as $key=>$res) {
-                    $exp = explode('-', $res);
-                    $firstElement = $exp[0];
-                    $app_type = $this->getAppointmentType($array1,$array2,$exp[0],$provider_zone);
-                    $morning = strtotime('12:00:00');
-                    $afternoon = strtotime('16:00:00');
-                    if ($firstElement <= $morning) {
-                        $newresults['morning'][$mor]['appointment_type'] = $app_type;
-                        $newresults['morning'][$mor]['time'] = date('h:i A',$exp[0]) . ' - ' . date('h:i A',$exp[1]);
-                        $mor++;
-                    } elseif ($firstElement <= $afternoon) {
-                        $newresults['afternoon'][$aft]['appointment_type'] = $app_type;
-                        $newresults['afternoon'][$aft]['time'] = date('h:i A',$exp[0]) . ' - ' . date('h:i A',$exp[1]);
-                        $aft++;
-                    } else {
-                        $newresults['evening'][$eve]['appointment_type'] = $app_type;
-                        $newresults['evening'][$eve]['time'] = date('h:i A',$exp[0]) . ' - ' . date('h:i A',$exp[1]);
-                        $eve++;
+                } else { //for web
+                    $mor = $aft = $eve = 0;
+                    foreach ($results as $key => $res) {
+                        $exp = explode('-', $res);
+                        $firstElement = $exp[0];
+                        $app_type = $this->getAppointmentType($array1, $array2, $exp[0], $provider_zone);
+                        $morning = strtotime('12:00:00');
+                        $afternoon = strtotime('16:00:00');
+                        if ($firstElement <= $morning) {
+                            $newresults['morning'][$mor]['appointment_type'] = $app_type;
+                            $newresults['morning'][$mor]['time'] = date('h:i A', $exp[0]) . ' - ' . date('h:i A', $exp[1]);
+                            $mor++;
+                        } elseif ($firstElement <= $afternoon) {
+                            $newresults['afternoon'][$aft]['appointment_type'] = $app_type;
+                            $newresults['afternoon'][$aft]['time'] = date('h:i A', $exp[0]) . ' - ' . date('h:i A', $exp[1]);
+                            $aft++;
+                        } else {
+                            $newresults['evening'][$eve]['appointment_type'] = $app_type;
+                            $newresults['evening'][$eve]['time'] = date('h:i A', $exp[0]) . ' - ' . date('h:i A', $exp[1]);
+                            $eve++;
+                        }
                     }
                 }
-            }
             }
             // dd($newresults);
             // sort($results);
@@ -867,33 +880,34 @@ class AppointmentController extends Controller
         }
 
     }
-    public function getAppointmentType($array1,$array2,$time,$provider_zone)
+
+    public function getAppointmentType($array1, $array2, $time, $provider_zone)
     {
-        (auth()->user()->time_zone)? $zone = auth()->user()->time_zone : '';
-        $app_type ='';
+        (auth()->user()->time_zone) ? $zone = auth()->user()->time_zone : '';
+        $app_type = '';
 
         foreach ($array1 as $item) {
             $stime = explode('-', $item);
-            $startTime = providerToUser($stime[0],$provider_zone,$zone);
-            $endTime = providerToUser($stime[1],$provider_zone,$zone);
+            $startTime = providerToUser($stime[0], $provider_zone, $zone);
+            $endTime = providerToUser($stime[1], $provider_zone, $zone);
             $startTime = strtotime($startTime->format('H:i:s'));
             $endTime = strtotime($endTime->format('H:i:s'));
-            if($time>=$startTime && $time<=$endTime){
+            if ($time >= $startTime && $time <= $endTime) {
                 $app_type = 1;
-            }elseif($time>=$startTime){
+            } elseif ($time >= $startTime) {
                 $app_type = 1;
             }
             // $arr1[]=date('H:i:s',$startTime).'-'.date('H:i:s',$endTime);
         }
         foreach ($array2 as $item) {
             $stime = explode('-', $item);
-            $startTime = providerToUser($stime[0],$provider_zone,$zone);
-            $endTime = providerToUser($stime[1],$provider_zone,$zone);
+            $startTime = providerToUser($stime[0], $provider_zone, $zone);
+            $endTime = providerToUser($stime[1], $provider_zone, $zone);
             $startTime = strtotime($startTime->format('H:i:s'));
             $endTime = strtotime($endTime->format('H:i:s'));
-            if($time>=$startTime && $time<=$endTime){
+            if ($time >= $startTime && $time <= $endTime) {
                 $app_type = 2;
-            }elseif($time>=$startTime){
+            } elseif ($time >= $startTime) {
                 $app_type = 2;
             }
             // $arr2[]=date('H:i:s',$startTime).'-'.date('H:i:s',$endTime);
@@ -901,6 +915,7 @@ class AppointmentController extends Controller
         // dd($arr1,$arr2,date('H:i:s',$time));
         return $app_type;
     }
+
     public function roundToNearestMinuteInterval($time, $interval)
     {
         $timestamp = strtotime($time);
@@ -917,12 +932,14 @@ class AppointmentController extends Controller
             'working_hours' => 'required|string',
         );
         $valid = self::customValidation($request, $rules);
-        if ($valid) {return $valid;}
+        if ($valid) {
+            return $valid;
+        }
 
         try {
             $schedule = ScheduleTiming::where('provider_id', $request->provider_id)->first();
-           
-           
+
+
             if ($schedule) { //update
                 $schedule = ScheduleTiming::where('provider_id', $request->provider_id)->where('appointment_type', $request->appointment_type)->first();
                 if ($schedule) { //update
@@ -931,11 +948,11 @@ class AppointmentController extends Controller
                     $day_array = $array[config('custom.days.' . $request->day)];
                     $incoming = explode(',', $request->working_hours);
                     foreach ($incoming as $item) {
-                        $t = explode('-',$item);
-                        $t1 = $t[0]; 
-                        $t2 = $t[1]; 
+                        $t = explode('-', $item);
+                        $t1 = $t[0];
+                        $t2 = $t[1];
                         // dd($t[0],$t1);
-                        $b = $t1.'-'.$t2;
+                        $b = $t1 . '-' . $t2;
                         array_push($day_array, $b);
                     }
                     $array[config('custom.days.' . $request->day)] = $day_array;
@@ -966,19 +983,19 @@ class AppointmentController extends Controller
                     if ($i == $request->appointment_type) {
                         $array = config('custom.empty_working_hours');
                         $incoming = explode(',', $request->working_hours);
-                    foreach($incoming as $item){
-                        $t = explode('-',$item);
-                        $t1 = $t[0]; 
-                        $t2 = $t[1]; 
-                        $b[] = $t1.'-'.$t2;
-                    }
+                        foreach ($incoming as $item) {
+                            $t = explode('-', $item);
+                            $t1 = $t[0];
+                            $t2 = $t[1];
+                            $b[] = $t1 . '-' . $t2;
+                        }
 
-                    $array[config('custom.days.' . $request->day)] = $b;
+                        $array[config('custom.days.' . $request->day)] = $b;
                         $schedule->working_hours = json_encode($array);
                     } else {
                         $schedule->working_hours = json_encode(config('custom.empty_working_hours'));
                     }
-                   
+
                     $schedule->save();
                 }
             }
@@ -1006,11 +1023,13 @@ class AppointmentController extends Controller
             'working_hours' => 'required|string',
         );
         $valid = self::customValidation($request, $rules);
-        if ($valid) {return $valid;}
+        if ($valid) {
+            return $valid;
+        }
 
         try {
             $seconds = Carbon::parse('00:00:00')->diffInSeconds(Carbon::parse($request->duration));
-            $seconds = (int) $seconds;
+            $seconds = (int)$seconds;
             $schedule = ScheduleTiming::where('provider_id', $request->provider_id)->where('appointment_type', $request->appointment_type)->first();
             if ($schedule) {
                 $array = json_decode($schedule->working_hours, true);
@@ -1054,7 +1073,9 @@ class AppointmentController extends Controller
                 $rules['language_id'] = 'integer|exists:languages,id';
 
                 $valid = self::customValidation($request, $rules, $common);
-                if ($valid) {return $valid;}
+                if ($valid) {
+                    return $valid;
+                }
             }
             $user = $request->user();
 
@@ -1101,7 +1122,9 @@ class AppointmentController extends Controller
                 $rules['language_id'] = 'integer|exists:languages,id';
             }
             $valid = self::customValidation($request, $rules, $common);
-            if ($valid) {return $valid;}
+            if ($valid) {
+                return $valid;
+            }
 
             $paginate = $request->count_per_page ? $request->count_per_page : 10;
             $order_by = $request->order_by ? $request->order_by : 'desc';
@@ -1153,7 +1176,9 @@ class AppointmentController extends Controller
                 $rules['language_id'] = 'integer|exists:languages,id';
             }
             $valid = self::customValidation($request, $rules, $common);
-            if ($valid) {return $valid;}
+            if ($valid) {
+                return $valid;
+            }
 
             $result = [];
             $user = $request->user();
@@ -1191,7 +1216,9 @@ class AppointmentController extends Controller
             if ($request->language_id) {
                 $rules['language_id'] = 'integer|exists:languages,id';
                 $valid = self::customValidation($request, $rules, $common);
-                if ($valid) {return $valid;}
+                if ($valid) {
+                    return $valid;
+                }
             }
             $user = auth()->user();
 
@@ -1226,7 +1253,9 @@ class AppointmentController extends Controller
             $rules['call_type'] = 'required';
         }
         $valid = self::customValidation($request, $rules);
-        if ($valid) {return $valid;}
+        if ($valid) {
+            return $valid;
+        }
 
         try {
             $user = auth()->user();
@@ -1305,7 +1334,9 @@ class AppointmentController extends Controller
             'end_time' => 'required|date_format:"Y-m-d H:i:s"',
         );
         $valid = self::customValidation($request, $rules);
-        if ($valid) {return $valid;}
+        if ($valid) {
+            return $valid;
+        }
 
         try {
             $user = auth()->user();
@@ -1353,7 +1384,9 @@ class AppointmentController extends Controller
             'call_type' => 'required',
         );
         $valid = self::customValidation($request, $rules);
-        if ($valid) {return $valid;}
+        if ($valid) {
+            return $valid;
+        }
 
         try {
             $user = auth()->user();
@@ -1398,7 +1431,7 @@ class AppointmentController extends Controller
             if ($device_type == 'IOS' && (!empty($notifydata['device_id']))) {
                 sendFCMiOSMessage($notifydata);
             }
-            
+
             return self::send_success_response($response, 'Make Call');
         } catch (Exception | Throwable $exception) {
             return self::send_exception_response($exception->getMessage());
@@ -1434,9 +1467,9 @@ class AppointmentController extends Controller
 
             $response_array = [];
             // check api_key
-            $value = Setting::where("slug","payment_gateway")->where('keyword','stripe_live_api_key')->pluck('value');
-            
-            if ( $value && ($request->api_key == $value[0])) {
+            $value = Setting::where("slug", "payment_gateway")->where('keyword', 'stripe_live_api_key')->pluck('value');
+
+            if ($value && ($request->api_key == $value[0])) {
 
                 $StripePayment = new \App\Stripe\StripePayment();
 
@@ -1462,7 +1495,7 @@ class AppointmentController extends Controller
                     'response_code' => '-1',
                     'response_message' => 'authentication failed',
                 ],
-                    'data' => (object) [],
+                    'data' => (object)[],
                 ];
             }
         } catch (\Exception | \Throwable $e) {
@@ -1471,7 +1504,7 @@ class AppointmentController extends Controller
                     'response_code' => '-1',
                     'response_message' => $e->getMessage(),
                 ],
-                'data' => (object) [],
+                'data' => (object)[],
             ];
         }
         return $this->convertNullsAsEmpty($response_array);
