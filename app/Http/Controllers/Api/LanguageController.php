@@ -226,4 +226,34 @@ class LanguageController extends Controller
             return self::send_exception_response($exception->getMessage());
         }
     }
+    
+    public function addMultiLang(Request $request){
+        $rules = [
+            'page_master_id' => 'required|exists:page_masters,id',
+            'language_id' => 'required|exists:languages,id',
+            'keyword' => 'required',
+            'value' => 'required',
+            ];
+
+        $valid = self::customValidation($request, $rules);
+        if($valid){ return $valid;}
+
+        try {
+            DB::beginTransaction();
+                
+            $multi = new MultiLanguage();
+            $multi->page_master_id = $request->page_master_id;
+            $multi->language_id = $request->language_id;
+            $multi->keyword = $request->keyword;
+            $multi->value =$request->value;
+            $multi->created_by = 1;
+            $multi->save();
+
+            DB::commit();
+            return self::send_success_response([],'Language Updated Successfully');
+        } catch (Exception | Throwable $exception) {
+            DB::rollback();
+            return self::send_exception_response($exception->getMessage());
+        }
+    }
 }

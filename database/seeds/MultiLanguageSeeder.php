@@ -6491,7 +6491,55 @@ class MultiLanguageSeeder extends Seeder
                 'created_by' => 1, 
                 'language_id' => 1,
             ],
-
+            1031 =>[
+                'page_master_id' => 4,
+                'keyword' => 'social_media',
+                'value' => 'Social Media',
+                'created_by' => 1, 
+                'language_id' => 1,
+            ],
+            1032 =>[
+                'page_master_id' => 4,
+                'keyword' => 'facebook',
+                'value' => 'Facebook',
+                'created_by' => 1, 
+                'language_id' => 1,
+            ],
+            1033 =>[
+                'page_master_id' => 4,
+                'keyword' => 'twitter',
+                'value' => 'Twitter',
+                'created_by' => 1, 
+                'language_id' => 1,
+            ],
+            1034 =>[
+                'page_master_id' => 4,
+                'keyword' => 'instagram',
+                'value' => 'Instagram',
+                'created_by' => 1, 
+                'language_id' => 1,
+            ],
+            1035 =>[
+                'page_master_id' => 4,
+                'keyword' => 'pinterest',
+                'value' => 'Pinterest',
+                'created_by' => 1, 
+                'language_id' => 1,
+            ],
+            1036 =>[
+                'page_master_id' => 4,
+                'keyword' => 'linkedin',
+                'value' => 'LinkedIn',
+                'created_by' => 1, 
+                'language_id' => 1,
+            ],
+            1037 =>[
+                'page_master_id' => 4,
+                'keyword' => 'youtube',
+                'value' => 'YouTube',
+                'created_by' => 1, 
+                'language_id' => 1,
+            ],
             
             // for menu page end
         ];

@@ -180,7 +180,7 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
     Route::get('Pagetype','Api\LanguageController@getMobilePage');
 
     Route::get('schedule/listfor/patient','Api\AppointmentController@scheduleListForPatient');
-    
+    Route::post('multilanguage/add','Api\LanguageController@addMultiLang');
 
 });
 
