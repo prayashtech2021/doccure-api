@@ -9,6 +9,7 @@ use App\EmailTemplate;
 use App\Http\Controllers\Controller;
 use App\Mail\SendInvitation;
 use App\Notifications\AppointmentNoty;
+use App\Notifications\IncomingCallNoty;
 use App\Payment;
 use App\Prescription;
 use App\PrescriptionDetail;
@@ -1259,7 +1260,7 @@ class AppointmentController extends Controller
 
         try {
             $user = auth()->user();
-
+            
             $callLog = CallLog::where('appointment_id', $request->appointment_id)->where('from', $user->id)->where('to', $request->call_to)->whereNull('end_time')->first();
             if ($callLog) {
                 $log = $callLog;
@@ -1278,12 +1279,18 @@ class AppointmentController extends Controller
                 // $provider = User::find($app->doctor_id);
                 // $provider->notify(new AppointmentNoty($app));
             }
+            $appoinments_details = Appointment::Find($request->appointment_id);
+
+            $patient = User::Find($appoinments_details->user_id);
+            $doctor = User::Find($appoinments_details->doctor_id);
+            if ($user->hasRole('doctor')) {
+                $patient->notify(new IncomingCallNoty($appoinments_details));
+            }else if ($user->hasRole('patient')) {
+                $doctor->notify(new IncomingCallNoty($appoinments_details));
+            }
 
             if ($request->route()->getName() == "saveCallLog") {
-                $appoinments_details = Appointment::Find($request->appointment_id);
-
-                $patient = User::Find($appoinments_details->user_id);
-                $doctor = User::Find($appoinments_details->doctor_id);
+                
                 $response = array();
                 $response['patient_id'] = $patient->id;
                 $response['patient_name'] = $patient->first_name . ' ' . $patient->last_name;
