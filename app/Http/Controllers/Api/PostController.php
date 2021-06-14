@@ -242,6 +242,8 @@ class PostController extends Controller
                 if (!$post) {
                     return self::send_bad_request_response('Incorrect post id. Please check and try again!');
                 }
+                $post->is_verified =  0;
+                $post->is_viewable = 0;
                 $post->updated_by = auth()->user()->id;
             } else {
                 $post = new Post();

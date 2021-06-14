@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\AppointmentController;
 use Validator;
 use App\ { User, Speciality, EducationDetail, Service,Country, State, City, Address, AddressImage, UserSpeciality, ExperienceDetail, AwardDetail, MembershipDetail, RegistrationDetail, Review, ScheduleTiming, Setting };
 use App\Appointment;
+use App\SocialMedia;
 use Illuminate\Http\Request;
 use DB;
 use Storage;
@@ -173,6 +174,7 @@ class DoctorController extends Controller
                 $array['average_rating'] = ($list->avgRating()) ? $list->avgRating() : "0";
                 $array['feedback'] = ($list->doctorRatings()) ? $list->doctorRatings()->where('user_id', $user_id)->count() : "0";
                 $review = Review::orderBy('id', 'desc')->where('user_id', $user_id);
+                
                 $result = collect();
                 $review->each(function ($provider) use (&$result) {
                     $result->push($provider->getData());
@@ -185,6 +187,8 @@ class DoctorController extends Controller
                 });
                 // $schedule_array = $data->toArray();
                 // dd($wh_array);
+
+                $array['social_media'] = SocialMedia::where('provider_id',$user_id)->get();
                 
                 if($request->route()->getName() == "doctorProfile"){
                     $array['business_hours'] = $data->toArray();
