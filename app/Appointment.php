@@ -23,7 +23,7 @@ class Appointment extends Model
         }
         return [
             'id' => $this->id,
-            'created' => convertToLocal(Carbon::parse($this->created_at),$zone,'d/m/Y h:i A'),
+            'created' => convertToLocal(Carbon::parse($this->created_at),$zone,'M-d-Y h:i A'),
             'reference' => $this->appointment_reference,
             'type' => $this->appointment_type,
             'type_name' => config('appointments.type')[$this->appointment_type],
@@ -34,10 +34,10 @@ class Appointment extends Model
             'review_status' => $this->review_status,
             'doctor' => $this->doctor()->first()->basicProfile(),
             'patient' => $this->patient()->first()->basicProfile(),
-            'date' => Carbon::parse($this->appointment_date)->format('d/m/Y'),
+            'date' => Carbon::parse($this->appointment_date)->format('M-d-Y'),
             'start_time' => $startTime,
             'end_time' => $endTime,
-            'next_visit' => convertToLocal(Carbon::parse($this->next_visit),$zone,'d/m/Y'),
+            'next_visit' => convertToLocal(Carbon::parse($this->next_visit),$zone,'M-d-Y'),
             'transaction_data' => $this->payment()->first()->getData()
         ];
     }
@@ -57,12 +57,12 @@ class Appointment extends Model
             }
         return [
             'id' => $this->id,
-            'created' => convertToLocal(Carbon::parse($this->created_at),$zone,'d/m/Y h:i A'),
+            'created' => convertToLocal(Carbon::parse($this->created_at),$zone,'M-d-Y h:i A'),
             'type' => config('appointments.type')[$this->appointment_type],
             'appointment_status' => config('custom.appointment_status')[$this->appointment_status],
             'doctor' => $this->doctor()->first()->basicProfile(),
             'patient' => $this->patient()->first()->basicProfile(),
-            'date' => convertToLocal(Carbon::parse($this->appointment_date),$zone,'d/m/Y'),
+            'date' => convertToLocal(Carbon::parse($this->appointment_date),$zone,'M-d-Y'),
             'start_time' => $startTime,
             'end_time' => $endTime,
             'amount' => $this->payment()->select('currency_code','total_amount')->first(),

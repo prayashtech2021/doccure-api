@@ -209,7 +209,7 @@ class User extends Authenticatable implements Wallet, WalletFloat
             'language_id' => $this->language_id,
             'currency_code' => $this->currency_code,
             'permanent_address' => $address,
-            'member_since' => convertToLocal(Carbon::parse($this->created_at),config('custom.timezone')[251],'d M Y H:s A'),
+            'member_since' => convertToLocal(Carbon::parse($this->created_at),config('custom.timezone')[251],'M-d-Y H:s A'),
             'accountstatus' => $this->getAccountStatusAttribute(),
             'last_visit' => ($this->appointments()->first())?$this->appointments()->orderby('id','desc')->first()->appointment_date:'',
             'patient_paid' => ($this->payment())?$this->payment()->sum('total_amount'):'',

@@ -27,7 +27,7 @@ class Speciality extends Model
             'duration' => $this->duration, //Carbon::parse((int)$this->duration)->format('i'),
             'image' => $this->getSpecilityImage(),
             'amount' => $this->amount,
-            'created_at' => convertToLocal(Carbon::parse($this->created_at),config('custom.timezone')[251],'d/m/Y h:i A'),
+            'created_at' => convertToLocal(Carbon::parse($this->created_at),config('custom.timezone')[251],'M-d-Y h:i A'),
             'deleted_at' => $this->deleted_at,        
         ];
     }
