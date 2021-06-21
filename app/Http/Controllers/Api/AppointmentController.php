@@ -239,7 +239,7 @@ class AppointmentController extends Controller
             ->where(function($qry)use($request){
                 $qry->where('start_time','<=', Carbon::parse($request->start_time)->format('H:i:s'))
                 ->where('end_time','>=', Carbon::parse($request->start_time)->format('H:i:s'));
-            })->orWhere(function($qry)use($end){
+            })->orWhere(function($qry)use($request){
                 $qry->where('start_time','<=', Carbon::parse($request->end_time)->format('H:i:s'))
                 ->where('end_time','>=', Carbon::parse($request->end_time)->format('H:i:s'));
             })->first();
