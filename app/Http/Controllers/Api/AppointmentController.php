@@ -239,7 +239,7 @@ class AppointmentController extends Controller
             ->where(function($qry)use($start,$end){
                 $qry->where('start_time','<=', Carbon::parse($start)->format('H:i:s'))
                     ->where('end_time','>=', Carbon::parse($start)->format('H:i:s'));
-                $qry->orWhere('start_tim','<=', Carbon::parse($end)->format('H:i:s'))
+                $qry->orWhere('start_time','<=', Carbon::parse($end)->format('H:i:s'))
                     ->where('end_time','>=', Carbon::parse($end)->format('H:i:s'));
             })->first();
             if ($chk) {
@@ -809,7 +809,7 @@ class AppointmentController extends Controller
                                                 ->where(function($qry)use($start,$end){
                                                     $qry->where('start_time','<=', Carbon::parse($start)->format('H:i:s'))
                                                     ->where('end_time','>=', Carbon::parse($start)->format('H:i:s'));
-                                                    $qry->orWhere('start_tim','<=', Carbon::parse($end)->format('H:i:s'))
+                                                    $qry->orWhere('start_time','<=', Carbon::parse($end)->format('H:i:s'))
                                                     ->where('end_time','>=', Carbon::parse($end)->format('H:i:s'));
                                                 })->first();
                                                 if (!$chk) {
@@ -837,9 +837,9 @@ class AppointmentController extends Controller
                                         if ($temp <= $endTimeSeconds) {
                                             $chk = Appointment::where('doctor_id', $request->provider_id)->where('appointment_date', $selectedDate)
                                                 ->where(function($qry)use($start,$end){
-                                                    $qry->where('start_tim','<=', Carbon::parse($start)->format('H:i:s'))
+                                                    $qry->where('start_time','<=', Carbon::parse($start)->format('H:i:s'))
                                                     ->where('end_time','>=', Carbon::parse($start)->format('H:i:s'));
-                                                    $qry->orWhere('start_tim','<=', Carbon::parse($end)->format('H:i:s'))
+                                                    $qry->orWhere('start_time','<=', Carbon::parse($end)->format('H:i:s'))
                                                     ->where('end_time','>=', Carbon::parse($end)->format('H:i:s'));
                                                 })->first();
                                             if (!$chk) {
