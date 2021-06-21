@@ -27,6 +27,7 @@ class MedicalRecord extends Model
             'appointment_id' => $this->appointment_id,
             'created' => convertToLocal(Carbon::parse($this->created_at),config('custom.timezone')[251],'M-d-Y h:i A'),
             'appointment_reference_no' => $this->appointment()->select('appointment_reference')->first(),
+            'appointment_date' => $this->appointment()->select('appointment_date')->first(),
             'doctor' => $this->doctor()->first()->basicProfile(),
             'patient' => $this->patient()->first()->basicProfile(),
             'description' => $this->description,
