@@ -235,7 +235,11 @@ class AppointmentController extends Controller
              * Appointment
              */
             $appointment_date = Carbon::createFromFormat('d/m/Y', $request->appointment_date)->format('Y-m-d');
-            $chk = Appointment::where(['doctor_id' => $doctor->id, 'appointment_date' => $appointment_date, 'start_time' => $request->start_time, 'end_time' => $request->end_time])->first();
+            $chk = Appointment::where(['doctor_id' => $doctor->id, 'appointment_date' => $appointment_date])
+            ->where(function($qry)use($start,$end){
+                $qry->where(DB::raw("start_time>='". Carbon::parse($request->start_time)->format('H:i:s')."' and end_time<='". Carbon::parse($request->start_time)->format('H:i:s')."'"));
+                $qry->orWhere(DB::raw("start_time>='". Carbon::parse($request->end_time)->format('H:i:s')."' and end_time<='". Carbon::parse($request->end_time)->format('H:i:s')."'"));
+            })->first();
             if ($chk) {
                 if ($request->route()->getName() == "appointmentCreate") {
                     return self::send_bad_request_response('Appointment already exists');
