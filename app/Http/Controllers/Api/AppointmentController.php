@@ -236,11 +236,17 @@ class AppointmentController extends Controller
              */
             $appointment_date = Carbon::createFromFormat('d/m/Y', $request->appointment_date)->format('Y-m-d');
             $chk = Appointment::where('doctor_id', $request->doctor_id)->where('appointment_date', $appointment_date)
+            // ->where(function($qry)use($request){
+            //     $qry->where('start_time','<=', Carbon::parse($request->start_time)->format('H:i:s'))
+            //     ->where('end_time','>=', Carbon::parse($request->start_time)->format('H:i:s'));
+            // })->orWhere(function($qry)use($request){
+            //     $qry->where('start_time','<=', Carbon::parse($request->end_time)->format('H:i:s'))
+            //     ->where('end_time','>=', Carbon::parse($request->end_time)->format('H:i:s'));
+            // })
             ->where(function($qry)use($request){
                 $qry->where('start_time','<=', Carbon::parse($request->start_time)->format('H:i:s'))
                 ->where('end_time','>=', Carbon::parse($request->start_time)->format('H:i:s'));
-            })->orWhere(function($qry)use($request){
-                $qry->where('start_time','<=', Carbon::parse($request->end_time)->format('H:i:s'))
+                $qry->orWhere('start_time','<=', Carbon::parse($request->end_time)->format('H:i:s'))
                 ->where('end_time','>=', Carbon::parse($request->end_time)->format('H:i:s'));
             })->first();
             if ($chk) {
@@ -807,11 +813,10 @@ class AppointmentController extends Controller
                                         if ($start >= $currentTime) {
                                             if ($temp <= $endTimeSeconds) {
                                                 $chk = Appointment::where('doctor_id', $request->provider_id)->where('appointment_date', $selectedDate)
-                                                ->where(function($qry)use($start){
+                                                ->where(function($qry)use($start,$end){
                                                     $qry->where('start_time','<=', Carbon::parse($start)->format('H:i:s'))
                                                     ->where('end_time','>=', Carbon::parse($start)->format('H:i:s'));
-                                                })->orWhere(function($qry)use($end){
-                                                    $qry->where('start_time','<=', Carbon::parse($end)->format('H:i:s'))
+                                                    $qry->orWhere('start_time','<=', Carbon::parse($end)->format('H:i:s'))
                                                     ->where('end_time','>=', Carbon::parse($end)->format('H:i:s'));
                                                 })->first();
                                                 if (!$chk) {
@@ -838,11 +843,10 @@ class AppointmentController extends Controller
                                         $temp = strtotime('+' . $interval . ' minutes', $start);
                                         if ($temp <= $endTimeSeconds) {
                                             $chk = Appointment::where('doctor_id', $request->provider_id)->where('appointment_date', $selectedDate)
-                                            ->where(function($qry)use($start){
+                                            ->where(function($qry)use($start,$end){
                                                 $qry->where('start_time','<=', Carbon::parse($start)->format('H:i:s'))
                                                 ->where('end_time','>=', Carbon::parse($start)->format('H:i:s'));
-                                            })->orWhere(function($qry)use($end){
-                                                $qry->where('start_time','<=', Carbon::parse($end)->format('H:i:s'))
+                                                $qry->orWhere('start_time','<=', Carbon::parse($end)->format('H:i:s'))
                                                 ->where('end_time','>=', Carbon::parse($end)->format('H:i:s'));
                                             })->first();
                                             if (!$chk) {
