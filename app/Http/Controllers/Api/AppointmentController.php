@@ -803,9 +803,6 @@ class AppointmentController extends Controller
                                                 ->where(function($qry)use($start,$end){
                                                     $qry->where('start_time','>=', Carbon::parse($start)->format('H:i:s'))
                                                     ->where('end_time','<=', Carbon::parse($end)->format('H:i:s'));
-                                                })->orWhere(function($qry)use($start,$end){
-                                                    $qry->where('start_time','>=', Carbon::parse($start)->format('H:i:s'))
-                                                    ->where('end_time','>=', Carbon::parse($end)->format('H:i:s'));
                                                 })->first();
                                                 if (!$chk) {
                                                     $results[] = $start . '-' . $temp;
@@ -834,9 +831,6 @@ class AppointmentController extends Controller
                                             ->where(function($qry)use($start,$end){
                                                 $qry->where('start_time','>=', Carbon::parse($start)->format('H:i:s'))
                                                 ->where('end_time','<=', Carbon::parse($end)->format('H:i:s'));
-                                            })->orWhere(function($qry)use($start,$end){
-                                                $qry->where('start_time','>=', Carbon::parse($start)->format('H:i:s'))
-                                                ->where('end_time','>=', Carbon::parse($end)->format('H:i:s'));
                                             })->first();
                                             if (!$chk) {
                                                 $results[] = $start . '-' . $temp;
