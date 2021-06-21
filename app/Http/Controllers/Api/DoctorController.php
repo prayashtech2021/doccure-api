@@ -543,6 +543,8 @@ class DoctorController extends Controller
                 $doctors->whereIn('gender', [$request->gender]);
             }
 
+            
+
             if ($request->speciality && (!empty($request->speciality))) {
                 $doctors = $doctors->whereHas('doctorSpecialization', function ($category) use ($request) {
                     $category->whereIn('user_speciality.speciality_id', [$request->speciality]);
@@ -554,6 +556,8 @@ class DoctorController extends Controller
                 $doctors = $doctors->whereHas('doctorSpecialization', function ($category) use ($speciality_name) {
                     $category->where('specialities.name', 'like', '%' . $speciality_name . '%');
                 });
+                $doctors = $doctors->whereEncrypted('first_name', 'like', '%' . $request->speciality_name . '%')
+                    ->orWhereEncrypted('last_name', 'like', '%' . $request->speciality_name . '%');
             }
 
             if ($request->country_id && (!empty($request->country_id))) {
@@ -570,6 +574,20 @@ class DoctorController extends Controller
                 });
             }
 
+            if ($request->city_id && (!empty($request->city_id))) {
+                $city_id = $request->city_id;
+                $doctors = $doctors->whereHas('homeAddress', function ($category) use ($city_id) {
+                    $category->where('addresses.city_id', $city_id);
+                });
+            }
+
+            if ($request->country_name && (!empty($request->country_name))) {
+                $country_name =  $request->country_name;
+                $doctors = $doctors->whereHas('homeAddress.country', function ($category) use ($country_name) {
+                    $category->where('name', $country_name);
+                });
+            }
+
             if ($request->state_name && (!empty($request->state_name))) {
                 $state_name =  $request->state_name;
                 $doctors = $doctors->whereHas('homeAddress.state', function ($category) use ($state_name) {
@@ -581,13 +599,6 @@ class DoctorController extends Controller
                 $city_name =  $request->city_name;
                 $doctors = $doctors->whereHas('homeAddress.city', function ($category) use ($city_name) {
                     $category->where('name', $city_name);
-                });
-            }
-
-            if ($request->city_id && (!empty($request->city_id))) {
-                $city_id = $request->city_id;
-                $doctors = $doctors->whereHas('homeAddress', function ($category) use ($city_id) {
-                    $category->where('addresses.city_id', $city_id);
                 });
             }
 
