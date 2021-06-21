@@ -553,10 +553,14 @@ class DoctorController extends Controller
             
             if ($request->speciality_name && (!empty($request->speciality_name))) {
                 $speciality_name = $request->speciality_name;
+                $name = explode(' ',$request->speciality_name);
                 $doctors = $doctors->whereHas('doctorSpecialization', function ($category) use ($speciality_name) {
                     $category->where('specialities.name', 'like', '%' . $speciality_name . '%');
-                })->orwhereEncrypted('first_name', 'like', '%' . $speciality_name . '%')
-                    ->orWhereEncrypted('last_name', 'like', '%' . $speciality_name . '%');
+                })->orwhereEncrypted('first_name', 'like', '%' . $name[0] . '%')
+                  ->orwhereEncrypted('last_name', 'like', '%' . $name[0] . '%');
+                if(isset($name[1])){
+                    $doctors = $doctors->orwhereEncrypted('first_name', 'like', '%' . $name[1] . '%')->orWhereEncrypted('last_name', 'like', '%' . $name[1] . '%');
+                }
             }
 
             if ($request->country_id && (!empty($request->country_id))) {
