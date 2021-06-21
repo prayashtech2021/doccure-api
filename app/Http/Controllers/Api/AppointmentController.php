@@ -236,7 +236,7 @@ class AppointmentController extends Controller
              */
             $appointment_date = Carbon::createFromFormat('d/m/Y', $request->appointment_date)->format('Y-m-d');
             $chk = Appointment::where(['doctor_id' => $doctor->id, 'appointment_date' => $appointment_date])
-            ->where(function($qry)use($start,$end){
+            ->where(function($qry)use($request){
                 $qry->where(DB::raw("start_time>='". Carbon::parse($request->start_time)->format('H:i:s')."' and end_time<='". Carbon::parse($request->start_time)->format('H:i:s')."'"));
                 $qry->orWhere(DB::raw("start_time>='". Carbon::parse($request->end_time)->format('H:i:s')."' and end_time<='". Carbon::parse($request->end_time)->format('H:i:s')."'"));
             })->first();
