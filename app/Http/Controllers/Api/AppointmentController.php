@@ -802,6 +802,9 @@ class AppointmentController extends Controller
                                                 $chk = Appointment::where(['doctor_id' => $request->provider_id, 'appointment_date' => $selectedDate])
                                                 ->where(function($qry)use($start,$end){
                                                     $qry->where('start_time','>=', Carbon::parse($start)->format('H:i:s'))
+                                                    ->where('end_time','<=', Carbon::parse($start)->format('H:i:s'));
+                                                })->orWhere(function($qry)use($start,$end){
+                                                    $qry->where('start_time','>=', Carbon::parse($end)->format('H:i:s'))
                                                     ->where('end_time','<=', Carbon::parse($end)->format('H:i:s'));
                                                 })->first();
                                                 if (!$chk) {
@@ -830,6 +833,9 @@ class AppointmentController extends Controller
                                             $chk = Appointment::where(['doctor_id' => $request->provider_id, 'appointment_date' => $selectedDate])
                                             ->where(function($qry)use($start,$end){
                                                 $qry->where('start_time','>=', Carbon::parse($start)->format('H:i:s'))
+                                                ->where('end_time','<=', Carbon::parse($start)->format('H:i:s'));
+                                            })->orWhere(function($qry)use($start,$end){
+                                                $qry->where('start_time','>=', Carbon::parse($end)->format('H:i:s'))
                                                 ->where('end_time','<=', Carbon::parse($end)->format('H:i:s'));
                                             })->first();
                                             if (!$chk) {
