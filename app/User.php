@@ -174,7 +174,7 @@ class User extends Authenticatable implements Wallet, WalletFloat
             'providerspeciality' => $this->getProviderSpecialityAttribute(),
             'permanent_address' => $permanentAddress,
             'office_address' => $officeAddress,
-            'member_since' => convertToLocal(Carbon::parse($this->created_at),config('custom.timezone')[251],'d M Y H:s A'),
+            'member_since' => convertToLocal(Carbon::parse($this->created_at),config('custom.timezone')[251],'M-d-Y H:s A'),
             'accountstatus' => $this->getAccountStatusAttribute(),
             'doctor_earned' => ($this->providerPayment())?$this->providerPayment()->sum(DB::raw('total_amount-(transaction_charge + tax_amount)')):'',
             'doctorRating' => ($this->avgRating())? $this->avgRating() : 0,
