@@ -31,7 +31,7 @@ class Post extends Model
             'meta_keywords' => $this->meta_keywords,
             'url' => $this->url,
             'status' => (!empty($this->deleted_at))?false:true,
-            'created_at' => convertToLocal(Carbon::parse($this->created_at),config('custom.timezone')[251],'M-d-Y h:i A'),
+            'created_at' => convertToLocal(Carbon::parse($this->created_at),config('custom.timezone')[251],'d/m/Y h:i A'),
             'category' => $this->category()->select('id','name')->first(),
             'sub_category' => $this->subCategory()->select('id','name')->first(),
             'tags' => $this->tags()->select('id','name')->get(),
