@@ -22,7 +22,7 @@ class PostCategory extends Model
         return [
             'id' => $this->id,
             'name' => $this->name,
-            'created_at' => convertToLocal(Carbon::parse($this->created_at),config('custom.timezone')[251],'M-d-Y h:i A'),
+            'created_at' => convertToLocal(Carbon::parse($this->created_at),config('custom.timezone')[251],'d/m/Y h:i A'),
             'deleted_at' => $this->deleted_at,         ];
     }
     public function post(){
