@@ -63,11 +63,13 @@ class PostController extends Controller
                 $list = Post::orderBy('created_at', $order_by);
                 if(isset($request->category_id) && !empty($request->category_id)){
                     $list = $list->where('post_category_id',$request->category_id);
-                }elseif(isset($request->tag_name) && !empty($request->tag_name)){
+                }
+                if(isset($request->tag_name) && !empty($request->tag_name)){
                     $list = $list->whereHas('tags',function($qry)use($request){
                     $qry->where('name',$request->tag_name);
                 });
-                }elseif(!empty($request->search_keyword)){
+                }
+                if(!empty($request->search_keyword)){
                     $list = $list->where(function($qry)use($request){
                         $qry->where('title','like','%'.$request->search_keyword.'%')
                         ->orWhere('content','like','%'.$request->search_keyword.'%');
