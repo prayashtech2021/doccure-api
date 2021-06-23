@@ -23,7 +23,7 @@ class Appointment extends Model
         }
         return [
             'id' => $this->id,
-            'created' => convertToLocal(Carbon::parse($this->created_at),$zone,'d/m/Y h:i A'),
+            'created' => convertToLocal(Carbon::parse($this->created_at),$zone,''),
             'reference' => $this->appointment_reference,
             'type' => $this->appointment_type,
             'type_name' => config('appointments.type')[$this->appointment_type],
@@ -57,7 +57,7 @@ class Appointment extends Model
             }
         return [
             'id' => $this->id,
-            'created' => convertToLocal(Carbon::parse($this->created_at),$zone,'d/m/Y h:i A'),
+            'created' => convertToLocal(Carbon::parse($this->created_at),$zone,''),
             'type' => config('appointments.type')[$this->appointment_type],
             'appointment_status' => config('custom.appointment_status')[$this->appointment_status],
             'doctor' => $this->doctor()->first()->basicProfile(),

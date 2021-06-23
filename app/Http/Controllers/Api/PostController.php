@@ -53,45 +53,44 @@ class PostController extends Controller
             $order_by = $request->order_by ? $request->order_by : 'desc';
             $pageNumber = $request->page ? $request->page : 1;
 
-            if ($request->bearerToken()) {
-                if (auth('api')->user()->hasRole('company_admin')) {
+           
+                if ($request->bearerToken() && auth('api')->user()->hasRole('company_admin')) {
                     $list = Post::withTrashed()->orderBy('created_at', $order_by);
-                }elseif (auth('api')->user()->hasRole('doctor')) {
+                }elseif ($request->bearerToken() && auth('api')->user()->hasRole('doctor')) {
                     $list = Post::orderBy('created_at', $order_by)->where('created_by',auth('api')->user()->id);
-                }
-            }else{
-                $list = Post::orderBy('created_at', $order_by);
-                if(isset($request->category_id) && !empty($request->category_id)){
-                    $list = $list->where('post_category_id',$request->category_id);
-                }
-                if(isset($request->tag_name) && !empty($request->tag_name)){
-                    $list = $list->whereHas('tags',function($qry)use($request){
-                    $qry->where('name',$request->tag_name);
-                });
-                }
-                if(!empty($request->search_keyword)){
-                    $list = $list->where(function($qry)use($request){
-                        $qry->where('title','like','%'.$request->search_keyword.'%')
-                        ->orWhere('content','like','%'.$request->search_keyword.'%');
-                    }); 
-                }
-                $result['categories'] = PostCategory::whereHas('post',function($qry){
-                    $qry->where('is_viewable',1);
-                })->withCount(['post','post' => function($qry){
-                    $qry->where('is_viewable',1);
-                }])->orderBy('name')->get();
-                $result['tags'] = PostTag::whereHas('post',function($qry){
-                    $qry->where('is_viewable',1);
-                })->orderBy('name')->groupBy('name')->get();
+                }else{
+                    $list = Post::orderBy('created_at', $order_by);
+                    if(isset($request->category_id) && !empty($request->category_id)){
+                        $list = $list->where('post_category_id',$request->category_id);
+                    }
+                    if(isset($request->tag_name) && !empty($request->tag_name)){
+                        $list = $list->whereHas('tags',function($qry)use($request){
+                        $qry->where('name',$request->tag_name);
+                    });
+                    }
+                    if(!empty($request->search_keyword)){
+                        $list = $list->where(function($qry)use($request){
+                            $qry->whereEncrypted('title','like','%'.$request->search_keyword.'%')
+                            ->orwhereEncrypted('content','like','%'.$request->search_keyword.'%');
+                        }); 
+                    }
+                    $result['categories'] = PostCategory::whereHas('post',function($qry){
+                        $qry->where('is_viewable',1);
+                    })->withCount(['post','post' => function($qry){
+                        $qry->where('is_viewable',1);
+                    }])->orderBy('name')->get();
+                    $result['tags'] = PostTag::whereHas('post',function($qry){
+                        $qry->where('is_viewable',1);
+                    })->orderBy('name')->groupBy('name')->get();
 
-                $latest = Post::latest()->limit(5)->get();
-                $latest->each(function($item, $key){
-                    $item->thumbnail_image = getPostImage($item->thumbnail_image);
-                    $item->banner_image = getPostImage($item->banner_image);
-                });
-                $result['latest']=$latest;
-            }
-
+                    $latest = Post::latest()->limit(5)->get();
+                    $latest->each(function($item, $key){
+                        $item->thumbnail_image = getPostImage($item->thumbnail_image);
+                        $item->banner_image = getPostImage($item->banner_image);
+                    });
+                    $result['latest']=$latest;
+                }
+        
             if(isset($request->viewable) && $request->viewable==1){
                 if ($request->bearerToken()) {
                     if (auth('api')->user()->hasRole('company_admin')) {
