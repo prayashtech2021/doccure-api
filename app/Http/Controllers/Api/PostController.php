@@ -65,7 +65,7 @@ class PostController extends Controller
                     }
                     if(isset($request->tag_name) && !empty($request->tag_name)){
                         $list = $list->whereHas('tags',function($qry)use($request){
-                        $qry->where('name',$request->tag_name);
+                        $qry->whereEncrypted('name',$request->tag_name);
                     });
                     }
                     if(!empty($request->search_keyword)){
