@@ -389,7 +389,7 @@ class HomeController extends Controller
                 if (preg_match('/data:image\/(.+);base64,(.*)/', $request->profile_image, $matchings)) {
                     $imageData = base64_decode($matchings[2]);
                     $extension = $matchings[1];
-                    $file_name = date('YmdHis') . rand(100, 999) . '_' . $request->user_id . '.' . $extension;
+                    $file_name = date('YmdHis') . rand(100, 999) . '_' . $user->id . '.' . $extension;
                     $path = 'images/profile-images/' . $file_name;
                     Storage::put($path, $imageData);
 
