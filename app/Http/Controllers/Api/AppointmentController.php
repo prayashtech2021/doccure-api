@@ -94,7 +94,7 @@ class AppointmentController extends Controller
             foreach ($getApp as $item) {
                 $patient = User::find($item->user_id);
                 $patient_zone = Carbon::createFromFormat('Y-m-d H:i:s', Carbon::now()->toDateTimeString())->setTimezone($patient->time_zone);
-                if ($item->appointment_date < $patient_zone->format('Y-m-d')) {
+                if ($item->appointment_date < $patient_zone->format('Y-m-d H:i:s')) {
                     Appointment::where('id', $item->id)->update(['appointment_status' => 7]);
 
                     $requested_amount = $getApp->payment->total_amount - $getApp->payment->transaction_charge;
