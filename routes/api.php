@@ -51,6 +51,7 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
     Route::post('changepassword', 'Api\HomeController@changePassword');
     Route::post('reset-password', 'Api\HomeController@resetPassword');
     Route::get('user/delete/{id}/{type?}', 'Api\HomeController@destroy');
+    Route::get('user/softdelete','Api\HomeController@user_softdelete');
     Route::post('upload/profile-image', 'Api\HomeController@uploadProfileImage');
     /* Admin Profile */
     Route::get('admin/profile/{id}', 'Api\HomeController@adminProfile');

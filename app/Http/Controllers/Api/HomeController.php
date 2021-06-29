@@ -416,7 +416,7 @@ class HomeController extends Controller
 
     public function destroy($id,$type=NULL){
         if(isset($type) && $type == 1){
-            echo $type;
+            //echo $type;
             $user = User::withTrashed()->find($id);
             $user->forcedelete();
 			$msg='Record Deleted successfully!';
@@ -424,6 +424,31 @@ class HomeController extends Controller
         }else{
            return self::customDelete('\App\User', $id);
         }
+    }
+
+    public function user_softdelete(Request $request){
+        $rules = array(
+            'user_id' => 'required|integer|exists:users,id', 
+        );
+        
+        $valid = self::customValidation($request, $rules);
+        if($valid){ return $valid;}
+
+        $data = User::withTrashed()->find($request->user_id);
+        if ($data->trashed()) {
+            $data->deleted_at = null;
+            $data->deleted_by = null;
+            $data->save();
+            $msg='Record Activated successfully!';
+            // session()->flash('success', 'Record Activated successfully!');
+        } else {
+            $data->deleted_at = date('Y-m-d H:i:s');
+            $data->deleted_by = auth()->user()->id;
+            $data->save();
+            $msg='Record Deleted successfully!';
+            // session()->flash('success', 'Record Deleted successfully!');
+        }
+        return self::send_success_response([], $msg);
     }
 
     public function adminDashboard(Request $request){
