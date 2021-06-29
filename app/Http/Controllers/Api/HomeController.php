@@ -426,7 +426,7 @@ class HomeController extends Controller
         }
     }
 
-    public function user_softdelete(Request $request){
+    public function userSoftdelete(Request $request){
         $rules = array(
             'user_id' => 'required|integer|exists:users,id', 
         );
