@@ -875,8 +875,8 @@ class AppointmentController extends Controller
                         $exp = explode('-', $res);
                         $firstElement = $exp[0];
                         $app_type = $this->getAppointmentType($array1, $array2, $exp[0], $provider_zone);
-                        $morning = strtotime('12:00:00');
-                        $afternoon = strtotime('16:00:00');
+                        $morning = strtotime($selectedDate . ' ' .'12:00:00');
+                        $afternoon = strtotime($selectedDate . ' ' .'16:00:00');
                         if ($firstElement <= $morning) {
                             $newresults['morning'][$mor]['appointment_type'] = $app_type;
                             $newresults['morning'][$mor]['time'] = date('h:i A', $exp[0]) . ' - ' . date('h:i A', $exp[1]);
