@@ -1157,7 +1157,12 @@ class AppointmentController extends Controller
                 $payments = $user->payment();
             }
             if ($user->hasRole(['doctor'])) {
-                $payments = $user->providerPayment();
+                if(isset($request->consumer_id)){
+                    $consumer = User::find($request->consumer_id);
+                    $payments = $consumer->payment();
+                }else{
+                    $payments = $user->providerPayment();
+                }
             }
             $data = collect();
             $paginatedata = $payments->paginate($paginate, ['*'], 'page', $pageNumber);
