@@ -28,7 +28,7 @@ class Banner extends Model
     function getImage(){
         $image = $this->image;
         if (!empty($image) && Storage::exists('images/cms-images/' . $image)) {
-            $path = (config('filesystems.default') == 's3') ? Storage::temporaryUrl('app/public/images/cms-images/' . $image, now()->addMinutes(5)) : Storage::url('app/public/images/cms-images/' . $image);
+            $path = (config('filesystems.default') == 's3') ? Storage::temporaryUrl('images/cms-images/' . $image, now()->addMinutes(5)) : Storage::url('images/cms-images/' . $image);
         } elseif(!empty($image)){
             $path = url('img/cms-images/' . $image);
         }else{

@@ -94,11 +94,13 @@ class AppointmentController extends Controller
             foreach ($getApp as $item) {
                 $patient = User::find($item->user_id);
                 $patient_zone = Carbon::createFromFormat('Y-m-d H:i:s', Carbon::now()->toDateTimeString())->setTimezone($patient->time_zone);
-                if ($item->appointment_date < $patient_zone->format('Y-m-d H:i:s')) {
+                if ($item->appointment_date == $patient_zone->format('Y-m-d')) {
+                    if ($item->end_time < $patient_zone->format('H:i:s')) {
                     Appointment::where('id', $item->id)->update(['appointment_status' => 7]);
 
-                    $requested_amount = $getApp->payment->total_amount - $getApp->payment->transaction_charge;
+                    $requested_amount = $item->payment->total_amount - $item->payment->transaction_charge;
                     $patient->depositFloat($requested_amount);
+                    }
                 }
             }
 
@@ -873,8 +875,8 @@ class AppointmentController extends Controller
                         $exp = explode('-', $res);
                         $firstElement = $exp[0];
                         $app_type = $this->getAppointmentType($array1, $array2, $exp[0], $provider_zone);
-                        $morning = strtotime('12:00:00');
-                        $afternoon = strtotime('16:00:00');
+                        $morning = strtotime($selectedDate . ' ' .'12:00:00');
+                        $afternoon = strtotime($selectedDate . ' ' .'16:00:00');
                         if ($firstElement <= $morning) {
                             $newresults['morning'][$mor]['appointment_type'] = $app_type;
                             $newresults['morning'][$mor]['time'] = date('h:i A', $exp[0]) . ' - ' . date('h:i A', $exp[1]);
