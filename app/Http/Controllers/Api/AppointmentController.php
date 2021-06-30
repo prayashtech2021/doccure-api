@@ -60,7 +60,7 @@ class AppointmentController extends Controller
         $lang_id = ($request->language_id) ? getLang($request->language_id) : defaultLang();
         $common['header'] = getLangContent(8, $lang_id);
         $common['setting'] = getSettingData();
-        // $common['menu'] = getAppMenu();
+        $common['menu'] = getAppMenu();
         if ($request->request_type) {
             $common['lang_content'] = getLangContent(18, $lang_id);
         } else {
