@@ -60,7 +60,7 @@ class AppointmentController extends Controller
         $lang_id = ($request->language_id) ? getLang($request->language_id) : defaultLang();
         $common['header'] = getLangContent(8, $lang_id);
         $common['setting'] = getSettingData();
-        $common['menu'] = getAppMenu();
+        // $common['menu'] = getAppMenu();
         if ($request->request_type) {
             $common['lang_content'] = getLangContent(18, $lang_id);
         } else {
@@ -97,7 +97,7 @@ class AppointmentController extends Controller
                 if ($item->appointment_date < $patient_zone->format('Y-m-d H:i:s')) {
                     Appointment::where('id', $item->id)->update(['appointment_status' => 7]);
 
-                    $requested_amount = $getApp->payment->total_amount - $getApp->payment->transaction_charge;
+                    $requested_amount = $item->payment->total_amount - $item->payment->transaction_charge;
                     $patient->depositFloat($requested_amount);
                 }
             }
