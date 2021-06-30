@@ -160,7 +160,7 @@ class PageContentController extends Controller
             
             foreach($getSettings as $result){
                 if (!empty($result->image) && Storage::exists('images/cms-images/' . $result->image)) {
-                    $path = (config('filesystems.default') == 's3') ? Storage::temporaryUrl('app/public/images/cms-images/' . $result->image, now()->addMinutes(5)) : Storage::url('app/public/images/cms-images/' . $result->image);
+                    $path = (config('filesystems.default') == 's3') ? Storage::temporaryUrl('images/cms-images/' . $result->image, now()->addMinutes(5)) : Storage::url('images/cms-images/' . $result->image);
                 } elseif(!empty($result->image)){
                     $path = url('img/cms-images/' . $result->image);
                 }else{
