@@ -107,8 +107,11 @@ class PassportController extends Controller {
 		}
 	}
 
-	public function logout() {
+	public function logout(Request $request) {
 		if (auth()->check()) {
+			if($request->route()->getName() == 'mobileLogout'){
+				User::where('id',auth()->user()->id)->update(array('device_id'=>NULL,'device_type'=>NULL));
+			}
 			auth()->user()->token()->revoke();
 		}
 

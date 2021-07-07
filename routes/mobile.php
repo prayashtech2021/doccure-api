@@ -104,7 +104,7 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
     Route::get('record/view/{id}', 'Api\MedicalRecordController@getView');
     Route::get('record/delete/{id}', 'Api\MedicalRecordController@destroy');
 
-    Route::get('logout', 'PassportController@logout');
+    Route::get('logout', 'PassportController@logout')->name('mobileLogout');
     // Language
     Route::post('language/update', 'Api\LanguageController@update');
     Route::post('language/save','Api\LanguageController@save');

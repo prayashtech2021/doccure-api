@@ -185,6 +185,7 @@ class User extends Authenticatable implements Wallet, WalletFloat
             'online_status' => $this->onlineStatus(),
             'education' => $this->doctorEducation()->get(),
             'favourite' => $fav,
+            'time_zone_name' => $this->time_zone, 
         ];
     }
 
