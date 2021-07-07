@@ -5731,7 +5731,7 @@ class MultiLanguageSeeder extends Seeder
             921 =>[
                 'page_master_id' => 52,
                 'keyword' => 'lbl_billing',
-                'value' => 'Billing',
+                'value' => 'Invoice',
                 'created_by' => 1, 
                 'language_id' => 1,
             ],

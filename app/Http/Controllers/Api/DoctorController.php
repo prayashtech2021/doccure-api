@@ -233,12 +233,11 @@ class DoctorController extends Controller
                 'dob' => 'date',
                 // 'price_type' => 'required|between:1,2',
                 'amount' => 'numeric',
-                'contact_address_line1' => 'required',
                 'speciality' => 'required',
             );
 
                 $rules['contact_address_line1'] = 'required';            
-                $rules['contact_address_line2'] = 'required';
+                //$rules['contact_address_line2'] = 'required';
                 $rules['contact_country_id'] = 'required';
                 $rules['contact_state_id'] = 'required';
                 $rules['contact_city_id'] = 'required';
@@ -535,8 +534,15 @@ class DoctorController extends Controller
             $doctors = User::role('doctor');
 
             if ($request->keywords && (!empty($request->keywords))) {
-                $doctors = $doctors->whereEncrypted('first_name', 'like', '%' . $request->keywords . '%')
-                    ->orWhereEncrypted('last_name', 'like', '%' . $request->keywords . '%');
+                $keywords = $request->keywords;
+                $name = explode(' ',$request->keywords);
+                $doctors = $doctors->whereHas('doctorSpecialization', function ($category) use ($keywords) {
+                    $category->where('specialities.name', 'like', '%' . $keywords . '%');
+                })->orwhereEncrypted('first_name', 'like', '%' . $name[0] . '%')
+                  ->orwhereEncrypted('last_name', 'like', '%' . $name[0] . '%');
+                if(isset($name[1])){
+                    $doctors = $doctors->orwhereEncrypted('first_name', 'like', '%' . $name[1] . '%')->orWhereEncrypted('last_name', 'like', '%' . $name[1] . '%');
+                }
             }
 
             if ($request->gender && (!empty($request->gender))) {
