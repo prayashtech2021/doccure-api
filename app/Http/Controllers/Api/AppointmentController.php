@@ -906,7 +906,8 @@ class AppointmentController extends Controller
     {
         (auth()->user()->time_zone) ? $zone = auth()->user()->time_zone : '';
         $app_type = '';
-
+        $time=(int)$time;
+        $time=strtotime(Carbon::parse($time)->format('H:i:s'));
         foreach ($array1 as $item) {
             $stime = explode('-', $item);
             $startTime = providerToUser($stime[0], $provider_zone, $zone);
@@ -915,11 +916,13 @@ class AppointmentController extends Controller
             $endTime = strtotime($endTime->format('H:i:s'));
             if ($time >= $startTime && $time <= $endTime) {
                 $app_type = 1;
-            } elseif ($time >= $startTime) {
-                $app_type = 1;
-            }
+            } 
+            // elseif ($time >= $startTime) {
+            //     $app_type = 1;
+            // }
             // $arr1[]=date('H:i:s',$startTime).'-'.date('H:i:s',$endTime);
         }
+        // dd($app_type);
         foreach ($array2 as $item) {
             $stime = explode('-', $item);
             $startTime = providerToUser($stime[0], $provider_zone, $zone);
@@ -928,11 +931,13 @@ class AppointmentController extends Controller
             $endTime = strtotime($endTime->format('H:i:s'));
             if ($time >= $startTime && $time <= $endTime) {
                 $app_type = 2;
-            } elseif ($time >= $startTime) {
-                $app_type = 2;
-            }
+            } 
+            // elseif ($time >= $startTime) {
+            //     $app_type = 2;
+            // }
             // $arr2[]=date('H:i:s',$startTime).'-'.date('H:i:s',$endTime);
         }
+        // dd($app_type);
         // dd($arr1,$arr2,date('H:i:s',$time));
         return $app_type;
     }
