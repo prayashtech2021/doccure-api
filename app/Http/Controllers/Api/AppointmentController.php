@@ -90,7 +90,7 @@ class AppointmentController extends Controller
 
             $user = auth()->user();
             updateLastSeen(auth()->user());
-            $getApp = Appointment::whereIn('appointment_status', [1, 2])->get();
+            $getApp = Appointment::where('appointment_type',1)->whereIn('appointment_status', [1, 2])->get();
             foreach ($getApp as $item) {
                 $patient = User::find($item->user_id);
                 $patient_zone = Carbon::createFromFormat('Y-m-d H:i:s', Carbon::now()->toDateTimeString())->setTimezone($patient->time_zone);
