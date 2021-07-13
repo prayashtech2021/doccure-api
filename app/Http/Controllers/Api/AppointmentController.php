@@ -647,6 +647,14 @@ class AppointmentController extends Controller
             }
             $log->status = $appointment->appointment_status;
             $log->save();
+            if ($request->status == 3){
+                $doctor = User::find($appointment->doctor_id);
+
+                $value = ($appointment->payment->transaction_charge + $appointment->payment->tax_amount);
+                $requested_amount = $appointment->payment->total_amount - $value;
+                $doctor->depositFloat($requested_amount);
+            }
+
             if ($request->status == 5 && $appointment->payment->total_amount > 0) { // refund approved
                 $user = User::find($appointment->user_id);
                 $requested_amount = $appointment->payment->total_amount - $appointment->payment->transaction_charge;
