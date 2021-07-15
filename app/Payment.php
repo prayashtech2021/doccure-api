@@ -26,6 +26,7 @@ class Payment extends Model
             'tax_amount' => $this->tax_amount ?? 'NA',
             'transaction_charge' => $this->transaction_charge ?? 'NA',
             'card_details' => $this->cardDetails(),
+            'appointment_type' => ($this->appointment->appointment_type==1)?'Online':'Clinic',
             'from' => $this->appointment->doctor()->first()->basicProfile(),
             'to' => $this->appointment->patient()->first()->basicProfile(),
             'created' => convertToLocal(Carbon::parse($this->created_at),config('custom.timezone')[251],'d/m/Y h:i A'),
