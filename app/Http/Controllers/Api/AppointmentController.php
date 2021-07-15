@@ -241,7 +241,7 @@ class AppointmentController extends Controller
             ->where(function($qry)use($request){
                 $qry->where('start_time','<=', Carbon::parse($request->start_time)->format('H:i:s'))
                 ->where('end_time','>', Carbon::parse($request->start_time)->format('H:i:s'));
-                $qry->orWhere('start_time','<=', Carbon::parse($request->end_time)->format('H:i:s'))
+                $qry->orWhere('start_time','<', Carbon::parse($request->end_time)->format('H:i:s'))
                 ->where('end_time','>=', Carbon::parse($request->end_time)->format('H:i:s'));
             })->first();
             if ($chk) {
@@ -754,8 +754,14 @@ class AppointmentController extends Controller
     public function scheduleListForPatient(Request $request)
     {
         try {
-            $request_day = strtolower(Carbon::parse(str_replace('/', '-', $request->selected_date))->format('l'));
-            $selectedDate = Carbon::parse(str_replace('/', '-', $request->selected_date))->format('Y-m-d');
+            $provider = User::find($request->provider_id);
+            $results = [];
+            $patient = auth()->user();
+            $user_zone = $patient->time_zone;
+            $provider_zone = $provider->time_zone;
+
+            $request_day = strtolower(Carbon::parse(str_replace('/', '-', $request->selected_date))->setTimezone($user_zone)->format('l'));
+            $selectedDate = Carbon::parse(str_replace('/', '-', $request->selected_date))->setTimezone($user_zone)->format('Y-m-d');
             $list1 = ScheduleTiming::where('provider_id', $request->provider_id)->where('appointment_type', 1)->first();
             $list2 = ScheduleTiming::where('provider_id', $request->provider_id)->where('appointment_type', 2)->first();
             $array1 = json_decode($list1->working_hours, true);
@@ -770,12 +776,7 @@ class AppointmentController extends Controller
             $interval = $minutes;
             sort($final);
 
-            $provider = User::find($request->provider_id);
-            // dd($final);
-            $results = [];
-            $patient = auth()->user();
-            $user_zone = $patient->time_zone;
-            $provider_zone = $provider->time_zone;
+            
             // date_default_timezone_set($zone);
             foreach ($final as $item) {
                 $stime = explode('-', $item);
@@ -922,7 +923,7 @@ class AppointmentController extends Controller
             $endTime = providerToUser($stime[1], $provider_zone, $zone);
             $startTime = strtotime($startTime->format('H:i:s'));
             $endTime = strtotime($endTime->format('H:i:s'));
-            if ($time >= $startTime && $time <= $endTime) {
+            if ($time >= $startTime && $time < $endTime) {
                 $app_type = 1;
             } 
             // elseif ($time >= $startTime) {
@@ -931,13 +932,14 @@ class AppointmentController extends Controller
             // $arr1[]=date('H:i:s',$startTime).'-'.date('H:i:s',$endTime);
         }
         // dd($app_type);
+        if(empty($app_type)){
         foreach ($array2 as $item) {
             $stime = explode('-', $item);
             $startTime = providerToUser($stime[0], $provider_zone, $zone);
             $endTime = providerToUser($stime[1], $provider_zone, $zone);
             $startTime = strtotime($startTime->format('H:i:s'));
             $endTime = strtotime($endTime->format('H:i:s'));
-            if ($time >= $startTime && $time <= $endTime) {
+            if ($time >= $startTime && $time < $endTime) {
                 $app_type = 2;
             } 
             // elseif ($time >= $startTime) {
@@ -945,8 +947,10 @@ class AppointmentController extends Controller
             // }
             // $arr2[]=date('H:i:s',$startTime).'-'.date('H:i:s',$endTime);
         }
+        }
         // dd($app_type);
         // dd($arr1,$arr2,date('H:i:s',$time));
+        if(empty($app_type)){$app_type=1;}
         return $app_type;
     }
 

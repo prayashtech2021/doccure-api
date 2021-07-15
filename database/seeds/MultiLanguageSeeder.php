@@ -1687,7 +1687,7 @@ class MultiLanguageSeeder extends Seeder
                 'page_master_id' => 16,
                 'language_id' => 1,
                 'keyword' => 'offline',
-                'value' => 'Offline',
+                'value' => 'Clinic',
                 'created_by' => 1,
             ],280 => [
                 'page_master_id' => 16,
@@ -2623,7 +2623,7 @@ class MultiLanguageSeeder extends Seeder
                 'page_master_id' => 12,
                 'language_id' => 1,
                 'keyword' => 'offline',
-                'value' => 'Offline',
+                'value' => 'Clinic',
                 'created_by' => 1, 
             ],434 => [
                 'page_master_id' => 12,
@@ -2947,7 +2947,7 @@ class MultiLanguageSeeder extends Seeder
                 'page_master_id' => 29,
                 'language_id' => 1,
                 'keyword' => 'offline',
-                'value' => 'Offline',
+                'value' => 'Clinic',
                 'created_by' => 1, 
             ],488 => [
                 'page_master_id' => 18,
@@ -3829,7 +3829,7 @@ class MultiLanguageSeeder extends Seeder
                 'page_master_id' => 26,
                 'language_id' => 1,
                 'keyword' => 'offline',
-                'value' => 'Offline',
+                'value' => 'Clinic',
                 'created_by' => 1, 
             ],635 => [
                 'page_master_id' => 26,
@@ -4453,7 +4453,7 @@ class MultiLanguageSeeder extends Seeder
                 'page_master_id' => 10,
                 'language_id' => 1,
                 'keyword' => 'offline',
-                'value' => 'Offline',
+                'value' => 'Clinic',
                 'created_by' => 1, 
             ],740 => [
                 'page_master_id' => 8,

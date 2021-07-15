@@ -14,7 +14,7 @@ class ScheduleTiming extends Model
     public function getData(){
         return [
             'id' => $this->id,
-            'appointment_type' => ($this->appointment_type == 1)?'Online':'Offline',
+            'appointment_type' => ($this->appointment_type == 1)?'Online':'Clinic',
             // 'duration' => Carbon::parse((int)$this->duration)->format('i'),
             'working_hours' => $this->working_hours,
         ];
