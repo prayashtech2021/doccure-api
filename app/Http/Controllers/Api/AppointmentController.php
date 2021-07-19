@@ -760,8 +760,10 @@ class AppointmentController extends Controller
             $user_zone = $patient->time_zone;
             $provider_zone = $provider->time_zone;
 
-            $request_day = strtolower(Carbon::parse(str_replace('/', '-', $request->selected_date))->setTimezone($user_zone)->format('l'));
-            $selectedDate = Carbon::parse(str_replace('/', '-', $request->selected_date))->setTimezone($user_zone)->format('Y-m-d');
+            date_default_timezone_set($user_zone);
+            $request_day = strtolower(Carbon::parse(str_replace('/', '-', $request->selected_date))->format('l'));
+            // dd($request_day,$user_zone);
+            $selectedDate = Carbon::parse(str_replace('/', '-', $request->selected_date))->format('Y-m-d');
             $list1 = ScheduleTiming::where('provider_id', $request->provider_id)->where('appointment_type', 1)->first();
             $list2 = ScheduleTiming::where('provider_id', $request->provider_id)->where('appointment_type', 2)->first();
             $array1 = json_decode($list1->working_hours, true);
@@ -792,7 +794,7 @@ class AppointmentController extends Controller
                 if ($startTime_date == $selectedDate) {
                     if ($sseconds >= $speciality_seconds) {
 
-                        $today = Carbon::createFromFormat('Y-m-d H:i:s', date('Y-m-d H:i:s'))->setTimezone($user_zone);
+                        $today = Carbon::createFromFormat('Y-m-d H:i:s', now()->format('Y-m-d H:i:s'));
                         $currentTime = strtotime($today->format('Y-m-d H:i:s'));
                         $startTimeSeconds = strtotime($startTime->format('Y-m-d H:i:s'));
                         $endTimeSeconds = strtotime($endTime->format('Y-m-d H:i:s'));
