@@ -37,8 +37,11 @@ class AppointmentController extends Controller
      *
      * @return void
      */
+    public $default_time_zone;
+
     public function __construct()
     {
+        $this->default_time_zone = config('app.timezone');
 
         $this->middleware(function ($request, Closure $next) {
 
@@ -48,10 +51,18 @@ class AppointmentController extends Controller
                     config()->set('app.timezone', $time_zone->name);
                     date_default_timezone_set($time_zone->name);
                 }
+                if ($user->time_zone){
+                    config()->set('app.timezone', $user->time_zone);
+                    date_default_timezone_set($user->time_zone);
+                }
             }
 
             return $next($request);
         });
+    }
+    public function __destruct()
+    {
+        config()->set('app.timezone', $this->default_time_zone);
     }
 
     function list(Request $request, $flag = null)
@@ -760,7 +771,8 @@ class AppointmentController extends Controller
             $user_zone = $patient->time_zone;
             $provider_zone = $provider->time_zone;
 
-            date_default_timezone_set($user_zone);
+            // config()->set('app.timezone', $user_zone);
+            // date_default_timezone_set($user_zone);
             $request_day = strtolower(Carbon::parse(str_replace('/', '-', $request->selected_date))->format('l'));
             // dd($request_day,$user_zone);
             $selectedDate = Carbon::parse(str_replace('/', '-', $request->selected_date))->format('Y-m-d');
@@ -794,7 +806,8 @@ class AppointmentController extends Controller
                 if ($startTime_date == $selectedDate) {
                     if ($sseconds >= $speciality_seconds) {
 
-                        $today = Carbon::createFromFormat('Y-m-d H:i:s', now()->format('Y-m-d H:i:s'));
+                        // $today = Carbon::createFromFormat('Y-m-d H:i:s', now()->format('Y-m-d H:i:s'));
+                        $today = Carbon::now();
                         $currentTime = strtotime($today->format('Y-m-d H:i:s'));
                         $startTimeSeconds = strtotime($startTime->format('Y-m-d H:i:s'));
                         $endTimeSeconds = strtotime($endTime->format('Y-m-d H:i:s'));
