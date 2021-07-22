@@ -880,7 +880,7 @@ class AppointmentController extends Controller
                     }
                 } //check converted date==selected date
             }
-            // dd($results);
+            // dd($array1, $array2,$results);
             $newresults = [];
             if ($results) {
                 if ($request->route()->getName() == "scheduleListPatient") {//for mobile
@@ -931,7 +931,7 @@ class AppointmentController extends Controller
         (auth()->user()->time_zone) ? $zone = auth()->user()->time_zone : '';
         $app_type = '';
         $time=(int)$time;
-        $time=strtotime(Carbon::parse($time)->format('H:i:s'));
+        // $time=strtotime(Carbon::parse($time)->format('H:i:s'));
         foreach ($array1 as $item) {
             $stime = explode('-', $item);
             $startTime = providerToUser($stime[0], $provider_zone, $zone);
@@ -945,6 +945,7 @@ class AppointmentController extends Controller
             //     $app_type = 1;
             // }
             // $arr1[]=date('H:i:s',$startTime).'-'.date('H:i:s',$endTime);
+            // dd($stime[0], $provider_zone, $zone,$startTime,$time);
         }
         // dd($app_type);
         if(empty($app_type)){
