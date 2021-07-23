@@ -51,10 +51,10 @@ class AppointmentController extends Controller
                     config()->set('app.timezone', $time_zone->name);
                     date_default_timezone_set($time_zone->name);
                 }
-                // if ($user->time_zone){
-                //     config()->set('app.timezone', $user->time_zone);
-                //     date_default_timezone_set($user->time_zone);
-                // }
+                if ($user->time_zone){
+                    config()->set('app.timezone', $user->time_zone);
+                    date_default_timezone_set($user->time_zone);
+                }
             }
 
             return $next($request);
@@ -773,9 +773,9 @@ class AppointmentController extends Controller
 
             // config()->set('app.timezone', $user_zone);
             // date_default_timezone_set($user_zone);
-            $request_day = strtolower(Carbon::parse(str_replace('/', '-', $request->selected_date))->setTimezone($user_zone)->format('l'));
+            $request_day = strtolower(Carbon::parse(str_replace('/', '-', $request->selected_date))->format('l'));
             // dd($request_day,$user_zone);
-            $selectedDate = Carbon::parse(str_replace('/', '-', $request->selected_date))->setTimezone($user_zone)->format('Y-m-d');
+            $selectedDate = Carbon::parse(str_replace('/', '-', $request->selected_date))->format('Y-m-d');
             $list1 = ScheduleTiming::where('provider_id', $request->provider_id)->where('appointment_type', 1)->first();
             $list2 = ScheduleTiming::where('provider_id', $request->provider_id)->where('appointment_type', 2)->first();
             $array1 = json_decode($list1->working_hours, true);
