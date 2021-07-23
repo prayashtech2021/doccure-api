@@ -25,11 +25,13 @@ class NotificationController extends Controller {
 			}
 			$notifications = auth()->user()->notifications;
 			$array = [];
+			
 			foreach ($notifications as $key => $notification) {
+				$notytime =convertToLocal(Carbon::parse($notification->created_at), auth()->user()->time_zone);
 				$array[] = [
 					'message' => $notification->data['message'],
-					'created_at' => $notification->created_at,
-					'date_diff' => $notification->created_at->diffForHumans(),
+					'created_at' => $notytime->format('Y-m-d H:i:s'),
+					'date_diff' => $notytime->diffForHumans(),
 					'read_status' => ($notification->read_at != '')? 0 : 1, 
 				];
 			}

@@ -73,24 +73,24 @@ class User extends Authenticatable implements Wallet, WalletFloat
                 $image->delete(); // <-- direct deletion
             });
             $user->appointments()->each(function($appointment) {
-                $appointment->delete(); // <-- direct deletion
+                
                 AppointmentLog::where('appointment_id',$appointment->id)->delete();
                 CallLog::where('appointment_id',$appointment->id)->delete();
                 Prescription::where('appointment_id',$appointment->id)->delete();
                 MedicalRecord::where('appointment_id',$appointment->id)->delete();
                 Payment::where('appointment_id',$appointment->id)->delete();
                 Review::where('appointment_id',$appointment->id)->delete();
-
+                $appointment->delete(); // <-- direct deletion
             });
             $user->providerAppointments()->each(function($provider_appointment) {
-                $provider_appointment->delete(); // <-- direct deletion
+                
                 AppointmentLog::where('appointment_id',$provider_appointment->id)->delete();
                 CallLog::where('appointment_id',$provider_appointment->id)->delete();
                 Prescription::where('appointment_id',$appointment->id)->delete();
                 MedicalRecord::where('appointment_id',$appointment->id)->delete();
                 Payment::where('appointment_id',$appointment->id)->delete();
                 Review::where('appointment_id',$appointment->id)->delete();
-
+                $provider_appointment->delete(); // <-- direct deletion
             });
             
             if($user->doctorService()){
