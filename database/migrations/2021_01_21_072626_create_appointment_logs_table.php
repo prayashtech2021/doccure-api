@@ -20,7 +20,9 @@ class CreateAppointmentLogsTable extends Migration
             $table->text('description');
             $table->unsignedTinyInteger('status');
 
-            $table->timestamps();
+            // $table->timestamps();
+            $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
+            $table->timestamp('updated_at')->nullable();
 
             $table->foreign('appointment_id')->references('id')->on('appointments')->onDelete('cascade')->onUpdate('cascade');
         });

@@ -51,10 +51,10 @@ class AppointmentController extends Controller
                     config()->set('app.timezone', $time_zone->name);
                     date_default_timezone_set($time_zone->name);
                 }
-                if ($user->time_zone){
-                    config()->set('app.timezone', $user->time_zone);
-                    date_default_timezone_set($user->time_zone);
-                }
+                // if ($user->time_zone){
+                //     config()->set('app.timezone', $user->time_zone);
+                //     date_default_timezone_set($user->time_zone);
+                // }
             }
 
             return $next($request);
@@ -285,7 +285,7 @@ class AppointmentController extends Controller
             $log->request_type = 1;
             $log->description = config('custom.appointment_log_message.1');
             $log->status = $appointment->appointment_status;
-            $log->created_at = Carbon::now();
+            // $log->created_at = Carbon::now();
             $log->save();
 
             /* Notification */

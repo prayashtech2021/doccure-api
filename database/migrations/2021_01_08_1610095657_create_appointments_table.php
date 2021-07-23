@@ -28,7 +28,9 @@ class CreateAppointmentsTable extends Migration
             $table->unsignedTinyInteger('request_type')->default(0)->comment('1=>payment,2=>refund');
             $table->boolean('call_status')->default(false);
             $table->boolean('review_status')->default(false);
-            $table->timestamps();
+            // $table->timestamps();
+            $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
+            $table->timestamp('updated_at')->nullable();
             $table->softDeletes();
 
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
