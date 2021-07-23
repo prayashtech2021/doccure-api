@@ -51,10 +51,10 @@ class AppointmentController extends Controller
                     config()->set('app.timezone', $time_zone->name);
                     date_default_timezone_set($time_zone->name);
                 }
-                if ($user->time_zone){
-                    config()->set('app.timezone', $user->time_zone);
-                    date_default_timezone_set($user->time_zone);
-                }
+                // if ($user->time_zone){
+                //     config()->set('app.timezone', $user->time_zone);
+                //     date_default_timezone_set($user->time_zone);
+                // }
             }
 
             return $next($request);
@@ -772,7 +772,7 @@ class AppointmentController extends Controller
             $provider_zone = $provider->time_zone;
 
             // config()->set('app.timezone', $user_zone);
-            // date_default_timezone_set($user_zone);
+            date_default_timezone_set($user_zone);
             $request_day = strtolower(Carbon::parse(str_replace('/', '-', $request->selected_date))->format('l'));
             // dd($request_day,$user_zone);
             $selectedDate = Carbon::parse(str_replace('/', '-', $request->selected_date))->format('Y-m-d');
