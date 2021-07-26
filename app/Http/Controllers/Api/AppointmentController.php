@@ -41,29 +41,29 @@ class AppointmentController extends Controller
 
     public function __construct()
     {
-        $this->default_time_zone = config('app.timezone');
+        // $this->default_time_zone = config('app.timezone');
 
-        $this->middleware(function ($request, Closure $next) {
+        // $this->middleware(function ($request, Closure $next) {
 
-            if ($request->user()) {
-                $user = $request->user();
-                if ($user->time_zone_id && $time_zone = TimeZone::find($user->time_zone_id)) {
-                    config()->set('app.timezone', $time_zone->name);
-                    date_default_timezone_set($time_zone->name);
-                }
-                // if ($user->time_zone){
-                //     config()->set('app.timezone', $user->time_zone);
-                //     date_default_timezone_set($user->time_zone);
-                // }
-            }
+        //     if ($request->user()) {
+        //         $user = $request->user();
+        //         if ($user->time_zone_id && $time_zone = TimeZone::find($user->time_zone_id)) {
+        //             config()->set('app.timezone', $time_zone->name);
+        //             date_default_timezone_set($time_zone->name);
+        //         }
+        //         // if ($user->time_zone){
+        //         //     config()->set('app.timezone', $user->time_zone);
+        //         //     date_default_timezone_set($user->time_zone);
+        //         // }
+        //     }
 
-            return $next($request);
-        });
+        //     return $next($request);
+        // });
     }
-    public function __destruct()
-    {
-        config()->set('app.timezone', $this->default_time_zone);
-    }
+    // public function __destruct()
+    // {
+    //     config()->set('app.timezone', $this->default_time_zone);
+    // }
 
     function list(Request $request, $flag = null)
     {
@@ -772,7 +772,7 @@ class AppointmentController extends Controller
             $provider_zone = $provider->time_zone;
 
             // config()->set('app.timezone', $user_zone);
-            date_default_timezone_set($user_zone);
+            // date_default_timezone_set($user_zone);
             $request_day = strtolower(Carbon::parse(str_replace('/', '-', $request->selected_date))->format('l'));
             // dd($request_day,$user_zone);
             $selectedDate = Carbon::parse(str_replace('/', '-', $request->selected_date))->format('Y-m-d');
@@ -931,7 +931,8 @@ class AppointmentController extends Controller
         (auth()->user()->time_zone) ? $zone = auth()->user()->time_zone : '';
         $app_type = '';
         $time=(int)$time;
-        // $time=strtotime(Carbon::parse($time)->format('H:i:s'));
+        $time=strtotime(Carbon::parse($time)->format('H:i:s'));
+        // dd($time,$array1);
         foreach ($array1 as $item) {
             $stime = explode('-', $item);
             $startTime = providerToUser($stime[0], $provider_zone, $zone);
