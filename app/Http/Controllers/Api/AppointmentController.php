@@ -41,7 +41,7 @@ class AppointmentController extends Controller
 
     public function __construct()
     {
-        // $this->default_time_zone = config('app.timezone');
+        $this->default_time_zone = config('app.timezone');
 
         // $this->middleware(function ($request, Closure $next) {
 
@@ -62,7 +62,7 @@ class AppointmentController extends Controller
     }
     public function __destruct()
     {
-        config()->set('app.timezone', $this->default_time_zone);
+        // config()->set('app.timezone', $this->default_time_zone);
         date_default_timezone_set($this->default_time_zone);
     }
 
