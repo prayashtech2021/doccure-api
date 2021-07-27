@@ -1197,14 +1197,23 @@ class AppointmentController extends Controller
             updateLastSeen(auth()->user());
             $payments = [];
             if ($user->hasRole(['patient'])) {
-                $payments = $user->payment();
+                $payments = Payment::whereHas('appointment',function($qry)use($user,$request){
+                    $qry->where('user_id',$user->id);
+                })->orderBy('id','Desc');
+                // $payments = $user->payment();
             }
             if ($user->hasRole(['doctor'])) {
                 if(isset($request->consumer_id)){
-                    $consumer = User::find($request->consumer_id);
-                    $payments = $consumer->payment();
+                    $payments = Payment::whereHas('appointment',function($qry)use($user,$request){
+                        $qry->where('doctor_id',$user->id)
+                            ->where('user_id',$request->consumer_id);
+                    })->orderBy('id','Desc');
+                    // $payments = $consumer->payment();
                 }else{
-                    $payments = $user->providerPayment();
+                    $payments = Payment::whereHas('appointment',function($qry)use($user,$request){
+                        $qry->where('doctor_id',$user->id);
+                    })->orderBy('id','Desc');
+                    // $payments = $user->providerPayment();
                 }
             }
             $data = collect();

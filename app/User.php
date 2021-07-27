@@ -310,6 +310,11 @@ class User extends Authenticatable implements Wallet, WalletFloat
         return $this->hasManyThrough(Payment::class, Appointment::class,'doctor_id');
     }
 
+    public function patientPaymentFromDoctor()
+    {
+        return $this->hasManyThrough(Payment::class, Appointment::class);
+    }
+
     public function getPidAttribute() { 
         return 'PT00'.$this->id; 
     } // patient_ID
