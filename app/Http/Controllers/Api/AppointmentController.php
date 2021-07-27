@@ -106,8 +106,9 @@ class AppointmentController extends Controller
             foreach ($getApp as $item) {
                 $patient = User::find($item->user_id);
                 $patient_zone = Carbon::createFromFormat('Y-m-d H:i:s', Carbon::now()->toDateTimeString())->setTimezone($patient->time_zone);
+                // date_default_timezone_set($patient->time_zone);
                 if ($item->appointment_date == $patient_zone->format('Y-m-d')) {
-                    if ($item->end_time < $patient_zone->format('H:i:s')) {
+                    if (strtotime($item->end_time) < strtotime($patient_zone->format('H:i:s'))) {
                     Appointment::where('id', $item->id)->update(['appointment_status' => 7]);
 
                     $requested_amount = $item->payment->total_amount - $item->payment->transaction_charge;
@@ -276,9 +277,8 @@ class AppointmentController extends Controller
             $appointment->payment_type = $request->payment_type;
             $appointment->request_type = 1;
             $appointment->appointment_status = 1;
-            if (isset($request->time_zone) && !empty($request->time_zone)) {
-                $appointment->time_zone = $request->time_zone;
-            }
+            
+            $appointment->time_zone = auth()->user()->time_zone;
             $appointment->save();
 
             $log = new AppointmentLog;
