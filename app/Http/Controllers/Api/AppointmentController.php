@@ -47,23 +47,24 @@ class AppointmentController extends Controller
 
         //     if ($request->user()) {
         //         $user = $request->user();
-        //         if ($user->time_zone_id && $time_zone = TimeZone::find($user->time_zone_id)) {
-        //             config()->set('app.timezone', $time_zone->name);
-        //             date_default_timezone_set($time_zone->name);
-        //         }
-        //         // if ($user->time_zone){
-        //         //     config()->set('app.timezone', $user->time_zone);
-        //         //     date_default_timezone_set($user->time_zone);
+        //         // if ($user->time_zone_id && $time_zone = TimeZone::find($user->time_zone_id)) {
+        //         //     config()->set('app.timezone', $time_zone->name);
+        //         //     date_default_timezone_set($time_zone->name);
         //         // }
+        //         if ($user->time_zone){
+        //             config()->set('app.timezone', $user->time_zone);
+        //             date_default_timezone_set($user->time_zone);
+        //         }
         //     }
 
         //     return $next($request);
         // });
     }
-    // public function __destruct()
-    // {
-    //     config()->set('app.timezone', $this->default_time_zone);
-    // }
+    public function __destruct()
+    {
+        config()->set('app.timezone', $this->default_time_zone);
+        date_default_timezone_set($this->default_time_zone);
+    }
 
     function list(Request $request, $flag = null)
     {
@@ -772,10 +773,10 @@ class AppointmentController extends Controller
             $provider_zone = $provider->time_zone;
 
             // config()->set('app.timezone', $user_zone);
-            // date_default_timezone_set($user_zone);
+            date_default_timezone_set($user_zone);
             $request_day = strtolower(Carbon::parse(str_replace('/', '-', $request->selected_date))->format('l'));
-            // dd($request_day,$user_zone);
             $selectedDate = Carbon::parse(str_replace('/', '-', $request->selected_date))->format('Y-m-d');
+            // dd($request_day,$user_zone,$selectedDate);
             $list1 = ScheduleTiming::where('provider_id', $request->provider_id)->where('appointment_type', 1)->first();
             $list2 = ScheduleTiming::where('provider_id', $request->provider_id)->where('appointment_type', 2)->first();
             $array1 = json_decode($list1->working_hours, true);
@@ -811,7 +812,7 @@ class AppointmentController extends Controller
                         $currentTime = strtotime($today->format('Y-m-d H:i:s'));
                         $startTimeSeconds = strtotime($startTime->format('Y-m-d H:i:s'));
                         $endTimeSeconds = strtotime($endTime->format('Y-m-d H:i:s'));
-                        // dd($user_zone );
+                        // dd($selectedDate,$today->format('Y-m-d') );
 
                         if ($selectedDate == $today->format('Y-m-d')) { //current date check
 
@@ -828,7 +829,7 @@ class AppointmentController extends Controller
                                     if ($selectedDate == $carbon_start->format('Y-m-d')) {
                                         // $results[] = date('H:i:s', $start)
                                         $temp = strtotime('+' . $interval . ' minutes', $start);
-                                        // dd(date('Y-m-d',strtotime($start)),$currentTime,date('Y-m-d',strtotime($temp)));
+                                        // dd($temp,$start,$currentTime);
                                         if ($start >= $currentTime) {
                                             if ($temp <= $endTimeSeconds) {
                                                 $chk = Appointment::where('doctor_id', $request->provider_id)->where('appointment_date', $selectedDate)
@@ -931,7 +932,7 @@ class AppointmentController extends Controller
         (auth()->user()->time_zone) ? $zone = auth()->user()->time_zone : '';
         $app_type = '';
         $time=(int)$time;
-        $time=strtotime(Carbon::parse($time)->format('H:i:s'));
+        // $time=strtotime(Carbon::parse($time)->setTimezone($user_zone)->format('H:i:s'));
         // dd($time,$array1);
         foreach ($array1 as $item) {
             $stime = explode('-', $item);
