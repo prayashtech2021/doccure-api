@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use Validator;
-use App\ { User,Address,Appointment,Prescription,PrescriptionDetails,Country,UserFavourite,PageContent,MedicalRecord };
+use App\ { User,Address,Appointment,Prescription,PrescriptionDetails,Country,UserFavourite,PageContent,MedicalRecord,Payment };
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use DB;
@@ -421,12 +421,22 @@ class PatientController extends Controller
                 $appointment = Appointment::where('user_id',$user_id);
                 $prescription = Prescription::where('user_id',$user_id);
                 $medical_record = MedicalRecord::where('consumer_id',$user_id);
-                $invoice = $user->payment();
+                // $invoice = $user->payment();
+                
                 if ($request->doctor_id) {  //if need doctors -> patient details count
                     $appointment = $appointment->where('doctor_id',$request->doctor_id); 
                     $prescription = $prescription->where('doctor_id',$request->doctor_id); 
-                    $medical_record = $medical_record->where('provider_id',$request->doctor_id); 
+                    $medical_record = $medical_record->where('provider_id',$request->doctor_id);
+                    $invoice = Payment::whereHas('appointment',function($qry)use($user,$request){
+                        $qry->where('user_id',$user->id)
+                            ->where('doctor_id',$request->doctor_id);
+                    }); 
+                }else{
+                    $invoice = Payment::whereHas('appointment',function($qry)use($user){
+                        $qry->where('user_id',$user->id);
+                    }); 
                 }
+                
                 $result = [ 
                     'profile' => $user->toArray(),
                     'appointment' => $appointment->count(), 
