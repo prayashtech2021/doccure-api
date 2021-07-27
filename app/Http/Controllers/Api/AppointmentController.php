@@ -108,6 +108,7 @@ class AppointmentController extends Controller
                 $patient_zone = Carbon::createFromFormat('Y-m-d H:i:s', Carbon::now()->toDateTimeString())->setTimezone($patient->time_zone);
                 // date_default_timezone_set($patient->time_zone);
                 if ($item->appointment_date == $patient_zone->format('Y-m-d')) {
+                    // dd($item->end_time,$patient_zone->format('H:i:s'),$patient->time_zone);
                     if (strtotime($item->end_time) < strtotime($patient_zone->format('H:i:s'))) {
                     Appointment::where('id', $item->id)->update(['appointment_status' => 7]);
 
