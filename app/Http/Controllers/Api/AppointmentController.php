@@ -1364,9 +1364,7 @@ class AppointmentController extends Controller
             }else if ($user->hasRole('patient')) {
                 $doctor->notify(new IncomingCallNoty($appoinments_details));
             }
-
-            if ($request->route()->getName() == "saveCallLog") {
-                
+          
                 $response = array();
                 $response['patient_id'] = $patient->id;
                 $response['patient_name'] = $patient->first_name . ' ' . $patient->last_name;
@@ -1400,10 +1398,11 @@ class AppointmentController extends Controller
                 if ($device_type == 'IOS' && (!empty($notifydata['device_id']))) {
                     sendFCMiOSMessage($notifydata);
                 }
-                return self::send_success_response($response, 'Log Saved Successfully');
-            } else {
-                return self::send_success_response($log, 'Log Saved Successfully');
-            }
+                if ($request->route()->getName() == "saveCallLog") {
+                    return self::send_success_response($response, 'Log Saved Successfully');
+                }else{
+                    return self::send_success_response($log, 'Log Saved Successfully');
+                }
         } catch (Exception | Throwable $exception) {
             DB::rollBack();
             return self::send_exception_response($exception->getMessage());

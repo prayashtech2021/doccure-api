@@ -97,7 +97,7 @@ class LanguageController extends Controller
             }
 
             if(!$request->language_id){
-                $get_keyword = MultiLanguage::select('page_master_id','keyword')->where('language_id',1)->get();
+                $get_keyword = MultiLanguage::select('page_master_id','keyword','value')->where('language_id',1)->get();
                 foreach($get_keyword as $keyword){
                     $new = MultiLanguage::create([
                         'page_master_id' => $keyword->page_master_id,
