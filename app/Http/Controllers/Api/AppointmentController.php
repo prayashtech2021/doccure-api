@@ -1385,7 +1385,12 @@ class AppointmentController extends Controller
                     $notifydata['message'] = 'Incoming call from ' . $patient->first_name . ' ' . $patient->last_name;
                 }
                 $response['appoinment_id'] = $request->appointment_id;
-                $response['type'] = $request->call_type;
+                if($request->type == 1){
+                    $type = 'Audio';
+                }else{
+                    $type = 'Video';
+                }
+                $response['type'] = $type;
 
                 $response['tokbox'] = Setting::select('keyword', 'value')->where('slug', 'tokbox')->get();
                 $response['call_log'] = $log;
