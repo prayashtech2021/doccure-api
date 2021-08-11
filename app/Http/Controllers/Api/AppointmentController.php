@@ -665,7 +665,7 @@ class AppointmentController extends Controller
             }
             $log->status = $appointment->appointment_status;
             $log->save();
-            if ($request->status == 3){
+            if ($request->status == 3){ //completed
                 $doctor = User::find($appointment->doctor_id);
 
                 $value = ($appointment->payment->transaction_charge + $appointment->payment->tax_amount);
@@ -679,10 +679,11 @@ class AppointmentController extends Controller
                 $user->depositFloat($requested_amount);
 
                 //($appointment->payment->transaction_charge > $appointment->payment->tax_amount) ? $value = $appointment->payment->transaction_charge - $appointment->payment->tax_amount :  $value = $appointment->payment->tax_amount - $appointment->payment->transaction_charge;
-                $value = $appointment->payment->transaction_charge + $appointment->payment->tax_amount;
-                $withdraw_amount = $appointment->payment->total_amount - ($value);
-                $doctor = User::find($appointment->doctor_id);
-                $doctor->withdrawFloat($withdraw_amount);
+
+                // $value = $appointment->payment->transaction_charge + $appointment->payment->tax_amount;
+                // $withdraw_amount = $appointment->payment->total_amount - ($value);
+                // $doctor = User::find($appointment->doctor_id);
+                // $doctor->withdrawFloat($withdraw_amount);
             }
             if ($request->status == 6 && $cancel == 1) {
                 $user = User::find($appointment->user_id);
