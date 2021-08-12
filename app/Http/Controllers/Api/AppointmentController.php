@@ -694,16 +694,24 @@ class AppointmentController extends Controller
             $consumer->notify(new AppointmentNoty($appointment));
             $provider = User::find($appointment->doctor_id);
             $provider->notify(new AppointmentNoty($appointment));
-            if ($request->status == 2 || $request->status == 6) { //mobile noty doctor accept / cancelled
+            if ($request->status == 2 || $request->status == 6 || $request->status == 4 || $request->status == 5) { //mobile noty doctor 2)accept / 6)cancelled / 4)refund / 5) refund approved
 
-                $notifydata['device_id'] = $consumer->device_id;
-
-                $device_type = $consumer->device_type;
+                if($request->status != 4){ //refund (send noty to doctor)
+                    $notifydata['device_id'] = $provider->device_id;
+                    $device_type = $provider->device_type;
+                }else{ //other status (send noty to patient)
+                    $notifydata['device_id'] = $consumer->device_id;
+                    $device_type = $consumer->device_type;
+                }
 
                 if ($request->status == 2) {  //accept
                     $message = 'Your appointment request is accepted by Dr.' . $provider->first_name . '' . $provider->last_name;
-                } else {  //cancel
+                } elseif($request->status == 6) {  //cancel
                     $message = 'Your appointment request is cancelled by Dr.' . $provider->first_name . '' . $provider->last_name;
+                } elseif($request->status == 4){ //refund
+                    $message = 'Patient raised refund request for appointment with reference #'.$appointment->appointment_reference;
+                } elseif($request->status == 5){ //refund approved
+                    $message = 'Doctor Approved patient refund request approved for appointment with reference #'.$appointment->appointment_reference;
                 }
 
                 $notifydata['message'] = $message;
@@ -1456,9 +1464,53 @@ class AppointmentController extends Controller
                     $requested_amount = $app->payment->total_amount - $value;
                     $doctor->depositFloat($requested_amount);
                 }
+
             }
 
-            return self::send_success_response('Log updated Successfully');
+            $patient = User::Find($app->user_id);
+            $doctor = User::Find($app->doctor_id);
+            if ($user->hasRole('doctor')) {
+                $patient->notify(new IncomingCallNoty($app));
+            }else if ($user->hasRole('patient')) {
+                $doctor->notify(new IncomingCallNoty($app));
+            }
+          
+                $response = array();
+                $response['patient_id'] = $patient->id;
+                $response['patient_name'] = $patient->first_name . ' ' . $patient->last_name;
+                $response['patient_image'] = getUserProfileImage($patient->id);
+                $response['doctor_id'] = $doctor->id;
+                $response['doctor_name'] = $doctor->first_name . ' ' . $doctor->last_name;
+                $response['doctor_image'] = getUserProfileImage($doctor->id);
+                $response['type'] = 'Booking';
+
+                if ($user->hasRole('doctor')) {
+                    $notifydata['device_id'] = $patient->device_id;
+                    $device_type = $patient->device_type;
+                    $notifydata['message'] = 'Appointment call has completed successfully';
+                }
+
+                if ($user->hasRole('patient')) {
+                    $notifydata['device_id'] = $doctor->device_id;
+                    $device_type = $doctor->device_type;
+                    $notifydata['message'] = 'Appointment call has completed successfully';
+                }
+                
+                $notifydata['notifications_title'] = env('APP_NAME');
+                $notifydata['additional_data'] = $response;
+
+                if ($device_type == 'Android' && (!empty($notifydata['device_id']))) {
+                    sendFCMNotification($notifydata);
+                }
+                if ($device_type == 'IOS' && (!empty($notifydata['device_id']))) {
+                    sendFCMiOSMessage($notifydata);
+                }
+
+            if ($request->route()->getName() == "updateCallLog") {
+                    return self::send_success_response($response, 'Log updated Successfully');
+            }else{
+                return self::send_success_response('Log updated Successfully');
+            }
         } catch (Exception | Throwable $exception) {
             return self::send_exception_response($exception->getMessage());
         }
@@ -1595,5 +1647,69 @@ class AppointmentController extends Controller
             ];
         }
         return $this->convertNullsAsEmpty($response_array);
+    }
+
+    public function callSwitch(Request $request){
+        $rules = array(
+            'appointment_id' => 'required|exists:appointments,id',
+            'call_type' => 'required',
+        );
+        $valid = self::customValidation($request, $rules);
+        if ($valid) {
+            return $valid;
+        }
+
+        try {
+            $user = auth()->user();
+
+            $appoinments_details = Appointment::Find($request->appointment_id);
+
+            $patient = User::Find($appoinments_details->user_id);
+            $doctor = User::Find($appoinments_details->doctor_id);
+            $response = array();
+            $response['patient_id'] = $patient->id;
+            $response['patient_name'] = $patient->first_name . ' ' . $patient->last_name;
+            $response['patient_image'] = getUserProfileImage($patient->id);
+            $response['doctor_id'] = $doctor->id;
+            $response['doctor_name'] = $doctor->first_name . ' ' . $doctor->last_name;
+            $response['doctor_image'] = getUserProfileImage($doctor->id);
+            if($request->call_type == 1){
+                $type = 'Audio';
+            }else{
+                $type = 'Video';
+            }
+            if ($user->hasRole('doctor')) {
+
+                $notifydata['device_id'] = $patient->device_id;
+                $device_type = $patient->device_type;
+                $notifydata['message'] = 'Doctor Requesting to swtich to '.$type.'call';
+
+            }
+
+            if ($user->hasRole('patient')) {
+
+                $notifydata['device_id'] = $doctor->device_id;
+                $device_type = $doctor->device_type;
+                $notifydata['message'] = 'Patient Requesting to swtich to '.$type.'call';
+            }
+            $response['appoinment_id'] = $request->appointment_id;
+            $response['type'] = $request->call_type;
+
+            $response['tokbox'] = Setting::select('keyword', 'value')->where('slug', 'tokbox')->get();
+
+            $notifydata['notifications_title'] = 'Swtich call';
+            $notifydata['additional_data'] = $response;
+
+            if ($device_type == 'Android' && (!empty($notifydata['device_id']))) {
+                sendFCMNotification($notifydata);
+            }
+            if ($device_type == 'IOS' && (!empty($notifydata['device_id']))) {
+                sendFCMiOSMessage($notifydata);
+            }
+
+            return self::send_success_response($response, 'Switch Call');
+        } catch (Exception | Throwable $exception) {
+            return self::send_exception_response($exception->getMessage());
+        }
     }
 }

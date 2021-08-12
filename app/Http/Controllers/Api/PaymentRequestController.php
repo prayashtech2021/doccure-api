@@ -169,6 +169,8 @@ class PaymentRequestController extends Controller
                     $result->updated_by = isset(auth()->user()->id) ? auth()->user()->id : '1';
                     $result->save();
 
+                    $user_detail->notify(new RequestPayment($result));
+
                     // $message = "Status has been changed to " . $new_status . " for " . $result->reference_id;
 
                 } else {

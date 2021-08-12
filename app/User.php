@@ -388,7 +388,7 @@ class User extends Authenticatable implements Wallet, WalletFloat
                 ] : (object)[], 
             ];
         }else{
-            return Address::with('country','state','city')->whereNull('name')->where('user_id',$this->id)->first();
+            return Address::with('country','state','city')->where('user_id',$this->id)->whereNull('name')->first();
         }
     }
     

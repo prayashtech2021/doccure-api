@@ -60,11 +60,18 @@ class RequestPayment extends Notification implements ShouldQueue
      */
     public function toArray($notifiable)
     {
+        if($this->request->status==1){ //request
+            $msg = 'Payment Request with reference #' . $this->request->reference_id . ' has been created!';
+        }elseif($this->request->status==2){ // paid
+            $msg = 'Your Requested payment #' . $this->request->reference_id . ' has paid successfully';
+        }else{
+            $msg = 'Your Requested payment #' . $this->request->reference_id . ' has been rejected';
+        }
         return [
             'noty_type' => 'payment-requested',
             'request_id' => $this->request->id,
             'reference' => $this->request->reference_id,
-            'message' => 'Payment Request with reference #' . $this->request->reference_id . ' has been created!',
+            'message' => $msg,
             // 'open_link' => route('paymentRequestView',['id'=>$this->request->id])
         ];
     }
