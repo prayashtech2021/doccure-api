@@ -538,10 +538,16 @@ class DoctorController extends Controller
                 $name = explode(' ',$request->keywords);
                 $doctors = $doctors->whereHas('doctorSpecialization', function ($category) use ($keywords) {
                     $category->where('specialities.name', 'like', '%' . $keywords . '%');
-                })->orwhereEncrypted('first_name', 'like', '%' . $name[0] . '%')
-                  ->orwhereEncrypted('last_name', 'like', '%' . $name[0] . '%');
+                })->where(function($query) use ($name){
+                    $query->orWhereEncrypted('first_name', 'like', '%' . $name[0] . '%')
+                    ->orWhereEncrypted('last_name', 'like', '%' . $name[0] . '%');
+                });
                 if(isset($name[1])){
-                    $doctors = $doctors->orwhereEncrypted('first_name', 'like', '%' . $name[1] . '%')->orWhereEncrypted('last_name', 'like', '%' . $name[1] . '%');
+
+                    $doctors = $doctors->where(function($query) use($name){
+                        $query->orWhereEncrypted('first_name', 'like', '%' . $name[1] . '%')
+                        ->orWhereEncrypted('last_name', 'like', '%' . $name[1] . '%');
+                    });
                 }
             }
 
@@ -562,10 +568,15 @@ class DoctorController extends Controller
                 $name = explode(' ',$request->speciality_name);
                 $doctors = $doctors->whereHas('doctorSpecialization', function ($category) use ($speciality_name) {
                     $category->where('specialities.name', 'like', '%' . $speciality_name . '%');
-                })->orwhereEncrypted('first_name', 'like', '%' . $name[0] . '%')
-                  ->orwhereEncrypted('last_name', 'like', '%' . $name[0] . '%');
+                })->where(function($query) use ($name) {
+                    $query->orWhereEncrypted('first_name', 'like', '%' . $name[0] . '%')
+                  ->orWhereEncrypted('last_name', 'like', '%' . $name[0] . '%');
+                });
                 if(isset($name[1])){
-                    $doctors = $doctors->orwhereEncrypted('first_name', 'like', '%' . $name[1] . '%')->orWhereEncrypted('last_name', 'like', '%' . $name[1] . '%');
+                    $doctors = $doctors->where(function($query) use ($name) {
+                        $query->orWhereEncrypted('first_name', 'like', '%' . $name[1] . '%')
+                        ->orWhereEncrypted('last_name', 'like', '%' . $name[1] . '%');
+                    });
                 }
             }
 
