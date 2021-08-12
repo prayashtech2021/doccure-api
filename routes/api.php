@@ -73,7 +73,7 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
     Route::post('appointment/status/update', 'Api\AppointmentController@appointmentStatusUpdate');
     Route::get('appointment/calendar', 'Api\AppointmentController@calendarList');
     Route::post('call/log/save', 'Api\AppointmentController@saveCallLog');
-    Route::post('call/log/update', 'Api\AppointmentController@updateCallLog')->name('updateCallLog');
+    Route::post('call/log/update', 'Api\AppointmentController@updateCallLog');
 
     //invoice
     Route::get('invoice/list', 'Api\AppointmentController@invoiceList');
