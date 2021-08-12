@@ -459,10 +459,12 @@ class HomeController extends Controller
                 $patient = User::role('patient')->count();
                 $appointment = Appointment::count();
                 
-                $revenue = Payment::whereYear('created_at', date('Y'));
+                $revenue = Payment::join('appointments','payments.appointment_id','=','appointments.id')->whereYear('payments.created_at', date('Y'));
 
-                $revenue_cost = $revenue->select(DB::raw('sum(transaction_charge + tax_amount) as data'),DB::raw('YEAR(created_at) year'))->get();
-                $revenue_graph = $revenue->select(DB::raw('sum(transaction_charge + tax_amount) as `data`'),DB::raw('YEAR(created_at) year, MONTH(created_at) month'))->groupby('year','month')->get()->toArray();
+                $revenue_cost = $revenue->select(DB::raw('sum(CASE WHEN appointments.request_type=1 THEN (transaction_charge + tax_amount) ELSE transaction_charge END) as data'),DB::raw('YEAR(payments.created_at) year'))->get();
+
+                // $revenue_cost = $revenue->select(DB::raw('sum(transaction_charge + tax_amount) as data'),DB::raw('YEAR(created_at) year'))->get();
+                $revenue_graph = $revenue->select(DB::raw('sum(CASE WHEN appointments.request_type=1 THEN (transaction_charge + tax_amount) ELSE transaction_charge END) as `data`'),DB::raw('YEAR(payments.created_at) year, MONTH(payments.created_at) month'))->groupby('year','month')->get()->toArray();
 
                 $patient_graph = User::role('patient')->select(DB::raw('count(id) as data'),DB::raw('YEAR(created_at) year, MONTH(created_at) month'))
                 ->whereYear('created_at', date('Y'))->groupby('year','month')->get()->makeHidden(['pid','did','age','accountstatus','membersince','gendername','doctorfees','userimage','providerspeciality','permanentaddress','officeaddress']);
