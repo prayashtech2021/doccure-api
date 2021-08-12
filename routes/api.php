@@ -183,6 +183,7 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
     Route::get('schedule/listfor/patient','Api\AppointmentController@scheduleListForPatient');
     Route::post('multilanguage/add','Api\LanguageController@addMultiLang');
 
+    Route::post('call-switch','Api\AppointmentController@callSwitch');
 });
 
 Route::any('{path}', function () {
