@@ -56,6 +56,14 @@ class HomeController extends Controller
 			}
             $user = User::create($array);
             $user->assignRole($request->type);
+
+            /*add a row in address table*/
+            $contact_details = new Address();
+            $contact_details->user_id = $user->id;
+            $contact_details->country_id = $request->country_id;
+            $contact_details->created_by = $user->id;
+            $contact_details->save();
+
             DB::commit();
             
             $url = config('custom.frontend_url').'verifymail/'.$user->id.'/'.$token;
