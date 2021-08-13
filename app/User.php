@@ -473,4 +473,5 @@ class User extends Authenticatable implements Wallet, WalletFloat
     public function timezone(){
         return $this->belongsTo(TimeZone::class, 'time_zone_id', 'id');
     }
+
 }

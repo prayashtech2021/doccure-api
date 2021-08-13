@@ -184,6 +184,9 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
     Route::post('multilanguage/add','Api\LanguageController@addMultiLang');
 
     Route::post('call-switch','Api\AppointmentController@callSwitch');
+
+    Route::get('allRoleUser','Api\DoctorController@allRoleUser');
+    Route::get('alluser','Api\DoctorController@allUser');
 });
 
 Route::any('{path}', function () {

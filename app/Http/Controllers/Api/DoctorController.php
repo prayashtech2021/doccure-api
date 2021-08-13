@@ -530,27 +530,28 @@ class DoctorController extends Controller
         if ($valid) {return $valid;}
 
         try {
-            
+
             $doctors = User::role('doctor');
 
             if ($request->keywords && (!empty($request->keywords))) {
                 $keywords = $request->keywords;
                 $name = explode(' ',$request->keywords);
+                $a1 = $name[0];
                 $doctors = $doctors->whereHas('doctorSpecialization', function ($category) use ($keywords) {
                     $category->where('specialities.name', 'like', '%' . $keywords . '%');
-                })->where(function($query) use ($name){
-                    $query->orWhereEncrypted('first_name', 'like', '%' . $name[0] . '%')
-                    ->orWhereEncrypted('last_name', 'like', '%' . $name[0] . '%');
+                })->orWhere(function($query) use ($a1){
+                    $query->orWhereEncrypted('first_name', 'like', '%'.$a1.'%')
+                    ->orWhereEncrypted('last_name', 'like', '%' . $a1 . '%');
                 });
                 if(isset($name[1])){
-
-                    $doctors = $doctors->where(function($query) use($name){
-                        $query->orWhereEncrypted('first_name', 'like', '%' . $name[1] . '%')
-                        ->orWhereEncrypted('last_name', 'like', '%' . $name[1] . '%');
+                    $a2 = $name[1];
+                    $doctors = $doctors->orWhere(function($query) use($a2){
+                        $query->orWhereEncrypted('first_name', 'like', '%' . $a2 . '%')
+                        ->orWhereEncrypted('last_name', 'like', '%' . $a2 . '%');
                     });
                 }
             }
-
+            
             if ($request->gender && (!empty($request->gender))) {
                 $doctors->whereIn('gender', [$request->gender]);
             }
@@ -566,16 +567,18 @@ class DoctorController extends Controller
             if ($request->speciality_name && (!empty($request->speciality_name))) {
                 $speciality_name = $request->speciality_name;
                 $name = explode(' ',$request->speciality_name);
+                $a1 = $name[0];
                 $doctors = $doctors->whereHas('doctorSpecialization', function ($category) use ($speciality_name) {
-                    $category->where('specialities.name', 'like', '%' . $speciality_name . '%');
-                })->where(function($query) use ($name) {
-                    $query->orWhereEncrypted('first_name', 'like', '%' . $name[0] . '%')
-                  ->orWhereEncrypted('last_name', 'like', '%' . $name[0] . '%');
+                    $category->Where('specialities.name', 'like', '%' . $speciality_name . '%');
+                })->orWhere(function($query) use ($a1){
+                    $query->orWhereEncrypted('first_name', 'like', '%'.$a1.'%')
+                    ->orWhereEncrypted('last_name', 'like', '%' . $a1 . '%');
                 });
                 if(isset($name[1])){
-                    $doctors = $doctors->where(function($query) use ($name) {
-                        $query->orWhereEncrypted('first_name', 'like', '%' . $name[1] . '%')
-                        ->orWhereEncrypted('last_name', 'like', '%' . $name[1] . '%');
+                    $a2 = $name[1];
+                    $doctors = $doctors->orWhere(function($query) use($a2){
+                        $query->orWhereEncrypted('first_name', 'like', '%' . $a2 . '%')
+                        ->orWhereEncrypted('last_name', 'like', '%' . $a2 . '%');
                     });
                 }
             }
@@ -682,6 +685,37 @@ class DoctorController extends Controller
         } catch (\Exception | \Throwable $exception) {
             return self::send_exception_response($exception->getMessage());
         }
+    }
+
+    public function allRoleUser(){
+        
+        $user = User::get();
+        $a = [];
+        $a[] = count($user);
+        foreach($user as $item){
+            $a[] = [
+                'id' => $item->id,
+                'name' => $item->name,
+                'email' => $item->email,
+                'role'  => $item->roles()->first()->name,
+            ];
+        }
+        return $a;
+    }
+
+    public function alluser(){
+        $user = User::withTrashed()->get();
+        $a = [];
+        $a[] = count($user);
+        foreach($user as $item){
+            $a[] = [
+                'id' => $item->id,
+                'name' => $item->name,
+                'email' => $item->email,
+                'role'  => $item->roles()->first()->name,
+            ];
+        }
+        return $a;
     }
 
 }
