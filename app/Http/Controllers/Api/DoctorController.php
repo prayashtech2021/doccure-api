@@ -539,10 +539,14 @@ class DoctorController extends Controller
                 $a1 = $name[0];
                 $doctors = $doctors->whereHas('doctorSpecialization', function ($category) use ($keywords) {
                     $category->where('specialities.name', 'like', '%' . $keywords . '%');
-                })->orWhere(function($query) use ($a1){
+                });
+               
+                $doctors = $doctors->orWhere(function($query) use ($a1){
                     $query->orWhereEncrypted('first_name', 'like', '%'.$a1.'%')
                     ->orWhereEncrypted('last_name', 'like', '%' . $a1 . '%');
                 });
+               
+        
                 if(isset($name[1])){
                     $a2 = $name[1];
                     $doctors = $doctors->orWhere(function($query) use($a2){
@@ -551,7 +555,7 @@ class DoctorController extends Controller
                     });
                 }
             }
-            
+           
             if ($request->gender && (!empty($request->gender))) {
                 $doctors->whereIn('gender', [$request->gender]);
             }
@@ -646,9 +650,11 @@ class DoctorController extends Controller
             }
             $data = collect();
             $doctors->each(function ($provider) use (&$data,$id,$mobile) {
-                $data->push($provider->doctorProfile($id,$mobile));
+                if($provider->hasrole('doctor')){
+                    $data->push($provider->doctorProfile($id,$mobile));
+                }
             });
-            
+           
             if($request->route()->getName() == 'doctorSearch'){
                 $array['profile'] = $data->toArray();
             }else{
