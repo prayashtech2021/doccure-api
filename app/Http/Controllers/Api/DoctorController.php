@@ -42,11 +42,13 @@ class DoctorController extends Controller
             $user_id = auth()->user()->id;
             $user = auth()->user();
             updateLastSeen($user);
+            $doctor_zone = Carbon::createFromFormat('Y-m-d H:i:s', Carbon::now()->toDateTimeString())->setTimezone($user->time_zone);
+
             if ($user_id) {
                 $total_patient = Appointment::where('doctor_id', $user_id)->groupby('user_id')->get()->count();
-                $today_patient = Appointment::where('doctor_id', $user_id)->whereDate('appointment_date', date('Y-m-d'))->groupBy('user_id')->count();
+                $today_patient = Appointment::where('doctor_id', $user_id)->whereDate('appointment_date', $doctor_zone->format('Y-m-d'))->groupBy('user_id')->count();
                 $appointment = Appointment::where('doctor_id', $user_id)->count();
-                $upcoming = Appointment::where('doctor_id', $user_id)->whereIn('appointment_status', [1,2])->whereDate('appointment_date', '>=', convertToUTC(now()))->count();
+                $upcoming = Appointment::where('doctor_id', $user_id)->whereIn('appointment_status', [1,2])->whereDate('appointment_date', '>=', $doctor_zone->format('Y-m-d'))->count();
                 $appointment_result = (new AppointmentController)->list($request, 1);
 
                 $result = [
