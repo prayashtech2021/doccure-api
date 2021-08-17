@@ -184,7 +184,7 @@ function getAppMenu($request = NULL) {
         }else*/
         if(auth('api')->user()->hasRole(['doctor'])){
             $menus = [
-                /*'dashboard' => ucwords($lang->first(function($item) {return $item->keyword == 'dashboard';})->value),
+                'dashboard' => ucwords($lang->first(function($item) {return $item->keyword == 'dashboard';})->value),
                 'appointments' => ucwords($lang->first(function($item) {return $item->keyword == 'appointments';})->value),
                 'all_appointments' => ucwords($lang->first(function($item) {return $item->keyword == 'all_appointments';})->value),
                 'my_patients' => ucwords($lang->first(function($item) {return $item->keyword == 'my_patients';})->value),
@@ -202,7 +202,7 @@ function getAppMenu($request = NULL) {
                 'blog' => ucwords($lang->first(function($item) {return $item->keyword == 'blog';})->value),
                 'my_profile' => ucwords($lang->first(function($item) {return $item->keyword == 'my_profile';})->value),
                 'change_password' => ucwords($lang->first(function($item) {return $item->keyword == 'change_password';})->value),
-                'logout' => ucwords($lang->first(function($item) {return $item->keyword == 'logout';})->value),*/
+                'logout' => ucwords($lang->first(function($item) {return $item->keyword == 'logout';})->value),
             ];
         }elseif(auth('api')->user()->hasRole(['patient'])){
             $menus = [
