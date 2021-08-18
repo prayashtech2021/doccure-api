@@ -187,6 +187,8 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
 
     Route::get('allRoleUser','Api\DoctorController@allRoleUser');
     Route::get('alluser','Api\DoctorController@allUser');
+
+    Route::get('testfcm','Api\AppointmentController@fcm');
 });
 
 Route::any('{path}', function () {
