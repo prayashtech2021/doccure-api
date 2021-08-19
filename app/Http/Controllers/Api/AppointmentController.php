@@ -305,26 +305,6 @@ class AppointmentController extends Controller
             $end_time = Carbon::parse($request->end_time)->format('h:i A');
             $reference = $appointment->appointment_reference;
 
-            /* Mail */
-            $template = EmailTemplate::where('slug', 'book_appointment')->first();
-            if ($template) {
-                $body = ($template->content); // this is template dynamic body. You may get other parameters too from database.
-
-                $a1 = array('{{username}}', '{{doctor}}', '{{app_date}}', '{{start_time}}', '{{end_time}}', '{{reference}}', '{{config_app_name}}', '{{custom_support_phone}}', '{{custom_support_email}}');
-                $a2 = array($user->first_name, $name, $app_date, $start_time, $end_time, $reference, config('app.name'), config('custom.support_phone'), config('custom.support_email'));
-
-                $response = str_replace($a1, $a2, $body); // this will replace {{username}} with $data['username']
-
-                $mail = [
-                    'body' => html_entity_decode(htmlspecialchars_decode($response)),
-                    'subject' => $template->subject,
-                ];
-
-                $mailObject = new SendInvitation($mail); // you can make php artisan make:mail MyMail
-                Mail::to($user->email)->send($mailObject);
-            }
-            /* MOBILE NOTY */
-
             $notifydata['device_id'] = $doctor->device_id;
 
             $device_type = $doctor->device_type;
@@ -343,6 +323,28 @@ class AppointmentController extends Controller
             if ($device_type == 'IOS' && (!empty($notifydata['device_id']))) {
                 sendFCMiOSMessage($notifydata);
             }
+            
+            /* Mail */
+            /*$template = EmailTemplate::where('slug', 'book_appointment')->first();
+            if ($template) {
+                $body = ($template->content); // this is template dynamic body. You may get other parameters too from database.
+
+                $a1 = array('{{username}}', '{{doctor}}', '{{app_date}}', '{{start_time}}', '{{end_time}}', '{{reference}}', '{{config_app_name}}', '{{custom_support_phone}}', '{{custom_support_email}}');
+                $a2 = array($user->first_name, $name, $app_date, $start_time, $end_time, $reference, config('app.name'), config('custom.support_phone'), config('custom.support_email'));
+
+                $response = str_replace($a1, $a2, $body); // this will replace {{username}} with $data['username']
+
+                $mail = [
+                    'body' => html_entity_decode(htmlspecialchars_decode($response)),
+                    'subject' => $template->subject,
+                ];
+
+                $mailObject = new SendInvitation($mail); // you can make php artisan make:mail MyMail
+                Mail::to($user->email)->send($mailObject);
+            }*/
+            /* MOBILE NOTY */
+
+           
 
             /**
              * Payment
@@ -1734,4 +1736,56 @@ class AppointmentController extends Controller
             return self::send_exception_response($exception->getMessage());
         }
     }
+
+    public function fcm(Request $request)
+    {
+
+        $appoinments_details = Appointment::find($request->appointment_id);
+
+        $patient = User::Find($appoinments_details->user_id);
+        $doctor = User::Find($appoinments_details->doctor_id);
+       
+            $response = array();
+            $response['patient_id'] = $patient->id;
+            $response['patient_name'] = $patient->first_name . ' ' . $patient->last_name;
+            $response['patient_image'] = getUserProfileImage($patient->id);
+            $response['doctor_id'] = $doctor->id;
+            $response['doctor_name'] = $doctor->first_name . ' ' . $doctor->last_name;
+            $response['doctor_image'] = getUserProfileImage($doctor->id);
+
+            /*if ($user->hasRole('doctor')) {
+                $notifydata['device_id'] = $patient->device_id;
+                $device_type = $patient->device_type;
+                $notifydata['message'] = 'Incoming call from ' . $doctor->first_name . ' ' . $doctor->last_name;
+            }
+
+            if ($user->hasRole('patient')) {
+                $notifydata['device_id'] = $doctor->device_id;
+                $device_type = $doctor->device_type;
+                $notifydata['message'] = 'Incoming call from ' . $patient->first_name . ' ' . $patient->last_name;
+            }*/
+                $notifydata['device_id'] = $doctor->device_id;
+                $device_type = 'Android';
+                $notifydata['message'] = 'Incoming call from ' . $patient->first_name . ' ' . $patient->last_name;
+
+            $response['appoinment_id'] = $appoinments_details->id;
+           
+                $type = 'Video';
+            
+            $response['type'] = $type;
+
+            $response['tokbox'] = Setting::select('keyword', 'value')->where('slug', 'tokbox')->get();
+           // $response['call_log'] = $log;
+            $notifydata['notifications_title'] = 'Incoming call';
+            $notifydata['additional_data'] = $response;
+
+            if ($device_type == 'Android' && (!empty($notifydata['device_id']))) {
+                sendFCMNotification($notifydata);
+            }
+            if ($device_type == 'IOS' && (!empty($notifydata['device_id']))) {
+                sendFCMiOSMessage($notifydata);
+            }
+
+    }
 }
+
