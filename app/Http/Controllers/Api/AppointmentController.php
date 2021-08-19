@@ -1423,6 +1423,27 @@ class AppointmentController extends Controller
         }
     }
 
+    public function someoneCalling(Request $request)
+    {
+        $user = auth()->user();
+            
+        $callLog = CallLog::where('to', $user->id)->whereNull('end_time')->first();
+        if ($callLog) {
+            $caller = User::find($callLog->from);
+            $data = [
+                'id' => $caller->id,
+                'name' => trim($caller->first_name . ' '. $caller->last_name),
+                'email' => $caller->email,
+                'mobile_number' => $caller->mobile_number,
+                'profile_image' => getUserProfileImage($caller->id),
+            ];
+        }else{
+            $data = [];
+        }
+
+        return self::send_success_response($data, 'Details Fetched Successfully');
+    }
+
     public function updateCallLog(Request $request)
     {
         $rules = array(
