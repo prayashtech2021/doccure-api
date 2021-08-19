@@ -1428,7 +1428,25 @@ class AppointmentController extends Controller
     public function someoneCalling(Request $request)
     {
         $user = auth()->user();
-            
+        $data = [];
+        if(isset($request->call_action) && $request->call_action=='cancelled'){
+            $callLog = CallLog::where('to', $user->id)->whereNull('end_time')->update('end_time',Carbon::now());
+
+                $app = Appointment::find($callLog->appointment_id);
+
+                if ($app->call_status == 0) {
+                    $app->appointment_status = 6;
+                    $app->call_status = 1;
+                    $app->save();
+
+                    $applog = new AppointmentLog;
+                    $applog->appointment_id = $log->appointment_id;
+                    $applog->request_type = 1;
+                    $applog->description = config('custom.appointment_log_message.3');
+                    $applog->status = 6; //cancelled
+                    $applog->save();
+                }
+        }else{
         $callLog = CallLog::where('to', $user->id)->whereNull('end_time')->first();
         if ($callLog) {
             $caller = User::find($callLog->from);
@@ -1439,8 +1457,7 @@ class AppointmentController extends Controller
                 'mobile_number' => $caller->mobile_number,
                 'profile_image' => getUserProfileImage($caller->id),
             ];
-        }else{
-            $data = [];
+        }
         }
 
         return self::send_success_response($data, 'Details Fetched Successfully');
