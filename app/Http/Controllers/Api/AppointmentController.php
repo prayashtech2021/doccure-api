@@ -1432,7 +1432,9 @@ class AppointmentController extends Controller
         if(isset($request->call_action) && $request->call_action=='cancelled'){
             $callLog = CallLog::where('to', $user->id)->whereNull('end_time')->first();
             if($callLog){
-            $callLog = CallLog::where('to', $user->id)->whereNull('end_time')->update('end_time',Carbon::now()->format('Y-m-d H:i:s'));
+                $callLog->end_time = Carbon::now()->format('Y-m-d H:i:s');
+                $callLog->duration = 0;
+                $callLog->save();
             
                 $app = Appointment::find($callLog->appointment_id);
 
@@ -1442,11 +1444,15 @@ class AppointmentController extends Controller
                     $app->save();
 
                     $applog = new AppointmentLog;
-                    $applog->appointment_id = $log->appointment_id;
+                    $applog->appointment_id = $callLog->appointment_id;
                     $applog->request_type = 1;
-                    $applog->description = config('custom.appointment_log_message.3');
+                    $applog->description = config('custom.appointment_log_message.6');
                     $applog->status = 6; //cancelled
                     $applog->save();
+
+                    $user = User::find($app->user_id);
+                    $requested_amount = $app->payment->total_amount - $app->payment->transaction_charge;
+                    $user->depositFloat($requested_amount);
                 }
             }
         }else{
