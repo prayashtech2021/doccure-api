@@ -1432,7 +1432,7 @@ class AppointmentController extends Controller
         if(isset($request->call_action) && $request->call_action=='cancelled'){
             $callLog = CallLog::where('to', $user->id)->whereNull('end_time')->first();
             if($callLog){
-            $callLog = CallLog::where('to', $user->id)->whereNull('end_time')->update('end_time',Carbon::now());
+            $callLog = CallLog::where('to', $user->id)->whereNull('end_time')->update('end_time',Carbon::now()->format('Y-m-d H:i:s'));
             
                 $app = Appointment::find($callLog->appointment_id);
 
