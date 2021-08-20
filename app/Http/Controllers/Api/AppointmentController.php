@@ -1348,7 +1348,8 @@ class AppointmentController extends Controller
         try {
             $user = auth()->user();
             
-            $callLog = CallLog::where('appointment_id', $request->appointment_id)->where('from', $user->id)->where('to', $request->call_to)->whereNull('end_time')->first();
+            // $callLog = CallLog::where('appointment_id', $request->appointment_id)->where('from', $user->id)->where('to', $request->call_to)->whereNull('end_time')->first();
+            $callLog = CallLog::where('appointment_id', $request->appointment_id)->whereNull('end_time')->first();
             if ($callLog) {
                 $log = $callLog;
             } else {
