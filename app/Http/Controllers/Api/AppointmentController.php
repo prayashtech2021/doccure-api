@@ -1462,6 +1462,7 @@ class AppointmentController extends Controller
             $data = [
                 'id' => $caller->id,
                 'call_log_id' => $callLog->id,
+                'call_type' => $callLog->type,
                 'appointment_id' => $callLog->appointment_id,
                 'name' => trim($caller->first_name . ' '. $caller->last_name),
                 'email' => $caller->email,
