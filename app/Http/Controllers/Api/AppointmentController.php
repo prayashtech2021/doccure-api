@@ -1461,6 +1461,8 @@ class AppointmentController extends Controller
             $caller = User::find($callLog->from);
             $data = [
                 'id' => $caller->id,
+                'call_log_id' => $callLog->id,
+                'appointment_id' => $callLog->appointment_id,
                 'name' => trim($caller->first_name . ' '. $caller->last_name),
                 'email' => $caller->email,
                 'mobile_number' => $caller->mobile_number,
