@@ -14,7 +14,18 @@ class Payment extends Model
     ];
     public function getData()
     {
-        
+        (auth()->user()->time_zone)? $zone = auth()->user()->time_zone : $zone = '';
+        if(auth()->user()->hasRole('doctor')){
+        $ttemp1 = $this->appointment->appointment_date.' '.$this->appointment->start_time;
+        $ttemp2 = $this->appointment->appointment_date.' '.$this->appointment->end_time;
+        $userr = User::find($this->appointment->user_id);
+        $providerr = User::find($this->appointment->doctor_id);
+        $startTime = userToProvider($ttemp1,$userr->time_zone,$providerr->time_zone,'h:i A');
+        $endTime = userToProvider($ttemp2,$userr->time_zone,$providerr->time_zone,'h:i A');
+        }else{
+            $startTime = Carbon::parse($this->appointment->start_time)->format('h:i A');
+            $endTime = Carbon::parse($this->appointment->end_time)->format('h:i A');
+        }
         return [
             'id' => $this->id,
             'reference' => $this->invoice_no,
@@ -29,7 +40,10 @@ class Payment extends Model
             'appointment_type' => ($this->appointment->appointment_type==1)?'Online':'Clinic',
             'from' => $this->appointment->doctor()->first()->basicProfile(),
             'to' => $this->appointment->patient()->first()->basicProfile(),
-            'created' => convertToLocal(Carbon::parse($this->created_at),config('custom.timezone')[251],'d/m/Y h:i A'),
+            'created' => convertToLocal(Carbon::parse($this->created_at),$zone,'d/m/Y h:i A'),
+            'appointment_date' => date('d/m/Y',strtotime($this->appointment->appointment_date)),
+            'start_time' => $startTime,
+            'end_time' => $endTime,
         ];
     }
 

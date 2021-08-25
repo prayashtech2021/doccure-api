@@ -256,7 +256,7 @@ class AppointmentController extends Controller
              * Appointment
              */
             $appointment_date = Carbon::createFromFormat('d/m/Y', $request->appointment_date)->format('Y-m-d');
-            $chk = Appointment::where('doctor_id', $request->doctor_id)->where('appointment_date', $appointment_date)
+            $chk = Appointment::where('doctor_id', $request->doctor_id)->where('appointment_date', $appointment_date)->whereNotIn('appointment_status', [5,6])
             ->where(function($qry)use($request){
                 $qry->where('start_time','<=', Carbon::parse($request->start_time)->format('H:i:s'))
                 ->where('end_time','>', Carbon::parse($request->start_time)->format('H:i:s'));
@@ -849,7 +849,7 @@ class AppointmentController extends Controller
                                         // dd($temp,$start,$currentTime);
                                         if ($start >= $currentTime) {
                                             if ($temp <= $endTimeSeconds) {
-                                                $chk = Appointment::where('doctor_id', $request->provider_id)->where('appointment_date', $selectedDate)
+                                                $chk = Appointment::where('doctor_id', $request->provider_id)->where('appointment_date', $selectedDate)->whereNotIn('appointment_status', [5,6])
                                                 ->where(function($qry)use($start,$end){
                                                     $qry->where('start_time','<=', Carbon::parse($start)->format('H:i:s'))
                                                     ->where('end_time','>', Carbon::parse($start)->format('H:i:s'));
