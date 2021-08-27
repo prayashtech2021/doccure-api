@@ -256,7 +256,7 @@ class AppointmentController extends Controller
              * Appointment
              */
             $appointment_date = Carbon::createFromFormat('d/m/Y', $request->appointment_date)->format('Y-m-d');
-            $chk = Appointment::where('doctor_id', $request->doctor_id)->where('appointment_date', $appointment_date)
+            $chk = Appointment::where('doctor_id', $request->doctor_id)->where('appointment_date', $appointment_date)->whereNotIn('appointment_status', [5,6])
             ->where(function($qry)use($request){
                 $qry->where('start_time','<=', Carbon::parse($request->start_time)->format('H:i:s'))
                 ->where('end_time','>', Carbon::parse($request->start_time)->format('H:i:s'));
@@ -861,7 +861,7 @@ class AppointmentController extends Controller
                                         // dd($temp,$start,$currentTime);
                                         if ($start >= $currentTime) {
                                             if ($temp <= $endTimeSeconds) {
-                                                $chk = Appointment::where('doctor_id', $request->provider_id)->where('appointment_date', $selectedDate)
+                                                $chk = Appointment::where('doctor_id', $request->provider_id)->where('appointment_date', $selectedDate)->whereNotIn('appointment_status', [5,6])
                                                 ->where(function($qry)use($start,$end){
                                                     $qry->where('start_time','<=', Carbon::parse($start)->format('H:i:s'))
                                                     ->where('end_time','>', Carbon::parse($start)->format('H:i:s'));
@@ -1360,7 +1360,8 @@ class AppointmentController extends Controller
         try {
             $user = auth()->user();
             
-            $callLog = CallLog::where('appointment_id', $request->appointment_id)->where('from', $user->id)->where('to', $request->call_to)->whereNull('end_time')->first();
+            // $callLog = CallLog::where('appointment_id', $request->appointment_id)->where('from', $user->id)->where('to', $request->call_to)->whereNull('end_time')->first();
+            $callLog = CallLog::where('appointment_id', $request->appointment_id)->whereNull('end_time')->first();
             if ($callLog) {
                 $log = $callLog;
             } else {
@@ -1435,6 +1436,56 @@ class AppointmentController extends Controller
             DB::rollBack();
             return self::send_exception_response($exception->getMessage());
         }
+    }
+
+    public function someoneCalling(Request $request)
+    {
+        $user = auth()->user();
+        $data = [];
+        if(isset($request->call_action) && $request->call_action=='cancelled'){
+            $callLog = CallLog::where('to', $user->id)->whereNull('end_time')->first();
+            if($callLog){
+                $callLog->end_time = Carbon::now()->format('Y-m-d H:i:s');
+                $callLog->duration = 0;
+                $callLog->save();
+            
+                $app = Appointment::find($callLog->appointment_id);
+
+                if ($app->call_status == 0) {
+                    $app->appointment_status = 6;
+                    $app->call_status = 1;
+                    $app->save();
+
+                    $applog = new AppointmentLog;
+                    $applog->appointment_id = $callLog->appointment_id;
+                    $applog->request_type = 1;
+                    $applog->description = config('custom.appointment_log_message.6');
+                    $applog->status = 6; //cancelled
+                    $applog->save();
+
+                    $user = User::find($app->user_id);
+                    $requested_amount = $app->payment->total_amount - $app->payment->transaction_charge;
+                    $user->depositFloat($requested_amount);
+                }
+            }
+        }else{
+        $callLog = CallLog::where('to', $user->id)->whereNull('end_time')->first();
+        if ($callLog) {
+            $caller = User::find($callLog->from);
+            $data = [
+                'id' => $caller->id,
+                'call_log_id' => $callLog->id,
+                'call_type' => $callLog->type,
+                'appointment_id' => $callLog->appointment_id,
+                'name' => trim($caller->first_name . ' '. $caller->last_name),
+                'email' => $caller->email,
+                'mobile_number' => $caller->mobile_number,
+                'profile_image' => getUserProfileImage($caller->id),
+            ];
+        }
+        }
+
+        return self::send_success_response($data, 'Details Fetched Successfully');
     }
 
     public function updateCallLog(Request $request)
