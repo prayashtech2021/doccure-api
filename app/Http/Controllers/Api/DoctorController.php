@@ -341,16 +341,7 @@ class DoctorController extends Controller
                     $spl_result = json_decode($request->speciality, true);
                     foreach ($spl_result as $spl_value) {
                         $myRequest = new Request(['speciality_id' => $spl_value['speciality_id'],'duration'=>$spl_value['duration'],'amount'=>$spl_value['amount']]);
-                        /*$custom_rules = array(
-                            'speciality_id' => 'required|numeric|exists:specialities,id',
-                            'duration' => 'required|date_format:"H:i:s',
-                            'amount' => 'required|numeric',
-                        );
-                        $validator = Validator::make($myRequest, $custom_rules);
-                        if ($validator->fails()) {
-                            return self::send_bad_request_response($validator->errors()->first());
-                        }*/
-
+                        
                         $check = UserSpeciality::where('speciality_id',$spl_value['speciality_id'])->where('user_id',$user_id)->count();
                         if($check > 0){
                             DB::rollback();
