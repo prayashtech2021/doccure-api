@@ -646,6 +646,7 @@ class AppointmentController extends Controller
         }
 
         try {
+            
             $cancel = 0;
             $appointment = Appointment::find($request->appointment_id);
             if ($request->status == 6) {
@@ -670,7 +671,6 @@ class AppointmentController extends Controller
 
             $doctor = $provider = User::find($appointment->doctor_id);
             $user = $consumer = User::find($appointment->user_id);
-
             if ($request->status == 3){ //completed
                 $value = ($appointment->payment->transaction_charge + $appointment->payment->tax_amount);
                 $requested_amount = $appointment->payment->total_amount - $value;
@@ -680,7 +680,7 @@ class AppointmentController extends Controller
             if ($request->status == 5 && $appointment->payment->total_amount > 0) { // refund approved
                 
                 $requested_amount = $appointment->payment->total_amount - $appointment->payment->transaction_charge;
-                if(!empty($doctor->currency_code) && !(empty($user->currency_code)) && (!empty($requested_amount)) && ($doctor->currency_code == $user->currency_code)){
+                if(!empty($doctor->currency_code) && !(empty($user->currency_code)) && (!empty($requested_amount)) && ($doctor->currency_code != $user->currency_code)){
                     $convertedCurrency = currencyConversion($doctor->currency_code,$user->currency_code,$requested_amount);
                     $user->depositFloat($convertedCurrency);
                 }else{
@@ -695,7 +695,7 @@ class AppointmentController extends Controller
             }
             if ($request->status == 6 && $cancel == 1) {
                 $requested_amount = $appointment->payment->total_amount - $appointment->payment->transaction_charge;
-                if(!empty($doctor->currency_code) && !(empty($user->currency_code)) && (!empty($requested_amount)) && ($doctor->currency_code == $user->currency_code)){
+                if(!empty($doctor->currency_code) && !(empty($user->currency_code)) && (!empty($requested_amount)) && ($doctor->currency_code != $user->currency_code)){
                     $convertedCurrency = currencyConversion($doctor->currency_code,$user->currency_code,$requested_amount);
                     $user->depositFloat($convertedCurrency);
                 }else{

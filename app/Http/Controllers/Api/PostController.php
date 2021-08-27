@@ -287,21 +287,20 @@ class PostController extends Controller
                 $post->save();
                 
             }
-
+           
             if($request->tags){
                 $tagArray=explode(',',$request->tags);
-                
-                foreach($tagArray as $tag){
-                    $tags = PostTag::where('post_id',$post->id)->where('name',$tag)->first();
-                    if(!$tags){
-                    PostTag::create(['post_id'=>$post->id, 'name'=>$tag]);
+                PostTag::where('post_id',$post->id)->forceDelete();
+                if(count($tagArray)>0){
+                    foreach($tagArray as $item){
+                        
+                            $new = new PostTag();
+                            $new->post_id = $post->id; 
+                            $new->name = $item;
+                            $new->save();
+                       
                     }
                 }
-                $tags = PostTag::where('post_id',$post->id)->whereNotIn('name',$tagArray)->first();
-                    if($tags){
-                        PostTag::where('post_id',$post->id)->whereNotIn('name',$tagArray)->forceDelete();
-                    }
-
             }
 
             DB::commit();
