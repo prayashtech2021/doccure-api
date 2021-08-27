@@ -592,6 +592,4 @@ class HomeController extends Controller
 
         return true;
     }
-
-
 }

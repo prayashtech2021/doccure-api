@@ -667,19 +667,25 @@ class AppointmentController extends Controller
             }
             $log->status = $appointment->appointment_status;
             $log->save();
-            if ($request->status == 3){ //completed
-                $doctor = User::find($appointment->doctor_id);
 
+            $doctor = $provider = User::find($appointment->doctor_id);
+            $user = $consumer = User::find($appointment->user_id);
+
+            if ($request->status == 3){ //completed
                 $value = ($appointment->payment->transaction_charge + $appointment->payment->tax_amount);
                 $requested_amount = $appointment->payment->total_amount - $value;
                 $doctor->depositFloat($requested_amount);
             }
 
             if ($request->status == 5 && $appointment->payment->total_amount > 0) { // refund approved
-                $user = User::find($appointment->user_id);
+                
                 $requested_amount = $appointment->payment->total_amount - $appointment->payment->transaction_charge;
-                $user->depositFloat($requested_amount);
-
+                if(!empty($doctor->currency_code) && !(empty($user->currency_code)) && (!empty($requested_amount)) && ($doctor->currency_code == $user->currency_code)){
+                    $convertedCurrency = currencyConversion($doctor->currency_code,$user->currency_code,$requested_amount);
+                    $user->depositFloat($convertedCurrency);
+                }else{
+                    $user->depositFloat($requested_amount);
+                }
                 //($appointment->payment->transaction_charge > $appointment->payment->tax_amount) ? $value = $appointment->payment->transaction_charge - $appointment->payment->tax_amount :  $value = $appointment->payment->tax_amount - $appointment->payment->transaction_charge;
 
                 // $value = $appointment->payment->transaction_charge + $appointment->payment->tax_amount;
@@ -688,15 +694,20 @@ class AppointmentController extends Controller
                 // $doctor->withdrawFloat($withdraw_amount);
             }
             if ($request->status == 6 && $cancel == 1) {
-                $user = User::find($appointment->user_id);
                 $requested_amount = $appointment->payment->total_amount - $appointment->payment->transaction_charge;
-                $user->depositFloat($requested_amount);
+                if(!empty($doctor->currency_code) && !(empty($user->currency_code)) && (!empty($requested_amount)) && ($doctor->currency_code == $user->currency_code)){
+                    $convertedCurrency = currencyConversion($doctor->currency_code,$user->currency_code,$requested_amount);
+                    $user->depositFloat($convertedCurrency);
+                }else{
+                    $user->depositFloat($requested_amount);
+                }
             }
 
-            $consumer = User::find($appointment->user_id);
+            /* Web Noty */
             $consumer->notify(new AppointmentNoty($appointment));
-            $provider = User::find($appointment->doctor_id);
             $provider->notify(new AppointmentNoty($appointment));
+
+            /* Mobile Push Noty */
             if ($request->status == 2 || $request->status == 6 || $request->status == 4 || $request->status == 5) { //mobile noty doctor 2)accept / 6)cancelled / 4)refund / 5) refund approved
 
                 if($request->status != 4){ //refund (send noty to doctor)
@@ -728,6 +739,7 @@ class AppointmentController extends Controller
                     sendFCMiOSMessage($notifydata);
                 }
             }
+            /* End Mobile Push Noty */
 
 
             return self::send_success_response([], 'Status updated sucessfully');

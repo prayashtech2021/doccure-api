@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 use App\ActivityLog;
 use Illuminate\Support\Carbon;
+use App\CurrencyRate;
 
 function getUserProfileImage($user_id)
 {
@@ -363,69 +364,14 @@ function sendFCMNotification($data){
     }
 //}
 
-/*if(!function_exists('sendFCMiOSMessage'))
-{
-function sendiosNotification($data){
-    $ci =& get_instance();
-    $ci->load->database();
-    $ci->db->select('key,value,system,groups');
-    $ci->db->from('system_settings');
-    $query = $ci->db->get();
-    $results = $query->result();
-    $apns_pem_file = '';
-    $apns_password = '';
-    if(!empty($results)){
-        foreach ($results as $result) {
-            $result = (array)$result;
-            if($result['key'] == 'apns_pem_file'){
-            $apns_pem_file = $result['value'];
-            }
-            if($result['key'] == 'apns_password'){
-            $apns_password = $result['value'];
-            }
-            
-        }
+function currencyConversion($fromCode,$toCode,$fromCurrency){
+    $from = CurrencyRate::where('currency_code',$fromCode)->first();
+    $to = CurrencyRate::where('currency_code',$toCode)->first();
+
+    if($fromCode != $toCode){
+      return  $convertedCurrency = $fromCurrency * $to->rate ;
+    }else{
+        return $fromCurrency;
     }
-
-     // Put your device token here (without spaces):
-     $deviceToken = $data['include_player_ids'];
-
-     // Put your private key's passphrase here:
-     $passphrase = $apns_password;
-     $pemfilename = $apns_pem_file;
-
-     // SIMPLE PUSH 
-     $body['aps'] = array(
-       'alert' => array(
-         'title' => $data['notifications_title'],
-         'body' => $data['message'],
-       ),
-       'badge' => 0,
-       'sound' => 'default',
-       'my_value_1' => $data['additional_data'],
-       ); // Create the payload body
-
-
-      
-     ////////////////////////////////////////////////////////////////////////////////
-
-     $ctx = stream_context_create();
-     stream_context_set_option($ctx, 'ssl', 'local_cert', $pemfilename);
-     stream_context_set_option($ctx, 'ssl', 'passphrase', $passphrase);
-
-     $fp = stream_socket_client(
-       'ssl://gateway.sandbox.push.apple.com:2195', $err,
-       $errstr, 60, STREAM_CLIENT_CONNECT|STREAM_CLIENT_PERSISTENT, $ctx); // Open a connection to the APNS server
-     if (!$fp)
-       exit("Failed to connect: $err $errstr" . PHP_EOL);
-     echo 'Connected to APNS' . PHP_EOL;
-     $payload = json_encode($body); // Encode the payload as JSON
-     $msg = chr(0) . pack('n', 32) . pack('H*', $deviceToken) . pack('n', strlen($payload)) . $payload; // Build the binary notification
-     $result = fwrite($fp, $msg, strlen($msg)); // Send it to the server
-     if (!$result)
-       echo 'Message not delivered' . PHP_EOL;
-     else
-       echo 'Message successfully delivered' . PHP_EOL;
-     fclose($fp); // Close the connection to the server
+    
 }
-}*/
