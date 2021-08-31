@@ -109,6 +109,11 @@ class AppointmentController extends Controller
                 // date_default_timezone_set($patient->time_zone);
                 if ($item->appointment_date < $patient_zone->format('Y-m-d')) {
                     Appointment::where('id', $item->id)->update(['appointment_status' => 7]);
+                    $log = CallLog::where('appointment_id', $item->id)->whereNull('end_time')->first();
+                    if($log){
+                        $log->end_time = Carbon::now()->toDateString();
+                        $log->save();
+                    }
 
                     $requested_amount = $item->payment->total_amount - $item->payment->transaction_charge;
                     $patient->depositFloat($requested_amount);
@@ -116,7 +121,11 @@ class AppointmentController extends Controller
                 if ($item->appointment_date == $patient_zone->format('Y-m-d')) {
                     if (strtotime($item->end_time) < strtotime($patient_zone->format('H:i:s'))) {
                     Appointment::where('id', $item->id)->update(['appointment_status' => 7]);
-
+                    $log = CallLog::where('appointment_id', $item->id)->whereNull('end_time')->first();
+                    if($log){
+                        $log->end_time = Carbon::now()->toDateString();
+                        $log->save();
+                    }
                     $requested_amount = $item->payment->total_amount - $item->payment->transaction_charge;
                     $patient->depositFloat($requested_amount);
                     }
