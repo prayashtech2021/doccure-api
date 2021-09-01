@@ -1512,7 +1512,7 @@ class AppointmentController extends Controller
             $user = auth()->user();
 
             $log = CallLog::where('id', $request->call_log_id)->whereNull('end_time')->first();
-
+            $response=[];
             if ($log) {
                 $duration = Carbon::parse($request->end_time)->diffInSeconds(Carbon::parse($log->start_time));
                 $log->end_time = $request->end_time;
@@ -1540,7 +1540,7 @@ class AppointmentController extends Controller
                     $doctor->depositFloat($requested_amount);
                 }
 
-            }
+            // }
 
             $patient = User::Find($app->user_id);
             $doctor = User::Find($app->doctor_id);
@@ -1550,7 +1550,7 @@ class AppointmentController extends Controller
                 $doctor->notify(new IncomingCallNoty($app));
             }
           
-                $response = array();
+                
                 $response['patient_id'] = $patient->id;
                 $response['patient_name'] = $patient->first_name . ' ' . $patient->last_name;
                 $response['patient_image'] = getUserProfileImage($patient->id);
@@ -1580,12 +1580,13 @@ class AppointmentController extends Controller
                 if ($device_type == 'IOS' && (!empty($notifydata['device_id']))) {
                     sendFCMiOSMessage($notifydata);
                 }
-
+            } //log endif
             if ($request->route()->getName() == "updateCallLog") {
                     return self::send_success_response($response, 'Log updated Successfully');
             }else{
                 return self::send_success_response('Log updated Successfully');
             }
+        
         } catch (Exception | Throwable $exception) {
             return self::send_exception_response($exception->getMessage());
         }
