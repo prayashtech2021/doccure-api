@@ -704,27 +704,27 @@ class AppointmentController extends Controller
             }
 
             /* Web Noty */
-            $consumer->notify(new AppointmentNoty($appointment));
-            $provider->notify(new AppointmentNoty($appointment));
+            $consumer->notify(new AppointmentNoty($appointment)); //patient
+            $provider->notify(new AppointmentNoty($appointment)); //doctor
 
             /* Mobile Push Noty */
             if ($request->status == 2 || $request->status == 6 || $request->status == 4 || $request->status == 5) { //mobile noty doctor 2)accept / 6)cancelled / 4)refund / 5) refund approved
 
-                if($request->status != 4){ //refund (send noty to doctor)
-                    $notifydata['device_id'] = $provider->device_id;
-                    $device_type = $provider->device_type;
-                }else{ //other status (send noty to patient)
+                if ($request->status == 2) {  //accept
                     $notifydata['device_id'] = $consumer->device_id;
                     $device_type = $consumer->device_type;
-                }
-
-                if ($request->status == 2) {  //accept
                     $message = 'Your appointment request is accepted by Dr.' . $provider->first_name . '' . $provider->last_name;
                 } elseif($request->status == 6) {  //cancel
+                    $notifydata['device_id'] = $consumer->device_id;
+                    $device_type = $consumer->device_type;
                     $message = 'Your appointment request is cancelled by Dr.' . $provider->first_name . '' . $provider->last_name;
                 } elseif($request->status == 4){ //refund
-                    $message = 'Patient raised refund request for appointment with reference #'.$appointment->appointment_reference;
+                    $notifydata['device_id'] = $provider->device_id;
+                    $device_type = $provider->device_type;
+                    $message = 'Patient cancelled & raised refund request for appointment with reference #'.$appointment->appointment_reference;
                 } elseif($request->status == 5){ //refund approved
+                    $notifydata['device_id'] = $consumer->device_id;
+                    $device_type = $consumer->device_type;
                     $message = 'Doctor Approved patient refund request approved for appointment with reference #'.$appointment->appointment_reference;
                 }
 
