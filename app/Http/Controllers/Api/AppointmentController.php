@@ -1490,6 +1490,7 @@ class AppointmentController extends Controller
                 'email' => $caller->email,
                 'mobile_number' => $caller->mobile_number,
                 'profile_image' => getUserProfileImage($caller->id),
+                'tokbox' => Setting::select('keyword', 'value')->where('slug', 'tokbox')->get(),
             ];
         }
         }
