@@ -301,6 +301,8 @@ class PostController extends Controller
                        
                     }
                 }
+            }elseif(empty($request->tags)){
+                PostTag::where('post_id',$post->id)->forceDelete();
             }
 
             DB::commit();
