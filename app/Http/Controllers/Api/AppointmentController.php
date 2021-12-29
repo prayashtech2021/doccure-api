@@ -454,7 +454,7 @@ class AppointmentController extends Controller
 
         $sign = Signature::select('id', 'signature_image')->whereUserId($doctor_id)->orderBy('id', 'desc')->first();
         if ($sign && !empty($sign->signature_image) && Storage::exists('images/signature/' . $sign->signature_image)) {
-            $img = (config('filesystems.default') == 's3') ? Storage::temporaryUrl('app/public/images/signature/' . $sign->signature_image, now()->addMinutes(5)) : Storage::url('app/public/images/signature/' . $sign->signature_image);
+            $img = (config('filesystems.default') == 's3') ? Storage::temporaryUrl('images/signature/' . $sign->signature_image, now()->addMinutes(5)) : Storage::url('images/signature/' . $sign->signature_image);
             $data = [
                 'id' => $sign->id,
                 'signature_image' => $img,
