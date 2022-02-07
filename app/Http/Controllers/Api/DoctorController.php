@@ -362,7 +362,7 @@ class DoctorController extends Controller
                             $doctor->save();
                         }else{
                             DB::rollback();
-                            return self::send_bad_request_response('Something went wrong. Please check and try again.');
+                            return self::send_bad_request_response('Please update the Speciality section to continue.');
                         }
                     }
                 }

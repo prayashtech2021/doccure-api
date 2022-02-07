@@ -76,6 +76,12 @@ class LanguageController extends Controller
         try {
             DB::beginTransaction();
             if($request->is_default == 1){  
+                if ($request->language_id) {
+                    $count = MultiLanguage::where('language_id',$request->language_id)->where('value','')->count();
+                    if($count){
+                        return self::send_bad_request_response('Language Not yet updated for all keywords');
+                    }
+                }
                 Language::where('id', '>', 0)->update(['is_default'=>0]);
                 DB::commit();
             }
