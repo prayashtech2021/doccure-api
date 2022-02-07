@@ -77,7 +77,7 @@ class LanguageController extends Controller
             DB::beginTransaction();
             if($request->is_default == 1){  
                 if ($request->language_id) {
-                    $count = MultiLanguage::where('language_id',$request->language_id)->whereRaw('value = "" OR col IS NULL')->count();
+                    $count = MultiLanguage::where('language_id',$request->language_id)->whereRaw('value = "" OR value IS NULL')->count();
                     if($count>0){
                         return self::send_bad_request_response('Language Not yet updated for all keywords');
                     }
@@ -129,7 +129,7 @@ class LanguageController extends Controller
         if($rules){ return $rules;}
         try {
 
-            $count = MultiLanguage::where('language_id',$request->language_id)->whereRaw('value = "" OR col IS NULL')->count();
+            $count = MultiLanguage::where('language_id',$request->language_id)->whereRaw('value = "" OR value IS NULL')->count();
                 if($count>0){
                     return self::send_bad_request_response('Language Not yet updated for all keywords');
                 }else{
