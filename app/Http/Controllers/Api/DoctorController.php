@@ -169,6 +169,10 @@ class DoctorController extends Controller
             if ($list) {
                 if($request->route()->getName() == "doctorProfile"){
                     $list->permanentaddress_mobile = ($list->getPermanentAddressAttribute()) ? $list->getPermanentAddressAttribute(1) : (object)[];
+                    $oaddress = Address::with('country','state','city','addressImage')->whereNotNull('name')->where('user_id',$list->id)->first();
+        
+                    $oaddress=($oaddress)?$oaddress:(object)[];
+                    $list->officeaddress_mobile = $oaddress;
                     $array['profile'] = $list->toArray();
                 }else{
                     $array['profile'] = $list;
