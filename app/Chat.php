@@ -1,7 +1,7 @@
 <?php
 
 namespace App;
-use ESolution\DBEncryption\Traits\EncryptedAttribute;
+//use ESolution\DBEncryption\Traits\EncryptedAttribute;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
@@ -10,14 +10,14 @@ use URL;
 
 class Chat extends Model
 {
-    use EncryptedAttribute;
+    //use EncryptedAttribute;
 
     protected $fillable = [
         'sender_id', 'recipient_id', 'message', 'file_path'
    ];
-    protected $encryptable = [
-        'message'
-    ];
+    // protected $encryptable = [
+    //     'message'
+    // ];
    public function sender() { 
     return $this->belongsTo('App\User','sender_id'); 
    }

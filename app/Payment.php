@@ -1,17 +1,17 @@
 <?php
 
 namespace App;
-use ESolution\DBEncryption\Traits\EncryptedAttribute;
+//use ESolution\DBEncryption\Traits\EncryptedAttribute;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 
 class Payment extends Model
 {
-    use EncryptedAttribute;
-    protected $encryptable = [
-        'invoice_no','txn_id'
-    ];
+   // use EncryptedAttribute;
+    // protected $encryptable = [
+    //     'invoice_no','txn_id'
+    // ];
     public function getData()
     {
         (auth()->user()->time_zone)? $zone = auth()->user()->time_zone : $zone = '';

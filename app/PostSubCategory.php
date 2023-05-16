@@ -1,7 +1,7 @@
 <?php
 
 namespace App;
-use ESolution\DBEncryption\Traits\EncryptedAttribute;
+//use ESolution\DBEncryption\Traits\EncryptedAttribute;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -10,14 +10,14 @@ use Illuminate\Support\Carbon;
 class PostSubCategory extends Model
 {
     use SoftDeletes;
-    use EncryptedAttribute;
+    //use EncryptedAttribute;
 
     protected $fillable = [
         'name', 'post_category_id','created_by',
     ];
-    protected $encryptable = [
-        'name'
-    ];
+    // protected $encryptable = [
+    //     'name'
+    // ];
     public function getData(){
         return [
             'id' => $this->id,

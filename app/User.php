@@ -1,7 +1,7 @@
 <?php
 
 namespace App;
-use ESolution\DBEncryption\Traits\EncryptedAttribute;
+//use ESolution\DBEncryption\Traits\EncryptedAttribute;
 
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -18,7 +18,7 @@ use DB;
 
 class User extends Authenticatable implements Wallet, WalletFloat
 {
-    use EncryptedAttribute;
+   // use EncryptedAttribute;
 
     use SoftDeletes;
     use Notifiable;
@@ -37,9 +37,9 @@ class User extends Authenticatable implements Wallet, WalletFloat
         'first_name', 'last_name', 'email', 'password', 'mobile_number', 'profile_image','country_id','currency_code','gender','dob','blood_group',
         'biography','price_type','amount','verification_code','is_verified','currency_code','created_by','time_zone_id','time_zone',
    ];
-    protected $encryptable = [
-        'first_name','last_name','biography'
-    ];
+    // protected $encryptable = [
+    //     'first_name','last_name','biography'
+    // ];
     /**
      * The attributes that should be hidden for arrays.
      *

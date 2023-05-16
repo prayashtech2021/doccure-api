@@ -1,23 +1,23 @@
 <?php
 
 namespace App;
-use ESolution\DBEncryption\Traits\EncryptedAttribute;
+//use ESolution\DBEncryption\Traits\EncryptedAttribute;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 
 class PaymentRequest extends Model
 {
-    use EncryptedAttribute;
+   // use EncryptedAttribute;
 
     protected $dates = ['payment_date']; 
     
     protected $fillable = [
         'user_id','reference_id', 'description', 'currency_code','request_type','request_amount','status','action_date','created_by'
     ];
-    protected $encryptable = [
-        'reference_id','description'
-    ];
+    // protected $encryptable = [
+    //     'reference_id','description'
+    // ];
 
     public function user()
     {
