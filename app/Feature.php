@@ -26,7 +26,7 @@ class Feature extends Model
     function getFeatureImage(){
         $image = $this->image;
         if (!empty($image) && Storage::exists('images/features/' . $image)) {
-            $path = (config('filesystems.default') == 's3') ? Storage::temporaryUrl('images/features/' . $image, now()->addMinutes(5)) : Storage::url('images/features/' . $image);
+            $path = (config('filesystems.default') == 's3') ? Storage::temporaryUrl('images/features/' . $image, now()->addMinutes(5)) : url('storage/images/features/' . $image);
         }else{
             $path = url('img/logo.png');
         }

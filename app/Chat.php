@@ -44,7 +44,7 @@ class Chat extends Model
     }
     function getUserAttachment(){
         if (!empty($this->file_path) && Storage::exists('images/chat-attachments/' . $this->file_path)) {
-            return (config('filesystems.default') == 's3') ? Storage::temporaryUrl('images/chat-attachments/' . $this->file_path, now()->addMinutes(5)) : Storage::url('images/chat-attachments/' . $this->file_path);
+            return (config('filesystems.default') == 's3') ? Storage::temporaryUrl('images/chat-attachments/' . $this->file_path, now()->addMinutes(5)) : url('storage/images/chat-attachments/' . $this->file_path);
         } else {
             return URL::asset('img/no_attachment.jpg');
         }

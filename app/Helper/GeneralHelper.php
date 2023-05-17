@@ -17,7 +17,7 @@ function getUserProfileImage($user_id)
 {
     $user = User::find($user_id);
     if ($user && !empty($user->profile_image) && Storage::exists('images/profile-images/' . $user->profile_image)) {
-        return (config('filesystems.default') == 's3') ? Storage::temporaryUrl('images/profile-images/' . $user->profile_image, now()->addMinutes(5)) : Storage::url('images/profile-images/' . $user->profile_image);
+        return (config('filesystems.default') == 's3') ? Storage::temporaryUrl('images/profile-images/' . $user->profile_image, now()->addMinutes(5)) : url('storage/images/profile-images/' . $user->profile_image);
 
     } else {
         return URL::asset('img/profile_image.jpg');
@@ -140,7 +140,7 @@ function getSettingData($addon = NULL){
 
 function getSettingImage($image){
     if (!empty($image) && Storage::exists('images/company-images/' . $image)) {
-        $path = (config('filesystems.default') == 's3') ? Storage::temporaryUrl('images/company-images/' . $image, now()->addMinutes(5)) : Storage::url('images/company-images/' . $image);
+        $path = (config('filesystems.default') == 's3') ? Storage::temporaryUrl('images/company-images/' . $image, now()->addMinutes(5)) : url('storage/images/company-images/' . $image);
     } else {
         $path = url('img/logo.png');
     }
@@ -233,7 +233,7 @@ function getAppMenu($request = NULL) {
     
 function getPostImage($image){
     if (!empty($image) && Storage::exists('images/blogs/' . $image)) {
-        $path = (config('filesystems.default') == 's3') ? Storage::temporaryUrl('images/blogs/' . $image, now()->addMinutes(5)) : Storage::url('images/blogs/' . $image);
+        $path = (config('filesystems.default') == 's3') ? Storage::temporaryUrl('images/blogs/' . $image, now()->addMinutes(5)) : url('storage/images/blogs/' . $image);
     } else {
         $path = url('img/default_blog.png');
     }

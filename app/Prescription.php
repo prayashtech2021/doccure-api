@@ -54,7 +54,7 @@ class Prescription extends Model
     public function signature(){
         $sign = $this->doctorsign()->first();
         if($sign && !empty($sign->signature_image) && Storage::exists('images/signature/' . $sign->signature_image)) {
-           return (config('filesystems.default') == 's3') ? Storage::temporaryUrl('images/signature/' . $sign->signature_image, now()->addMinutes(5)) : Storage::url('images/signature/' . $sign->signature_image);
+           return (config('filesystems.default') == 's3') ? Storage::temporaryUrl('images/signature/' . $sign->signature_image, now()->addMinutes(5)) : url('storage/images/signature/' . $sign->signature_image);
         }else{
             return '';
         }
