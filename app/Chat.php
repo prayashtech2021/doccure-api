@@ -34,6 +34,9 @@ class Chat extends Model
         'recipient_id' => $this->recipient_id,
         'recipient_name' => trim($this->recipient->first_name . ' '. $this->recipient->last_name),
         'recipient_image' => getUserProfileImage($this->recipient->id),
+        'pdf_image' => $this->getPdfImage(),
+        'video_image' => $this->getVideoImage(),
+        'word_image' => $this->getWordImage(),
         'message' => $this->message,
         'file_path' => $this->getUserAttachment(),
         'file_attach' => $this->getFileAttach(),
@@ -56,5 +59,17 @@ class Chat extends Model
         if($my_ext == 'pdf' || $my_ext == 'doc' || $my_ext == 'docx'){
             return URL::asset('img/attach.jpg');
         }
+    }
+
+    function getPdfImage(){
+            return URL::asset('img/pdf_image.png');
+    }
+
+    function getVideoImage(){
+        return URL::asset('img/video_image.jpg');
+    }
+    
+    function getWordImage(){
+    return URL::asset('img/word_image.png');
     }
 }

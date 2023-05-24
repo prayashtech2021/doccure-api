@@ -6539,6 +6539,12 @@ class MultiLanguageSeeder extends Seeder
                 'value' => 'YouTube',
                 'created_by' => 1, 
                 'language_id' => 1,
+            ],1038 => [
+                'page_master_id' => 4,
+                'language_id' => 1,
+                'keyword' => 'doctor_profile',
+                'value' => 'Doctor Profile',
+                'created_by' => 1,
             ],
             
             // for menu page end
