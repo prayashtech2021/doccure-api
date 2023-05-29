@@ -403,6 +403,7 @@ class AppointmentController extends Controller
                     'metadata' => [
                         'reference' => $appointment->appointment_reference,
                     ],
+                   'off_session' => true,
                 ];
 
                 if ($request->payment_type == 2) {

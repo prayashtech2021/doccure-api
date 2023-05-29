@@ -341,7 +341,7 @@ class HomeController extends Controller
                 $profile->first_name = $request->first_name;
                 $profile->last_name = $request->last_name;
                 $profile->email = $request->email;
-                $profile->biography = ($request->biography)? $request->biography : '';
+                $profile->biography = ($request->biography)? $request->biography : NULL;
                 $profile->save();
                 $get_address = Address::whereUserId($user_id)->whereNull('name')->first();
 

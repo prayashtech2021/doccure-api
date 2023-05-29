@@ -150,6 +150,7 @@ class PatientController extends Controller
                 'mobile_number' => 'required|min:7|max:15|unique:users,mobile_number,'.$request->user_id,
                 'gender'  => 'required|integer|between:1,2',
                 'dob'  => 'date',
+                'blood_group'  => 'required|string',
                 'contact_address_line1' => 'required',
             ];
     
@@ -166,6 +167,7 @@ class PatientController extends Controller
             $patient->country_id = $request->country_code_id;
             $patient->currency_code = Country::getCurrentCode($request->country_code_id);
             $patient->dob = date('Y-m-d',strtotime(str_replace('/', '-', $request->dob)));
+            $patient->blood_group = ($request->blood_group)? $request->blood_group : NULL;
             $patient->save();
             
             /* patient Address Details */
