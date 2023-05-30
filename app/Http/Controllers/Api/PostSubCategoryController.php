@@ -18,17 +18,17 @@ class PostSubCategoryController extends Controller
             $rules = array(
                 'sub_category_id' => 'integer|exists:post_sub_categories,id',
                 'category_id' => 'integer|exists:post_categories,id',
-                'name' => 'required|unique_encrypted:post_sub_categories,name,' . $request->sub_category_id,
+                'name' => 'required|unique:post_sub_categories,name,' . $request->sub_category_id,
             );
         } else {
             $rules = array(
                 'category_id' => 'integer|exists:post_categories,id',
-                'name' => 'required|unique_encrypted:post_sub_categories,name',
+                'name' => 'required|unique:post_sub_categories,name',
             );
         }
        
         $messages = array(
-            'name.unique_encrypted' => 'Name already exists',
+            'name.unique' => 'Name already exists',
         );
        
         $validator = Validator::make($request->all(), $rules,$messages);

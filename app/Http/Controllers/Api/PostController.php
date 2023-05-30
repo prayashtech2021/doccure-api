@@ -37,7 +37,7 @@ class PostController extends Controller
             'order_by' => 'nullable|in:desc,asc',
             'page' => 'nullable|numeric',
             'category_id' => 'nullable|numeric|exists:post_categories,id',
-            'tag_name' => 'nullable|string|exists_encrypted:post_tags,name',
+            'tag_name' => 'nullable|string|exists:post_tags,name',
             'viewable' => 'nullable|numeric|in:0,1',
             'search_keyword' => 'nullable|string|min:1|max:50',
         );
@@ -65,13 +65,13 @@ class PostController extends Controller
                     }
                     if(isset($request->tag_name) && !empty($request->tag_name)){
                         $list = $list->whereHas('tags',function($qry)use($request){
-                        $qry->whereEncrypted('name',$request->tag_name);
+                        $qry->where('name',$request->tag_name);
                     });
                     }
                     if(!empty($request->search_keyword)){
                         $list = $list->where(function($qry)use($request){
-                            $qry->whereEncrypted('title','like','%'.$request->search_keyword.'%')
-                            ->orwhereEncrypted('content','like','%'.$request->search_keyword.'%');
+                            $qry->where('title','like','%'.$request->search_keyword.'%')
+                            ->orWhere('content','like','%'.$request->search_keyword.'%');
                         }); 
                     }
                     $result['categories'] = PostCategory::whereHas('post',function($qry){
@@ -202,7 +202,7 @@ class PostController extends Controller
         if ($request->post_id) { //edit
             $rules = array(
                 'post_id' => 'integer|exists:posts,id',
-                'title' => 'required|unique_encrypted:posts,title,' . $request->post_id,
+                'title' => 'required|unique:posts,title,' . $request->post_id,
                 'slug' => 'nullable|unique:posts,id,' . $request->post_id,
                 'content' => 'required',
                 'meta_description' => 'nullable',
@@ -215,7 +215,7 @@ class PostController extends Controller
             );
         } else {
             $rules = array(
-                'title' => 'required|unique_encrypted:posts,title',
+                'title' => 'required|unique:posts,title',
                 'slug' => 'nullable|unique:posts',
                 'content' => 'required',
                 'meta_description' => 'nullable',
@@ -228,7 +228,7 @@ class PostController extends Controller
             );
         }
         $messages = array(
-            'title.unique_encrypted' => 'Title already exists',
+            'title.unique' => 'Title already exists',
         );
        
         $validator = Validator::make($request->all(), $rules,$messages);

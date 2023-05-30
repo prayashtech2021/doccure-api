@@ -539,16 +539,16 @@ class DoctorController extends Controller
                 });
                
                 $doctors = $doctors->orWhere(function($query) use ($a1){
-                    $query->orWhereEncrypted('first_name', 'like', '%'.$a1.'%')
-                    ->orWhereEncrypted('last_name', 'like', '%' . $a1 . '%');
+                    $query->orWhere('first_name', 'like', '%'.$a1.'%')
+                    ->orWhere('last_name', 'like', '%' . $a1 . '%');
                 });
                
         
                 if(isset($name[1])){
                     $a2 = $name[1];
                     $doctors = $doctors->orWhere(function($query) use($a2){
-                        $query->orWhereEncrypted('first_name', 'like', '%' . $a2 . '%')
-                        ->orWhereEncrypted('last_name', 'like', '%' . $a2 . '%');
+                        $query->orWhere('first_name', 'like', '%' . $a2 . '%')
+                        ->orWhere('last_name', 'like', '%' . $a2 . '%');
                     });
                 }
             }
@@ -572,14 +572,14 @@ class DoctorController extends Controller
                 $doctors = $doctors->whereHas('doctorSpecialization', function ($category) use ($speciality_name) {
                     $category->Where('specialities.name', 'like', '%' . $speciality_name . '%');
                 })->orWhere(function($query) use ($a1){
-                    $query->orWhereEncrypted('first_name', 'like', '%'.$a1.'%')
-                    ->orWhereEncrypted('last_name', 'like', '%' . $a1 . '%');
+                    $query->orWhere('first_name', 'like', '%'.$a1.'%')
+                    ->orWhere('last_name', 'like', '%' . $a1 . '%');
                 });
                 if(isset($name[1])){
                     $a2 = $name[1];
                     $doctors = $doctors->orWhere(function($query) use($a2){
-                        $query->orWhereEncrypted('first_name', 'like', '%' . $a2 . '%')
-                        ->orWhereEncrypted('last_name', 'like', '%' . $a2 . '%');
+                        $query->orWhere('first_name', 'like', '%' . $a2 . '%')
+                        ->orWhere('last_name', 'like', '%' . $a2 . '%');
                     });
                 }
             }
