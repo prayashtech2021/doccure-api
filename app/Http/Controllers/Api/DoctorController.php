@@ -264,11 +264,40 @@ class DoctorController extends Controller
             //Save doctor profile
             $doctor = User::find($user_id);
             if ($doctor) {
+
+                /* Clinic Images */
+                $digitalsignaturefile_name ='';
+                $digitalsignatureimages = array();
+                if ($request->digitalsignature_images) {
+                    $image_result = json_decode($request->digitalsignature_images, true);
+                    foreach ($image_result as $result) {
+                        $file = $result['name'];
+                        // $new_digitalsignature_img = new AddressImage();
+                        // $new_digitalsignature_img->user_id = $user_id;
+                        // $new_digitalsignature_img->address_id = $clinic_details->id;
+                        // $new_digitalsignature_img->created_by = auth()->user()->id;
+
+                        if (preg_match('/data:image\/(.+);base64,(.*)/', $file, $matchings)) {
+                            $imageData = base64_decode($matchings[2]);
+                            $extension = $matchings[1];
+                            $digitalsignaturefile_name = date('YmdHis') . rand(100, 999) . '_' . $user_id . '.' . $extension;
+                            $path = 'images/digitalsignature_images/' . $user_id . '/' . $digitalsignaturefile_name;
+                            Storage::put($path, $imageData);
+
+                            //$new_digitalsignature_img->image = $digitalsignaturefile_name;
+                            //$new_digitalsignature_img->save();
+                        } else {
+                            return self::send_bad_request_response('Image Uploading Failed. Please check and try again!');
+                        }
+                    }
+                }
+
                 $doctor->fill($request->all());
                 $doctor->country_id = $request->country_code_id;
                 $doctor->price_type = 2;
                 $doctor->currency_code = Country::getCurrentCode($request->country_code_id);
                 $doctor->dob = date('Y-m-d', strtotime(str_replace('/', '-', $request->dob)));
+                $doctor->digitalsignatureimage_nvc = $digitalsignaturefile_name;
                 $doctor->save();
 
                 /* Doctor Address Details */
@@ -289,6 +318,8 @@ class DoctorController extends Controller
                 $contact_details->city_id = ($request->contact_city_id) ? $request->contact_city_id : '';
                 $contact_details->postal_code = ($request->contact_postal_code) ? $request->contact_postal_code : '';
                 $contact_details->save();
+
+                 
 
                 /* Doctor Clinic Info */
                 if (!empty($request->clinic_name)) {

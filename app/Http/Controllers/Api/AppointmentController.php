@@ -237,6 +237,29 @@ class AppointmentController extends Controller
         }
     }
 
+
+    function listtemp(Request $request, $flag = null)
+    {
+        $common = [];
+        $lang_id = ($request->language_id) ? getLang($request->language_id) : defaultLang();
+        $common['header'] = getLangContent(8, $lang_id);
+        $common['setting'] = getSettingData();
+        $common['menu'] = getAppMenu();
+        if ($request->request_type) {
+            $common['lang_content'] = getLangContent(18, $lang_id);
+        } else {
+            $common['lang_content'] = getLangContent(12, $lang_id);
+        }
+        $common['footer'] = getLangContent(9, $lang_id);
+
+       
+
+                $result['toxbox'] = Setting::select('keyword', 'value')->where('slug', 'tokbox')->get();
+                return self::send_success_response($result, '', $common);
+            
+        
+    }
+
     public function create(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -1481,8 +1504,13 @@ class AppointmentController extends Controller
         }else{
         $callLog = CallLog::where('to', $user->id)->whereNull('end_time')->first();
         if ($callLog) {
+
+            $app = Appointment::find($callLog->appointment_id);
+
             $caller = User::find($callLog->from);
             $data = [
+                'patuid' => $app->user_id,
+                'appdoctorid' => $app->doctor_id,
                 'id' => $caller->id,
                 'call_log_id' => $callLog->id,
                 'call_type' => $callLog->type,

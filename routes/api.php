@@ -65,6 +65,7 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
 
     //appointments
     Route::get('appointments/list', 'Api\AppointmentController@list');
+    Route::get('appointments/listtemp', 'Api\AppointmentController@listtemp');
     Route::post('appointments/create', 'Api\AppointmentController@create');
     Route::get('appointments/saved-cards','Api\AppointmentController@savedCards');
     Route::get('schedule/list', 'Api\AppointmentController@scheduleList');
