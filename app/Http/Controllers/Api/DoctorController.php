@@ -294,7 +294,7 @@ class DoctorController extends Controller
 
                 $doctor->fill($request->all());
                 $doctor->country_id = $request->country_code_id;
-                $doctor->price_type = 2;
+                $doctor->price_type = 1;
                 $doctor->currency_code = Country::getCurrentCode($request->country_code_id);
                 $doctor->dob = date('Y-m-d', strtotime(str_replace('/', '-', $request->dob)));
                 $doctor->digitalsignatureimage_nvc = $digitalsignaturefile_name;
@@ -663,6 +663,7 @@ class DoctorController extends Controller
                 $order_by = $request->order_by ? $request->order_by : 'desc';
                 $doctors = $doctors->orderBy('created_at', $order_by);
             }
+
 
             if ($request->sort == 3) { //free
                 $doctors = $doctors->where('price_type', 1);

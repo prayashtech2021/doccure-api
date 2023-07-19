@@ -94,11 +94,11 @@ class SpecialityController extends Controller
         if ($valid) {return $valid;}
 
     try {
-        $paginate = $request->count_per_page ? $request->count_per_page : 10;
-        $order_by = $request->order_by ? $request->order_by : 'desc';
+        $paginate = $request->count_per_page ? $request->count_per_page : 30;
+        $order_by = $request->order_by ? $request->order_by : 'asc';
         $pageNumber = $request->page ? $request->page : 1;
 
-            $spl = Speciality::orderBy('name', $order_by);
+            $spl = Speciality::orderBy('id', $order_by);
             if($request->withtrash){
                 $spl = $spl->withTrashed();
             }
