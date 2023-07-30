@@ -1705,7 +1705,7 @@ class MultiLanguageSeeder extends Seeder
                 'page_master_id' => 17,
                 'language_id' => 1,
                 'keyword' => 'favourite',
-                'value' => 'Favourites',
+                'value' => 'Favorites',
                 'created_by' => 1,
             ],283 => [
                 'page_master_id' => 17,
@@ -1945,7 +1945,7 @@ class MultiLanguageSeeder extends Seeder
                 'page_master_id' => 19,
                 'language_id' => 1,
                 'keyword' => 'allowed_jpg_gif_png_max_size_2mb',
-                'value' => 'Allowed JPG, GIF or PNG.Max size of 2MB',
+                'value' => 'Allowed JPG, GIF or PNG.Max size of 2MB.',
                 'created_by' => 1,
             ],323 => [
                 'page_master_id' => 19,
@@ -2449,7 +2449,7 @@ class MultiLanguageSeeder extends Seeder
                 'page_master_id' => 24,
                 'language_id' => 1,
                 'keyword' => 'appointment_booking_successfully',
-                'value' => 'Appointment Booking Successfully',
+                'value' => 'Appointment Booking Successful',
                 'created_by' => 1,
             ],405 => [
                 'page_master_id' => 24,
@@ -3967,7 +3967,7 @@ class MultiLanguageSeeder extends Seeder
                 'page_master_id' => 1,
                 'language_id' => 1,
                 'keyword' => 'favourites',
-                'value' => 'favourites',
+                'value' => 'favorites',
                 'created_by' => 1, 
             ],659 => [
                 'page_master_id' => 1,
@@ -6545,7 +6545,13 @@ class MultiLanguageSeeder extends Seeder
                 'keyword' => 'doctor_profile',
                 'value' => 'Doctor Profile',
                 'created_by' => 1,
-            ],
+            ],1039 => [
+                'page_master_id' => 9,
+                'language_id' => 1,
+                'keyword' => 'consent_form',
+                'value' => 'Consent Form',
+                'created_by' => 1,
+            ]
             
             // for menu page end
         ];

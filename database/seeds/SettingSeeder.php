@@ -278,6 +278,12 @@ class SettingSeeder extends Seeder
                 'value' => 'AAAAWLRdl-c:APA91bExMBuh-Bin9L2AZbfT7DqpyoPQWidaUTYWs0UpGRVBwd3d0BIm0miBP7KH1Png_9v9goJRCW84a4ZJ-I0rLyoAyWq58JY-b5sB5bDEXPkjP7ol17cqwQklQPU4JdVITreI_IMn',
                 'created_by' => 1,
             ],
+            40 => [
+                'slug' => 'consent_form',
+                'keyword' => 'Consent Form',
+                'value' => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+                'created_by' => 1,
+            ],
            
         ];
 		foreach ($datas as $id => $data) {

@@ -297,7 +297,14 @@ class DoctorController extends Controller
                 $doctor->price_type = 1;
                 $doctor->currency_code = Country::getCurrentCode($request->country_code_id);
                 $doctor->dob = date('Y-m-d', strtotime(str_replace('/', '-', $request->dob)));
-                $doctor->digitalsignatureimage_nvc = $digitalsignaturefile_name;
+                if($digitalsignaturefile_name == "")
+                {
+                
+                }
+                else
+                {
+                    $doctor->digitalsignatureimage_nvc = $digitalsignaturefile_name;
+                }
                 $doctor->save();
 
                 /* Doctor Address Details */
@@ -722,6 +729,35 @@ class DoctorController extends Controller
         }
     }
 
+     public function deleteDigitalSignatureImage($digitalSignature_image_id)
+    {
+       
+
+        try {
+            $digitalsig_img = User::where('id', $digitalSignature_image_id)->first();
+            if (!$digitalsig_img) {
+                return self::send_bad_request_response('Invalid Profile Image Id. Kindly check and try again.');
+            }
+            if (!empty($digitalsig_img->digitalsignatureimage_nvc)) {
+                //return self::send_bad_request_response([$digitalsig_img->id . '/' . $digitalsig_img->digitalsignatureimage_nvc],'AAAA');
+                //return self::send_success_response([],'images/digitalsignature_images/' . $digitalsig_img->id . '/' . $digitalsig_img->digitalsignatureimage_nvc);
+                if (Storage::exists('images/digitalsignature_images/' . $digitalsig_img->id . '/' . $digitalsig_img->digitalsignatureimage_nvc)) {
+                    //return self::send_bad_request_response([$digitalsig_img->id . '/' . $digitalsig_img->digitalsignatureimage_nvc],'AAAA');
+                    Storage::delete('images/digitalsignature_images/' . $digitalsig_img->id . '/' . $digitalsig_img->digitalsignatureimage_nvc);
+                    //return self::send_bad_request_response([$digitalsig_img->id . '/' . $digitalsig_img->digitalsignatureimage_nvc],'AAAA');
+                    return self::send_success_response([], 'Digital Signature Image Deleted successfully');
+                }
+            }
+            //$digitalsig_img->forcedelete();
+           // return self::send_success_response([], 'Digital Signature Image Deleted successfully');
+
+        } catch (\Exception | \Throwable $exception) {
+            return self::send_exception_response($exception->getMessage());
+        }
+    }
+	
+
+    
     public function allRoleUser(){
         
         $user = User::get();

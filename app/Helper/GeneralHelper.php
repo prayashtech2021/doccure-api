@@ -129,7 +129,7 @@ function getSettingData($addon = NULL){
     foreach($result as $data){
         if(($data->keyword=='company_logo') || ($data->keyword=='footer_logo') || ($data->keyword=='favicon') ){
             $setting[$data->keyword] = getSettingImage($data->value);
-        }elseif($data->keyword == 'privacy_policy' || $data->keyword == 'terms_and_condition'){
+        }elseif($data->keyword == 'privacy_policy' || $data->keyword == 'terms_and_condition' || $data->keyword == 'consent_form') {
             $setting[$data->keyword] = htmlspecialchars_decode($data->value);
         }else{
             $setting[$data->keyword] = $data->value;
