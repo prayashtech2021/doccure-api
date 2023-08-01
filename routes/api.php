@@ -19,7 +19,7 @@ Route::middleware(['secureApi', 'responseHeader'])->group(function () {
     });
     Route::post('login', 'PassportController@login');
     Route::post('register', 'Api\HomeController@register');
-
+    Route::post('newregister', 'Api\HomeController@newregister');
     Route::get('getList/{case}/{id?}', 'Api\HomeController@getList')->name('getList');
     Route::post('resend-verification-link', 'Api\HomeController@resendVerificationLink');
     Route::post('verification', 'Api\HomeController@verification');
@@ -86,7 +86,7 @@ Route::middleware(['CheckAuthHeader', 'auth:api', 'secureApi', 'responseHeader']
     Route::get('doctor/list', 'Api\DoctorController@doctorList');
     Route::post('doctor/saveprofile', 'Api\DoctorController@saveProfile');
     Route::get('doctor/address-image/delete/{address_image_id}','Api\DoctorController@deleteAddressImage');
-    Route::get('doctor/digitalsignature-image/delete/{digitalsig_image_id}','Api\DoctorController@deleteDigitalSignatureImage');
+
     /* Speciality */
    // Route::group(['middleware' => ['can:specialization']], function () {
         Route::post('speacility/save', 'Api\SpecialityController@save');

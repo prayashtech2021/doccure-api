@@ -98,6 +98,80 @@ class HomeController extends Controller
         }
     }
 
+    public function newregister(Request $request){
+        try {
+            $validator = Validator::make($request->all(),[
+                'first_name'  => 'required|string|max:191',
+                'last_name'  => 'required|string|max:191',
+                'email' => 'required|email|unique:users',
+                'country_id' => 'required|integer',
+                'mobile_number' => 'required|min:7|max:15|unique:users',
+                'password' => 'required|confirmed|min:6|string',
+                'type' => 'required|integer',
+            ]);
+            if ($validator->fails()) {
+                return self::send_bad_request_response($validator->errors()->first());
+            }
+            DB::beginTransaction();
+            $array=$request->toArray();
+            $array['password'] = Hash::make($request->password);
+            $array['created_by'] = 1; //test
+            $array['country_id'] = $request->country_id;
+            $array['currency_code'] = Country::getCurrentCode($request->country_id);
+
+            $verification_code = mt_rand(100000,999999);
+            $array['verification_code'] = $verification_code;
+            $pool = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+            $token = substr(str_shuffle(str_repeat($pool, 5)), 0, 20);
+            $array['remember_token'] = $token;
+            if($request->timezone){
+				$array['time_zone'] = $request->timezone;
+			}
+            $user = User::create($array);
+            $user->assignRole($request->type);
+
+            /*add a row in address table*/
+            $contact_details = new Address();
+            $contact_details->user_id = $user->id;
+            $contact_details->country_id = $request->country_id;
+            $contact_details->created_by = $user->id;
+            $contact_details->save();
+
+            DB::commit();
+            $url = '';
+            //$url = config('custom.frontend_url').'verifymail/'.$user->id.'/'.$token;
+
+            $template = EmailTemplate::where('slug','registration')->first();
+            if($template){
+                $body = ($template->content); // this is template dynamic body. You may get other parameters too from database. $title = $template->title; $from = $template->from;
+            
+                $a1 = array('{{username}}','{{verification_code}}','{{link}}','{{config_app_name}}','{{custom_support_phone}}','{{custom_support_email}}');
+                $a2 = array($request->first_name,$verification_code,$url,config('app.name'),config('custom.support_phone'),config('custom.support_email'));
+
+                $response = str_replace($a1,$a2,$body); // this will replace {{username}} with $data['username']
+                
+                $mail = [
+                    'body' => html_entity_decode(htmlspecialchars_decode($response)),
+                    'subject' => $template->subject,
+                ];
+
+                $mailObject = new SendInvitation($mail); // you can make php artisan make:mail MyMail
+                Mail::to($request->email)->send($mailObject);
+            }
+            $response_array = [
+                "code" => "200",
+                "message" => "Verification Mail has sent to your Registered Email-id",
+            ];
+    
+            return response()->json(self::convertNullsAsEmpty($response_array), 200);
+
+        } catch (Exception | Throwable $exception) {
+            DB::rollback();
+            return self::send_exception_response($exception->getMessage());
+        }
+    }
+
     public function resendVerificationLink(Request $request){
         $rules = array(
             'email' => 'required|email',
