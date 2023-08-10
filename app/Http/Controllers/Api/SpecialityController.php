@@ -98,7 +98,7 @@ class SpecialityController extends Controller
         $order_by = $request->order_by ? $request->order_by : 'ASC';
         $pageNumber = $request->page ? $request->page : 1;
 
-            $spl = Speciality::orderBy('name', $order_by);
+            $spl = Speciality::orderBy('id', $order_by);
             if($request->withtrash){
                 $spl = $spl->withTrashed();
             }

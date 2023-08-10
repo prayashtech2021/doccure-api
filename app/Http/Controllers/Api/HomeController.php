@@ -115,6 +115,11 @@ class HomeController extends Controller
             DB::beginTransaction();
             $array=$request->toArray();
             $array['password'] = Hash::make($request->password);
+            
+            $array['blood_group'] = $request->bloodgroup;
+            $array['gender'] = $request->gender;
+            $array['dob'] = $request->dob;
+
             $array['created_by'] = 1; //test
             $array['country_id'] = $request->country_id;
             $array['currency_code'] = Country::getCurrentCode($request->country_id);

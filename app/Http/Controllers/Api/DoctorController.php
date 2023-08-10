@@ -496,11 +496,13 @@ class DoctorController extends Controller
                 if (isset($registrationArray)) {
                     $registration_result = json_decode($request->registration, true);
                     foreach ($registration_result as $reg) {
-                        $regyear = (int) $reg['registration_year'];
-                        if ($regyear < 1000 || $regyear > 2100) {
-                            DB::rollback();
-                            return self::send_bad_request_response('Invalid Registration Year . Please check and try again.');
-                        }
+                        //$regyear = (int) $reg['registration_year'];
+                        $regyear = $reg['registration_year'];
+                        
+                        // if ($regyear < 1000 || $regyear > 2100) {
+                        //     DB::rollback();
+                        //     return self::send_bad_request_response('Invalid Registration Year . Please check and try again.');
+                        // }
                         $registration = new RegistrationDetail();
                         if (!empty($reg['name']) || !empty($reg['registration_year'])) {
                             $registration->name = $reg['name'];
