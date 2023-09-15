@@ -188,7 +188,8 @@ class HomeController extends Controller
             try {
                 DB::beginTransaction();
                 $user = User::where('email',$request->email)->first();
-                if($user && ($user->is_verified == 0)){
+                //if($user && ($user->is_verified == 0)){
+                    if($user){
 
                     $verification_code = mt_rand(100000,999999);
                     $pool = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -220,9 +221,11 @@ class HomeController extends Controller
                     DB::commit();
                     
                     return self::send_success_response([],'Resent Verification Mail Sucessfully');
-                }elseif($user && ($user->is_verified == 1)){
-                    return self::send_bad_request_response('User Email id Already Verified');
-                }else{
+                }
+                // elseif($user && ($user->is_verified == 1)){
+                //     return self::send_bad_request_response('User Email id Already Verified');
+                // }
+                else{
                     return self::send_bad_request_response('User not found');
                 }
             } catch (Exception | Throwable $exception) {
@@ -526,6 +529,7 @@ class HomeController extends Controller
             $data->deleted_at = null;
             $data->deleted_by = null;
             $data->save();
+            
             $msg='Record Activated successfully!';
             // session()->flash('success', 'Record Activated successfully!');
         } else {
@@ -536,6 +540,75 @@ class HomeController extends Controller
             // session()->flash('success', 'Record Deleted successfully!');
         }
         return self::send_success_response([], $msg);
+    }
+
+    public function userSoftdeleteDoctorActivationDeactivation(Request $request){
+        // $rules = array(
+        //     'user_id' => 'required|integer|exists:users,id', 
+        // );
+        
+        // $valid = self::customValidation($request, $rules);
+        // if($valid){ return $valid;}
+
+        $data = User::withTrashed()->find($request->user_id);
+        if ($data->trashed()) {
+            $data->deleted_at = null;
+            $data->deleted_by = null;
+            $data->save();
+            //email_activateuser();
+            //$emailret=email_activateuser();
+
+            $template = EmailTemplate::where('slug','doctoractivation')->first();
+            if($template){
+                $body = ($template->content); // this is template dynamic body. You may get other parameters too from database. $title = $template->title; $from = $template->from;
+            //$template = "Dear Dr. {Doctorname}, Your DigiHealth account has been activated";
+             //if($template){
+               // $body = $template;//->content); // this is template dynamic body. You may get other parameters too from database. $title = $template->title; $from = $template->from;
+            
+                $a1 = array('{{username}}');
+                $a2 = array($request->user_name);
+    
+                 $response = str_replace($a1,$a2,$body); // this will replace {{username}} with $data['username']
+                
+                $mail = [
+                    'body' => html_entity_decode(htmlspecialchars_decode($response)),
+                    'subject' => $template->subject,
+                ];
+                 $emailid=$request->user_email;
+                $mailObject = new SendInvitation($mail); // you can make php artisan make:mail MyMail
+                Mail::to($emailid)->send($mailObject);
+             }
+            $msg='Record Activated successfully!';
+            // session()->flash('success', 'Record Activated successfully!');
+        } else {
+            $data->deleted_at = date('Y-m-d H:i:s');
+            $data->deleted_by = auth()->user()->id;
+            $data->save();
+            $msg='Record Deleted successfully!';
+            // session()->flash('success', 'Record Deleted successfully!');
+        }
+        $msg='';
+        return self::send_success_response([], $msg);
+    }
+
+    public function email_activateuser($emailid){
+        $template = "Dear Doctor, Your DigiHealth account has been activated";
+        if($template){
+            $body = ($template->content); // this is template dynamic body. You may get other parameters too from database. $title = $template->title; $from = $template->from;
+        
+            $a1 = '';//array('{{username}}','{{verification_code}}','{{link}}','{{config_app_name}}','{{custom_support_phone}}','{{custom_support_email}}');
+            $a2 = '';//array($request->first_name,$verification_code,$url,config('app.name'),config('custom.support_phone'),config('custom.support_email'));
+
+            $response = str_replace($a1,$a2,$body); // this will replace {{username}} with $data['username']
+            
+            $mail = [
+                'body' => html_entity_decode(htmlspecialchars_decode($response)),
+                'subject' => $template->subject,
+            ];
+
+            $mailObject = new SendInvitation($mail); // you can make php artisan make:mail MyMail
+            Mail::to($request->emailid)->send($mailObject);
+        }
     }
 
     public function adminDashboard(Request $request){
@@ -557,7 +630,7 @@ class HomeController extends Controller
                 ->whereYear('created_at', date('Y'))->groupby('year','month')->get()->makeHidden(['pid','did','age','accountstatus','membersince','gendername','doctorfees','userimage','providerspeciality','permanentaddress','officeaddress']);
 
                 $doctor_graph = User::role('doctor')->select(DB::raw('count(id) as data'),DB::raw('YEAR(created_at) year, MONTH(created_at) month'))
-                ->whereYear('created_at', date('Y'))->groupby('year','month')->get()->makeHidden(['pid','did','age','accountstatus','membersince','gendername','doctorfees','userimage','providerspeciality','permanentaddress','officeaddress']);
+                ->whereYear('created_at', date('Y'))->groupby('year','month')->get()->makeHidden(['pid','did','age','accountstatus','membersince','gendername','userIdentityNo_nvc','doctorfees','userimage','providerspeciality','permanentaddress','officeaddress']);
 
                 $patient_result = (new PatientController)->patientList($request);
                 $doctor_result = (new DoctorController)->doctorList($request);

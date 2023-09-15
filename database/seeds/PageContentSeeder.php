@@ -32,7 +32,7 @@ class PageContentSeeder extends Seeder
             3 => [
                 'page_master_id' => 2,
                 'slug' => 'specialities',
-                'title' => 'Specialities',
+                'title' => 'Specialties',
                 'sub_title' => '',
                 'content' => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqa.',
             ],

@@ -36,6 +36,7 @@ class User extends Authenticatable implements Wallet, WalletFloat
     protected $fillable = [
         'first_name', 'last_name', 'email', 'password', 'mobile_number', 'profile_image','country_id','currency_code','gender','dob','blood_group',
         'biography','price_type','amount','verification_code','is_verified','currency_code','created_by','time_zone_id','time_zone',
+        //'userIdentityNo_nvc','userIdentityDocumentname_nvc','medicalCouncil_RegNo_nvc','registrationDocument_nvc',
    ];
     // protected $encryptable = [
     //     'first_name','last_name','biography'
@@ -167,6 +168,11 @@ class User extends Authenticatable implements Wallet, WalletFloat
             'blood_group' => $this->blood_group,
             'biography' => $this->biography,
             'fees' =>  ($this->price_type == 1)? 'Free' : $this->amount,
+            'userIdentityNo_nvc' => $this->userIdentityNo_nvc,
+            'userIdentityDocumentname_nvc' => $this->userIdentityDocumentname_nvc,
+            'medicalCouncil_RegNo_nvc' => $this->medicalCouncil_RegNo_nvc,
+            'registrationDocument_nvc' => $this->registrationDocument_nvc,
+
             'currency_code' => $this->currency_code,
             'time_zone_id' => $this->time_zone_id,
             'language_id' => $this->language_id,

@@ -5514,7 +5514,7 @@ class MultiLanguageSeeder extends Seeder
             893 =>[
                 'page_master_id' => 47,
                 'keyword' => 'lbl_specialities',
-                'value' => 'SPECIALITIES',
+                'value' => 'SPECIALTIES',
                 'created_by' => 1, 
                 'language_id' => 1,
             ],
@@ -5549,7 +5549,7 @@ class MultiLanguageSeeder extends Seeder
             898 =>[
                 'page_master_id' => 47,
                 'keyword' => 'lbl_spec',
-                'value' => 'Specialities',
+                'value' => 'Specialties',
                 'created_by' => 1, 
                 'language_id' => 1,
             ],
