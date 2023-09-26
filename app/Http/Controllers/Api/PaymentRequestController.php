@@ -51,6 +51,7 @@ class PaymentRequestController extends Controller
                 'bank_name' => 'required|string|max:50',
                 'branch_name' => 'required|string|max:50',
                 'ifsc_code' => 'nullable|string|max:10',
+                'tin_number' => 'nullable|string|max:155',
             );
         
         $valid = self::customValidation($request, $rules);
@@ -70,6 +71,7 @@ class PaymentRequestController extends Controller
         $account->bank_name = $request->bank_name;
         $account->branch_name = $request->branch_name;
         $account->ifsc_code = $request->ifsc_code;
+        $account->tin_number = $request->tin_number;
         $account->save();
 
          return self::send_success_response([], 'Account deatils saved sucessfully');
