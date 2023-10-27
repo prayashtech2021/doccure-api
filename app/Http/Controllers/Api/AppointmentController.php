@@ -102,12 +102,22 @@ class AppointmentController extends Controller
 
             $user = auth()->user();
             updateLastSeen(auth()->user());
+            
+
+            // Code modified ARAJA - Get Appointment List of Guardian and Dependents
             $getApp = Appointment::where('appointment_type',1)->whereIn('appointment_status', [1, 2])->get();
-            foreach ($getApp as $item) {
+
+            //$getApp = Appointment::select('appointments.*')->leftJoin('users', 'appointments.user_id', '=', 'users.id')->where('users.id',auth()->user()->id)->orWhere('users.DependatnGurdianId_n',auth()->user()->id)->where('appointment_type',1)->whereIn('appointment_status', [1, 2])->get();
+
+                       
+            foreach ($getApp as $item) 
+            {
                 $patient = User::find($item->user_id);
+
                 $patient_zone = Carbon::createFromFormat('Y-m-d H:i:s', Carbon::now()->toDateTimeString())->setTimezone($patient->time_zone);
                 // date_default_timezone_set($patient->time_zone);
-                if ($item->appointment_date < $patient_zone->format('Y-m-d')) {
+                if ($item->appointment_date < $patient_zone->format('Y-m-d')) 
+                {
                     Appointment::where('id', $item->id)->update(['appointment_status' => 7]);
                     $log = CallLog::where('appointment_id', $item->id)->whereNull('end_time')->first();
                     if($log){
@@ -118,7 +128,8 @@ class AppointmentController extends Controller
                     $requested_amount = $item->payment->total_amount - $item->payment->transaction_charge;
                     $patient->depositFloat($requested_amount);
                 }
-                if ($item->appointment_date == $patient_zone->format('Y-m-d')) {
+                if ($item->appointment_date == $patient_zone->format('Y-m-d')) 
+                {
                     if (strtotime($item->end_time) < strtotime($patient_zone->format('H:i:s'))) {
                     Appointment::where('id', $item->id)->update(['appointment_status' => 7]);
                     $log = CallLog::where('appointment_id', $item->id)->whereNull('end_time')->first();
@@ -156,7 +167,8 @@ class AppointmentController extends Controller
                 }
             }
 
-            if ($request->status) {
+            if ($request->status) 
+            {
                 $list = $list->where('appointment_status', $request->status);
             }
 
@@ -167,9 +179,12 @@ class AppointmentController extends Controller
 
             $data = collect();
 
-            if ($user->hasRole('patient')) {
+            if ($user->hasRole('patient')) 
+            {
                 $list = $list->whereUserId($user->id);
-            } elseif ($user->hasRole('doctor')) {
+            } 
+            elseif ($user->hasRole('doctor')) 
+            {
                 $list = $list->whereDoctorId($user->id);
             }
 
@@ -280,7 +295,11 @@ class AppointmentController extends Controller
 
         try {
 
+            // Code Modified by ARAJA
+            $apptuser = User::find($request->appointment_userId);
+
             $user = $request->user();
+
             $doctor = User::find($request->doctor_id);
 
             // $booking_hours = Carbon::createFromFormat('H:i:s', $request->start_time)->diffInSeconds(Carbon::createFromFormat('H:i:s', $request->end_time));
@@ -305,8 +324,10 @@ class AppointmentController extends Controller
 
             $appointment = new Appointment();
             $last_id = $appointment->latest()->first() ? $appointment->latest()->first()->id : 0;
-            $appointment->appointment_reference = generateReference($user->id, $last_id, 'APT');
-            $appointment->user_id = auth()->user()->id;
+
+            $appointment->appointment_reference = generateReference($apptuser->id, $last_id, 'APT');
+            // Code Modified by ARAJA
+            $appointment->user_id = $request->appointment_userId;
             $appointment->doctor_id = $request->doctor_id;
             $appointment->appointment_type = $request->appointment_type; //1=online, 2=clinic
             $appointment->appointment_date = $appointment_date;
@@ -341,7 +362,7 @@ class AppointmentController extends Controller
 
             $device_type = $doctor->device_type;
 
-            $nresponse['from_name'] = auth()->user()->first_name . ' ' . auth()->user()->last_name;
+            $nresponse['from_name'] = $apptuser->first_name . ' ' . $apptuser->last_name;
 
             $message = $nresponse['from_name'] . ' has booked an appointment on ' . $app_date . ' at ' . $start_time . ' to ' . $end_time . ' reference #' . $reference . '!';
 
@@ -385,9 +406,13 @@ class AppointmentController extends Controller
             $payment = new Payment();
             $last_id = $payment->latest()->first() ? $payment->latest()->first()->id : 0;
             $payment->appointment_id = $appointment->id;
+            //$payment->invoice_no = generateReference($user->id, $last_id, 'INV');
+
             $payment->invoice_no = generateReference($user->id, $last_id, 'INV');
+            
             $payment->payment_type = $request->payment_type;
-            if ($doctor->price_type == 2) {
+            if ($doctor->price_type == 2) 
+            {
                 $getSettings = new Setting;
                 $getSettings = $getSettings->getAmount();
 
@@ -406,17 +431,21 @@ class AppointmentController extends Controller
                 $payment->transaction = $getSettings['trans_percent'];
                 $payment->transaction_charge = $transaction_charge;
                 $payment->total_amount = $total_amount;
-            } else {
+            } else 
+            {
                 $payment->total_amount = 0;
             }
 
             $payment->currency_code = $doctor->currency_code ?? config('cashier.currency');
             $payment->save();
 
-            // $requested_amount = $payment->total_amount - ($payment->tax_amount + $payment->transaction_charge);
-            // $doctor->depositFloat($requested_amount);
+            // Commented by ARaja
 
-            if ($request->payment_type == 1 || $request->payment_type == 2) {
+            $requested_amount = $payment->total_amount - ($payment->tax_amount + $payment->transaction_charge);
+            $doctor->depositFloat($requested_amount);
+
+            if ($request->payment_type == 1 || $request->payment_type == 2) 
+            {
 
                 $billable_amount = (int)($payment->total_amount * 100);
 
@@ -467,6 +496,8 @@ class AppointmentController extends Controller
             DB::commit();
 
             return self::send_success_response($appointment->getData(), 'Appointment has been scheduled.');
+
+
 
         } catch (Exception | Throwable $exception) {
             return self::send_exception_response($exception->getMessage());
